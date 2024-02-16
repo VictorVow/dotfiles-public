@@ -1,0 +1,154 @@
+---
+- name: Setup packages on Kubuntu
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    test: yes # Random test vars
+
+  # Also copied into Logseq:
+  # sudo apt install python3-pip
+  # pipx install ansible
+  # sudo apt install ansible-core
+  # ansible-playbook ansible.yml --ask-become-pass
+
+  tasks:
+    - name: Add Recoll apt repository
+      ansible.builtin.apt_repository:
+        repo: ppa:recoll-backports/recoll-1.15-on
+        state: present
+      become: yes
+
+    - name: Install apt packages
+      ansible.builtin.apt:
+        name:
+          - adb
+          - discord
+          - docker-compose
+          - dotnet-sdk-7.0 # # Space Station 14 / C# | check using `dotnet --list-sdks`
+          - earlyoom
+          - firejail
+          - ffmpeg
+          - gh # GitHub CLI
+          - git
+          - gnome-disk-utility # (for formatting USBs to exFAT i.e. compatible with all OS)
+          - gnupg
+          - gocryptfs # needed for KDE plasma-vault
+          - httrack
+          - htop
+          - libva-wayland2
+          - logiops # For Logitech mouse/keyboard customisation
+          - lutris
+          - lynx # text-only browser
+          - mediainfo
+          - mediainfo-gui
+          - mono-complete
+          - mpv
+          - neofetch
+          - openjdk-17-jdk # Java. Needed for Remnants of the Precursors, Minecraft (via Prism Launcher)
+          - openjdk-17-jre
+          - pavucontrol # PulseAudio volume control / Need for SongRec (Flatpak, uses Shazam API) music identification
+          - piper
+          - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
+          - puddletag
+
+          # Podman
+          - slirp4netns
+          - fuse-overlayfs
+          #- shadow / Not available on Ubuntu, not sure why it's needed
+          - rootlesskit
+
+          - qdirstat
+          - rclone
+          - recoll
+
+          # Rust
+          - cargo
+          - rustc
+          
+          - scrcpy
+
+          # Shadow PC
+          - libva-wayland2
+          - libva-drm2
+          - libva-glx2
+          - libvdpau1
+          - libcurl4
+
+          - signal-desktop
+          - simplescreenrecorder
+          - solaar
+          - speech-dispatcher # Needed for Firefox's SpeechSynthesis API, used for TTS in Reader Mode https://support.mozilla.org/en-US/kb/speechd-setup?as=u&utm_source=inproduct
+          - steam
+          - streamlink # https://github.com/streamlink/streamlink
+          - sqlitebrowser
+          - syncthing
+
+          # Visual Studio Code
+          - software-properties-common
+          - apt-transport-https
+          - wget
+          - gpg
+          - code
+
+          - virt-manager
+          - virtualenv
+          - vnstat
+          - wine
+
+          # Waydroid
+          - curl # Needed for Waydroid?
+          - lxc # Needed for Waydroid?
+          - wl-clipboard # Needed for Waydroid clipboard manager
+          # cacert # Needed for Waydroid?
+
+          - xdg-desktop-portal-gnome # Need to install this for Flameshot + NormCap to work on Wayland [source] [https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
+          # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and xdg-desktop-portal are being installed by default on Kubuntu
+          - youtube-dl
+
+        state: present
+      become: yes
+
+    # https://docs.ansible.com/ansible/latest/collections/community/general/pipx_module.html
+    - name: Inject dependencies via pipx
+      become: false
+      community.general.pipx:
+        name: ansible
+        inject_packages:
+          - yt-dlp
+          - pyclip # Needed for Waydroid clipboard manager?
+          #- gbinder-python # Needed for Waydroid
+          - poetry # Python dependency management, also for leech-master software
+          - click # Needed for leech-master
+        state: inject
+
+    #- name: Install pip libraries
+    #  ansible.builtin.pip:
+    #    name:
+    #      - click # Needed for leech-master
+
+    - name: Install NPM packages globally and upgrade them
+      community.general.npm:
+        name: typescript
+        global: true
+        state: latest
+
+    - name: Install Homebrew packages
+      community.general.homebrew:
+        name: scrcpy
+        state: present
+
+    - name: Upgrade pipx packages
+      community.general.pipx:
+        state: upgrade_all
+
+    - name: Update homebrew and upgrade all packages
+      community.general.homebrew:
+        update_homebrew: true
+        upgrade_all: true
+
+        #- name: Shell script
+    #  shell: |
+    #    brew install scrcpy # Not using apt because 2.0+ is needed for audio forwarding. Remove ~/linuxbrew/ when unnecessary
+    #    echo "DONE"
