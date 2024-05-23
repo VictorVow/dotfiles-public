@@ -20,14 +20,31 @@
         state: present
       become: yes
 
+    - name: Download the Mullvad signing key
+      ansible.builtin.get_url:
+        url: https://repository.mullvad.net/deb/mullvad-keyring.asc
+        dest: /usr/share/keyrings/mullvad-keyring.asc
+        mode: "0644"
+      become: yes
+
+    - name: Add the Mullvad repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch={{ ansible_architecture }}] https://repository.mullvad.net/deb/stable {{ ansible_distribution_release }} main"
+        filename: "mullvad"
+      become: yes
+
     - name: Install apt packages
       ansible.builtin.apt:
         name:
           - adb
-          - discord
+          # discord - doesn't exist in 24.04
+
+          # Distrobox
+
           - docker-compose
-          - dotnet-sdk-7.0 # # Space Station 14 / C# | check using `dotnet --list-sdks`
+          # - dotnet-sdk-7.0 # Space Station 14 / C# | check using `dotnet --list-sdks` - doesn't exist in 24.04
           - earlyoom
+          - fastboot
           - firejail
           - ffmpeg
           - gh # GitHub CLI
@@ -37,6 +54,7 @@
           - gocryptfs # needed for KDE plasma-vault
           - httrack
           - htop
+          - kio-admin # Allows Dolphin to run as root
           - libva-wayland2
           - logiops # For Logitech mouse/keyboard customisation
           - lutris
@@ -45,10 +63,13 @@
           - mediainfo-gui
           - mono-complete
           - mpv
+          - mullvad-vpn
           - neofetch
+          - nvtop # GPU monitor like htop https://github.com/Syllo/nvtop
           - openjdk-17-jdk # Java. Needed for Remnants of the Precursors, Minecraft (via Prism Launcher)
           - openjdk-17-jre
           - pavucontrol # PulseAudio volume control / Need for SongRec (Flatpak, uses Shazam API) music identification
+          # - pinentry # For GPG code-signing Git commits - doesn't exist in 24.04?
           - piper
           - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
           - puddletag
@@ -57,6 +78,7 @@
           - slirp4netns
           - fuse-overlayfs
           #- shadow / Not available on Ubuntu, not sure why it's needed
+          - python3-xlib # Needed for key-mon
           - rootlesskit
 
           - qdirstat
@@ -66,13 +88,13 @@
           # Rust
           - cargo
           - rustc
-          
+
           - scrcpy
 
           # Shadow PC
           - libva-wayland2
           - libva-drm2
-          - libva-glx2
+          - libva-glx2 # https://support.shadow.tech/en_US/articles/known-issues-for-shadow/known-issues-for-shadow/64e310046593fd01eb5e8255#_12da2a5b-74fb-496c-86e7-efbc89133fe7
           - libvdpau1
           - libcurl4
 
@@ -121,6 +143,7 @@
           #- gbinder-python # Needed for Waydroid
           - poetry # Python dependency management, also for leech-master software
           - click # Needed for leech-master
+          - key-mon # For showing keys and mouseclicks on video recording/streaming
         state: inject
 
     #- name: Install pip libraries
@@ -150,5 +173,5 @@
 
         #- name: Shell script
     #  shell: |
-    #    brew install scrcpy # Not using apt because 2.0+ is needed for audio forwarding. Remove ~/linuxbrew/ when unnecessary
+    #    brew install scrcpy # Not using apt because 4.0+ is needed for audio forwarding. Remove ~/linuxbrew/ when unnecessary. Check https://github.com/Genymobile/scrcpy/blob/master/doc/linux.md for when Ubuntu latest version has 2.0
     #    echo "DONE"
