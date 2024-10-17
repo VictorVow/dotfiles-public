@@ -7,62 +7,49 @@
   vars:
     test: yes # Random test vars
 
-  # Also copied into Logseq:
-  # sudo apt install python3-pip
-  # pipx install ansible
-  # sudo apt install ansible-core
-  # ansible-playbook ansible.yml --ask-become-pass
-
   tasks:
-    - name: Add Recoll apt repository
-      ansible.builtin.apt_repository:
-        repo: ppa:recoll-backports/recoll-1.15-on
-        state: present
-      become: yes
-
-    - name: Download the Mullvad signing key
-      ansible.builtin.get_url:
-        url: https://repository.mullvad.net/deb/mullvad-keyring.asc
-        dest: /usr/share/keyrings/mullvad-keyring.asc
-        mode: "0644"
-      become: yes
-
-    - name: Add the Mullvad repository
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch={{ ansible_architecture }}] https://repository.mullvad.net/deb/stable {{ ansible_distribution_release }} main"
-        filename: "mullvad"
-      become: yes
+    # - name: Add Recoll apt repository
+    #   ansible.builtin.apt_repository:
+    #     repo: ppa:recoll-backports/recoll-1.15-on
+    #     state: present
+    #   become: yes
 
     - name: Install apt packages
       ansible.builtin.apt:
         name:
           - adb
-          # discord - doesn't exist in 24.04
 
           # Distrobox
+          - podman
+          - slirp4netns
 
-          - docker-compose
+          - cpulimit # In Yakuake, used to limit etesync-dav | Note that cgroups is a better maintained alternative though different method
+          - docker-compose # Note: this will be deprecated soon, instead using `docker compose` which is installed via 3rd-party-package script
           # - dotnet-sdk-7.0 # Space Station 14 / C# | check using `dotnet --list-sdks` - doesn't exist in 24.04
           - earlyoom
           - fastboot
+          - flatpak
           - firejail
           - ffmpeg
+          - gdebi # Installing DEBs whilst handling dependencies
           - gh # GitHub CLI
           - git
           - gnome-disk-utility # (for formatting USBs to exFAT i.e. compatible with all OS)
           - gnupg
+          - gpg
           - gocryptfs # needed for KDE plasma-vault
           - httrack
           - htop
           - kio-admin # Allows Dolphin to run as root
+          - ktorrent
           - libva-wayland2
           - logiops # For Logitech mouse/keyboard customisation
           - lutris
           - lynx # text-only browser
           - mediainfo
           - mediainfo-gui
+          - micro # Alternative to `nano` with sane keybindings
           - mono-complete
-          - mpv
           - mullvad-vpn
           - neofetch
           - nvtop # GPU monitor like htop https://github.com/Syllo/nvtop
@@ -70,7 +57,8 @@
           - openjdk-17-jre
           - pavucontrol # PulseAudio volume control / Need for SongRec (Flatpak, uses Shazam API) music identification
           # - pinentry # For GPG code-signing Git commits - doesn't exist in 24.04?
-          - piper
+          - piper # GTK applications for configuring devices
+          - plasma-discover-backend-flatpak
           - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
           - puddletag
 
@@ -80,6 +68,9 @@
           #- shadow / Not available on Ubuntu, not sure why it's needed
           - python3-xlib # Needed for key-mon
           - rootlesskit
+
+          - python3-pip
+          - pipx
 
           - qdirstat
           - rclone
@@ -98,6 +89,7 @@
           - libvdpau1
           - libcurl4
 
+          - screen
           - signal-desktop
           - simplescreenrecorder
           - solaar
@@ -105,14 +97,16 @@
           - steam
           - streamlink # https://github.com/streamlink/streamlink
           - sqlitebrowser
+          - synaptic
           - syncthing
+          - tmux
 
           # Visual Studio Code
-          - software-properties-common
           - apt-transport-https
+          - code
+          - software-properties-common
           - wget
           - gpg
-          - code
 
           - virt-manager
           - virtualenv
@@ -127,10 +121,22 @@
 
           - xdg-desktop-portal-gnome # Need to install this for Flameshot + NormCap to work on Wayland [source] [https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
           # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and xdg-desktop-portal are being installed by default on Kubuntu
-          - youtube-dl
 
         state: present
       become: yes
+
+    - name: Find all scripts in the 3rd-party-packages subdirectory
+      find:
+        paths: "3rd-party-packages"
+        patterns: "*.sh"
+        use_regex: no
+      register: found_scripts
+
+    - name: Execute each script in the 3rd-party-packages subdirectory
+      shell: bash "{{ item.path }}"
+      loop: "{{ found_scripts.files }}"
+      when: found_scripts.matched > 0
+      tags: run_scripts
 
     # https://docs.ansible.com/ansible/latest/collections/community/general/pipx_module.html
     - name: Inject dependencies via pipx
