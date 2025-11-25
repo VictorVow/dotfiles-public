@@ -26,19 +26,20 @@
       ansible.builtin.apt:
         name:
           - adb
-
-          # Distrobox
-          - podman
-          - slirp4netns
-
+          - btop # Better than htop
           - cpulimit # In Yakuake, used to limit etesync-dav | Note that cgroups is a better maintained alternative though different method
-          - docker-compose # Note: this will be deprecated soon, instead using `docker compose` which is installed via 3rd-party-package script
+          - distrobox
+          # - podman # Unclear if these are still distrobox dependencies or not
+          # - slirp4netns # Unclear if these are still distrobox dependencies or not
           # - dotnet-sdk-7.0 # Space Station 14 / C# | check using `dotnet --list-sdks` - doesn't exist in 24.04
           - earlyoom
           - fastboot
           - flatpak
           - firejail
           - ffmpeg
+          - gamemode
+          - gamescope
+          - plasma-gamemode
           - gdebi # Installing DEBs whilst handling dependencies
           - gh # GitHub CLI
           - git
@@ -46,11 +47,12 @@
           - gnupg
           - gpg
           - gocryptfs # needed for KDE plasma-vault
-          - httrack
+          - haruna # hardware video decoding seems to work better and CPU usage lower than Flatpak
           - htop
+          - inxi # for checking what hardware is detected e.g. GPU
           - kio-admin # Allows Dolphin to run as root
           - ktorrent
-          - libva-wayland2
+          - libayatana-appindicator3-1 # Lutris tray icon
           - logiops # For Logitech mouse/keyboard customisation
           - lutris
           - lynx # text-only browser
@@ -59,7 +61,7 @@
           - micro # Alternative to `nano` with sane keybindings
           - mono-complete
           - mullvad-vpn
-          - neofetch
+          - fastfetch
           - nvtop # GPU monitor like htop https://github.com/Syllo/nvtop
           - openjdk-17-jdk # Java. Needed for Remnants of the Precursors, Minecraft (via Prism Launcher)
           - openjdk-17-jre
@@ -68,19 +70,15 @@
           - piper # GTK applications for configuring devices
           - plasma-discover-backend-flatpak
           - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
+          - power-profiles-daemon # For adjusting the power management profiles
           - puddletag
 
-          # Podman
-          - slirp4netns
-          - fuse-overlayfs
           #- shadow / Not available on Ubuntu, not sure why it's needed
           - python3-xlib # Needed for key-mon
           - rootlesskit
 
           - python3-pip
           - pipx
-
-          - qdirstat
           - rclone
           - recoll
 
@@ -121,16 +119,11 @@
           - vnstat
           - wine
 
-          # Waydroid
-          - curl # Needed for Waydroid?
-          - lxc # Needed for Waydroid?
-          - wl-clipboard # Needed for Waydroid clipboard manager
-          # cacert # Needed for Waydroid?
-
           - xdg-desktop-portal-gnome # Need to install this for Flameshot + NormCap to work on Wayland [source] [https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
           # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and xdg-desktop-portal are being installed by default on Kubuntu
 
         state: present
+        update_cache: yes
       become: yes
 
     - name: Find all scripts in the 3rd-party-packages subdirectory
