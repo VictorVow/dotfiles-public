@@ -7,12 +7,20 @@
   vars:
     test: yes # Random test vars
 
+
+
   tasks:
-    # - name: Add Recoll apt repository
-    #   ansible.builtin.apt_repository:
-    #     repo: ppa:recoll-backports/recoll-1.15-on
-    #     state: present
-    #   become: yes
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Become to show id
+      ansible.builtin.command:
+        cmd: whoami
+      become: true
+      become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
+      changed_when: false
+      register: whoami_result
 
     - name: Install apt packages
       ansible.builtin.apt:
