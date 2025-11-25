@@ -144,12 +144,11 @@
       community.general.pipx:
         name: ansible
         inject_packages:
-          - yt-dlp
-          - pyclip # Needed for Waydroid clipboard manager?
-          #- gbinder-python # Needed for Waydroid
+          - yt-dlp[default] # https://github.com/yt-dlp/yt-dlp/pull/11255
           - poetry # Python dependency management, also for leech-master software
           - click # Needed for leech-master
           - key-mon # For showing keys and mouseclicks on video recording/streaming
+          - uv # Python version management, 
         state: inject
 
     #- name: Install pip libraries
@@ -157,25 +156,54 @@
     #    name:
     #      - click # Needed for leech-master
 
+    # npm
+    # npm list -g --depth=0 to list globally installed packages
     - name: Install NPM packages globally and upgrade them
       community.general.npm:
-        name: typescript
+        name: "{{ item }}"
         global: true
         state: latest
+      loop:
+        - corepack # For managing package manager versions (npm, yarn, pnpm)
+        - "@anthropic-ai/claude-code" # Claude LLM CLI
+        - cline # CLI for Cline LLM
+        - "@continuedev/cli" # CLI for Continue Dev LLM
+        - deno # For yt-dlp https://github.com/yt-dlp/yt-dlp/issues/14404
+        - typescript
 
-    - name: Install Homebrew packages
-      community.general.homebrew:
-        name: scrcpy
-        state: present
-
-    - name: Upgrade pipx packages
-      community.general.pipx:
-        state: upgrade_all
-
+    # homebrew
+    # brew leaves | xargs brew list --versions to list installed top-level packages
     - name: Update homebrew and upgrade all packages
       community.general.homebrew:
         update_homebrew: true
         upgrade_all: true
+
+    - name: Install multiple Homebrew packages
+      community.general.homebrew:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - scrcpy
+        - clojure/tools/clojure # For Clojure development (for Logseq dev)
+    
+    # pipx
+    # pipx list to list installed packages
+    - name: Upgrade all pipx packages
+      community.general.pipx:
+        state: upgrade_all
+
+    - name: Install specific pipx packages
+      community.general.pipx:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - ansible
+        - fanficfare
+        - ipykernel # Jupyter kernel
+        - key-mon
+        - poetry
+        - uv
+        - yt-dlp
 
         #- name: Shell script
     #  shell: |
