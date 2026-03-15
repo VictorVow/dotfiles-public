@@ -18,3 +18,8 @@ then
 else
     echo "Homebrew is already installed."
 fi
+
+# Save brew packages list to file (will overwrite if exists)
+brew leaves | xargs brew list --versions > brew-packages.txt
+
+echo "Brew packages list saved to brew-packages.txt"

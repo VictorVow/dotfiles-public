@@ -34,6 +34,7 @@
           # - dotnet-sdk-7.0 # Space Station 14 / C# | check using `dotnet --list-sdks` - doesn't exist in 24.04
           - earlyoom
           - fastboot
+          - fastfetch
           - flatpak
           - firejail
           - ffmpeg
@@ -61,7 +62,6 @@
           - micro # Alternative to `nano` with sane keybindings
           - mono-complete
           - mullvad-vpn
-          - fastfetch
           - nvtop # GPU monitor like htop https://github.com/Syllo/nvtop
           - openjdk-17-jdk # Java. Needed for Remnants of the Precursors, Minecraft (via Prism Launcher)
           - openjdk-17-jre
@@ -69,6 +69,11 @@
           # - pinentry # For GPG code-signing Git commits - doesn't exist in 24.04?
           - piper # GTK applications for configuring devices
           - plasma-discover-backend-flatpak
+
+          # podman / distrobox dependencies
+          - crun # for rootless containers | alternative to runc | needed for distrobox/podman
+          - passt
+
           - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
           - power-profiles-daemon # For adjusting the power management profiles
           - puddletag
@@ -138,6 +143,7 @@
       loop: "{{ found_scripts.files }}"
       when: found_scripts.matched > 0
       tags: run_scripts
+      no_log: true
 
     # https://docs.ansible.com/ansible/latest/collections/community/general/pipx_module.html
     - name: Inject dependencies via pipx
@@ -145,12 +151,25 @@
       community.general.pipx:
         name: ansible
         inject_packages:
+        # ansible
+        # fanficfare
           - yt-dlp[default] # https://github.com/yt-dlp/yt-dlp/pull/11255
           - poetry # Python dependency management, also for leech-master software
           - click # Needed for leech-master
           - key-mon # For showing keys and mouseclicks on video recording/streaming
-          - uv # Python version management, 
+          - uv # Python version management
         state: inject
+
+    # pipx list to list installed packages
+    - name: Upgrade all pipx packages
+      community.general.pipx:
+        state: upgrade_all
+
+    - name: Upgrade yt-dlp nightly version
+      community.general.pipx:
+        name: yt-dlp
+        state: upgrade
+        pip_args: "--pre"  # If you specifically want pre-release versions
 
     #- name: Install pip libraries
     #  ansible.builtin.pip:
@@ -173,38 +192,28 @@
         - typescript
 
     # homebrew
-    # brew leaves | xargs brew list --versions to list installed top-level packages
     - name: Update homebrew and upgrade all packages
       community.general.homebrew:
         update_homebrew: true
         upgrade_all: true
 
+    # Consider brewfiles at some point https://docs.brew.sh/Brew-Bundle-and-Brewfile
+    # brew leaves | xargs brew list --versions to list installed top-level packages
     - name: Install multiple Homebrew packages
       community.general.homebrew:
         name: "{{ item }}"
         state: present
       loop:
-        - scrcpy
         - clojure/tools/clojure # For Clojure development (for Logseq dev)
+        - gh # GitHub CLI
+        - jackett # For qBittorrent search plugin, a torrent indexer
+        - neovim
+        - nvm
+        - ruby
+        - scrcpy
+        - sniffnet
+        - zrok
     
-    # pipx
-    # pipx list to list installed packages
-    - name: Upgrade all pipx packages
-      community.general.pipx:
-        state: upgrade_all
-
-    - name: Install specific pipx packages
-      community.general.pipx:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - ansible
-        - fanficfare
-        - ipykernel # Jupyter kernel
-        - key-mon
-        - poetry
-        - uv
-        - yt-dlp
 
         #- name: Shell script
     #  shell: |
