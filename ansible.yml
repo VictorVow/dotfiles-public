@@ -44,6 +44,7 @@
           - gdebi # Installing DEBs whilst handling dependencies
           - gh # GitHub CLI
           - git
+          - git-lfs # For handling large files in Git
           - gnome-disk-utility # (for formatting USBs to exFAT i.e. compatible with all OS)
           - gnupg
           - gpg
@@ -88,8 +89,7 @@
           - recoll
 
           # Rust
-          - cargo
-          - rustc
+          - rustup # Rust toolchain installer, includes cargo and rustc
 
           - scrcpy
 
@@ -151,8 +151,8 @@
       community.general.pipx:
         name: ansible
         inject_packages:
-        # ansible
-        # fanficfare
+          # - ansible
+          # - fanficfare
           - yt-dlp[default] # https://github.com/yt-dlp/yt-dlp/pull/11255
           - poetry # Python dependency management, also for leech-master software
           - click # Needed for leech-master
@@ -185,10 +185,11 @@
         state: latest
       loop:
         - corepack # For managing package manager versions (npm, yarn, pnpm)
-        - "@anthropic-ai/claude-code" # Claude LLM CLI
+        - "@anthropic-ai/claude-agent-sdk" # Claude Agent SDK for building agents using Claude LLM
         - cline # CLI for Cline LLM
         - "@continuedev/cli" # CLI for Continue Dev LLM
         - deno # For yt-dlp https://github.com/yt-dlp/yt-dlp/issues/14404
+        - opencode-ai # CLI for OpenCode agentic AI
         - typescript
 
     # homebrew
@@ -205,13 +206,17 @@
         state: present
       loop:
         - clojure/tools/clojure # For Clojure development (for Logseq dev)
+        - codex # CLI for OpenAI's Codex agentic AI
+        - dotnet # c# development, needed for Grayjay etc
+        - gemini-cli # Gemini CLI for Google's Gemini agentic AI
         - gh # GitHub CLI
+        - git-credential-libsecret # For GitHub CLI to store credentials in KDE wallet
         - jackett # For qBittorrent search plugin, a torrent indexer
         - neovim
-        - nvm
+        - nvm # Node Version Manager, for managing multiple versions of Node.js
         - ruby
         - scrcpy
-        - sniffnet
+        - sniffnet # For monitoring network traffic and identifying which applications are using the network, similar to GlassWire on Windows
         - zrok
     
 
