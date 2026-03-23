@@ -185,7 +185,6 @@
         state: latest
       loop:
         - corepack # For managing package manager versions (npm, yarn, pnpm)
-        - "@anthropic-ai/claude-agent-sdk" # Claude Agent SDK for building agents using Claude LLM
         - cline # CLI for Cline LLM
         - "@continuedev/cli" # CLI for Continue Dev LLM
         - deno # For yt-dlp https://github.com/yt-dlp/yt-dlp/issues/14404
@@ -207,6 +206,7 @@
       loop:
         - clojure/tools/clojure # For Clojure development (for Logseq dev)
         - codex # CLI for OpenAI's Codex agentic AI
+        - copilot-cli
         - dotnet # c# development, needed for Grayjay etc
         - gemini-cli # Gemini CLI for Google's Gemini agentic AI
         - gh # GitHub CLI
@@ -217,6 +217,7 @@
         - ruby
         - scrcpy
         - sniffnet # For monitoring network traffic and identifying which applications are using the network, similar to GlassWire on Windows
+        - starship # Rust-based terminal UI
         - zrok
     
 
