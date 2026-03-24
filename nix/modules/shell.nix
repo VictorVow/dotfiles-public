@@ -41,6 +41,50 @@
       # ── Pipx ────────────────────────────────────────────────────────────────
       # pipx installs remain on the system from ansible; expose their bin dir.
       export PATH="$HOME/.local/bin:$PATH"
+
+      # ── Android SDK ─────────────────────────────────────────────────────────
+      # ANDROID_HOME is set via home.sessionVariables below.
+      export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/emulator:$PATH"
+      export PATH="$HOME/.pub-cache/bin:$PATH"   # Flutter pub-cache
+
+      # ── Flatpak exports ─────────────────────────────────────────────────────
+      # Needed for VSCode NeoVim extension and other Flatpak-installed binaries.
+      export PATH="$PATH:/var/lib/flatpak/exports/bin"
+
+      # ── Native Firefox ──────────────────────────────────────────────────────
+      # Firefox installed as a native binary tarball (not Flatpak or snap).
+      if [ -d "/home/boss/Documents/ESSENTIALS/Programs/firefox" ]; then
+        export PATH="/home/boss/Documents/ESSENTIALS/Programs/firefox:$PATH"
+      fi
+
+      # ── Wayland / XDG ───────────────────────────────────────────────────────
+      # Required for portals, screen sharing, and Wayland tooling.
+      export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+      # ── Console Ninja ───────────────────────────────────────────────────────
+      # IDE runtime-value inspector; installed via the IDE extension, not Nix.
+      export PATH="$HOME/.console-ninja/.bin:$PATH"
+
+      # ── grab-site (ArchiveTeam web archiving tool) ───────────────────────────
+      # Installed in a dedicated venv; exposed here for CLI use.
+      export PATH="$PATH:$HOME/gs-venv/bin"
+
+      # ── dnvm (.NET version manager) ─────────────────────────────────────────
+      # Manages .NET SDK versions independently of the system Nix dotnet-sdk.
+      if [ -f "$HOME/.local/share/dnvm/env" ]; then
+        . "$HOME/.local/share/dnvm/env"
+      fi
+
+      # ── Distrobox: tint prompt when inside a container ───────────────────────
+      # Makes it visually obvious which Distrobox container you're working in.
+      if [ -n "$DISTROBOX_ENTER_PATH" ]; then
+        export PS1='\[\e[1;36m\]\u@\h:\w \[\e[0m\]'
+      fi
+
+      # ── fastfetch ────────────────────────────────────────────────────────────
+      # Show system info on every new terminal. Also helps identify which
+      # Distrobox container you're in (shows the container OS name).
+      fastfetch
     '';
 
     # ── Shell Aliases ──────────────────────────────────────────────────────────
@@ -57,14 +101,14 @@
       dbe   = "distrobox enter";
       dbl   = "distrobox list";
 
-      # System update shortcut (runs home-manager + apt + brew)
-      update-all = "hms && sudo apt update && sudo apt upgrade -y && brew update && brew upgrade";
+      # System update shortcut — runs all package managers in one pass
+      update-all = "~/Documents/ESSENTIALS/installs/update.sh";
     };
   };
 
   # ── Session Variables ─────────────────────────────────────────────────────────
   # These are set for the full desktop session (not just terminal), so GUI apps
-  # launched from launchers also see them.
+  # launched from the KDE application launcher also see them.
 
   home.sessionVariables = {
     # Default editor (also set via programs.neovim.defaultEditor, belt-and-suspenders)
@@ -73,6 +117,22 @@
 
     # npm global prefix — keeps npm global installs user-local (no sudo)
     NPM_CONFIG_PREFIX = "$HOME/.npm-global";
+
+    # Go workspace root
+    GOPATH = "$HOME/go";
+
+    # Podman rootless networking — required for Distrobox rootless containers
+    PODMAN_USERNS = "keep-id";
+
+    # Force GTK apps to use the KDE file chooser (thumbnails, bookmarks, etc.)
+    # https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications
+    GDK_DEBUG = "portals";
+
+    # Firefox Wayland native support (was previously in ~/.pam_environment)
+    MOZ_ENABLE_WAYLAND = "1";
+
+    # Android SDK root — SDK tool paths are added to PATH in initExtra above
+    ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
   };
 
   # ── Activation: Install AI CLI tools via npm ──────────────────────────────────
@@ -93,7 +153,7 @@
       _npm_global_install() {
         local pkg="$1"
         local bin="$2"  # binary name to check for (defaults to package name)
-        bin="${bin:-$pkg}"
+        bin="''${bin:-$pkg}"
         if ! command -v "$bin" &>/dev/null && \
            [ ! -f "$HOME/.npm-global/bin/$bin" ]; then
           echo "Installing npm global package: $pkg"

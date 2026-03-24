@@ -7,15 +7,36 @@
   # ── Version Control ──────────────────────────────────────────────────────────
 
   programs.git = {
-    enable = true;
-    # Minimal defaults — override in ~/.config/git/config for machine-specific
-    # settings (user.name, user.email, signing key, etc.)
+    enable    = true;
+    userName  = "Victor239";
+    userEmail = "12621257+Victor239@users.noreply.github.com";
+
+    # GPG signing key — gpgsign is disabled by default; enable per-repo if needed
+    signing = {
+      key           = "GPGKEY1";
+      signByDefault = false;
+    };
+
     extraConfig = {
-      init.defaultBranch = "main";
-      pull.rebase = false;
-      # Use libsecret (KDE Wallet) for credential storage.
-      # Requires gitAndTools.gitCredentialLibsecret in packages.nix.
-      credential.helper = "libsecret";
+      init.defaultBranch   = "main";
+      pull.rebase          = false;
+      push.autoSetupRemote = true;
+
+      gpg.program            = "/usr/bin/gpg";
+      tag.forceSignAnnotated = false;
+
+      # Credential storage: libsecret (KDE Wallet) with a 12-hour cache
+      credential = {
+        helper          = "libsecret";
+        credentialStore = "cache";
+        cacheOptions    = "--timeout 43200";
+      };
+      # Per-host credential helpers
+      "credential \"https://github.com\"".helper      = "libsecret";
+      "credential \"https://gist.github.com\"".helper = "libsecret";
+      "credential \"https://dev.azure.com\"".useHttpPath = true;
+
+      alias.ll = "log --oneline";
     };
   };
 
@@ -26,8 +47,6 @@
 
   programs.tmux = {
     enable = true;
-    # Start windows and panes at index 1 (more ergonomic than 0)
-    baseIndex = 1;
     # Enable mouse support for scrolling and pane selection
     mouse = true;
     # Use a longer scrollback history (default is 2000)
@@ -35,18 +54,23 @@
     # 256-colour terminal for better colour rendering in editors
     terminal = "screen-256color";
     extraConfig = ''
-      # Reload config with Prefix + r
-      bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded"
+      # Pane splitting — h for horizontal (side-by-side), v for vertical (stacked)
+      bind h split-window -h -c "#{pane_current_path}"
+      bind v split-window -v -c "#{pane_current_path}"
+      # Percentage variants: C- opens a narrow 33% pane, M- opens a wide 66% pane
+      bind C-h split-window -h -p 33 -c "#{pane_current_path}"
+      bind M-h split-window -h -p 66 -c "#{pane_current_path}"
+      bind C-v split-window -v -p 33 -c "#{pane_current_path}"
+      bind M-v split-window -v -p 33 -c "#{pane_current_path}"
+      unbind '"'
+      unbind %
 
-      # More intuitive pane splitting: | for vertical, - for horizontal
-      bind | split-window -h -c "#{pane_current_path}"
-      bind - split-window -v -c "#{pane_current_path}"
+      # Show pane titles at the top of each pane border
+      set -g pane-border-status top
+      set -g pane-border-style fg="#00c1ff",bg=default
 
-      # Vim-style pane navigation
-      bind h select-pane -L
-      bind j select-pane -D
-      bind k select-pane -U
-      bind l select-pane -R
+      # Visual indicator in the status bar when the PREFIX key is active
+      set -g status-right "#{?client_prefix,⌨️  PREFIX,}"
     '';
   };
 
@@ -54,18 +78,14 @@
 
   programs.starship = {
     enable = true;
-    # Replaces `brew install starship` and manual shell init in .bashrc.
-    # Home Manager automatically adds the `eval "$(starship init bash)"` snippet.
-    settings = {
-      # Add a blank line before each prompt for readability
-      add_newline = true;
-      # Show command duration for commands taking longer than 2 seconds
-      cmd_duration = {
-        min_time = 2000;
-        format = "took [$duration]($style) ";
-      };
-    };
+    # Shell integration (eval "$(starship init bash)") is injected automatically.
+    # The theme config is managed as a verbatim TOML file via home.file below
+    # to preserve the gruvbox_dark powerline theme exactly (Unicode symbols, etc.).
   };
+
+  # Gruvbox dark powerline theme — verbatim copy of ~/.config/starship.toml.
+  # Edit nix/dotfiles/starship.toml to change the prompt appearance.
+  home.file.".config/starship.toml".source = ../dotfiles/starship.toml;
 
   # ── Text Editors ──────────────────────────────────────────────────────────────
 
