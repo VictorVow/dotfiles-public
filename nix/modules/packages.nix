@@ -22,7 +22,8 @@
     # ── System Monitoring ─────────────────────────────────────────────────────
     btop     # Better top - rich terminal system monitor
     htop     # Interactive process viewer
-    nvtop    # GPU monitor (like htop for NVIDIA/AMD/Intel GPUs)
+    nvtopPackages.full
+             # GPU monitor (like htop for NVIDIA/AMD/Intel GPUs)
     cpulimit # Limit CPU usage of a process; used in Yakuake for etesync-dav
              # Note: cgroups is a better-maintained alternative (different method)
     vnstat   # Network traffic monitor (user CLI; daemon stays in apt)
@@ -68,7 +69,7 @@
     haruna       # KDE media player — hardware video decoding works better than Flatpak
                  # and CPU usage is lower than the Flatpak version
     mediainfo    # CLI tool for analysing media file properties
-    mediainfoGui # GUI for mediainfo
+    mediainfo-gui # GUI for mediainfo
     mpv          # Lightweight and powerful media player
     streamlink   # Extract streams from websites (Twitch, YouTube, etc.) to a player
     pavucontrol  # PulseAudio volume control
@@ -88,7 +89,7 @@
            # Replaces pipx install of yt-dlp[default]
 
     # ── Torrenting ────────────────────────────────────────────────────────────
-    ktorrent # KDE BitTorrent client
+    kdePackages.ktorrent # KDE BitTorrent client
     jackett  # Torrent indexer proxy; used as a qBittorrent search plugin
 
     # ── Disk / Storage ────────────────────────────────────────────────────────
@@ -112,9 +113,8 @@
     git      # Distributed version control
     git-lfs  # Git extension for large file storage (binary assets, models, etc.)
     gh       # Official GitHub CLI
-    # git-credential-libsecret: stores GitHub credentials in KDE Wallet (libsecret)
-    # Package name in nixpkgs may vary; check `nix search nixpkgs git-credential`
-    gitAndTools.gitCredentialLibsecret
+    # The legacy gitAndTools wrapper was removed from nixpkgs. Keep using the
+    # libsecret credential helper via the Git config in programs.nix.
 
     # ── Development: Languages & Runtimes ─────────────────────────────────────
     rustup       # Rust toolchain installer (includes cargo and rustc)
@@ -134,11 +134,9 @@
     # ── Development: Node.js ──────────────────────────────────────────────────
     nodejs_22    # Node.js LTS runtime (includes npm)
     nodePackages.typescript # TypeScript compiler (replaces npm install -g typescript)
-    nodePackages.corepack   # Manages yarn/pnpm/npm version pinning
+    corepack                # Manages yarn/pnpm/npm version pinning
                             # (replaces npm install -g corepack)
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
-    nvm          # Node Version Manager — manage multiple Node.js versions
-                 # Note: `nvm` requires shell integration; see shell.nix
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
     neovim  # Hyperextensible Vim-based text editor (replaces brew install neovim)
@@ -158,8 +156,7 @@
              # Provides ansible-playbook, ansible-galaxy, etc.
 
     # ── System / CLI Utilities ────────────────────────────────────────────────
-    key-mon  # Display keyboard/mouse input on screen — useful for screencasts
-             # Depends on python3Packages.xlib (handled automatically by nixpkgs)
+    screenkey # Display keyboard input on screen — useful for screencasts
 
     # ── Prompt / Terminal UI ──────────────────────────────────────────────────
     starship # Cross-shell prompt written in Rust (replaces brew install starship)

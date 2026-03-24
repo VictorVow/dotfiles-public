@@ -13,13 +13,6 @@
     # automatically by their respective programs.* modules in programs.nix.
 
     initExtra = ''
-      # ── nvm (Node Version Manager) ──────────────────────────────────────────
-      # nvm is installed via nixpkgs but requires shell initialisation.
-      # This sources the nvm script so `nvm use`, `nvm install`, etc. work.
-      export NVM_DIR="$HOME/.nvm"
-      [ -s "${pkgs.nvm}/share/nvm/nvm.sh" ] && \. "${pkgs.nvm}/share/nvm/nvm.sh"
-      [ -s "${pkgs.nvm}/share/nvm/bash_completion" ] && \. "${pkgs.nvm}/share/nvm/bash_completion"
-
       # ── Homebrew (Linux) ────────────────────────────────────────────────────
       # Homebrew is kept for packages not available in nixpkgs.
       # The nix-managed PATH takes priority; Homebrew fills in the gaps.

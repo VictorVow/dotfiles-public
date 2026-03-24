@@ -1,5 +1,9 @@
 { config, pkgs, lib, ... }:
 
+let
+  jsonFormat = pkgs.formats.json { };
+in
+
 # Home Manager program configurations.
 # Using programs.* modules instead of bare packages gives Home Manager the
 # ability to manage config files, shell integrations, and user services.
@@ -7,17 +11,19 @@
   # ── Version Control ──────────────────────────────────────────────────────────
 
   programs.git = {
-    enable    = true;
-    userName  = "Victor239";
-    userEmail = "12621257+Victor239@users.noreply.github.com";
+    enable = true;
 
     # GPG signing key — gpgsign is disabled by default; enable per-repo if needed
     signing = {
       key           = "GPGKEY1";
+      format        = "openpgp";
       signByDefault = false;
     };
 
-    extraConfig = {
+    settings = {
+      user.name  = "Victor239";
+      user.email = "12621257+Victor239@users.noreply.github.com";
+
       init.defaultBranch   = "main";
       pull.rebase          = false;
       push.autoSetupRemote = true;
@@ -167,10 +173,13 @@
   # it is therefore removed from packages.nix.
   programs.micro = {
     enable = true;
-    bindings = {
-      "Alt-/"          = "lua:comment.comment";
-      "CtrlUnderscore" = "lua:comment.comment";
-    };
+  };
+
+  # Home Manager no longer exposes programs.micro.bindings, so keep the
+  # keymap declarative by writing micro's native bindings.json directly.
+  xdg.configFile."micro/bindings.json".source = jsonFormat.generate "micro-bindings" {
+    "Alt-/" = "lua:comment.comment";
+    "CtrlUnderscore" = "lua:comment.comment";
   };
 
   # ── IDE ───────────────────────────────────────────────────────────────────────
@@ -181,23 +190,24 @@
     # Nix-managed extensions. Without this, HM would wipe any unlisted extension.
     mutableExtensionsDir = true;
 
-    # Extensions available in pkgs.vscode-extensions (nixpkgs subset).
-    # Extensions NOT in nixpkgs are managed by VS Code's built-in sync / marketplace.
-    extensions = with pkgs.vscode-extensions; [
-      bbenoist.nix
-      dbaeumer.vscode-eslint
-      eamodio.gitlens
-      esbenp.prettier-vscode
-      ms-python.python
-      ms-python.vscode-pylance
-      ms-python.debugpy
-      ms-vscode.cpptools
-      oderwat.indent-rainbow
-      redhat.vscode-yaml
-      rust-lang.rust-analyzer
-      tamasfe.even-better-toml
-      usernamehw.errorlens
-    ];
+    profiles.default = {
+      # Extensions available in pkgs.vscode-extensions (nixpkgs subset).
+      # Extensions NOT in nixpkgs are managed by VS Code's built-in sync / marketplace.
+      extensions = with pkgs.vscode-extensions; [
+        bbenoist.nix
+        dbaeumer.vscode-eslint
+        eamodio.gitlens
+        esbenp.prettier-vscode
+        ms-python.python
+        ms-python.vscode-pylance
+        ms-python.debugpy
+        ms-vscode.cpptools
+        oderwat.indent-rainbow
+        redhat.vscode-yaml
+        rust-lang.rust-analyzer
+        tamasfe.even-better-toml
+        usernamehw.errorlens
+      ];
 
     # Full extension inventory (for documentation / future declarative migration).
     # Extensions marked (*) are managed above via nixpkgs; the rest via VS Code sync.
@@ -266,7 +276,7 @@
     #     vscjava.vscode-maven
     #     zainchen.json
 
-    userSettings = {
+      userSettings = {
       # ── Telemetry ──────────────────────────────────────────────────────────────
       "telemetry.enableCrashReporter" = false;
       "telemetry.enableTelemetry"     = false;
@@ -340,6 +350,7 @@
       "java.imports.gradle.wrapper.checksums" = [
         { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
       ];
+      };
     };
   };
 
