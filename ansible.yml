@@ -1,5 +1,17 @@
 ---
-- name: Setup packages on Kubuntu
+# ansible.yml — System-level package configuration for Kubuntu.
+#
+# SCOPE: This playbook now manages ONLY packages that require root access,
+# system services, or system-level integration. All user-space packages have
+# been migrated to Nix Home Manager (see nix/home.nix and nix/modules/).
+#
+# Run order:
+#   1. ./bootstrap.sh          — Installs Nix + activates Home Manager config
+#   2. ansible-playbook ansible.yml --ask-become-pass   ← this file
+#
+# To see what moved to Nix, check nix/modules/packages.nix.
+
+- name: Setup system-level packages on Kubuntu
   hosts: localhost
   connection: local
   gather_facts: yes
@@ -22,110 +34,65 @@
       changed_when: false
       register: whoami_result
 
-    - name: Install apt packages
+    - name: Install system-level apt packages
       ansible.builtin.apt:
         name:
-          - adb
-          - btop # Better than htop
-          - cpulimit # In Yakuake, used to limit etesync-dav | Note that cgroups is a better maintained alternative though different method
-          - distrobox
-          # - podman # Unclear if these are still distrobox dependencies or not
-          # - slirp4netns # Unclear if these are still distrobox dependencies or not
-          # - dotnet-sdk-7.0 # Space Station 14 / C# | check using `dotnet --list-sdks` - doesn't exist in 24.04
-          - earlyoom
-          - fastboot
-          - fastfetch
-          - flatpak
-          - firejail
-          - ffmpeg
-          - gamemode
-          - gamescope
-          - plasma-gamemode
-          - gdebi # Installing DEBs whilst handling dependencies
-          - gh # GitHub CLI
-          - git
-          - git-lfs # For handling large files in Git
-          - gnome-disk-utility # (for formatting USBs to exFAT i.e. compatible with all OS)
-          - gnupg
-          - gpg
-          - gocryptfs # needed for KDE plasma-vault
-          - haruna # hardware video decoding seems to work better and CPU usage lower than Flatpak
-          - htop
-          - inxi # for checking what hardware is detected e.g. GPU
-          - kio-admin # Allows Dolphin to run as root
-          - ktorrent
-          - libayatana-appindicator3-1 # Lutris tray icon
-          - logiops # For Logitech mouse/keyboard customisation
-          - lutris
-          - lynx # text-only browser
-          - mediainfo
-          - mediainfo-gui
-          - micro # Alternative to `nano` with sane keybindings
-          - mono-complete
-          - mullvad-vpn
-          - nvtop # GPU monitor like htop https://github.com/Syllo/nvtop
-          - openjdk-17-jdk # Java. Needed for Remnants of the Precursors, Minecraft (via Prism Launcher)
-          - openjdk-17-jre
-          - pavucontrol # PulseAudio volume control / Need for SongRec (Flatpak, uses Shazam API) music identification
-          # - pinentry # For GPG code-signing Git commits - doesn't exist in 24.04?
-          - piper # GTK applications for configuring devices
-          - plasma-discover-backend-flatpak
+          # ── Distrobox / container infrastructure ──────────────────────────
+          # Note: distrobox, crun, passt, rootlesskit are in Nix user profile.
+          # These are system-level optional dependencies / workarounds only.
+          # podman is the OCI backend; install at system level for proper cgroup support.
+          # - podman       # Uncomment if distrobox rootless mode has issues
 
-          # podman / distrobox dependencies
-          - crun # for rootless containers | alternative to runc | needed for distrobox/podman
-          - passt
+          # ── KDE Plasma integration ────────────────────────────────────────
+          - kio-admin                      # Allows Dolphin file manager to run as root
+          - plasma-gamemode                # KDE Plasma integration for Feral's gamemode
+          - plasma-discover-backend-flatpak # Flatpak backend for KDE Discover app store
 
-          - postfix # Mail Transfer Agent, needed so cronjobs store their error messages
-          - power-profiles-daemon # For adjusting the power management profiles
-          - puddletag
+          # ── Flatpak (system-level) ─────────────────────────────────────────
+          - flatpak                        # Flatpak runtime — system-wide integration
 
-          #- shadow / Not available on Ubuntu, not sure why it's needed
-          - python3-xlib # Needed for key-mon
-          - rootlesskit
+          # ── System services ───────────────────────────────────────────────
+          - earlyoom                       # Out-of-memory killer daemon (system service)
+          - logiops                        # Advanced Logitech mouse/keyboard customisation
+                                           # Requires system service + /etc/logiops.yml
+          - postfix                        # Mail Transfer Agent — cronjobs store errors here
+          - power-profiles-daemon          # Adjusts power management profiles (D-Bus service)
+          - vnstat                         # Network traffic monitor daemon
 
-          - python3-pip
-          - pipx
-          - rclone
-          - recoll
-
-          # Rust
-          - rustup # Rust toolchain installer, includes cargo and rustc
-
-          - scrcpy
-
-          # Shadow PC
+          # ── System libraries (Shadow PC streaming) ────────────────────────
+          # Needed for Shadow PC client GPU acceleration
+          # https://support.shadow.tech/en_US/articles/known-issues-for-shadow
           - libva-wayland2
           - libva-drm2
-          - libva-glx2 # https://support.shadow.tech/en_US/articles/known-issues-for-shadow/known-issues-for-shadow/64e310046593fd01eb5e8255#_12da2a5b-74fb-496c-86e7-efbc89133fe7
+          - libva-glx2
           - libvdpau1
           - libcurl4
 
-          - screen
-          - signal-desktop
-          - simplescreenrecorder
-          - solaar
-          - speech-dispatcher # Needed for Firefox's SpeechSynthesis API, used for TTS in Reader Mode https://support.mozilla.org/en-US/kb/speechd-setup?as=u&utm_source=inproduct
-          - steam
-          - streamlink # https://github.com/streamlink/streamlink
-          - sqlitebrowser
-          - synaptic
-          - syncthing
-          - tmux
+          # ── System tray / indicator library ──────────────────────────────
+          - libayatana-appindicator3-1     # Tray icon support for Lutris
 
-          # Visual Studio Code
-          - apt-transport-https
-          - code
-          - software-properties-common
-          - wget
-          - gpg
+          # ── XDG Desktop Portal ────────────────────────────────────────────
+          # Needed for Flameshot + NormCap to work on Wayland
+          # https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
+          # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and
+          # xdg-desktop-portal are installed by default on Kubuntu
+          - xdg-desktop-portal-gnome
 
-          - virt-manager
-          - virtualenv
-          - vnstat
-          - wine
+          # ── Ubuntu-specific GUI tools ─────────────────────────────────────
+          - gdebi                          # Install .deb packages whilst handling dependencies
+          - synaptic                       # GUI front-end for apt package manager
 
-          - xdg-desktop-portal-gnome # Need to install this for Flameshot + NormCap to work on Wayland [source] [https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
-          # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and xdg-desktop-portal are being installed by default on Kubuntu
+          # ── System Python tooling ─────────────────────────────────────────
+          # Kept at system level for compatibility with system Python workflows.
+          # User-space Python tools (poetry, uv, yt-dlp) are now in Nix.
+          - python3-pip
+          - pipx
+
+          # ── apt infrastructure ────────────────────────────────────────────
+          - apt-transport-https            # HTTPS support for apt repositories
+          - software-properties-common     # add-apt-repository command
+          - wget                           # File downloader (used by 3rd-party scripts)
+          - gpg                            # GPG key import for apt repos (also in Nix for user use)
 
         state: present
         update_cache: yes
@@ -145,83 +112,8 @@
       tags: run_scripts
       no_log: true
 
-    # https://docs.ansible.com/ansible/latest/collections/community/general/pipx_module.html
-    - name: Inject dependencies via pipx
-      become: false
-      community.general.pipx:
-        name: ansible
-        inject_packages:
-          # - ansible
-          # - fanficfare
-          - yt-dlp[default] # https://github.com/yt-dlp/yt-dlp/pull/11255
-          - poetry # Python dependency management, also for leech-master software
-          - click # Needed for leech-master
-          - key-mon # For showing keys and mouseclicks on video recording/streaming
-          - uv # Python version management
-        state: inject
-
-    # pipx list to list installed packages
-    - name: Upgrade all pipx packages
-      community.general.pipx:
-        state: upgrade_all
-
-    - name: Upgrade yt-dlp nightly version
-      community.general.pipx:
-        name: yt-dlp
-        state: upgrade
-        pip_args: "--pre"  # If you specifically want pre-release versions
-
-    #- name: Install pip libraries
-    #  ansible.builtin.pip:
-    #    name:
-    #      - click # Needed for leech-master
-
-    # npm
-    # npm list -g --depth=0 to list globally installed packages
-    - name: Install NPM packages globally and upgrade them
-      community.general.npm:
-        name: "{{ item }}"
-        global: true
-        state: latest
-      loop:
-        - corepack # For managing package manager versions (npm, yarn, pnpm)
-        - cline # CLI for Cline LLM
-        - "@continuedev/cli" # CLI for Continue Dev LLM
-        - deno # For yt-dlp https://github.com/yt-dlp/yt-dlp/issues/14404
-        - opencode-ai # CLI for OpenCode agentic AI
-        - typescript
-
-    # homebrew
-    - name: Update homebrew and upgrade all packages
-      community.general.homebrew:
-        update_homebrew: true
-        upgrade_all: true
-
-    # Consider brewfiles at some point https://docs.brew.sh/Brew-Bundle-and-Brewfile
-    # brew leaves | xargs brew list --versions to list installed top-level packages
-    - name: Install multiple Homebrew packages
-      community.general.homebrew:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - clojure/tools/clojure # For Clojure development (for Logseq dev)
-        - codex # CLI for OpenAI's Codex agentic AI
-        - copilot-cli
-        - dotnet # c# development, needed for Grayjay etc
-        - gemini-cli # Gemini CLI for Google's Gemini agentic AI
-        - gh # GitHub CLI
-        - git-credential-libsecret # For GitHub CLI to store credentials in KDE wallet
-        - jackett # For qBittorrent search plugin, a torrent indexer
-        - neovim
-        - nvm # Node Version Manager, for managing multiple versions of Node.js
-        - ruby
-        - scrcpy
-        - sniffnet # For monitoring network traffic and identifying which applications are using the network, similar to GlassWire on Windows
-        - starship # Rust-based terminal UI
-        - zrok
-    
-
-        #- name: Shell script
-    #  shell: |
-    #    brew install scrcpy # Not using apt because 4.0+ is needed for audio forwarding. Remove ~/linuxbrew/ when unnecessary. Check https://github.com/Genymobile/scrcpy/blob/master/doc/linux.md for when Ubuntu latest version has 2.0
-    #    echo "DONE"
+    # NOTE: pipx, npm, and Homebrew package tasks have been removed.
+    # Those packages are now managed by Nix Home Manager. See:
+    #   nix/modules/packages.nix   — home.packages list
+    #   nix/modules/shell.nix      — npm AI CLIs via activation script
+    #   nix/modules/programs.nix   — program configurations
