@@ -163,6 +163,6 @@
 
     # ── Syncing ───────────────────────────────────────────────────────────────
     syncthing # Continuous file synchronisation (replaces apt install syncthing)
-              # Also configured as a user service in programs.nix
+              # Start manually with: syncthing serve
   ];
 }

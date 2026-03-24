@@ -354,15 +354,6 @@ in
     };
   };
 
-  # ── File Sync ─────────────────────────────────────────────────────────────────
-
-  # Run Syncthing as a user-level systemd service (no root required).
-  # Web UI available at http://127.0.0.1:8384
-  services.syncthing = {
-    enable = true;
-    # tray.enable = true;  # Uncomment to enable system tray icon (requires tray app)
-  };
-
   # ── Nix Utilities ─────────────────────────────────────────────────────────────
 
   # nix-index provides `nix-locate` to find which package provides a given file,
