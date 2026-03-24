@@ -135,6 +135,18 @@
     ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
   };
 
+  # ── Activation: Ensure Flathub user remote is configured ─────────────────────
+  # Runs on every `hms`. The --if-not-exists flag makes it idempotent.
+  # This ensures ansible's 3rd-party scripts (e.g. flathub-gpu-screen-recorder.sh)
+  # and flatpak.sh can install user-scope Flatpaks without manual setup.
+
+  home.activation.flathubRemote = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if command -v flatpak &>/dev/null; then
+      $DRY_RUN_CMD flatpak remote-add --if-not-exists --user flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+    fi
+  '';
+
   # ── Activation: Install AI CLI tools via npm ──────────────────────────────────
   # These tools are not yet packaged in nixpkgs. They are installed once into
   # ~/.npm-global. Re-running `home-manager switch` will check and install

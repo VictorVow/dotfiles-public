@@ -10,7 +10,7 @@
 #   - System portals: xdg-desktop-portal-gnome
 #   - Ubuntu-only GUI tools: gdebi, synaptic
 #   - Third-party daemons: mullvad-vpn (via mullvad-vpn.sh), docker (via docker.sh)
-#   - Android Studio (via android-studio.sh)
+#   - Android Studio (via android-studio.sh; also available as androidStudioPackages.stable below)
 #   - Flatpak (system-level integration)
 {
   home.packages = with pkgs; [
@@ -62,6 +62,7 @@
     # ── Networking ────────────────────────────────────────────────────────────
     sniffnet # Network traffic monitor — shows which apps are using the network
              # Similar to GlassWire on Windows
+    ngrok    # Secure tunnels to localhost — replaces 3rd-party-packages/ngrok.sh
 
     # ── Media Playback ────────────────────────────────────────────────────────
     haruna       # KDE media player — hardware video decoding works better than Flatpak
@@ -144,17 +145,21 @@
     vscode  # Visual Studio Code (replaces 3rd-party-packages/vscode.sh)
             # Requires allowUnfree = true
 
+    # Android Studio — uncomment to install via Nix instead of android-studio.sh.
+    # Note: ~3 GB download; may require setting STUDIO_JDK on non-NixOS.
+    # androidStudioPackages.stable
+
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
     zrok    # Peer-to-peer reverse proxy / tunnel (replaces brew install zrok)
 
+    # ── System Administration ─────────────────────────────────────────────────
+    ansible  # IT automation — used to run ansible.yml after bootstrap
+             # Provides ansible-playbook, ansible-galaxy, etc.
+
     # ── System / CLI Utilities ────────────────────────────────────────────────
     key-mon  # Display keyboard/mouse input on screen — useful for screencasts
-             # Replaces `pipx inject ansible key-mon`
              # Depends on python3Packages.xlib (handled automatically by nixpkgs)
-
-    # ── Monitoring / Indexing ──────────────────────────────────────────────────
-    jackett  # (also listed above) Torrent indexer proxy
 
     # ── Prompt / Terminal UI ──────────────────────────────────────────────────
     starship # Cross-shell prompt written in Rust (replaces brew install starship)
