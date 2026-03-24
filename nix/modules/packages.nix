@@ -134,13 +134,12 @@
     # ── Development: Node.js ──────────────────────────────────────────────────
     nodejs_22    # Node.js LTS runtime (includes npm)
     nodePackages.typescript # TypeScript compiler (replaces npm install -g typescript)
-    corepack                # Manages yarn/pnpm/npm version pinning
-                            # (replaces npm install -g corepack)
+    # nodejs_22 already provides corepack; do not add the standalone package or
+    # Home Manager will hit a bin/corepack collision in the profile build.
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
-    neovim  # Hyperextensible Vim-based text editor (replaces brew install neovim)
-            # Also configured via programs.neovim in programs.nix
+    # neovim — managed by programs.neovim in programs.nix (installs it automatically)
     # vscode — managed by programs.vscode in programs.nix (installs it automatically)
 
     # Android Studio — uncomment to install via Nix instead of android-studio.sh.

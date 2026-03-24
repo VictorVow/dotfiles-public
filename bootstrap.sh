@@ -86,7 +86,7 @@ else
     success "Nix user environment sourced."
   else
     error "Could not find Nix profile script. You may need to open a new terminal."
-    error "Then re-run: nix run home-manager/master -- switch --flake ./nix#boss"
+    error "Then re-run: nix run github:nix-community/home-manager -- switch --flake ./nix#boss"
     exit 1
   fi
 fi
@@ -118,12 +118,12 @@ FLAKE_REF="$NIX_CONFIG_DIR#boss"
 
 if command -v home-manager &>/dev/null; then
   info "home-manager found — running switch..."
-  home-manager switch --flake "$FLAKE_REF"
+  home-manager switch -b backup --flake "$FLAKE_REF"
 else
-  info "home-manager not found — bootstrapping via 'nix run'..."
+  info "home-manager not found — bootstrapping via 'nix run github:nix-community/home-manager'..."
   info "This downloads home-manager and runs your configuration."
   info "(Subsequent runs will use the installed home-manager binary.)"
-  nix run home-manager/master -- switch --flake "$FLAKE_REF"
+  nix run github:nix-community/home-manager -- switch -b backup --flake "$FLAKE_REF"
 fi
 
 success "Home Manager configuration applied."
