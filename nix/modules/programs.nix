@@ -92,8 +92,7 @@
   programs.neovim = {
     enable = true;
     # Replaces `brew install neovim`.
-    # Set as the default editor for the system.
-    defaultEditor = true;
+    # defaultEditor is intentionally not set; EDITOR/VISUAL are set to nano in shell.nix.
     vimAlias  = true;   # Alias `vim` → `nvim`
     viAlias   = true;   # Alias `vi`  → `nvim`
     extraConfig = ''
@@ -115,10 +114,232 @@
   programs.htop = {
     enable = true;
     settings = {
-      # Show CPU usage as a percentage of total (not per-core)
-      cpu_count_from_zero = false;
-      # Show tree view by default
-      tree_view = true;
+      cpu_count_from_one   = true;   # Label CPUs starting from 1 (not 0)
+      hide_kernel_threads  = true;
+      highlight_megabytes  = true;
+      highlight_threads    = true;
+      enable_mouse         = true;
+      # Header layout: two columns 50/50
+      header_layout        = "two_50_50";
+      column_meters_0      = "LeftCPUs Memory Swap";
+      column_meter_modes_0 = "1 1 1";
+      column_meters_1      = "RightCPUs Tasks LoadAverage Uptime";
+      column_meter_modes_1 = "1 2 2 2";
+      # Field/column order (htop field IDs matching ~/.config/htop/htoprc)
+      fields               = "0 48 17 18 38 39 40 2 46 47 49 1";
+    };
+  };
+
+  # ── System Monitor ────────────────────────────────────────────────────────────
+
+  programs.btop = {
+    enable = true;
+    settings = {
+      graph_symbol  = "braille";      # Braille character graphs
+      update_ms     = 2000;           # Refresh rate in milliseconds
+      proc_sorting  = "cpu direct";   # Sort processes by CPU (default: "cpu lazy")
+      proc_per_core = true;           # Show CPU% per core instead of total (default: false)
+      use_fstab     = true;           # Use /etc/fstab for disk display (default: false)
+      net_auto      = false;          # Fixed scale for network graphs (default: true)
+      net_download  = 100;            # Fixed download scale in Mbps
+      net_upload    = 100;            # Fixed upload scale in Mbps
+      # Custom preset layouts for cycling with 'p':
+      presets       = "cpu:1:default,proc:0:default cpu:0:default,mem:0:default,net:0:default cpu:0:block,net:0:tty";
+    };
+  };
+
+  # ── GitHub CLI ───────────────────────────────────────────────────────────────
+
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocol = "https";
+      prompt       = "enabled";
+      aliases = {
+        co = "pr checkout";
+      };
+    };
+  };
+
+  # ── Text Editors ─────────────────────────────────────────────────────────────
+
+  # programs.micro.enable = true also installs the micro package automatically;
+  # it is therefore removed from packages.nix.
+  programs.micro = {
+    enable = true;
+    bindings = {
+      "Alt-/"          = "lua:comment.comment";
+      "CtrlUnderscore" = "lua:comment.comment";
+    };
+  };
+
+  # ── IDE ───────────────────────────────────────────────────────────────────────
+
+  programs.vscode = {
+    enable = true;
+    # mutableExtensionsDir allows marketplace / manual installs to coexist alongside
+    # Nix-managed extensions. Without this, HM would wipe any unlisted extension.
+    mutableExtensionsDir = true;
+
+    # Extensions available in pkgs.vscode-extensions (nixpkgs subset).
+    # Extensions NOT in nixpkgs are managed by VS Code's built-in sync / marketplace.
+    extensions = with pkgs.vscode-extensions; [
+      bbenoist.nix
+      dbaeumer.vscode-eslint
+      eamodio.gitlens
+      esbenp.prettier-vscode
+      ms-python.python
+      ms-python.vscode-pylance
+      ms-python.debugpy
+      ms-vscode.cpptools
+      oderwat.indent-rainbow
+      redhat.vscode-yaml
+      rust-lang.rust-analyzer
+      tamasfe.even-better-toml
+      usernamehw.errorlens
+    ];
+
+    # Full extension inventory (for documentation / future declarative migration).
+    # Extensions marked (*) are managed above via nixpkgs; the rest via VS Code sync.
+    # To move more to Nix: use pkgs.vscode-utils.extensionsFromVscodeMarketplace with sha256.
+    #
+    # (*) bbenoist.nix
+    # (*) dbaeumer.vscode-eslint
+    # (*) eamodio.gitlens
+    # (*) esbenp.prettier-vscode
+    # (*) ms-python.python
+    # (*) ms-python.vscode-pylance
+    # (*) ms-python.debugpy
+    # (*) ms-vscode.cpptools
+    # (*) oderwat.indent-rainbow
+    # (*) redhat.vscode-yaml
+    # (*) rust-lang.rust-analyzer
+    # (*) tamasfe.even-better-toml
+    # (*) usernamehw.errorlens
+    #     amazonwebservices.amazon-q-vscode
+    #     anthropic.claude-code
+    #     asvetliakov.vscode-neovim
+    #     ccimage.jsonviewer
+    #     christian-kohler.npm-intellisense
+    #     continue.continue
+    #     davidanson.vscode-markdownlint
+    #     docker.docker
+    #     donjayamanne.githistory
+    #     editorconfig.editorconfig
+    #     firefox-devtools.vscode-firefox-debug
+    #     formulahendry.code-runner
+    #     fuzionix.devtool-plus
+    #     gbasood.byond-dm-language-support
+    #     github.copilot-chat
+    #     github.vscode-github-actions
+    #     leizongmin.node-module-intellisense
+    #     ms-azuretools.vscode-containers
+    #     ms-dotnettools.csdevkit
+    #     ms-dotnettools.csharp
+    #     ms-dotnettools.vscode-dotnet-runtime
+    #     ms-python.vscode-python-envs
+    #     ms-toolsai.jupyter
+    #     ms-toolsai.jupyter-keymap
+    #     ms-toolsai.jupyter-renderers
+    #     ms-toolsai.vscode-jupyter-cell-tags
+    #     ms-toolsai.vscode-jupyter-slideshow
+    #     ms-vscode-remote.remote-containers
+    #     ms-vscode.cmake-tools
+    #     ms-vscode.cpp-devtools
+    #     ms-vscode.cpptools-extension-pack
+    #     ms-vscode.cpptools-themes
+    #     ms-vsliveshare.vsliveshare
+    #     nickdemayo.vscode-json-editor
+    #     ofhumanbondage.react-proptypes-intellisense
+    #     onlyutkarsh.git-config-user-profiles
+    #     platymuus.dm-langclient
+    #     redhat.java
+    #     ritwickdey.liveserver
+    #     saoudrizwan.claude-dev
+    #     sourcegraph.javascript-typescript
+    #     tauri-apps.tauri-vscode
+    #     twxs.cmake
+    #     vscjava.vscode-gradle
+    #     vscjava.vscode-java-debug
+    #     vscjava.vscode-java-dependency
+    #     vscjava.vscode-java-test
+    #     vscjava.vscode-maven
+    #     zainchen.json
+
+    userSettings = {
+      # ── Telemetry ──────────────────────────────────────────────────────────────
+      "telemetry.enableCrashReporter" = false;
+      "telemetry.enableTelemetry"     = false;
+      "redhat.telemetry.enabled"      = false;
+      "amazonQ.telemetry"             = false;
+
+      # ── Editor ─────────────────────────────────────────────────────────────────
+      "editor.inlineSuggest.enabled" = true;
+      "editor.defaultFormatter"      = "esbenp.prettier-vscode";
+      "editor.formatOnSave"          = true;
+
+      # ── Git ────────────────────────────────────────────────────────────────────
+      "git.autofetch"                     = true;
+      "git.openRepositoryInParentFolders" = "never";
+
+      # ── Explorer ───────────────────────────────────────────────────────────────
+      "explorer.confirmDelete" = false;
+
+      # ── Terminal ───────────────────────────────────────────────────────────────
+      "terminal.integrated.allowChords" = false;
+
+      # ── Claude Code ────────────────────────────────────────────────────────────
+      "claudeCode.preferredLocation" = "panel";
+
+      # ── Copilot ────────────────────────────────────────────────────────────────
+      "github.copilot.advanced"                    = {};
+      "github.copilot.nextEditSuggestions.enabled" = true;
+
+      # ── Continue ───────────────────────────────────────────────────────────────
+      "continue.showInlineTip" = false;
+      # yaml.schemas intentionally omitted: version-specific Continue paths become
+      # stale on every extension update; Continue manages its own schema registration.
+
+      # ── vscode-neovim ──────────────────────────────────────────────────────────
+      # Point to the Nix-managed nvim binary (was: /home/linuxbrew/.linuxbrew/bin/nvim)
+      "extensions.experimental.affinity"          = { "asvetliakov.vscode-neovim" = 1; };
+      "vscode-neovim.neovimExecutablePaths.linux"  = "${pkgs.neovim}/bin/nvim";
+      "vscode-neovim.neovimExecutablePaths.darwin" = "";
+      "vscode-neovim.neovimExecutablePaths.win32"  = "";
+
+      # ── Git Config User Profiles ────────────────────────────────────────────────
+      # (extension: onlyutkarsh.git-config-user-profiles)
+      "gitConfigUser.profiles" = [
+        {
+          label      = "Psuedononymous [Victor239]";
+          email      = "12621257+Victor239@users.noreply.github.com";
+          userName   = "Victor239";
+          selected   = true;
+          id         = "f4feda82-9f84-40ed-ae25-45893e812650";
+          signingKey = "GPGKEY1";
+        }
+        {
+          label      = "Personal [USER2]";
+          email      = "22418751+USER2@users.noreply.github.com";
+          userName   = "USER2";
+          selected   = false;
+          id         = "80ec2d0d-bf53-4508-a832-380861ee3118";
+          signingKey = "GPGKEY2";
+        }
+      ];
+      "gitConfigUser.workspaceProfileSelections" = {
+        "/home/boss/Documents/ESSENTIALS/installs" = "80ec2d0d-bf53-4508-a832-380861ee3118";
+      };
+
+      # ── Misc extension settings ─────────────────────────────────────────────────
+      "dreammaker.autoUpdate"   = true;
+      "dreammaker.tickOnCreate" = true;
+      "cmake.showOptionsMovedNotification"           = false;
+      "docker.extension.enableComposeLanguageServer" = false;
+      "java.autobuild.enabled"                       = false;
+      "java.imports.gradle.wrapper.checksums" = [
+        { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
+      ];
     };
   };
 

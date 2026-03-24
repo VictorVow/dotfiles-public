@@ -45,7 +45,7 @@
     # ── Terminal / Shell Tools ────────────────────────────────────────────────
     screen  # Terminal multiplexer (classic)
     tmux    # Terminal multiplexer (modern) — also configured in programs.nix
-    micro   # Terminal text editor with sane keybindings (nano alternative)
+    # micro — managed by programs.micro in programs.nix (installs it automatically)
     lynx    # Text-only web browser
 
     # ── Security / Privacy ────────────────────────────────────────────────────
@@ -77,7 +77,8 @@
                  # in Reader Mode https://support.mozilla.org/en-US/kb/speechd-setup
 
     # ── Screen Recording / Streaming ─────────────────────────────────────────
-    simplescreenrecorder # Screen recorder with hardware encoding support
+    simplescreenrecorder  # Screen recorder with hardware encoding support
+    gpu-screen-recorder   # GPU-accelerated screen recorder (replaces flathub-gpu-screen-recorder.sh)
 
     # ── Audio / Music ─────────────────────────────────────────────────────────
     puddletag # Audio tag (ID3/etc.) editor
@@ -142,8 +143,7 @@
     # ── Development: Tools & Editors ──────────────────────────────────────────
     neovim  # Hyperextensible Vim-based text editor (replaces brew install neovim)
             # Also configured via programs.neovim in programs.nix
-    vscode  # Visual Studio Code (replaces 3rd-party-packages/vscode.sh)
-            # Requires allowUnfree = true
+    # vscode — managed by programs.vscode in programs.nix (installs it automatically)
 
     # Android Studio — uncomment to install via Nix instead of android-studio.sh.
     # Note: ~3 GB download; may require setting STUDIO_JDK on non-NixOS.
