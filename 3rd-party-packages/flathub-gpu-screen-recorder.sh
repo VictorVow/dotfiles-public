@@ -5,7 +5,7 @@
 # then
 #     echo "GPU Screen Recorder is not installed. Installing now..."
 
-#     # Install Homebrew
+#     # Install GPU Screen Recorder
 #     /bin/bash -c "sudo flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo"
 #      flatpak install --system com.dec05eba.gpu_screen_recorder
 
