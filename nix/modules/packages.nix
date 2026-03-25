@@ -106,7 +106,26 @@
                        # Important for Wine/Lutris — many Windows apps expect these metrics
 
     # ── Gaming ────────────────────────────────────────────────────────────────
-    lutris    # Open-source gaming platform (Wine/Proton/native games)
+    # Open-source gaming platform (Wine/Proton/native games).
+    # Wrapped with makeWrapper to prepend the AyatanaAppIndicator3 typelib path
+    # to GI_TYPELIB_PATH. The path is baked at build time into the lutris-unwrapped
+    # C binary wrapper via makeCWrapper, so it cannot be patched at runtime — the
+    # only fix is wrapping the outer bwrap script before it enters the sandbox.
+    # extraPkgs/extraLibraries put libayatana-appindicator into the FHS env so the
+    # .so is present at /usr/lib64/; the makeWrapper prefix ensures Python-gi finds
+    # the typelib when it searches GI_TYPELIB_PATH.
+    (symlinkJoin {
+      name = "lutris";
+      paths = [ (lutris.override {
+        extraPkgs = pkgs: [ pkgs.libayatana-appindicator ];
+        extraLibraries = pkgs: [ pkgs.libayatana-appindicator ];
+      }) ];
+      buildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/lutris \
+          --prefix GI_TYPELIB_PATH : "${libayatana-appindicator}/lib/girepository-1.0"
+      '';
+    })
     steam     # Valve's game distribution platform (requires allowUnfree = true)
     gamemode  # Feral Interactive's game performance optimiser
     gamescope # Valve's micro-compositor for gaming (FSR, resolution scaling)
