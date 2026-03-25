@@ -107,6 +107,23 @@ This runs 7 steps in sequence:
 6. pipx packages
 7. Distrobox containers (apt/dnf inside `dev` and `media`)
 
+**What step 1 does:** `flake.lock` pins exact git commits for nixpkgs-unstable and
+home-manager. Without updating it, `hms` always builds from the same snapshot no matter
+how old. `nix flake update` fetches the latest commits for both inputs, which updates
+package versions and pulls in new Home Manager modules.
+
+**If `hms` reports "The option `programs.X' does not exist":** the module was added to
+home-manager after your last flake update — or hasn't landed yet. Try `update-all` first.
+If the error persists, install the package in `packages.nix` and add shell integration
+to `shell.nix` manually instead.
+
+**Update flake.lock without a full system update:**
+
+```bash
+nix flake update --flake ~/Documents/ESSENTIALS/installs/nix
+hms
+```
+
 **Skip Nix update** (use pinned flake.lock versions):
 
 ```bash
