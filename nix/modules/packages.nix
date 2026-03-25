@@ -135,10 +135,9 @@
                  # (replaces pipx ipykernel; also provides the python3 interpreter)
 
     # ── Development: Node.js ──────────────────────────────────────────────────
-    nodejs_22    # Node.js LTS runtime (includes npm)
-    nodePackages.typescript # TypeScript compiler (replaces npm install -g typescript)
-    # nodejs_22 already provides corepack; do not add the standalone package or
-    # Home Manager will hit a bin/corepack collision in the profile build.
+    fnm          # Fast Node Manager — install/switch Node versions per project
+                 # Shell integration (auto-switch on cd) is set up in shell.nix
+    nodePackages.typescript # TypeScript compiler
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
 
     # ── Development: Tools & Editors ──────────────────────────────────────────

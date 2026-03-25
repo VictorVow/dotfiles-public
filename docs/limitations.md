@@ -110,11 +110,14 @@ Set `ANDROID_HOME` (already in `shell.nix`) to match where Android Studio instal
 
 ---
 
-## NVM / Node Version Switching
+## Node Version Switching
 
-**Problem:** `nvm use` to switch Node versions at runtime isn't purely declarative.
+**Problem:** Switching Node versions at runtime isn't purely declarative.
 
-**Status:** Already handled. `nvm` is installed via nixpkgs and initialised in `shell.nix`. `nvm use`, `nvm install`, and `nvm ls` all work as expected. This is a deliberate choice — project-level `.nvmrc` files drive version selection at runtime.
+**Status:** Handled. `fnm` (Fast Node Manager) is installed via `packages.nix` and
+initialised in `shell.nix` (`eval "$(fnm env --use-on-cd --shell bash)"`). `fnm install`,
+`fnm use`, and auto-switching via `.node-version` / `.nvmrc` files all work. Replaces
+the previous `nodejs_22` pin — node versions are now managed per-project by fnm.
 
 ---
 
@@ -131,4 +134,4 @@ Set `ANDROID_HOME` (already in `shell.nix`) to match where Android Studio instal
 | Docker daemon | Not in Nix | Keep `docker.sh` |
 | Mullvad VPN daemon | Not in Nix | Keep `mullvad-vpn.sh` |
 | Application data/caches | Not in Nix | Back up with Vorta/Borg |
-| NVM / Node switching | Handled | nvm in nixpkgs + `shell.nix` init |
+| Node version switching | Handled | fnm via `packages.nix` + `shell.nix` init |

@@ -62,6 +62,10 @@
       # Installed in a dedicated venv; exposed here for CLI use.
       export PATH="$PATH:$HOME/gs-venv/bin"
 
+      # ── fnm (Fast Node Manager) ─────────────────────────────────────────────
+      # Initialises fnm and enables auto-switching on `cd` via .node-version/.nvmrc
+      eval "$(fnm env --use-on-cd --shell bash)"
+
       # ── dnvm (.NET version manager) ─────────────────────────────────────────
       # Manages .NET SDK versions independently of the system Nix dotnet-sdk.
       if [ -f "$HOME/.local/share/dnvm/env" ]; then
