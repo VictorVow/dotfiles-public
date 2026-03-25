@@ -268,7 +268,6 @@ done
 if [[ ${#FAILED[@]} -gt 0 ]]; then
   warn "Some steps failed: ${FAILED[*]}"
   warn "Check the output above for details."
-  exit 1
 fi
 
 success "All updates complete."
@@ -333,6 +332,9 @@ else
     fi
   fi
 fi
+
+# Exit with failure if any step failed
+[[ ${#FAILED[@]} -gt 0 ]] && exit 1
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Optional: yt-dlp nightly
