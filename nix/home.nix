@@ -25,6 +25,12 @@
     ./modules/distrobox.nix  # Declarative distrobox container definitions
   ];
 
+  # Tell Home Manager this is a non-NixOS Linux system.
+  # This auto-enables targets.genericLinux.gpu, which creates
+  # /run/opengl-driver → Nix Mesa derivation so that Nix-packaged
+  # GPU apps (Qt6, etc.) can find the OpenGL/Vulkan driver.
+  targets.genericLinux.enable = true;
+
   # Let Home Manager manage itself. This generates the home-manager CLI
   # and enables automatic profile updates.
   programs.home-manager.enable = true;

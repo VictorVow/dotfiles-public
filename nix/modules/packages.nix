@@ -17,21 +17,7 @@
 
     # ── Android / Mobile ─────────────────────────────────────────────────────
     android-tools  # Provides adb and fastboot
-    # Mirror and control Android devices over USB/network.
-    # Wrapped to force XWayland (SDL_VIDEODRIVER=x11) because nixpkgs-unstable
-    # ships sdl2-compat-2.32.64 (SDL3 compat shim) as pkgs.SDL2. Under Wayland,
-    # the SDL2→SDL3 renderer name translation fails:
-    #   "Could not create renderer: Parameter 'renderer' is invalid"
-    # Forcing x11 uses XWayland where the renderer name mapping works correctly.
-    (pkgs.symlinkJoin {
-      name = "scrcpy";
-      paths = [ scrcpy ];
-      buildInputs = [ pkgs.makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/scrcpy \
-          --set SDL_VIDEODRIVER x11
-      '';
-    })
+    scrcpy         # Mirror and control Android devices over USB/network
 
     # ── System Monitoring ─────────────────────────────────────────────────────
     btop     # Better top - rich terminal system monitor
@@ -80,23 +66,8 @@
     ngrok    # Secure tunnels to localhost — replaces 3rd-party-packages/ngrok.sh
 
     # ── Media Playback ────────────────────────────────────────────────────────
-    # KDE media player — hardware video decoding works better than Flatpak
-    # and CPU usage is lower than the Flatpak version.
-    # Wrapped to fix crash on startup:
-    #   QT_QPA_PLATFORM=xcb  — force XWayland (Wayland plugin SIGABRTs)
-    #   QT_XCB_GL_INTEGRATION=xcb_egl  — use EGL instead of GLX because
-    #     XWayland's GLX fails to find a matching FBConfig:
-    #     "qglx_findConfig: Failed ... Could not initialize GLX"
-    (pkgs.symlinkJoin {
-      name = "haruna";
-      paths = [ haruna ];
-      buildInputs = [ pkgs.makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/haruna \
-          --set QT_QPA_PLATFORM xcb \
-          --set QT_XCB_GL_INTEGRATION xcb_egl
-      '';
-    })
+    haruna       # KDE media player — hardware video decoding works better than Flatpak
+                 # and CPU usage is lower than the Flatpak version
     mediainfo    # CLI tool for analysing media file properties
     mediainfo-gui # GUI for mediainfo
     mpv          # Lightweight and powerful media player
