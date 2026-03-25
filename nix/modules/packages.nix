@@ -126,10 +126,13 @@
     clojure      # Clojure language + deps CLI (was: clojure/tools/clojure in Homebrew)
                  # Useful for Logseq development
     ruby         # Ruby language runtime
-    python3      # Python 3 interpreter
+    # python3 — provided transitively by pkgs.jupyter below; do not add standalone
+    #            or Home Manager's buildEnv will hit a python3 binary conflict
     poetry       # Python dependency management tool (replaces pipx install poetry)
     uv           # Extremely fast Python package/version manager (replaces pipx uv)
     virtualenv   # Python virtual environment creator (python3Packages.virtualenv)
+    jupyter      # Jupyter Notebook + JupyterLab + ipython REPL + ipykernel
+                 # (replaces pipx ipykernel; also provides the python3 interpreter)
 
     # ── Development: Node.js ──────────────────────────────────────────────────
     nodejs_22    # Node.js LTS runtime (includes npm)
@@ -164,5 +167,7 @@
     # ── Syncing ───────────────────────────────────────────────────────────────
     syncthing # Continuous file synchronisation (replaces apt install syncthing)
               # Start manually with: syncthing serve
+
+    glow # Markdown viewer
   ];
 }
