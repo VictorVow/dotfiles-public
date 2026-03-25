@@ -144,6 +144,8 @@
     # ── Development: Tools & Editors ──────────────────────────────────────────
     # neovim — managed by programs.neovim in programs.nix (installs it automatically)
     # vscode — managed by programs.vscode in programs.nix (installs it automatically)
+    kdePackages.kate          # KDE text editor with syntax highlighting and plugins
+    kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
 
     # Android Studio — uncomment to install via Nix instead of android-studio.sh.
     # Note: ~3 GB download; may require setting STUDIO_JDK on non-NixOS.
