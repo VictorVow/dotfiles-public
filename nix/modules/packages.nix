@@ -17,7 +17,21 @@
 
     # ── Android / Mobile ─────────────────────────────────────────────────────
     android-tools  # Provides adb and fastboot
-    scrcpy         # Mirror and control Android devices over USB/network
+    # Mirror and control Android devices over USB/network.
+    # Wrapped to force XWayland (SDL_VIDEODRIVER=x11) because nixpkgs-unstable
+    # ships sdl2-compat-2.32.64 (SDL3 compat shim) as pkgs.SDL2. Under Wayland,
+    # the SDL2→SDL3 renderer name translation fails:
+    #   "Could not create renderer: Parameter 'renderer' is invalid"
+    # Forcing x11 uses XWayland where the renderer name mapping works correctly.
+    (pkgs.symlinkJoin {
+      name = "scrcpy";
+      paths = [ scrcpy ];
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/scrcpy \
+          --set SDL_VIDEODRIVER x11
+      '';
+    })
 
     # ── System Monitoring ─────────────────────────────────────────────────────
     btop     # Better top - rich terminal system monitor
