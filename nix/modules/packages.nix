@@ -80,8 +80,20 @@
     ngrok    # Secure tunnels to localhost — replaces 3rd-party-packages/ngrok.sh
 
     # ── Media Playback ────────────────────────────────────────────────────────
-    haruna       # KDE media player — hardware video decoding works better than Flatpak
-                 # and CPU usage is lower than the Flatpak version
+    # KDE media player — hardware video decoding works better than Flatpak
+    # and CPU usage is lower than the Flatpak version.
+    # Wrapped to force XWayland (QT_QPA_PLATFORM=xcb) because the Nix-packaged
+    # Qt6 Wayland platform plugin fails to initialize the EGL/OpenGL context
+    # on this system, causing an immediate SIGABRT on startup.
+    (pkgs.symlinkJoin {
+      name = "haruna";
+      paths = [ haruna ];
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/haruna \
+          --set QT_QPA_PLATFORM xcb
+      '';
+    })
     mediainfo    # CLI tool for analysing media file properties
     mediainfo-gui # GUI for mediainfo
     mpv          # Lightweight and powerful media player
