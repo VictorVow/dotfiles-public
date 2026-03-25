@@ -255,6 +255,32 @@ else
   info "Actually installed and to be removed: ${#INSTALLED_TO_REMOVE[@]} packages"
   run sudo apt-get remove --purge -y "${INSTALLED_TO_REMOVE[@]}"
   run sudo apt-get autoremove -y
+
+  # Re-mark KDE/Kubuntu essentials as manually installed so that autoremove
+  # cannot cascade-remove them in future runs.  These are not managed by Nix
+  # and must stay in the apt world.
+  KDE_ESSENTIALS=(
+    sddm sddm-theme-breeze
+    dolphin ark
+    plasma-runners-addons
+    kde-spectacle
+    plasma-widgets-addons plasma-dataengines-addons
+    plasma-wallpapers-addons plasma-calendar-addons
+    grub-theme-breeze plymouth-theme-breeze
+    usb-creator-kde alsa-base
+    kubuntu-desktop
+  )
+  ESSENTIALS_INSTALLED=()
+  for pkg in "${KDE_ESSENTIALS[@]}"; do
+    if dpkg -l "$pkg" 2>/dev/null | grep -q "^ii"; then
+      ESSENTIALS_INSTALLED+=("$pkg")
+    fi
+  done
+  if [[ ${#ESSENTIALS_INSTALLED[@]} -gt 0 ]]; then
+    run sudo apt-mark manual "${ESSENTIALS_INSTALLED[@]}"
+    info "Marked ${#ESSENTIALS_INSTALLED[@]} KDE essentials as manually installed."
+  fi
+
   success "apt packages removed."
 fi
 
