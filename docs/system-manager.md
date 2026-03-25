@@ -1,5 +1,7 @@
 # system-manager
 
+> **Decision:** Not worth changing currently, it's alpha quality and modifies too little.
+
 [`numtide/system-manager`](https://github.com/numtide/system-manager) is an alpha-quality Nix-based tool for managing system-level state on non-NixOS Linux. It brings NixOS-style declarative configuration (atomic apply, generation tracking, rollback) to Ubuntu and other systemd-based distributions, without replacing the OS.
 
 ---

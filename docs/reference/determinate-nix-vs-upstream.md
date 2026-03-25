@@ -1,5 +1,7 @@
 # Determinate Nix vs Upstream Nix
 
+> **Decision:** Determinate Nix has various performance improvements and no lock-in currently, keep as-is.
+
 This repo uses Determinate Nix (via `bootstrap.sh`). This document explains what that means, how it compares to upstream Nix, and how to switch between the two if needed.
 
 ## What is Determinate Nix?
