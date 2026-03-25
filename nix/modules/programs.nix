@@ -93,6 +93,12 @@ in
   # Edit nix/dotfiles/starship.toml to change the prompt appearance.
   home.file.".config/starship.toml".source = ../dotfiles/starship.toml;
 
+  # Tell ripgrep (and tools that use it, like Claude Code and Gemini CLI) to skip
+  # the rclone FUSE mount — traversing it causes high CPU on the rclone mount process.
+  home.file.".ignore".text = ''
+    Mounts/
+  '';
+
   # ── Text Editors ──────────────────────────────────────────────────────────────
 
   programs.neovim = {
