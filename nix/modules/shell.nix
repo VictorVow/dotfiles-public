@@ -75,9 +75,23 @@
       fi
 
       # ── fastfetch ────────────────────────────────────────────────────────────
-      # Show system info on every new terminal. Also helps identify which
-      # Distrobox container you're in (shows the container OS name).
+      # Show system info on:
+      #   - new Yakuake sessions (parent process is yakuake)
+      #   - new Distrobox container shells
+      #   - return to local shell after an SSH session exits
+      if [[ "$(ps -p $PPID -o comm= 2>/dev/null)" == "yakuake" ]] || \
+         [[ -n "$DISTROBOX_ENTER_PATH" ]]; then
+        fastfetch
+      fi
+
+      # Wrap ssh: run fastfetch when returning from a remote session
+      ssh() {
+        command ssh "$@"
       fastfetch
+      }
+
+      # Colours for ls
+      eval "$(dircolors -b)"
     '';
 
     # ── Shell Aliases ──────────────────────────────────────────────────────────
