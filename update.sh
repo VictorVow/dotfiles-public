@@ -273,6 +273,67 @@ fi
 
 success "All updates complete."
 
+# ── Home Manager News ─────────────────────────────────────────────────────────
+HM_NEWS_FILE="$SCRIPT_DIR/docs/home-manager-news.md"
+
+echo ""
+echo -e "${CYAN}${BOLD}━━━ Home Manager News ━━━${NC}"
+info "Checking home-manager news (output suppressed)..."
+
+HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#boss" 2>&1) || true
+
+if [[ -z "$HM_NEWS_OUTPUT" ]]; then
+  info "No home-manager news output."
+else
+  # Extract existing News section content for comparison
+  EXISTING_NEWS=""
+  if [[ -f "$HM_NEWS_FILE" ]]; then
+    EXISTING_NEWS=$(sed -n '/^## News$/,$ { /^## News$/d; p }' "$HM_NEWS_FILE")
+    # Trim leading blank line added by the section header
+    EXISTING_NEWS="${EXISTING_NEWS#$'\n'}"
+  fi
+
+  if [[ "$HM_NEWS_OUTPUT" == "$EXISTING_NEWS" ]]; then
+    info "No new home-manager news since last update."
+  else
+    WRITE_NEWS=false
+    if $DRY_RUN; then
+      echo -e "  ${DIM}[dry-run] Would prompt to update $HM_NEWS_FILE${NC}"
+    elif [[ -t 0 ]]; then
+      echo ""
+      echo -e "${YELLOW}New home-manager news is available.${NC}"
+      printf "  Overwrite docs/home-manager-news.md? [Y/n] "
+      read -r ANSWER </dev/tty || ANSWER="N"
+      ANSWER="${ANSWER:-Y}"
+      [[ "$ANSWER" =~ ^[Yy]$ ]] && WRITE_NEWS=true
+    else
+      info "Non-interactive session — skipping home-manager-news.md update."
+    fi
+
+    if $WRITE_NEWS; then
+      mkdir -p "$(dirname "$HM_NEWS_FILE")"
+      {
+        printf '## Meta\n\n'
+        printf 'This file is maintained by `update.sh` and updated during system updates.\n\n'
+        printf '**Structure:**\n'
+        printf -- '- **Meta** (this section): Documents the structure and formatting of this file.\n'
+        printf -- '- **News**: Raw plain-text output from `home-manager news`, captured silently.\n\n'
+        printf '**Formatting rules for the News section:**\n'
+        printf -- '- Content is the verbatim output of `home-manager news` — do not hand-edit it.\n'
+        printf -- '- Each news entry starts with a `#` heading (package name and version range).\n'
+        printf -- '- Entries are separated by blank lines.\n\n'
+        printf '**Update behaviour:** `update.sh` compares new news output against the stored\n'
+        printf 'News section and prompts before overwriting (Y/n, default Y). Skipped in\n'
+        printf 'non-interactive (cron) sessions.\n\n'
+        printf 'Last updated: %s\n\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+        printf '## News\n\n'
+        printf '%s\n' "$HM_NEWS_OUTPUT"
+      } > "$HM_NEWS_FILE"
+      success "docs/home-manager-news.md updated."
+    fi
+  fi
+fi
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Optional: yt-dlp nightly
 # ─────────────────────────────────────────────────────────────────────────────
