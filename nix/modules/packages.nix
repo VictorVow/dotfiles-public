@@ -82,16 +82,19 @@
     # ── Media Playback ────────────────────────────────────────────────────────
     # KDE media player — hardware video decoding works better than Flatpak
     # and CPU usage is lower than the Flatpak version.
-    # Wrapped to force XWayland (QT_QPA_PLATFORM=xcb) because the Nix-packaged
-    # Qt6 Wayland platform plugin fails to initialize the EGL/OpenGL context
-    # on this system, causing an immediate SIGABRT on startup.
+    # Wrapped to fix crash on startup:
+    #   QT_QPA_PLATFORM=xcb  — force XWayland (Wayland plugin SIGABRTs)
+    #   QT_XCB_GL_INTEGRATION=xcb_egl  — use EGL instead of GLX because
+    #     XWayland's GLX fails to find a matching FBConfig:
+    #     "qglx_findConfig: Failed ... Could not initialize GLX"
     (pkgs.symlinkJoin {
       name = "haruna";
       paths = [ haruna ];
       buildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/haruna \
-          --set QT_QPA_PLATFORM xcb
+          --set QT_QPA_PLATFORM xcb \
+          --set QT_XCB_GL_INTEGRATION xcb_egl
       '';
     })
     mediainfo    # CLI tool for analysing media file properties
