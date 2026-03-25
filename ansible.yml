@@ -119,6 +119,19 @@
         update_cache: yes
       become: yes
 
+    - name: Hold apt packages superseded by Nix
+      # Prevents apt / KDE Discover from reinstalling Kubuntu defaults that are
+      # already managed by home-manager. Equivalent to: apt-mark hold <pkg>
+      ansible.builtin.apt:
+        name:
+          # ── System / CLI ──────────────────────────────────────────────────────
+          - procps   # pgrep, ps, kill — superseded by nix#procps
+
+          # ── Development: Tools & Editors ──────────────────────────────────────
+          - kate     # KDE text editor — superseded by nix#kdePackages.kate
+        state: held
+      become: yes
+
     - name: Find all scripts in the 3rd-party-packages subdirectory
       find:
         paths: "3rd-party-packages"

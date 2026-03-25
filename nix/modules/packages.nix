@@ -20,6 +20,9 @@
     scrcpy         # Mirror and control Android devices over USB/network
 
     # ── System Monitoring ─────────────────────────────────────────────────────
+    procps   # Provides pgrep, ps, kill, etc.
+             # Needed by Lutris FHS sandbox — sandbox overlays /usr/bin with its
+             # own Nix store version, which lacks pgrep without this package
     btop     # Better top - rich terminal system monitor
     htop     # Interactive process viewer
     nvtopPackages.full
