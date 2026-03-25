@@ -43,6 +43,27 @@
           # podman is the OCI backend; install at system level for proper cgroup support.
           # - podman       # Uncomment if distrobox rootless mode has issues
 
+          # ── KDE Essentials ───────────────────────────────────────────────
+          # These are marked manual (apt-mark manual) to prevent autoremove
+          # from stripping them when unrelated packages are removed.
+          - cryptsetup                    # The main command-line tool for LUKS encryption/decryption
+          - cryptsetup-initramfs          # Enables unlocking encrypted volumes at boot
+          - gocryptfs                     # For unlocking Plasma Vaults
+          - sddm                           # Kubuntu login screen (display manager)
+          - sddm-theme-breeze              # KDE Breeze login theme
+          - dolphin                        # KDE file manager
+          - ark                            # KDE archive manager
+          - plasma-runners-addons          # KRunner search plugins (calculator, bookmarks, etc.)
+          - kde-spectacle                  # Screenshot tool
+          - plasma-widgets-addons          # Weather, calculator, notes plasmoids
+          - plasma-dataengines-addons      # Data engines powering the widget add-ons
+          - plasma-wallpapers-addons       # Extra wallpapers and slideshow support
+          - plasma-calendar-addons         # Calendar widget integration
+          - grub-theme-breeze              # Breeze GRUB theme
+          - plymouth-theme-breeze          # Breeze boot splash
+          - usb-creator-kde               # USB startup disk creator
+          - alsa-base                      # ALSA driver configuration files
+
           # ── KDE Plasma integration ────────────────────────────────────────
           - kio-admin                      # Allows Dolphin file manager to run as root
           - plasma-gamemode                # KDE Plasma integration for Feral's gamemode
