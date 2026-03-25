@@ -31,6 +31,11 @@
   # GPU apps (Qt6, etc.) can find the OpenGL/Vulkan driver.
   targets.genericLinux.enable = true;
 
+  # Register Nix-installed fonts with the system fontconfig.
+  # Required on non-NixOS — without this, fonts in the Nix store are invisible
+  # to GTK apps (like Lutris) even if the packages are installed.
+  fonts.fontconfig.enable = true;
+
   # Let Home Manager manage itself. This generates the home-manager CLI
   # and enables automatic profile updates.
   programs.home-manager.enable = true;

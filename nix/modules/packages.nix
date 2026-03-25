@@ -95,6 +95,13 @@
     # ── Disk / Storage ────────────────────────────────────────────────────────
     gnome-disk-utility # GUI for formatting USBs to exFAT (compatible with all OSes)
 
+    # ── Fonts ─────────────────────────────────────────────────────────────────
+    noto-fonts         # Google Noto — broad Unicode coverage, fixes missing-glyph boxes
+    noto-fonts-cjk-sans # Noto CJK (Chinese/Japanese/Korean)
+    noto-fonts-color-emoji # Noto emoji
+    liberation_ttf     # Metrically compatible with Arial/Times New Roman/Courier New
+                       # Important for Wine/Lutris — many Windows apps expect these metrics
+
     # ── Gaming ────────────────────────────────────────────────────────────────
     lutris    # Open-source gaming platform (Wine/Proton/native games)
     steam     # Valve's game distribution platform (requires allowUnfree = true)
