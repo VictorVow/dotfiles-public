@@ -13,6 +13,20 @@
     # automatically by their respective programs.* modules in programs.nix.
 
     initExtra = ''
+      # ── HM session vars: re-source when nix store path changes ──────────────
+      # home.sessionVariables are blocked by __HM_SESS_VARS_SOURCED (a "source
+      # once" guard). New vars added after login never appear until full logout,
+      # because child shells inherit the flag and skip re-sourcing.
+      # Fix: track the active store path in __HM_SESS_VARS_PATH; re-source
+      # (and reset the guard) whenever hms produces a new store derivation.
+      _hm_sess_current=$(readlink ~/.nix-profile/etc/profile.d/hm-session-vars.sh 2>/dev/null)
+      if [[ "$_hm_sess_current" != "$__HM_SESS_VARS_PATH" ]]; then
+        unset __HM_SESS_VARS_SOURCED
+        source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+        export __HM_SESS_VARS_PATH="$_hm_sess_current"
+      fi
+      unset _hm_sess_current
+
       # ── Homebrew (Linux) ────────────────────────────────────────────────────
       # Homebrew is kept for packages not available in nixpkgs.
       # The nix-managed PATH takes priority; Homebrew fills in the gaps.
