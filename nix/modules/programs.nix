@@ -584,10 +584,8 @@ in
         ---
         description: Run home-manager switch and show any new news items.
         ---
-        1. Run `hms` (alias for home-manager switch).
-        2. If it succeeded, run `hmn` (home-manager news) and surface any [unread] entries
-           dated after the previous switch.
-        3. If it failed, show the full error and suggest a fix.
+        1. If the user tells you to run `hms` then instead run `home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss` since you don't have access to `hms` from your Bash shell.
+        2. If it failed, show the full error and suggest a fix.
       '';
 
       "git-who" = ''
