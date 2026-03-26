@@ -119,12 +119,14 @@
       ls = "ls --color=auto";
 
       # Launch a tmux agent workspace (auto-numbered session, no conflicts):
+      #          67%             33%
       # ┌──────────────────┬────────────┐
       # │    top-L         │   top-R    │   67%
       # │                  │            │
-      # ├──────────────────┼────────────┤
-      # │    bot-L      │    bot-R      │  33%
+      # ├───────────────┬──┴────────────┤
+      # │    bot-L      │    bot-R      │   33%
       # └───────────────┴───────────────┘
+      #       50%              50%
       tmux-agent = "tmux new-session \\; split-window -v -p 33 \\; select-pane -t 0 \\; split-window -h -p 33 \\; select-pane -t 2 \\; split-window -h \\; select-pane -t 0";
     };
   };
