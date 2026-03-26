@@ -102,7 +102,10 @@
 
     # ── Shell Aliases ──────────────────────────────────────────────────────────
     shellAliases = {
-      # Home Manager shortcuts
+      # Home Manager shortcuts.
+      # NOTE: Aliases are only loaded in interactive shells — non-interactive tools
+      # (e.g. Claude's Bash tool, scripts, cron jobs) cannot resolve them.
+      # Use the full `home-manager switch --flake ...` command in those contexts.
       hms   = "home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss";
       hmn   = "home-manager news --flake ~/Documents/ESSENTIALS/installs/nix#boss";
 
