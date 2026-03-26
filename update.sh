@@ -311,7 +311,7 @@ echo ""
 echo -e "${CYAN}${BOLD}━━━ Home Manager News ━━━${NC}"
 info "Checking home-manager news (output suppressed)..."
 
-HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#boss" 2>&1) || true
+HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#boss" 2>&1 | grep -v 'has uncommitted changes') || true
 
 if [[ -z "$HM_NEWS_OUTPUT" ]]; then
   info "No home-manager news output."
