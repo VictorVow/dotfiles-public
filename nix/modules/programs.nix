@@ -21,6 +21,8 @@ in
     };
 
     settings = {
+      # Default identity (1 = Victor239); use `git su [1|2]` to switch per-repo
+      # Identity 2 (USER2): 22418751+USER2@users.noreply.github.com, key GPGKEY2
       user.name  = "Victor239";
       user.email = "12621257+Victor239@users.noreply.github.com";
 
@@ -43,6 +45,23 @@ in
       "credential \"https://dev.azure.com\"".useHttpPath = true;
 
       alias.ll = "log --oneline";
+      alias.su =
+        let
+          set1 = "git config user.name 'Victor239'"
+            + " && git config user.email '12621257+Victor239@users.noreply.github.com'"
+            + " && git config user.signingkey 'GPGKEY1'"
+            + " && echo 'switched -> Victor239 (identity 1)'";
+          set2 = "git config user.name 'USER2'"
+            + " && git config user.email '22418751+USER2@users.noreply.github.com'"
+            + " && git config user.signingkey 'GPGKEY2'"
+            + " && echo 'switched -> USER2 (identity 2)'";
+        in
+          "!f() { case \"$1\" in"
+          + " 1) ${set1};;"
+          + " 2) ${set2};;"
+          + " \"\") echo \"current: $(git config user.name) <$(git config user.email)>\";;"
+          + " *) echo 'usage: git su [1|2]';;"
+          + " esac }; f";
     };
   };
 
