@@ -192,6 +192,17 @@ in
 
   programs.vscode = {
     enable = true;
+    # Nix store binaries can't have root-owned 4755 perms, so the SUID sandbox
+    # helper is always misconfigured. Wrap the binary to pass --no-sandbox.
+    package = pkgs.symlinkJoin {
+      name = "vscode";
+      inherit (pkgs.vscode) pname version meta;
+      paths = [ pkgs.vscode ];
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/code --add-flags "--no-sandbox"
+      '';
+    };
     # mutableExtensionsDir allows marketplace / manual installs to coexist alongside
     # Nix-managed extensions. Without this, HM would wipe any unlisted extension.
     mutableExtensionsDir = true;
