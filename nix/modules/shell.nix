@@ -164,7 +164,7 @@
     # MCP server secrets — inherited by MCP server subprocesses at runtime.
     # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
     # shell-inherited values and an empty string would shadow the real value.
-    LOGSEQ_API_TOKEN = "";   # ← paste your LogSeq HTTP API token (Settings → HTTP APIs)
+    LOGSEQ_API_TOKEN = "7z5opygq2";   # ← paste your LogSeq HTTP API token (Settings → HTTP APIs)
     GITHUB_TOKEN     = "REDACTED_TOKEN";   # ← paste a GitHub PAT with repo + read:org scopes (github.com → Settings → Developer settings → PATs)
   };
 
