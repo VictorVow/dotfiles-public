@@ -236,3 +236,204 @@ A few things worth noting from the configs:
   - The three Android-Backups subfolders (NeoBackup, Signal, SeedVault) get rclone android-backups + Syncthing (but the parent
   Android-Backups/ dir is covered by android-backups as a whole)
   - Only ~/logseq1 is synced via Syncthing — ~/logseq (no suffix) is not in any Syncthing config
+
+---
+
+## Coverage Table — Vorta Exclusions
+
+Each path below is excluded from Vorta (BorgBase.com / rsync.net). The table shows what else covers it.
+
+**External SSD covers every row** (full `/home/` mirror via `rsync --delete`) — omitted as a column to reduce noise. A path showing only `—` across the table is backed up by External SSD only.
+
+**rclone cloudsync** ✓ is inferred from the Coverage Table above: a path is marked ✓ only where it falls under a parent already confirmed as rclone-covered (`~/.config`, `~/.cache`, `~/.var/app`, `~/.wine/drive_c`, `~/.local/share/Steam`, `~/.local/share/lutris`, `~/Games/{Adult,itchio-games,Pirated,1Git}`, `~/Vaults/gocryptfs2`, `~/Vaults/gocryptfs1/Thunderbird`, `~/Vaults/gocryptfs1/Android-sync/Android-NewPipe`).
+
+### ⚠️ Exact-path conflicts with Coverage Table
+
+These paths appear in the Coverage Table with Vorta ✓ **and** in the Vorta raw exclusions (trailing slash ignored). The Vorta ✓ in the Coverage Table is incorrect for all of them — none are in any Borg archive:
+
+| Coverage Table row | Result |
+|---|---|
+| `~/.cache` | entire dir excluded from Borg |
+| `~/.wine/drive_c` | entire dir excluded from Borg |
+| `~/.local/share/Steam` | excluded from Borg |
+| `~/.local/share/lutris` | excluded from Borg |
+| `~/Games/Adult` | excluded from Borg |
+| `~/Games/itchio-games` | excluded from Borg |
+| `~/Games/Pirated` | excluded from Borg |
+| `~/Games/1Git` | excluded from Borg |
+| `~/Vaults/gocryptfs2` | excluded from Borg |
+| `~/Vaults/gocryptfs1/Android-sync/Android-Backups` | excluded from Borg |
+| `~/Vaults/gocryptfs1/Android-sync/Android-NewPipe` | excluded from Borg |
+
+> **Near-conflicts (parent path excluded):** The Coverage Table shows the following with Vorta ✓, but their parent is excluded from Vorta, so they are not in Borg either:
+> - `~/Videos/Syncthing/BAE-PINK2-Logseq`, `Shadow2`, `Desktop-Windows` → parent `~/Videos/Syncthing/` is excluded
+> - `~/Vaults/gocryptfs1/Android-sync/Android-Backups/Android-NeoBackup`, `Android-Signal`, `Android-SeedVault` → parent `Android-Backups/` is excluded
+
+---
+
+### `.config` cache paths
+
+*rclone cloudsync ✓ for all (parent `~/.config` confirmed in Coverage Table)*
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/.config/GeForce NOW/Cache/` | ✓ | — | — |
+| `~/.config/GeForce NOW/Service Worker/` | ✓ | — | — |
+| `~/.config/GeForce NOW/Code Cache/` | ✓ | — | — |
+| `~/.config/google-chrome/Default/Service Worker/` | ✓ | — | — |
+| `~/.config/itch/Partitions/itchio-4159193/Cache/` | ✓ | — | — |
+| `~/.config/itch/Partitions/itchio-4159193/Code Cache/` | ✓ | — | — |
+| `~/.config/itch/Partitions/itchio-4159193/Service Worker/` | ✓ | — | — |
+| `~/.config/lbry/Cache/` | ✓ | — | — |
+| `~/.config/Logseq/search/` | ✓ | — | — |
+| `~/.config/Signal/` | ✓ | — | — |
+| `~/.config/syncthing/index-v0.14.0.db/` | ✓ | — | — |
+| `~/.config/WorkFlowy/Cache/` | ✓ | — | — |
+
+### `~/.cache/` and `.var/app` caches
+
+*rclone cloudsync ✓ for all (parents `~/.cache` and `~/.var/app` confirmed in Coverage Table)*
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/.cache/` *(entire dir)* | ✓ | — | — |
+| `~/.var/app/com.brave.Browser/cache/…/Default/Cache/` | ✓ | — | — |
+| `~/.var/app/com.brave.Browser/cache/…/Default/Code Cache/` | ✓ | — | — |
+| `~/.var/app/com.discordapp.Discord/config/discord/Code Cache/` | ✓ | — | — |
+| `~/.var/app/com.discordapp.Discord/config/discord/Cache/` | ✓ | — | — |
+| `~/.var/app/com.gitlab.KRypt0n_.an-anime-game-launcher/data/anime-game-launcher/` | ✓ | — | — |
+| `~/.var/app/com.logseq.Logseq/config/Logseq/search/` | ✓ | — | — |
+| `~/.var/app/com.logseq.Logseq/config/Logseq/Cache/` | ✓ | — | — |
+| `~/.var/app/com.slack.Slack/config/Slack/Cache/Cache_Data/` | ✓ | — | — |
+| `~/.var/app/com.slack.Slack/config/Slack/Service Worker/CacheStorage/` | ✓ | — | — |
+| `~/.var/app/com.spotify.Client/cache/spotify/Browser/Cache/Cache_Data/` | ✓ | — | — |
+| `~/.var/app/com.stremio.Stremio/.stremio-server/stremio-cache/` | ✓ | — | — |
+| `~/.var/app/com.usebottles.bottles/data/bottles/` | ✓ | — | — |
+| `~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/` | ✓ | — | — |
+| `~/.var/app/com.visualstudio.code/cache/Cypress/` | ✓ | — | — |
+| `~/.var/app/io.freetubeapp.FreeTube/config/FreeTube/Cache/` | ✓ | — | — |
+| `~/.var/app/io.gitlab.librewolf-community/cache/` | ✓ | — | — |
+| `~/.var/app/io.lbry.lbry-app/data/lbry/lbrynet/blobfiles/` | ✓ | — | — |
+| `~/.var/app/net.lutris.Lutris/cache/lutris/` | ✓ | — | — |
+| `~/.var/app/net.lutris.Lutris/data/lutris/runners/wine/` | ✓ | — | — |
+| `~/.var/app/org.chromium.Chromium/cache/` | ✓ | — | — |
+| `~/.var/app/org.chromium.Chromium/config/chromium/Default/Service Worker/` | ✓ | — | — |
+| `~/.var/app/org.kde.dolphin/cache/` | ✓ | — | — |
+| `~/.var/app/org.kde.dolphin/data/Trash/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/…/09muof4b.MASTER/cache2/entries/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/…/w4q5aadv.LEISURE/cache2/entries/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/…/89q24drb.CIKFORUM/cache2/entries/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/…/6nxpopo7.PLAIN/cache2/entries/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/…/kxnl5iqx.WORK/cache2/entries/` | ✓ | — | — |
+| `~/.var/app/org.mozilla.firefox/cache/tmp/` | ✓ | — | — |
+| `~/.var/app/org.polymc.PolyMC/data/polymc/` | ✓ | — | — |
+| `~/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data/` | ✓ | — | — |
+| `~/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data#2/` | ✓ | — | — |
+
+### `.local/share` paths
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/.local/share/baloo/` | — | — | — |
+| `~/.local/share/containers/storage/overlay/` | — | — | — |
+| `~/.local/share/flatpak/` | — | — | — |
+| `~/.local/share/lbry/lbrynet/blobfiles/` | — | — | — |
+| `~/.local/share/lutris/` | ✓ | — | — |
+| `~/.local/share/plasma-vault/` | — | — | — |
+| `~/.local/share/pnpm/` | — | — | — |
+| `~/.local/share/Steam/` | ✓ | — | — |
+| `~/.local/share/stremio/` | — | — | — |
+| `~/.local/share/Tabletop Simulator/` | — | — | — |
+| `~/.local/share/TelegramDesktop/tdata/` | — | — | — |
+| `~/.local/share/Trash/` | — | — | — |
+| `~/.local/share/Vircadia/Interface/ktx_cache/` | — | — | — |
+| `~/.local/share/waydroid/data/` | — | — | — |
+
+### Dev caches & other dotfiles
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `node_modules` *(relative pattern — matches any location)* | — | — | — |
+| `~/.babylonia-terminal/` | — | — | — |
+| `~/.bitmonero/lmdb/data.mdb` | — | — | — |
+| `~/.gradle/caches/` | — | — | — |
+| `~/.gradle/wrapper/` | — | — | — |
+| `~/.npm/_cacache/` | — | — | — |
+| `~/.nuget/packages/` | — | — | — |
+| `~/.recoll/` | — | — | — |
+| `~/.rustup/toolchains/` | — | — | — |
+| `~/.wine/drive_c/` | ✓ | — | — |
+
+### Games
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/Games/1Git/` | ✓ | — | — |
+| `~/Games/Adult/` | ✓ | — | — |
+| `~/Games/byond-513/` | — | — | — |
+| `~/Games/byond-ss13/` | — | — | — |
+| `~/Games/epic-games/` | — | — | — |
+| `~/Games/gog-galaxy/drive_c/windows/` | — | — | — |
+| `~/Games/gog-games/` | — | — | — |
+| `~/Games/itchio-games/` | ✓ | — | — |
+| `~/Games/magic-the-gathering-online/` | — | — | — |
+| `~/Games/minecraft/` | — | — | — |
+| `~/Games/minecraft-all/` | — | — | — |
+| `~/Games/multimc/` | — | — | — |
+| `~/Games/Pirated/` | ✓ | — | — |
+| `~/Games/SteamLibrary/steamapps/` | — | — | — |
+| `~/Games/SteamOther/` | — | — | — |
+| `~/Games/XMage/` | — | — | — |
+
+### Documents & Downloads
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/Documents/Dev/Android/Sdk/` | — | — | — |
+| `~/Documents/Git/` | — | — | — |
+| `~/Documents/Linux.iso` | — | — | — |
+| `~/Documents/MUSEUM/Docker/NocoDB/` | — | — | — |
+| `~/Documents/MUSEUM/Docker/LanguageTool/optional_ngrams/en/` | — | — | — |
+| `~/Documents/MUSEUM/Docker/zlib-searcher/index/` | — | — | — |
+| `~/Documents/OPTIONAL/ISOs/` | — | — | — |
+| `~/Documents/OPTIONAL/Android/PocophoneF1-beryllium/ROMs/` | — | — | — |
+| `~/Documents/OPTIONAL/Android/PocophoneF1-beryllium/Partitions/` | — | — | — |
+| `~/Documents/VMs/` | — | — | — |
+| `~/Downloads/MEGA/` | — | — | — |
+| `~/logseq/graphs/logseq-apex/backups/` | — | — | — |
+| `~/Mounts/` | — | — | — |
+
+### Vaults
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/Vaults/gocryptfs1/1Vault/Android-SwiftBackup` | — | — | — |
+| `~/Vaults/gocryptfs1/1Vault/Android-WhatsApp-OLD-FULL` | — | — | — |
+| `~/Vaults/gocryptfs1/1Vault/wikispooks/` | — | — | — |
+| `~/Vaults/gocryptfs1/Android-sync/Android-Backups/` | — | ✓ | — |
+| `~/Vaults/gocryptfs1/Android-sync/Android-CORE/1VideoMedia` | — | — | ✓ |
+| `~/Vaults/gocryptfs1/Android-sync/Android-NewPipe/` | ✓ | — | ✓ |
+| `~/Vaults/gocryptfs1/Android-sync/Android-WhatsApp/Databases/` | — | — | ✓ |
+| `~/Vaults/gocryptfs1/Browsers/MASTER/firefox/` | — | — | — |
+| `~/Vaults/gocryptfs1/Browsers/MASTER/profile/cache2/entries/` | — | — | — |
+| `~/Vaults/gocryptfs1/Browsers/MASTER/profile/storage/default/` | — | — | — |
+| `~/Vaults/gocryptfs1/Calibre/Calibre-Library/full-text-search.db` | — | — | — |
+| `~/Vaults/gocryptfs1/Cloud/Cloud Drive/Android-MP/.stversions/…/Android-NewPipe/` | — | — | — |
+| `~/Vaults/gocryptfs1/Cloud/Cloud Drive/Android-MP/1-Export to PC/Android-NewPipe/NewPipe-Video/` | — | — | — |
+| `~/Vaults/gocryptfs1/Thunderbird/profile/cache2/entries/` | ✓ | — | — |
+| `~/Vaults/gocryptfs1/Thunderbird/profile/calendar-data/` | ✓ | — | — |
+| `~/Vaults/gocryptfs1/Thunderbird/thunderbird/` | ✓ | — | — |
+| `~/Vaults/gocryptfs2/` | ✓ | — | — |
+
+### Videos & misc
+
+| Path | rclone cloudsync | rclone android-backups | Syncthing |
+|------|:---:|:---:|:---:|
+| `~/Videos/1-Downloading/` | — | — | — |
+| `~/Videos/2-Complete/` | — | — | — |
+| `~/Videos/9-LBRY/` | — | — | — |
+| `~/Videos/NewPipe-Video/` | — | — | — |
+| `~/Videos/Replays/` | — | — | — |
+| `~/Videos/Syncthing/` *(parent of 3 Coverage Table rows — see near-conflicts above)* | — | — | ✓ |
+| `~/Videos/X/` | — | — | — |
+| `~/vmware/` | — | — | — |
