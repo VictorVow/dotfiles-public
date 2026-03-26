@@ -167,6 +167,8 @@
                  # (replaces pipx ipykernel; also provides the python3 interpreter)
 
     # ── Development: Node.js ──────────────────────────────────────────────────
+    nodejs       # Node.js LTS runtime — provides npm for global installs and
+                 # the home-manager activation script; fnm overrides per project
     fnm          # Fast Node Manager — install/switch Node versions per project
                  # Shell integration (auto-switch on cd) is set up in shell.nix
     nodePackages.typescript # TypeScript compiler

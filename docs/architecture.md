@@ -77,6 +77,31 @@ Many GUI applications (Discord, Brave, Logseq, Heroic Games Launcher, etc.) are 
 
 Several AI/LLM CLI tools (Cline, OpenCode, Gemini CLI, etc.) are not yet in nixpkgs. They're installed into a user-local npm prefix (no sudo), managed by a Home Manager activation script in `shell.nix`. This is a transitional layer — as these tools land in nixpkgs, they'll move to `packages.nix`.
 
+### JavaScript / Node.js package management
+
+The setup has several layers for JS tooling:
+
+**Base runtime — `nodejs` (Nix, LTS)**
+A Nix-managed Node.js LTS provides the `node` and `npm` binaries at `~/.nix-profile/bin/`. This is the default node used for global tooling and by the Home Manager activation script that installs AI CLI tools into `~/.npm-global`. It has no involvement in per-project development — that's fnm's job.
+
+**Per-project versioning — `fnm` (Nix)**
+`fnm` (Fast Node Manager) is installed via Nix and configured in `shell.nix` with `eval "$(fnm env --use-on-cd --shell bash)"`. When you `cd` into a project directory containing a `.node-version` or `.nvmrc` file, fnm automatically activates the correct Node.js version. Use `fnm install <version>` and `fnm default <version>` to manage versions. fnm-managed node overrides the Nix base node in that shell.
+
+**Runtimes supported:**
+| Runtime | Supported | How |
+|---------|-----------|-----|
+| Node.js | Yes | Nix `nodejs` (base LTS) + `fnm` (per-project) |
+| Deno | Yes | Nix `deno` package — TypeScript-native, no npm required |
+| Bun | No | Not in this setup |
+
+**Package managers supported:**
+| Tool | Supported | How |
+|------|-----------|-----|
+| npm | Yes | Comes with `nodejs`; globals go to `~/.npm-global` |
+| yarn | Per-project only | `npx yarn` or as a devDependency; not installed globally |
+| pnpm | Per-project only | `npx pnpm` or as a devDependency; not installed globally |
+| bun | No | Not installed |
+
 ## Configuration Flow
 
 ```
