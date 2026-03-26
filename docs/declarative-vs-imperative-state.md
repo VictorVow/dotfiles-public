@@ -103,7 +103,7 @@ State that exists on the system but is not tracked in this repo.
 | State | Location | Why not managed | Potential path |
 |-------|----------|-----------------|----------------|
 | **KDE Plasma settings** | `~/.config/kde*`, `~/.config/plasma-*` | GUI-generated, hundreds of INI files, changes constantly | [`plasma-manager`](https://github.com/nix-community/plasma-manager) Home Manager module |
-| **Flatpak apps** (~40+) | Flatpak user install | Most lack Nix packages; Flatpak has better Wayland/sandbox support | Keep Flatpak; track app IDs in a text file |
+| **Flatpak apps** (~160+) | Flatpak user install | Most lack Nix packages; Flatpak has better Wayland/sandbox support for desktop apps | Keep Flatpak; track app IDs in a text file |
 | **Application data/caches** | `~/.config/discord/`, `~/.config/Code/`, `~/.local/share/Steam/`, etc. | Runtime state, changes constantly, not meaningful to version-control | Back up with Vorta/Borg |
 | **Distrobox container internals** | Container filesystems | Apt packages inside containers drift after first init | Re-running init or rebuilding containers |
 | **logiops config** | `/etc/logiops.yml` | Not yet committed anywhere; created manually or by logiops default | `system-manager` `environment.etc` or commit to repo |
@@ -115,3 +115,15 @@ State that exists on the system but is not tracked in this repo.
 | **Console Ninja binary** | `~/.console-ninja/.bin/` | IDE extension-managed | PATH entry in `shell.nix` is sufficient |
 | **npm AI CLI versions** | `~/.npm-global/` | Installed by activation script but not version-pinned | Move to `packages.nix` once upstreamed to nixpkgs |
 | **Firefox profile data** | `~/.mozilla/firefox/` | Application state, not config | Arkenfox `user.js` is re-applied by `arkenfox.sh` |
+| **ollama** | `/usr/local/bin/ollama` | Local LLM runner; installed from ollama.com installer; being migrated to Nix | `pkgs.ollama` in `packages.nix` |
+| **calibre** | `/opt/calibre/` | E-book library manager; installed via official calibre installer script | `pkgs.calibre` in `packages.nix` |
+| **megasync** | `/opt/MEGAsync/` | MEGA cloud storage sync client; installed via .deb from mega.nz | Vendor .deb; no reliable nixpkgs alternative |
+| **Z-Library** | `/opt/Z-Library/` | E-library desktop app; manual download | — |
+| **Webex** | `/opt/Webex/` | Cisco video conferencing; installed via vendor .deb | Vendor .deb; keep manual |
+| **Claude Code CLI** | `~/.local/share/claude/` | AI coding assistant CLI; self-updating binary managed by `claude update` | Keep self-managed; not in nixpkgs |
+| **Zed editor** | `~/.local/zed.app/` | Modern code editor; installed via zed.dev install script | `pkgs.zed-editor` in `packages.nix` |
+| **JetBrains Rider** | `~/.local/bin/rider` | C# IDE; managed by JetBrains Toolbox or manual archive extract | JetBrains Toolbox manages updates |
+| **jan** | `~/.local/bin/jan` | Local LLM chat desktop app; manual install | — |
+| **noisetorch** | `~/.local/bin/noisetorch` | Microphone noise suppression (PulseAudio); manual install | `pkgs.noisetorch` in `packages.nix` |
+| **mouseless** | `~/.local/bin/mouseless` | Keyboard-driven app switching overlay; manual install | — |
+| **AppImages (~44)** | `~/AppImages/` | Standalone portable executables (Heynote, Logseq, Cursor, FreeTube, Chiaki, Hydra, Redact, TagSpaces, ledger-live, amdgpu_top, etc.); manual downloads | Keep as-is; maintain a list in `~/AppImages/` |
