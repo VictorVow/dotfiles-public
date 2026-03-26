@@ -11,6 +11,10 @@
 # already exists. Package installation uses a sentinel file to avoid
 # reinstalling packages on every `home-manager switch`.
 #
+# Package installs run via `podman exec --user root` to bypass the nosuid
+# restriction on container overlay filesystems (which prevents sudo from
+# working in non-interactive activation hook contexts).
+#
 # To enter a container interactively:
 #   distrobox enter dev
 #   distrobox enter media
@@ -18,14 +22,21 @@
 # To run a one-off command in a container:
 #   distrobox enter dev   -- cmake --version
 #   distrobox enter media -- ffmpeg -version
+#
+# To re-run package initialisation:
+#   rm ~/.local/share/distrobox-hm-init/dev-initialized
+#   rm ~/.local/share/distrobox-hm-init/media-initialized
 {
   home.activation.distroboxContainers =
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       DISTROBOX="${pkgs.distrobox}/bin/distrobox"
-      DISTROBOX_EXPORT="${pkgs.distrobox}/bin/distrobox-export"
+      PODMAN="${pkgs.podman}/bin/podman"
 
-      # Activation runs with a stripped PATH; ensure podman is findable.
-      export PATH="${pkgs.podman}/bin:${pkgs.crun}/bin:${pkgs.passt}/bin:$PATH"
+      # Activation runs with a stripped PATH; add required tools.
+      export PATH="${pkgs.podman}/bin:${pkgs.crun}/bin:${pkgs.passt}/bin:${pkgs.gawk}/bin:${pkgs.util-linux}/bin:$PATH"
+
+      # Rootless podman needs XDG_RUNTIME_DIR to locate the user's containers.
+      export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
       SENTINEL_DIR="$HOME/.local/share/distrobox-hm-init"
       $DRY_RUN_CMD mkdir -p "$SENTINEL_DIR"
@@ -33,43 +44,46 @@
       # ── Container 1: dev (ubuntu:24.04) ────────────────────────────────────
       # Purpose: Development tools that integrate best with the Debian/Ubuntu
       # ecosystem — build toolchains, debuggers, language runtimes.
-      #
-      # The --no-entry flag creates the container without launching a shell.
-      # --volume is not needed because distrobox auto-mounts $HOME by default.
 
       $DRY_RUN_CMD "$DISTROBOX" create \
         --name dev \
         --image ubuntu:24.04 \
         --yes \
         --no-entry \
-        2>/dev/null || true   # Silently skip if container already exists
+        2>/dev/null || true
+
+      # Start the container so podman exec can reach it.
+      $DRY_RUN_CMD "$PODMAN" start dev 2>/dev/null || true
 
       # Install dev packages on first initialisation only.
       # Delete ~/.local/share/distrobox-hm-init/dev-initialized to re-run.
       if [ ! -f "$SENTINEL_DIR/dev-initialized" ]; then
         echo "Initialising 'dev' container packages (this may take a few minutes)..."
-        $DRY_RUN_CMD "$DISTROBOX" enter dev -- bash -c "
-          sudo apt-get update -qq && \
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \    # gcc, g++, make, libc-dev — the base build toolchain
-            cmake \              # Cross-platform build system generator
-            ninja-build \        # Fast build system often used with cmake
-            gdb \                # GNU Debugger
-            valgrind \           # Memory error detector and profiler
-            clang \              # LLVM-based C/C++ compiler
-            llvm \               # LLVM compiler infrastructure
-            pkg-config \         # Helper tool for compile flags of installed libraries
-            libssl-dev \         # OpenSSL development headers
-            python3-full \       # Python 3 with all standard library modules
-            python3-pip \        # Python package installer
-            python3-venv \       # Python virtual environment support
-            nodejs \             # Node.js JavaScript runtime
-            npm \                # Node Package Manager
-            curl \               # HTTP client (useful inside the container)
-            wget \               # File downloader
-            git                  # Version control (container-local copy)
-        " && $DRY_RUN_CMD touch "$SENTINEL_DIR/dev-initialized" \
-          || echo "WARNING: 'dev' container package install failed; will retry next switch."
+        if $DRY_RUN_CMD "$PODMAN" exec --user root dev bash -c '
+          apt-get update -qq &&
+          apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            gdb \
+            valgrind \
+            clang \
+            llvm \
+            pkg-config \
+            libssl-dev \
+            python3-full \
+            python3-pip \
+            python3-venv \
+            nodejs \
+            npm \
+            curl \
+            wget \
+            git
+        '; then
+          $DRY_RUN_CMD touch "$SENTINEL_DIR/dev-initialized"
+        else
+          echo "WARNING: 'dev' container package install failed; will retry next switch."
+        fi
       fi
 
       # ── Container 2: media (fedora:latest) ─────────────────────────────────
@@ -82,36 +96,38 @@
         --image fedora:latest \
         --yes \
         --no-entry \
-        2>/dev/null || true   # Silently skip if container already exists
+        2>/dev/null || true
+
+      $DRY_RUN_CMD "$PODMAN" start media 2>/dev/null || true
 
       # Install media packages on first initialisation only.
       # Delete ~/.local/share/distrobox-hm-init/media-initialized to re-run.
       if [ ! -f "$SENTINEL_DIR/media-initialized" ]; then
         echo "Initialising 'media' container packages (this may take a few minutes)..."
-        $DRY_RUN_CMD "$DISTROBOX" enter media -- bash -c "
-          # Enable RPM Fusion for codec support in OBS, ffmpeg, etc.
-          sudo dnf install -y --quiet \
-            https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-\$(rpm -E %fedora).noarch.rpm \
-            https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-\$(rpm -E %fedora).noarch.rpm \
-          && sudo dnf install -y --quiet \
-            ffmpeg \            # Video/audio processing (RPMFusion build with all codecs)
-            obs-studio \        # Open Broadcaster Software — streaming and recording
-            kdenlive \          # KDE video editor
-            HandBrake-cli \     # Video transcoder CLI
-            mpv \               # Lightweight media player
-            yt-dlp \            # Download video/audio from 1000+ sites
-            mediainfo \         # Media file analysis CLI tool
-            mediainfo-gui \     # GUI for mediainfo
+        if $DRY_RUN_CMD "$PODMAN" exec --user root media bash -c '
+          dnf install -y --quiet \
+            https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+            https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+          dnf install -y --quiet \
+            ffmpeg \
+            obs-studio \
+            kdenlive \
+            HandBrake-cli \
+            mpv \
+            yt-dlp \
+            mediainfo \
+            mediainfo-gui \
             curl \
             wget
-        " && $DRY_RUN_CMD touch "$SENTINEL_DIR/media-initialized" \
-          || echo "WARNING: 'media' container package install failed; will retry next switch."
+        '; then
+          $DRY_RUN_CMD touch "$SENTINEL_DIR/media-initialized"
 
-        # Export GUI apps from the media container to the host desktop.
-        # This creates .desktop entries so OBS and Kdenlive appear in the app launcher.
-        if [ -f "$SENTINEL_DIR/media-initialized" ]; then
-          $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app obs-studio  --container media 2>/dev/null || true
-          $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app kdenlive    --container media 2>/dev/null || true
+          # Export GUI apps from the media container to the host desktop.
+          DISTROBOX_EXPORT="${pkgs.distrobox}/bin/distrobox-export"
+          $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app obs-studio --container media 2>/dev/null || true
+          $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app kdenlive   --container media 2>/dev/null || true
+        else
+          echo "WARNING: 'media' container package install failed; will retry next switch."
         fi
       fi
     '';
