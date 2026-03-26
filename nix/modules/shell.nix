@@ -187,9 +187,13 @@
   # To upgrade: npm update -g --prefix ~/.npm-global
 
   home.activation.npmGlobalPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    # Ensure npm is available (comes from nodejs package in packages.nix)
-    if ! command -v npm &>/dev/null; then
-      echo "WARNING: npm not found, skipping AI CLI tool installation"
+    # HM activation runs in an isolated environment without standard system tools.
+    # Prepend nodejs (for node/npm) and system paths (for tar, sh, etc. used by
+    # npm postinstall scripts like @vscode/ripgrep's binary download).
+    export PATH="${pkgs.nodejs}/bin:/usr/bin:/bin:$PATH"
+    NPM="${pkgs.nodejs}/bin/npm"
+    if ! [ -x "$NPM" ]; then
+      echo "WARNING: npm not found at ${pkgs.nodejs}/bin/npm, skipping AI CLI tool installation"
     else
       export NPM_CONFIG_PREFIX="$HOME/.npm-global"
       mkdir -p "$HOME/.npm-global"
@@ -202,7 +206,7 @@
         if ! command -v "$bin" &>/dev/null && \
            [ ! -f "$HOME/.npm-global/bin/$bin" ]; then
           echo "Installing npm global package: $pkg"
-          $DRY_RUN_CMD npm install --global --prefix "$HOME/.npm-global" "$pkg"
+          $DRY_RUN_CMD "$NPM" install --global --prefix "$HOME/.npm-global" "$pkg"
         fi
       }
 
