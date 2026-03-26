@@ -2,6 +2,23 @@
 
 let
   jsonFormat = pkgs.formats.json { };
+
+  # Written as a mutable file (not a Nix-store symlink) so Claude Code can
+  # modify it at runtime — e.g. the /effort slash command rewrites this file.
+  # Same content that programs.claude-code.settings would generate, but
+  # deployed via home.activation (install -m 644) instead of home.file.
+  # See: home-manager#8654 (same issue that forced settings to be omitted for
+  # gemini-cli). Changes made at runtime are overwritten on the next `hms`.
+  claudeCodeSettings = pkgs.writeText "claude-code-settings.json" (builtins.toJSON {
+    "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
+    includeCoAuthoredBy = false;
+    effortLevel         = "medium";
+    hooks = {
+      Stop             = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh stop";      }]; }];
+      Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
+      UserPromptSubmit = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";      }]; }];
+    };
+  });
 in
 
 # Home Manager program configurations.
@@ -471,7 +488,7 @@ in
       # → set LOGSEQ_API_TOKEN in home.sessionVariables above → hms + restart shell.
       logseq = {
         command = "uv";
-        args    = [ "run" "--with" "mcp-logseq" "mcp-logseq" ];
+        args    = [ "run" "--with" "mcp-logseq[vector]" "mcp-logseq" ];
         env     = { LOGSEQ_API_URL = "http://localhost:12315"; };
       };
 
@@ -511,35 +528,6 @@ in
     package              = pkgs.claude-code;  # required when enableMcpIntegration = true
     enableMcpIntegration = true;              # merges programs.mcp.servers → ~/.claude/.mcp.json
 
-    # ── Settings — migrates ~/.claude/settings.json ──────────────────────────────
-    # NOTE: settings.local.json (per-machine permissions allow-list) is intentionally
-    # NOT managed here — it is machine-local and should stay outside the Nix store.
-    settings = {
-      includeCoAuthoredBy = false;
-      effortLevel         = "medium";
-
-      hooks = {
-        Stop = [{
-          hooks = [{
-            type    = "command";
-            command = "bash ~/.claude/hooks/notify-waiting.sh stop";
-          }];
-        }];
-        Notification = [{
-          hooks = [{
-            type    = "command";
-            command = "bash ~/.claude/hooks/notify-waiting.sh";
-          }];
-        }];
-        UserPromptSubmit = [{
-          hooks = [{
-            type    = "command";
-            command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";
-          }];
-        }];
-      };
-    };
-
     # ── Agents — creates ~/.claude/agents/<key>.md ────────────────────────────────
 
     agents = {
@@ -551,6 +539,7 @@ in
           Use when editing nix/modules/*.nix, flake.nix, or debugging eval errors.
         ---
         You are a Nix/Home Manager expert. When making changes:
+        - Remember that the main Nix config is located at ~/Documents/ESSENTIALS/installs
         - Read existing module files before proposing edits
         - Prefer extending existing modules over creating new ones
         - Use lib helpers; avoid string-based workarounds
@@ -586,7 +575,8 @@ in
         description: Run home-manager switch and show any new news items.
         ---
         1. If the user tells you to run `hms` then instead run `home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss` since you don't have access to `hms` from your Bash shell.
-        2. If it failed, show the full error and suggest a fix.
+        2. If you see "warning: Git tree <filepath> has uncommitted changes" then just ignore that warning.
+        3. If it failed, show the full error and suggest a fix.
       '';
 
       "git-who" = ''
@@ -631,5 +621,17 @@ in
     enable  = true;
     package = pkgs.gemini-cli;
   };
+
+  # ── Claude Code settings (writable copy) ────────────────────────────────────
+  # Replaces programs.claude-code.settings to avoid a read-only Nix-store
+  # symlink. install -m 644 copies the file so Claude Code can overwrite it.
+  home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.claude/settings.json"
+    # Replace any existing Nix-store symlink with a writable copy
+    if [ -L "$dest" ]; then
+      $DRY_RUN_CMD rm "$dest"
+    fi
+    $DRY_RUN_CMD install -m 644 ${claudeCodeSettings} "$dest"
+  '';
 
 }
