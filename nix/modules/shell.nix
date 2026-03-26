@@ -127,7 +127,7 @@
       # │    bot-L      │    bot-R      │   33%
       # └───────────────┴───────────────┘
       #       50%             50%
-      tmux-agent = "tmux new-session \\; split-window -v -p 33 \\; select-pane -t 0 \\; split-window -h -p 33 \\; select-pane -t 2 \\; split-window -h \\; select-pane -t 0";
+      tmux-agent = "tmux new-session \\; split-window -v -p 33 \\; select-pane -t 0 \\; split-window -h -p 33 \\; select-pane -t 2 \\; split-window -h \\; select-pane -t 0 \\; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter";
     };
   };
 
