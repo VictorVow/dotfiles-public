@@ -231,9 +231,7 @@
       _npm_global_install "cline" "cline"                    # Cline LLM CLI
       _npm_global_install "@continuedev/cli" "continue"      # Continue Dev LLM CLI
       _npm_global_install "opencode-ai" "opencode"           # OpenCode agentic AI
-      _npm_global_install "codex" "codex"                    # OpenAI Codex agentic AI
       _npm_global_install "@githubnext/github-copilot-cli" "github-copilot-cli"  # Copilot CLI
-      _npm_global_install "gemini-cli" "gemini"              # Google Gemini CLI
 
       unset -f _npm_global_install
     fi

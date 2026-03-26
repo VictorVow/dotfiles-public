@@ -454,6 +454,7 @@ in
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
+  #   - programs.codex       (via enableMcpIntegration = true → ~/.codex/.mcp.json)
   #   - programs.vscode.profiles.default (via enableMcpIntegration = true → VSCode userMcp)
   #
   # Secret env vars (LOGSEQ_API_TOKEN, GITHUB_TOKEN) are intentionally NOT placed in
@@ -613,4 +614,22 @@ in
     };
 
   };
+
+  # ── Codex ──────────────────────────────────────────────────────────────────────
+
+  programs.codex = {
+    enable               = true;
+    package              = pkgs.codex;
+    enableMcpIntegration = true;  # merges programs.mcp.servers → ~/.codex/.mcp.json
+  };
+
+  # ── Gemini CLI ─────────────────────────────────────────────────────────────────
+  # settings intentionally omitted — the module writes settings.json as a read-only
+  # Nix store symlink, which blocks OAuth login (home-manager#8654).
+
+  programs.gemini-cli = {
+    enable  = true;
+    package = pkgs.gemini-cli;
+  };
+
 }

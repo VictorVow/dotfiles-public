@@ -153,6 +153,9 @@ These use Home Manager's `programs.*` modules to manage config files and integra
 | `htop` | Tree view, CPU display |
 | `nix-index` | `nix-locate` + command-not-found integration |
 | `syncthing` | User-level systemd service |
+| `claude-code` | Settings, hooks, MCP integration, agents, slash commands |
+| `codex` | Package pin, MCP integration |
+| `gemini-cli` | Package pin (settings omitted — HM#8654 auth bug) |
 
 ---
 
@@ -223,8 +226,6 @@ Managed by the activation script in `nix/modules/shell.nix`. Installed on first 
 | `cline` | `cline` | Cline LLM CLI |
 | `@continuedev/cli` | `continue` | Continue Dev LLM CLI |
 | `opencode-ai` | `opencode` | OpenCode agentic AI |
-| `codex` | `codex` | OpenAI Codex CLI |
 | `@githubnext/github-copilot-cli` | `github-copilot-cli` | Copilot CLI |
-| `gemini-cli` | `gemini` | Google Gemini CLI |
 
 To upgrade: `npm update -g --prefix ~/.npm-global`
