@@ -68,6 +68,24 @@ in
   # Git LFS — large file storage integration
   programs.git.lfs.enable = true;
 
+  # Auto-select USER2 identity for repos under ~/Documents/ESSENTIALS/installs/
+  # The trailing slash makes gitdir: match any repo inside the directory tree.
+  # See docs/git-identity-management.md for the full picture of identity management.
+  programs.git.includes = [
+    {
+      condition = "gitdir:~/Documents/ESSENTIALS/installs/";
+      path      = "~/.config/git/identity-USER2";
+    }
+  ];
+
+  # Identity snippet loaded by the includeIf above
+  xdg.configFile."git/identity-USER2".text = ''
+    [user]
+        name       = USER2
+        email      = 22418751+USER2@users.noreply.github.com
+        signingkey = GPGKEY2
+  '';
+
   # ── Terminal Multiplexers ─────────────────────────────────────────────────────
 
   programs.tmux = {
