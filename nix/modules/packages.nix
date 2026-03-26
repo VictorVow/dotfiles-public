@@ -10,7 +10,7 @@
 #   - System portals: xdg-desktop-portal-gnome
 #   - Ubuntu-only GUI tools: gdebi, synaptic
 #   - Third-party daemons: mullvad-vpn (via mullvad-vpn.sh), docker (via docker.sh)
-#   - Android Studio (via android-studio.sh; also available as androidStudioPackages.stable below)
+#   - Android Studio — now Nix-managed via androidStudioPackages.stable (android-studio.sh retained as fallback)
 #   - Flatpak (system-level integration)
 {
   home.packages = with pkgs; [
@@ -21,8 +21,8 @@
 
     # ── System Monitoring ─────────────────────────────────────────────────────
     procps   # Provides pgrep, ps, kill, etc.
-             # Needed by Lutris FHS sandbox — sandbox overlays /usr/bin with its
-             # own Nix store version, which lacks pgrep without this package
+             # Also included via extraPkgs in the Gaming section for Lutris's
+             # internal game bwrap sandbox (both are needed)
     btop     # Better top - rich terminal system monitor
     htop     # Interactive process viewer
     nvtopPackages.full
@@ -109,18 +109,22 @@
     # ── Gaming ────────────────────────────────────────────────────────────────
     # Open-source gaming platform (Wine/Proton/native games).
     #
-    # Wrapped with makeWrapper to prepend the AyatanaAppIndicator3 typelib path
-    # to GI_TYPELIB_PATH. The path is baked at build time into the lutris-unwrapped
-    # C binary wrapper via makeCWrapper, so it cannot be patched at runtime — the
-    # only fix is wrapping the outer bwrap script before it enters the sandbox.
-    # extraPkgs/extraLibraries put libayatana-appindicator into the FHS env so the
-    # .so is present at /usr/lib64/; the makeWrapper prefix ensures Python-gi finds
-    # the typelib when it searches GI_TYPELIB_PATH.
+    # extraPkgs puts libayatana-appindicator into Lutris's FHS rootfs so the
+    # .so is present at /usr/lib64/. However, the typelib is NOT automatically
+    # found by Python-gi there — the Lutris FHS env places it at /usr/lib64/
+    # whereas Python-gi searches /usr/lib/girepository-1.0/ by default.
+    # The wrapProgram prefix injects the Nix store path of the typelib into
+    # GI_TYPELIB_PATH on the outer bwrap script, before the sandbox starts;
+    # this env var persists into the bwrap namespace where Python runs.
+    # procps ensures pgrep is present in the FHS sandbox (Lutris's internal
+    # game bwrap overlays /usr/bin from the Nix profile; procps must be listed
+    # in extraPkgs so it is included in that overlay).
+    # See docs/buildFHSEnv.md for full context.
     # https://github.com/NixOS/nixpkgs/issues/503530
     (symlinkJoin {
       name = "lutris";
       paths = [ (lutris.override {
-        extraPkgs = pkgs: [ pkgs.libayatana-appindicator ];
+        extraPkgs      = pkgs: [ pkgs.libayatana-appindicator pkgs.procps ];
         extraLibraries = pkgs: [ pkgs.libayatana-appindicator ];
       }) ];
       buildInputs = [ makeWrapper ];
@@ -180,9 +184,12 @@
     kdePackages.kate          # KDE text editor with syntax highlighting and plugins
     kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
 
-    # Android Studio — uncomment to install via Nix instead of android-studio.sh.
-    # Note: ~3 GB download; may require setting STUDIO_JDK on non-NixOS.
-    # androidStudioPackages.stable
+    androidStudioPackages.stable
+    # Official Android IDE (~3 GB on first build). Uses buildFHSEnv internally
+    # to handle prebuilt SDK binaries with hardcoded interpreter paths.
+    # Replaces 3rd-party-packages/android-studio.sh (PPA).
+    # ANDROID_HOME is set in shell.nix; no additional config needed.
+    # See docs/buildFHSEnv.md for details.
 
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife

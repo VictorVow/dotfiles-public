@@ -73,16 +73,20 @@ To track installed Flatpaks in version control: `flatpak list --app --columns=ap
 
 ## Android Studio
 
-**Problem:** Android Studio is distributed via a PPA and requires system-level installation. The nixpkgs `androidStudioPackages.stable` exists but can be unreliable on non-NixOS systems (missing system libraries, SDK path issues).
+**Status: Resolved via Nix.**
 
-**Alternative:** Keep `3rd-party-packages/android-studio.sh` (current approach). If you want to try the Nix version:
+`androidStudioPackages.stable` in `packages.nix` provides Android Studio via Nix. The nixpkgs package wraps the IDE in `buildFHSEnv` to handle prebuilt SDK binaries that have hardcoded `/lib/ld-linux.so.2` interpreter paths — this works correctly on non-NixOS with `targets.genericLinux.enable = true`.
 
-```nix
-# In packages.nix:
-androidStudioPackages.stable   # or .beta, .canary
+`ANDROID_HOME` is set in `shell.nix` (`$HOME/Documents/Dev/Android/Sdk`). SDK Manager downloads still go there; existing SDK components from the PPA install continue to work.
+
+`3rd-party-packages/android-studio.sh` is retained as a fallback but skips the PPA install if the Nix binary is detected. To clean up the PPA install after confirming the Nix version works:
+
+```bash
+sudo apt remove android-studio
+sudo add-apt-repository --remove ppa:maarten-fonville/android-studio
 ```
 
-Set `ANDROID_HOME` (already in `shell.nix`) to match where Android Studio installs the SDK.
+See [`docs/buildFHSEnv.md`](buildFHSEnv.md).
 
 ---
 
@@ -130,7 +134,7 @@ the previous `nodejs_22` pin — node versions are now managed per-project by fn
 | Pyenv (multi-Python) | Not in Nix | Keep pyenv; or use `nix develop` per project |
 | grab-site venv | Not in Nix | Keep `~/gs-venv` as-is |
 | Console Ninja | Not in Nix | IDE-managed; PATH entry in `shell.nix` |
-| Android Studio | Not in Nix | Keep `android-studio.sh`; try `androidStudioPackages.stable` |
+| Android Studio | In Nix | `androidStudioPackages.stable` in `packages.nix` (uses `buildFHSEnv`) |
 | Docker daemon | Not in Nix | Keep `docker.sh` |
 | Mullvad VPN daemon | Not in Nix | Keep `mullvad-vpn.sh` |
 | Application data/caches | Not in Nix | Back up with Vorta/Borg |

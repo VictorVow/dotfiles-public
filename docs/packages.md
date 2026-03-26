@@ -121,10 +121,11 @@ These replace the old apt, Homebrew, pipx, and npm global package lists.
 | `zrok` | brew | Peer-to-peer tunnel |
 
 ### Android / Mobile
-| Package | Notes |
-|---------|-------|
-| `android-tools` | adb and fastboot |
-| `scrcpy` | Mirror/control Android devices |
+| Package | Replaces | Notes |
+|---------|----------|-------|
+| `android-tools` | — | adb and fastboot |
+| `scrcpy` | — | Mirror/control Android devices |
+| `androidStudioPackages.stable` | `android-studio.sh` (PPA) | Official Android IDE; uses `buildFHSEnv`; `ANDROID_HOME` from `shell.nix` |
 
 ### Utilities
 | Package | Replaces | Notes |
@@ -189,7 +190,7 @@ These tools ship their own apt repositories or require proprietary installers.
 |--------|----------|-------|
 | `docker.sh` | Docker CE | Official Docker apt repo |
 | `mullvad-vpn.sh` | Mullvad VPN | Official Mullvad apt repo |
-| `android-studio.sh` | Android Studio | PPA |
+| `android-studio.sh` | Android Studio | PPA (superseded by `androidStudioPackages.stable` in Nix; skips if Nix binary detected) |
 | `vscode.sh` | VS Code | Microsoft apt repo (superseded by `vscode` in Nix) |
 | `brew.sh` | Homebrew | Linux Homebrew (fills gaps until tools land in Nix) |
 | `nix.sh` | Nix | Determinate Systems installer (called by `bootstrap.sh`) |
