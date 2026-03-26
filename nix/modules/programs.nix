@@ -403,4 +403,14 @@ in
     enable = true;
     enableBashIntegration = true;
   };
+
+  # direnv auto-loads/unloads environments when entering/leaving directories with
+  # an .envrc file. nix-direnv caches flake devShell results in the Nix store so
+  # re-entering a project is instant instead of re-evaluating the flake each time.
+  # Usage: echo "use flake" > .envrc && direnv allow
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true;
+    nix-direnv.enable = true;
+  };
 }

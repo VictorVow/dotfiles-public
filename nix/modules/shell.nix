@@ -63,8 +63,10 @@
       export PATH="$PATH:$HOME/gs-venv/bin"
 
       # ── fnm (Fast Node Manager) ─────────────────────────────────────────────
-      # Initialises fnm and enables auto-switching on `cd` via .node-version/.nvmrc
-      eval "$(fnm env --use-on-cd --shell bash)"
+      # --use-on-cd: auto-switch Node version when entering a directory with .node-version/.nvmrc
+      # --resolve-engines=false: don't try to resolve engines.node from package.json — fnm can't
+      #   compare against the system node version and will error if no fnm-managed version matches
+      eval "$(fnm env --use-on-cd --resolve-engines=false --shell bash)"
 
       # ── dnvm (.NET version manager) ─────────────────────────────────────────
       # Manages .NET SDK versions independently of the system Nix dotnet-sdk.
