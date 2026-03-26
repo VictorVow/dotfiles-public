@@ -148,6 +148,21 @@
       tags: run_scripts
       no_log: true
 
+    # Install Solaar's udev rules so it can access Logitech hidraw devices.
+    # Solaar is managed by Nix (home.packages), but on non-NixOS the Nix store
+    # rules are never auto-installed to /etc/udev/rules.d/. This task resolves
+    # the current store path dynamically so it stays correct after Solaar updates.
+    - name: Install Solaar udev rules from Nix store
+      shell: |
+        SOLAAR_BIN=$(readlink -f $(su - boss -c 'which solaar'))
+        SOLAAR_PREFIX="${SOLAAR_BIN%/bin/solaar}"
+        cp "$SOLAAR_PREFIX/lib/udev/rules.d/42-logitech-unify-permissions.rules" \
+           /etc/udev/rules.d/42-logitech-unify-permissions.rules
+        udevadm control --reload-rules
+        udevadm trigger
+      become: yes
+      changed_when: false
+
     # NOTE: pipx, npm, and Homebrew package tasks have been removed.
     # Those packages are now managed by Nix Home Manager. See:
     #   nix/modules/packages.nix   — home.packages list

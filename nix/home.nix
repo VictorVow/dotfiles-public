@@ -39,4 +39,15 @@
   # Let Home Manager manage itself. This generates the home-manager CLI
   # and enables automatic profile updates.
   programs.home-manager.enable = true;
+
+  # Start Solaar (Logitech device manager) in the system tray on login.
+  # Uses KDE autostart (.desktop) instead of a systemd service so that
+  # hms doesn't restart it (and open a window) on every home-manager switch.
+  home.file.".config/autostart/solaar.desktop".text = ''
+    [Desktop Entry]
+    Name=Solaar
+    Exec=${pkgs.solaar}/bin/solaar --window=hide
+    Type=Application
+    X-KDE-autostart-after=panel
+  '';
 }
