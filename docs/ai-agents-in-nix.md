@@ -22,6 +22,8 @@ All three are installed from nixpkgs-unstable via Home Manager program modules (
 
 ## Claude: nixpkgs-unstable vs `llm-agents.nix`
 
+> **Decision:** Consider migrating to this once I get a RSS changelog of Claude setup so I can follow updates and be informed of new changes.
+
 [`llm-agents.nix`](https://github.com/numtide/llm-agents.nix) is a Nix flake by numtide (865 stars, ~6 000 commits, daily updates) that packages 70+ AI agents — including `claude-code` and 9 Claude Code ecosystem companion tools — as proper Nix derivations with a pre-built binary cache. It is **not mutually exclusive** with the `programs.claude-code` HM module: you can keep all existing module configuration (settings, hooks, MCP, agents) and simply override the package — `package = inputs.llm-agents-nix.packages.${system}.claude-code` — to get llm-agents.nix's daily build instead of nixpkgs-unstable's.
 
 | For `llm-agents.nix` | For `nixpkgs-unstable` (current) |
