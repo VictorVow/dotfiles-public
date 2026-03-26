@@ -122,6 +122,21 @@ in
     Mounts/
   '';
 
+  # ── Claude Code hook scripts ───────────────────────────────────────────────────
+  # Managed here so they're version-controlled alongside the rest of the nix config.
+  # Using home.file with executable = true (NOT programs.claude-code.hooks, which
+  # writes non-executable read-only Nix-store symlinks that cannot be chmod'd).
+
+  home.file.".claude/hooks/notify-waiting.sh" = {
+    source     = ../dotfiles/claude-hooks/notify-waiting.sh;
+    executable = true;
+  };
+
+  home.file.".claude/hooks/notify-reset-dedupe.sh" = {
+    source     = ../dotfiles/claude-hooks/notify-reset-dedupe.sh;
+    executable = true;
+  };
+
   # ── Text Editors ──────────────────────────────────────────────────────────────
 
   programs.neovim = {
@@ -231,6 +246,10 @@ in
     mutableExtensionsDir = true;
 
     profiles.default = {
+      # Share MCP servers from programs.mcp.servers with VS Code clients
+      # (Continue, Claude Code extension, etc.). Written to VSCode's userMcp config.
+      enableMcpIntegration = true;
+
       # Extensions available in pkgs.vscode-extensions (nixpkgs subset).
       # Extensions NOT in nixpkgs are managed by VS Code's built-in sync / marketplace.
       extensions = with pkgs.vscode-extensions; [
@@ -412,5 +431,170 @@ in
     enable = true;
     enableBashIntegration = true;
     nix-direnv.enable = true;
+  };
+
+  # ── MCP Servers — shared registry ─────────────────────────────────────────────
+  # Outputs ~/.config/mcp/mcp.json, consumed by:
+  #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
+  #   - programs.vscode.profiles.default (via enableMcpIntegration = true → VSCode userMcp)
+  #
+  # Secret env vars (LOGSEQ_API_TOKEN, GITHUB_TOKEN) are intentionally NOT placed in
+  # env blocks here — the env block overrides inherited shell values, so an empty string
+  # would shadow the real token set in home.sessionVariables. MCP server processes
+  # inherit the full session environment automatically.
+
+  programs.mcp = {
+    enable = true;
+    servers = {
+
+      # LogSeq knowledge base — requires LogSeq running with HTTP API enabled (port 12315).
+      # One-time setup: LogSeq → Settings → Features → HTTP APIs → enable → generate token
+      # → set LOGSEQ_API_TOKEN in home.sessionVariables above → hms + restart shell.
+      logseq = {
+        command = "uv";
+        args    = [ "run" "--with" "mcp-logseq" "mcp-logseq" ];
+        env     = { LOGSEQ_API_URL = "http://localhost:12315"; };
+      };
+
+      # Local file system — exposes ~/Documents for navigation and file operations.
+      filesystem = {
+        command = "npx";
+        args    = [ "-y" "@modelcontextprotocol/server-filesystem"
+                    "/home/boss/Documents" ];
+      };
+
+      # GitHub API — PR/issue operations, release queries, cross-repo search.
+      # Needs GITHUB_TOKEN (classic PAT, repo + read:org scopes) in sessionVariables.
+      github = {
+        command = "npx";
+        args    = [ "-y" "@modelcontextprotocol/server-github" ];
+      };
+
+      # Context7 — resolves up-to-date library docs at query time (Rust/Python/TS/Java/etc.)
+      # HTTP transport; no credentials required.
+      context7 = {
+        url = "https://mcp.context7.com/mcp";
+      };
+
+      # Sequential thinking — structured step-by-step reasoning for architecture/analysis tasks.
+      sequential-thinking = {
+        command = "npx";
+        args    = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
+      };
+
+    };
+  };
+
+  # ── Claude Code ────────────────────────────────────────────────────────────────
+
+  programs.claude-code = {
+    enable               = true;
+    package              = pkgs.claude-code;  # required when enableMcpIntegration = true
+    enableMcpIntegration = true;              # merges programs.mcp.servers → ~/.claude/.mcp.json
+
+    # ── Settings — migrates ~/.claude/settings.json ──────────────────────────────
+    # NOTE: settings.local.json (per-machine permissions allow-list) is intentionally
+    # NOT managed here — it is machine-local and should stay outside the Nix store.
+    settings = {
+      includeCoAuthoredBy = false;
+      effortLevel         = "medium";
+
+      hooks = {
+        Stop = [{
+          hooks = [{
+            type    = "command";
+            command = "bash ~/.claude/hooks/notify-waiting.sh stop";
+          }];
+        }];
+        Notification = [{
+          hooks = [{
+            type    = "command";
+            command = "bash ~/.claude/hooks/notify-waiting.sh";
+          }];
+        }];
+        UserPromptSubmit = [{
+          hooks = [{
+            type    = "command";
+            command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";
+          }];
+        }];
+      };
+    };
+
+    # ── Agents — creates ~/.claude/agents/<key>.md ────────────────────────────────
+
+    agents = {
+
+      "nix-helper" = ''
+        ---
+        name: nix-helper
+        description: Assist with Home Manager and Nix flake configuration changes.
+          Use when editing nix/modules/*.nix, flake.nix, or debugging eval errors.
+        ---
+        You are a Nix/Home Manager expert. When making changes:
+        - Read existing module files before proposing edits
+        - Prefer extending existing modules over creating new ones
+        - Use lib helpers; avoid string-based workarounds
+        - Always remind the user to run `hms` after any change
+        - Know the module structure: programs.nix, packages.nix, shell.nix, distrobox.nix
+      '';
+
+      "container-helper" = ''
+        ---
+        name: container-helper
+        description: Distrobox container assistant. Use when working with or troubleshooting
+          the dev or media containers, exporting apps, or installing packages inside containers.
+        ---
+        This system uses two distrobox containers:
+        - dev (ubuntu:24.04): build tools, C/C++, cmake, clang, Python, Node, npm, git
+        - media (fedora:latest): ffmpeg, OBS, kdenlive, HandBrake, mpv, yt-dlp (RPMFusion codecs)
+
+        Guidelines:
+        - Prefer exporting desktop entries or binaries to the host over installing directly on the host
+        - Use `dbe dev` or `dbe media` to enter containers
+        - Media container exports GUI apps to the host desktop automatically
+        - For GUI apps not in either container, suggest a new distrobox.nix entry
+      '';
+
+    };
+
+    # ── Commands — creates ~/.claude/commands/<key>.md ────────────────────────────
+
+    commands = {
+
+      "nix-switch" = ''
+        ---
+        description: Run home-manager switch and show any new news items.
+        ---
+        1. Run `hms` (alias for home-manager switch).
+        2. If it succeeded, run `hmn` (home-manager news) and surface any [unread] entries
+           dated after the previous switch.
+        3. If it failed, show the full error and suggest a fix.
+      '';
+
+      "git-who" = ''
+        ---
+        description: Show the active git identity for this repo and offer to switch.
+        ---
+        Run `git config user.name` and `git config user.email`.
+        Known identities:
+        - Identity 1 (default): Victor239 <12621257+Victor239@users.noreply.github.com>
+        - Identity 2 (personal): USER2   <22418751+USER2@users.noreply.github.com>
+        If neither matches, note it. Offer `git su 1` or `git su 2` to switch.
+      '';
+
+      "dbox-status" = ''
+        ---
+        description: Show status of distrobox containers and their key packages.
+        ---
+        1. Run `dbl` to list containers and their running state.
+        2. For each container, state its purpose and key packages:
+           - dev: build tools (gcc, clang, cmake, ninja, gdb, valgrind), Python, Node
+           - media: ffmpeg, OBS, kdenlive, HandBrake, mpv, yt-dlp
+        3. Suggest next steps based on current context.
+      '';
+
+    };
+
   };
 }

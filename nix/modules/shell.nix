@@ -160,6 +160,12 @@
 
     # Android SDK root — SDK tool paths are added to PATH in initExtra above
     ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
+
+    # MCP server secrets — inherited by MCP server subprocesses at runtime.
+    # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
+    # shell-inherited values and an empty string would shadow the real value.
+    LOGSEQ_API_TOKEN = "";   # ← paste your LogSeq HTTP API token (Settings → HTTP APIs)
+    GITHUB_TOKEN     = "REDACTED_TOKEN";   # ← paste a GitHub PAT with repo + read:org scopes (github.com → Settings → Developer settings → PATs)
   };
 
   # ── Activation: Ensure Flathub user remote is configured ─────────────────────
