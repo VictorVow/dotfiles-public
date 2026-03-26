@@ -40,8 +40,7 @@
           # ── Distrobox / container infrastructure ──────────────────────────
           # Note: distrobox, crun, passt, rootlesskit are in Nix user profile.
           # These are system-level optional dependencies / workarounds only.
-          # podman is the OCI backend; install at system level for proper cgroup support.
-          # - podman       # Uncomment if distrobox rootless mode has issues
+          # podman is now managed by Nix (nix#podman). Held in apt to prevent reinstalls.
 
           # ── KDE Essentials ───────────────────────────────────────────────
           # These are marked manual (apt-mark manual) to prevent autoremove
@@ -126,6 +125,9 @@
         name:
           # ── System / CLI ──────────────────────────────────────────────────────
           - procps   # pgrep, ps, kill — superseded by nix#procps
+
+          # ── Container / Virtualisation ────────────────────────────────────────
+          - podman   # OCI backend — superseded by nix#podman (5.8.1 vs apt 5.4.2)
 
           # ── Development: Tools & Editors ──────────────────────────────────────
           - kate     # KDE text editor — superseded by nix#kdePackages.kate

@@ -35,6 +35,7 @@
 
     # ── Container / Virtualisation ────────────────────────────────────────────
     distrobox    # Create and manage OCI containers integrated with the host
+    podman       # OCI container backend required by distrobox
     crun         # OCI container runtime; alternative to runc, needed for rootless containers
     passt        # Networking for user-mode containers (distrobox/podman dependency)
     rootlesskit  # User namespace helper for rootless containers
@@ -107,6 +108,7 @@
 
     # ── Gaming ────────────────────────────────────────────────────────────────
     # Open-source gaming platform (Wine/Proton/native games).
+    #
     # Wrapped with makeWrapper to prepend the AyatanaAppIndicator3 typelib path
     # to GI_TYPELIB_PATH. The path is baked at build time into the lutris-unwrapped
     # C binary wrapper via makeCWrapper, so it cannot be patched at runtime — the
@@ -114,6 +116,7 @@
     # extraPkgs/extraLibraries put libayatana-appindicator into the FHS env so the
     # .so is present at /usr/lib64/; the makeWrapper prefix ensures Python-gi finds
     # the typelib when it searches GI_TYPELIB_PATH.
+    # https://github.com/NixOS/nixpkgs/issues/503530
     (symlinkJoin {
       name = "lutris";
       paths = [ (lutris.override {
