@@ -15,12 +15,12 @@ This file is maintained by `update.sh` and updated during system updates.
 News section and prompts before overwriting (Y/n, default Y). Skipped in
 non-interactive (cron) sessions.
 
-Last updated: 2026-03-25 12:40:28
+Last updated: 2026-03-26 11:14:08
 
 ## News
 
 warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted changes
-* 2026-03-24 15:51:30 [unread]
+* 2026-03-24 15:51:30 [read]
 
   A new module is available: `qt.kvantum`.
   
@@ -33,7 +33,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-03-20 04:51:15 [unread]
+* 2026-03-20 04:51:15 [read]
 
   A new module is available: 'programs.nom'.
   
@@ -43,21 +43,21 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-03-15 20:42:27 [unread]
+* 2026-03-15 20:42:27 [read]
 
   programs.smug.projects.<name>.session is a new optional setting that
   can be used to specify a different session name from the project name.
   
 
 
-* 2026-03-12 13:04:00 [unread]
+* 2026-03-12 13:04:00 [read]
 
   The ruby provider is now disabled by default since the overwhelming majority of users do not use it.
   Set `programs.neovim.withRuby = true;` to restore the previous behavior.
   
 
 
-* 2026-02-24 18:17:29 [unread]
+* 2026-02-24 18:17:29 [read]
 
   The options 'xsession.windowManager.i3.config.gaps.smartGaps' and
   'wayland.windowManager.sway.config.gaps.smartGaps' now expects either "on",
@@ -65,7 +65,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-02-23 05:21:28 [unread]
+* 2026-02-23 05:21:28 [read]
 
   A new module is available: 'programs.w3m'.
   
@@ -73,7 +73,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-02-18 17:20:43 [unread]
+* 2026-02-18 17:20:43 [read]
 
   A new module is available: 'programs.rizin'.
   
@@ -84,7 +84,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-02-17 14:42:25 [unread]
+* 2026-02-17 14:42:25 [read]
 
   
   A new module is available: 'programs.mistral-vibe'.
@@ -93,7 +93,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-02-13 11:21:10 [unread]
+* 2026-02-13 11:21:10 [read]
 
   
   A new module is available: 'programs.tirith'.
@@ -103,14 +103,14 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-02-12 05:16:46 [unread]
+* 2026-02-12 05:16:46 [read]
 
   The `services.flameshot` module now supports Darwin by generating a
   launchd agent in addition to the existing Linux systemd service.
   
 
 
-* 2026-02-08 13:59:14 [unread]
+* 2026-02-08 13:59:14 [read]
 
   A new module is available: `programs.lazyworktree`
   
@@ -119,7 +119,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-27 20:02:41 [unread]
+* 2026-01-27 20:02:41 [read]
 
   A new module is available: 'programs.prismlauncher'.
   
@@ -128,7 +128,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-25 18:00:28 [unread]
+* 2026-01-25 18:00:28 [read]
 
   The neovim module now exposes programs.neovim.extraLuaPackages via init.lua instead of wrapper arguments.
   This makes for a better out of the box experience, closer to what users can expect on other distributions, i.e., you
@@ -147,7 +147,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-19 05:36:20 [unread]
+* 2026-01-19 05:36:20 [read]
 
   Chrome now has a `plasmaSupport` flag.
   
@@ -165,7 +165,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-19 03:12:38 [unread]
+* 2026-01-19 03:12:38 [read]
 
   A new module `programs.pyradio` is available.
   
@@ -173,20 +173,20 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-19 01:17:02 [unread]
+* 2026-01-19 01:17:02 [read]
 
   The neovim module now symlinks its plugins into xdg.dataFile."nvim/site/pack/hm" ( ~/.local/share/nvim) instead of modifying the runtimepath via wrapper arguments.
   
 
 
-* 2026-01-18 14:07:27 [unread]
+* 2026-01-18 14:07:27 [read]
 
   A new 'programs.vscode.argvSettings' option is available to configure VS
   Code this creates the `argv.json` file.
   
 
 
-* 2026-01-14 17:05:44 [unread]
+* 2026-01-14 17:05:44 [read]
 
   A new module is available: `programs.aphorme`
   
@@ -194,7 +194,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-14 16:52:53 [unread]
+* 2026-01-14 16:52:53 [read]
 
   A new module is available: `programs.aperture`
   
@@ -203,7 +203,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-14 14:54:50 [unread]
+* 2026-01-14 14:54:50 [read]
 
   There is a new option, 'home-manager.startAsUserService', which
   causes home-manager to set up each user's personal environment on
@@ -214,14 +214,14 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-11 16:02:12 [unread]
+* 2026-01-11 16:02:12 [read]
 
   The starship module has a new option, programs.starship.presets, which
   allows for merging user configuration with Starship's bundled presets.
   
 
 
-* 2026-01-11 04:00:11 [unread]
+* 2026-01-11 04:00:11 [read]
 
   A new option is available: `systemd.user.packages`.
   
@@ -232,7 +232,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-10 18:52:15 [unread]
+* 2026-01-10 18:52:15 [read]
 
   A new module is available: `services.proton-pass-agent`
   
@@ -250,7 +250,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2026-01-05 11:57:57 [unread]
+* 2026-01-05 11:57:57 [read]
 
   A new module is available: 'programs.workstyle'.
   
@@ -259,7 +259,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-12-06 10:05:43 [unread]
+* 2025-12-06 10:05:43 [read]
 
   A new module is available: `programs.ty`
   
@@ -268,7 +268,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-12-06 10:03:01 [unread]
+* 2025-12-06 10:03:01 [read]
 
   A new module is available: `programs.npm`
   
@@ -277,7 +277,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-12-05 01:50:03 [unread]
+* 2025-12-05 01:50:03 [read]
 
   A new module is available: `programs.hyprlauncher`
   
@@ -286,7 +286,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-12-04 19:34:38 [unread]
+* 2025-12-04 19:34:38 [read]
 
   A new module is available: `programs.screen`
   
@@ -297,7 +297,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-12-03 13:14:53 [unread]
+* 2025-12-03 13:14:53 [read]
 
   A new module is available: `programs.calibre`
   
@@ -308,13 +308,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-29 23:04:38 [unread]
+* 2025-11-29 23:04:38 [read]
 
   A new module is available: 'programs.parallel'.
   
 
 
-* 2025-11-26 10:55:28 [unread]
+* 2025-11-26 10:55:28 [read]
 
   The option 'gtk.theme' does not apply to GTK 4 automatically anymore for new
   installations (with `home.stateVersion` >= "26.05"). Using a custom theme is
@@ -324,7 +324,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-26 05:33:49 [unread]
+* 2025-11-26 05:33:49 [read]
 
   A new module is available: 'programs.cargo'.
   
@@ -332,7 +332,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-25 02:56:51 [unread]
+* 2025-11-25 02:56:51 [read]
 
   A new option `programs.claude-code.skills` is now available.
   
@@ -340,7 +340,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-15 08:54:20 [unread]
+* 2025-11-15 08:54:20 [read]
 
   A new module is available: 'programs.bluetuith'.
   
@@ -350,7 +350,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-08 20:50:07 [unread]
+* 2025-11-08 20:50:07 [read]
 
   A new module is available: 'programs.retroarch'.
   
@@ -360,7 +360,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-06 11:50:53 [unread]
+* 2025-11-06 11:50:53 [read]
 
   A new module is available: 'services.tomat'.
   
@@ -368,7 +368,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-04 15:44:03 [unread]
+* 2025-11-04 15:44:03 [read]
 
   The 'services.podman' module now supports Darwin (macOS) with declarative
   machine management.
@@ -395,7 +395,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-04 13:00:00 [unread]
+* 2025-11-04 13:00:00 [read]
 
   A new module is available: 'programs.opkssh'.
   
@@ -405,7 +405,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-04 04:40:09 [unread]
+* 2025-11-04 04:40:09 [read]
 
   A new program is available: 'programs.discord'.
   
@@ -420,7 +420,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-04 02:33:15 [unread]
+* 2025-11-04 02:33:15 [read]
 
   A new program is available: 'programs.vicinae'.
   
@@ -438,7 +438,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-11-03 10:18:15 [unread]
+* 2025-11-03 10:18:15 [read]
 
   A new module 'programs.mcp' is now available for managing Model
   Context Protocol (MCP) server configurations.
@@ -462,7 +462,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-31 12:00:00 [unread]
+* 2025-10-31 12:00:00 [read]
 
   services.local-ai: new module
   
@@ -470,7 +470,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-30 17:25:46 [unread]
+* 2025-10-30 17:25:46 [read]
 
   A new option 'backupCommand' is now available for Home Manager activation.
   
@@ -486,7 +486,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-26 21:07:01 [unread]
+* 2025-10-26 21:07:01 [read]
 
   A new module is available: `programs.zapzap`
   
@@ -496,7 +496,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-26 07:36:05 [unread]
+* 2025-10-26 07:36:05 [read]
 
   A new module is available: `programs.kraftkit`.
   
@@ -505,7 +505,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-26 07:19:48 [unread]
+* 2025-10-26 07:19:48 [read]
 
   A new module is available: `targets.genericLinux.gpu`
   
@@ -515,7 +515,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-25 14:45:39 [unread]
+* 2025-10-25 14:45:39 [read]
 
   The home-manager auto-upgrade service now supports updating Nix flakes.
   
@@ -526,7 +526,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-17 00:46:07 [unread]
+* 2025-10-17 00:46:07 [read]
 
   A new module is available: 'services.wl-clip-persist'.
   
@@ -537,7 +537,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-14 23:44:58 [unread]
+* 2025-10-14 23:44:58 [read]
 
   A new module is available: `services.colima`
   
@@ -545,7 +545,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-11 20:56:35 [unread]
+* 2025-10-11 20:56:35 [read]
 
   A new module is available: `programs.anvil-editor`
   
@@ -556,14 +556,14 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-11 14:06:00 [unread]
+* 2025-10-11 14:06:00 [read]
 
   A new service is available: 'services.autotiling'.
   autotiling is a script for Sway and i3 to automatically switch the horizontal / vertical window split orientation.
   
 
 
-* 2025-10-11 00:06:01 [unread]
+* 2025-10-11 00:06:01 [read]
 
   A new option is available: `home-manager.minimal`
   
@@ -584,7 +584,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-10 18:56:49 [unread]
+* 2025-10-10 18:56:49 [read]
 
   A new module is available: `programs.anup`
   
@@ -592,7 +592,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-10 18:24:32 [unread]
+* 2025-10-10 18:24:32 [read]
 
   A new module is available: `programs.anime-downloader`
   
@@ -600,7 +600,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-09 19:34:56 [unread]
+* 2025-10-09 19:34:56 [read]
 
   A new module is available: `programs.andcli`
   
@@ -610,7 +610,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-09 19:14:29 [unread]
+* 2025-10-09 19:14:29 [read]
 
   A new module is available: `programs.amp`
   
@@ -621,7 +621,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-07 12:39:32 [unread]
+* 2025-10-07 12:39:32 [read]
 
   A new module is available: `programs.amoco`
   
@@ -629,7 +629,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-06 23:28:22 [unread]
+* 2025-10-06 23:28:22 [read]
 
   A new module is available: `programs.amfora`
   
@@ -639,7 +639,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-05 18:18:28 [unread]
+* 2025-10-05 18:18:28 [read]
 
   A new module is available: `programs.amber`
   
@@ -648,7 +648,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-05 17:55:44 [unread]
+* 2025-10-05 17:55:44 [read]
 
   A new module is available: `programs.am2rlauncher`
   
@@ -658,7 +658,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-03 02:36:31 [unread]
+* 2025-10-03 02:36:31 [read]
 
   A new module is available: `programs.asciinema`
   
@@ -671,7 +671,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-10-02 15:54:47 [unread]
+* 2025-10-02 15:54:47 [read]
 
   A new module is available: `programs.alistral`
   
@@ -679,7 +679,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-29 19:23:12 [unread]
+* 2025-09-29 19:23:12 [read]
 
   A new module is available: `programs.aliae`
   
@@ -687,7 +687,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-29 17:01:34 [unread]
+* 2025-09-29 17:01:34 [read]
 
   A new module is available: `programs.algia`
   
@@ -695,7 +695,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-28 22:34:55 [unread]
+* 2025-09-28 22:34:55 [read]
 
   A new module is available: `programs.intelli-shell`
   
@@ -705,7 +705,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-28 06:57:30 [unread]
+* 2025-09-28 06:57:30 [read]
 
   A new module is available: 'programs.radio-active'
   
@@ -716,7 +716,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-26 14:46:57 [unread]
+* 2025-09-26 14:46:57 [read]
 
   A new module is available: `programs.airlift`
   
@@ -726,7 +726,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-26 14:20:32 [unread]
+* 2025-09-26 14:20:32 [read]
 
   A new module is available: `programs.aider-chat`
   
@@ -737,7 +737,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-24 19:33:28 [unread]
+* 2025-09-24 19:33:28 [read]
 
   A new module is available: `programs.aiac`
   
@@ -747,7 +747,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-23 13:42:39 [unread]
+* 2025-09-23 13:42:39 [read]
 
   A new module is available: `programs.ahoviewer`
   
@@ -755,7 +755,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-20 18:04:36 [unread]
+* 2025-09-20 18:04:36 [read]
 
   A new module is available: `programs.fabric-ai`
   
@@ -765,7 +765,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-20 12:29:51 [unread]
+* 2025-09-20 12:29:51 [read]
 
   A new module is available: `programs.animdl`
   
@@ -774,7 +774,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-19 14:24:17 [unread]
+* 2025-09-19 14:24:17 [read]
 
   A new module is available: `programs.wleave`
   
@@ -782,14 +782,14 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-18 23:12:11 [unread]
+* 2025-09-18 23:12:11 [read]
 
   Nix remote builders can be declared by setting `nix.distributedBuilds = true`
   and populating `nix.buildMachines`.
   
 
 
-* 2025-09-18 17:05:15 [unread]
+* 2025-09-18 17:05:15 [read]
 
   A new module is available: `programs.acd-cli`
   
@@ -799,7 +799,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-18 16:25:16 [unread]
+* 2025-09-18 16:25:16 [read]
 
   A new module is available: `programs.abaddon`
   
@@ -807,7 +807,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-18 14:46:18 [unread]
+* 2025-09-18 14:46:18 [read]
 
   A new module is available: `programs.retext`
   
@@ -817,7 +817,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-18 00:13:27 [unread]
+* 2025-09-18 00:13:27 [read]
 
   A new module is available: `programs.formiko`
   
@@ -827,13 +827,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-17 05:03:26 [unread]
+* 2025-09-17 05:03:26 [read]
 
   A new service is available: 'services.tailscale-systray'.
   
 
 
-* 2025-09-15 22:14:27 [unread]
+* 2025-09-15 22:14:27 [read]
 
   A new module is available: `programs.nvchecker`.
   
@@ -841,7 +841,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-13 16:36:15 [unread]
+* 2025-09-13 16:36:15 [read]
 
   A new module is available: `programs.cudatext`
   
@@ -853,7 +853,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-12 15:02:45 [unread]
+* 2025-09-12 15:02:45 [read]
 
   A new module is available: 'programs.jjui'
   
@@ -861,7 +861,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-08 18:49:30 [unread]
+* 2025-09-08 18:49:30 [read]
 
   A new module is available: 'programs.radicle'.
   A new service is available: 'services.radicle.node'.
@@ -871,7 +871,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-06 17:04:11 [unread]
+* 2025-09-06 17:04:11 [read]
 
   A new module is available: 'programs.pianobar'.
   
@@ -881,7 +881,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-03 21:44:34 [unread]
+* 2025-09-03 21:44:34 [read]
 
   A new module is available: `programs.vivid`
   
@@ -891,7 +891,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-09-02 13:29:23 [unread]
+* 2025-09-02 13:29:23 [read]
 
   A new module is available: `programs.swappy`
   
@@ -902,7 +902,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-30 16:07:19 [unread]
+* 2025-08-30 16:07:19 [read]
 
   A new module is available: 'services.shpool'.
   
@@ -912,7 +912,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-18 17:37:24 [unread]
+* 2025-08-18 17:37:24 [read]
 
   A new module is available: 'programs.satty'
   
@@ -922,7 +922,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-16 01:35:44 [unread]
+* 2025-08-16 01:35:44 [read]
 
   A new module is available: 'programs.hyprshot'
   
@@ -932,7 +932,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-15 20:51:02 [unread]
+* 2025-08-15 20:51:02 [read]
 
   A new module is available: 'programs.claude-code'.
   
@@ -948,7 +948,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-13 21:34:57 [unread]
+* 2025-08-13 21:34:57 [read]
 
   A new module is available: 'services.protonmail-bridge'.
   
@@ -959,7 +959,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-11 04:23:58 [unread]
+* 2025-08-11 04:23:58 [read]
 
   A new service is available: 'services.walker'.
   
@@ -968,7 +968,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-10 16:03:30 [unread]
+* 2025-08-10 16:03:30 [read]
 
   A new module is available: 'programs.jrnl'.
   
@@ -978,7 +978,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-09 22:11:00 [unread]
+* 2025-08-09 22:11:00 [read]
 
   A new service is available: 'services.pizauth'.
   
@@ -988,7 +988,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-08 00:39:04 [unread]
+* 2025-08-08 00:39:04 [read]
 
   A new module is available: 'programs.sheldon'.
   
@@ -998,7 +998,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-07 13:39:36 [unread]
+* 2025-08-07 13:39:36 [read]
 
   A new module is available: 'programs.mullvad-vpn'.
   
@@ -1008,7 +1008,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-06 04:18:50 [unread]
+* 2025-08-06 04:18:50 [read]
 
   A new service is available: 'services.rescrobbled'.
   
@@ -1018,7 +1018,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-06 00:14:30 [unread]
+* 2025-08-06 00:14:30 [read]
 
   A new module is available: 'programs.sherlock'.
   
@@ -1029,7 +1029,18 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-05 19:13:33 [unread]
+* 2025-08-05 19:17:36 [read]
+
+  The 'fontconfig' module now supports font rendering configuration.
+  
+  New options have been added to control font appearance:
+  - 'fontconfig.antialiasing' - Enable/disable font antialiasing
+  - 'fontconfig.hinting' - Set hinting mode (none, slight, medium, full)
+  - 'fontconfig.subpixelRendering' - Configure sub-pixel rendering (none, rgb, bgr, etc.)
+  
+
+
+* 2025-08-05 19:13:33 [read]
 
   A new module is available: 'programs.grep'.
   
@@ -1038,7 +1049,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-05 19:13:23 [unread]
+* 2025-08-05 19:13:23 [read]
 
   A new module is available: 'programs.gcc'.
   
@@ -1047,7 +1058,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-05 19:13:10 [unread]
+* 2025-08-05 19:13:10 [read]
 
   A new module is available: 'programs.nix-search-tv'.
   
@@ -1057,7 +1068,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-08-01 14:53:46 [unread]
+* 2025-08-01 14:53:46 [read]
 
   The 'programs.tmux' module has improved prefix key configuration.
   
@@ -1067,7 +1078,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-29 17:20:22 [unread]
+* 2025-07-29 17:20:22 [read]
 
   Package options have been added to 34 modules across Home Manager.
   
@@ -1078,7 +1089,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-25 17:54:38 [unread]
+* 2025-07-25 17:54:38 [read]
 
   A new module is available: 'xdg.terminal-exec'.
   
@@ -1087,7 +1098,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-23 18:13:14 [unread]
+* 2025-07-23 18:13:14 [read]
 
   A new module is available: 'programs.yofi'.
   
@@ -1097,7 +1108,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-23 15:42:37 [unread]
+* 2025-07-23 15:42:37 [read]
 
   A new module is available: 'programs.yarn'.
   
@@ -1107,7 +1118,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-18 00:31:15 [unread]
+* 2025-07-18 00:31:15 [read]
 
   A new service is available: 'services.ssh-tpm-agent'.
   
@@ -1116,7 +1127,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-17 19:21:31 [unread]
+* 2025-07-17 19:21:31 [read]
 
   A new module is available: 'programs.radio-cli'.
   
@@ -1126,7 +1137,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-13 22:51:03 [unread]
+* 2025-07-13 22:51:03 [read]
 
   A new module is available: 'programs.gurk-rs'.
   
@@ -1136,7 +1147,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-10 20:36:53 [unread]
+* 2025-07-10 20:36:53 [read]
 
   A new module is available: 'programs.docker-cli'.
   
@@ -1146,7 +1157,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-10 19:23:15 [unread]
+* 2025-07-10 19:23:15 [read]
 
   A new service is available: 'services.hyprshell'.
   
@@ -1156,7 +1167,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-08 15:56:50 [unread]
+* 2025-07-08 15:56:50 [read]
 
   A new module is available: 'programs.firefoxpwa'.
   
@@ -1166,7 +1177,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-08 14:52:03 [unread]
+* 2025-07-08 14:52:03 [read]
 
   A new module is available: 'programs.twitch-tui'.
   
@@ -1176,7 +1187,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-07-08 14:51:45 [unread]
+* 2025-07-08 14:51:45 [read]
 
   A new module is available: 'programs.tray-tui'.
   
@@ -1186,13 +1197,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-24 03:44:23 [unread]
+* 2025-06-24 03:44:23 [read]
 
   A new module is available: 'programs.quickshell'.
   
 
 
-* 2025-06-15 02:49:02 [unread]
+* 2025-06-15 02:49:02 [read]
 
   A new module is available: 'programs.anki'.
   
@@ -1200,7 +1211,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-13 16:14:02 [unread]
+* 2025-06-13 16:14:02 [read]
 
   A new module is available: 'programs.kubeswitch'.
   
@@ -1209,13 +1220,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-12 17:07:18 [unread]
+* 2025-06-12 17:07:18 [read]
 
   A new module is available: 'programs.ashell'.
   
 
 
-* 2025-06-10 03:33:16 [unread]
+* 2025-06-10 03:33:16 [read]
 
   A new module is available: 'programs.codex'.
   
@@ -1225,7 +1236,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-09 15:12:11 [unread]
+* 2025-06-09 15:12:11 [read]
 
   A new module is available: 'programs.niriswitcher'.
   
@@ -1234,7 +1245,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-09 14:25:11 [unread]
+* 2025-06-09 14:25:11 [read]
 
   A new module is available: 'programs.mc'.
   
@@ -1244,7 +1255,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-08 16:27:00 [unread]
+* 2025-06-08 16:27:00 [read]
 
   A new module is available: 'programs.nyxt'.
   
@@ -1254,7 +1265,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-08 04:51:28 [unread]
+* 2025-06-08 04:51:28 [read]
 
   A new module is available: 'programs.lazysql'.
   
@@ -1264,7 +1275,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-06-04 18:35:39 [unread]
+* 2025-06-04 18:35:39 [read]
 
   A new module is available: 'programs.aichat'.
   
@@ -1274,13 +1285,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-29 18:33:51 [unread]
+* 2025-05-29 18:33:51 [read]
 
   A new module is available: 'programs.hwatch'.
   
 
 
-* 2025-05-29 03:30:10 [unread]
+* 2025-05-29 03:30:10 [read]
 
   A new module is available: 'programs.meli'.
   
@@ -1290,7 +1301,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-24 23:55:23 [unread]
+* 2025-05-24 23:55:23 [read]
 
   A new module is available: 'programs.obsidian'.
   
@@ -1300,7 +1311,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-24 18:18:40 [unread]
+* 2025-05-24 18:18:40 [read]
 
   A new module is available: `services.wayvnc`
   
@@ -1308,7 +1319,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-16 20:29:26 [unread]
+* 2025-05-16 20:29:26 [read]
 
   A new module is available: 'programs.ptyxis'.
   
@@ -1318,7 +1329,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-15 21:37:58 [unread]
+* 2025-05-15 21:37:58 [read]
 
   A new module is available: `programs.pgcli`
   
@@ -1326,7 +1337,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-12 22:21:57 [unread]
+* 2025-05-12 22:21:57 [read]
 
   A new module is available: `programs.foliate`
   
@@ -1334,7 +1345,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-11 03:13:09 [unread]
+* 2025-05-11 03:13:09 [read]
 
   A new module is available: 'programs.halloy'.
   
@@ -1344,13 +1355,13 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-11 01:08:48 [unread]
+* 2025-05-11 01:08:48 [read]
 
   A new module is available: 'programs.numbat'.
   
 
 
-* 2025-05-09 03:13:20 [unread]
+* 2025-05-09 03:13:20 [read]
 
   A new module is available: 'programs.waveterm'.
   
@@ -1361,7 +1372,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-08 15:45:24 [unread]
+* 2025-05-08 15:45:24 [read]
 
   A new module is available: 'programs.wayprompt'.
   
@@ -1372,7 +1383,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-08 03:13:52 [unread]
+* 2025-05-08 03:13:52 [read]
 
   A new module is available: 'programs.lutris'.
   
@@ -1384,7 +1395,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-05 03:14:02 [unread]
+* 2025-05-05 03:14:02 [read]
 
   A new module is available: 'programs.sway-easyfocus'.
   
@@ -1395,7 +1406,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-04 03:14:11 [unread]
+* 2025-05-04 03:14:11 [read]
 
   A new module is available: 'programs.i3bar-river'.
   
@@ -1406,7 +1417,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-03 03:14:19 [unread]
+* 2025-05-03 03:14:19 [read]
 
   A new module is available: 'programs.onagre'.
   
@@ -1417,7 +1428,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-02 03:14:36 [unread]
+* 2025-05-02 03:14:36 [read]
 
   A new module is available: 'services.clipcat'.
   
@@ -1429,7 +1440,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-05-02 03:14:27 [unread]
+* 2025-05-02 03:14:27 [read]
 
   A new module is available: 'programs.visidata'.
   
@@ -1441,7 +1452,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-28 03:17:23 [unread]
+* 2025-04-28 03:17:23 [read]
 
   A new module is available: 'programs.mpvpaper'.
   
@@ -1453,7 +1464,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-28 03:17:15 [unread]
+* 2025-04-28 03:17:15 [read]
 
   A new module is available: 'programs.kickoff'.
   
@@ -1465,7 +1476,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-27 03:17:07 [unread]
+* 2025-04-27 03:17:07 [read]
 
   A new module is available: 'programs.rmpc'.
   
@@ -1476,7 +1487,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-26 03:16:59 [unread]
+* 2025-04-26 03:16:59 [read]
 
   A new module is available: 'programs.onedrive'.
   
@@ -1488,7 +1499,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-21 03:27:49 [unread]
+* 2025-04-21 03:27:49 [read]
 
   A new module is available: `programs.television`
   
@@ -1497,7 +1508,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-21 01:44:29 [unread]
+* 2025-04-21 01:44:29 [read]
 
   A new module is available: 'programs.nix-init'.
   
@@ -1505,7 +1516,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-21 01:12:03 [unread]
+* 2025-04-21 01:12:03 [read]
 
   A new module is available: 'programs.clock-rs'.
   
@@ -1513,7 +1524,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-20 05:39:01 [unread]
+* 2025-04-20 05:39:01 [read]
 
   A new module is available: 'programs.wallust'.
   
@@ -1521,7 +1532,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-18 08:58:18 [unread]
+* 2025-04-18 08:58:18 [read]
 
   A new module is available: 'programs.inori'.
   
@@ -1529,7 +1540,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-10 08:10:18 [unread]
+* 2025-04-10 08:10:18 [read]
 
   A new module is available: 'services.way-displays'.
   
@@ -1538,7 +1549,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-02 13:01:34 [unread]
+* 2025-04-02 13:01:34 [read]
 
   A new way to define news is available.
   
@@ -1547,7 +1558,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-04-02 00:00:00 [unread]
+* 2025-04-02 00:00:00 [read]
 
   A new service is available: 'services.home-manager.autoExpire'.
   
@@ -1556,7 +1567,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-29 14:32:11 [unread]
+* 2025-03-29 14:32:11 [read]
 
   A new module is available: `programs.sesh`
   
@@ -1564,7 +1575,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-29 04:16:57 [unread]
+* 2025-03-29 04:16:57 [read]
 
   A new module is available: 'programs.streamlink'.
   
@@ -1573,7 +1584,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-26 02:44:04 [unread]
+* 2025-03-26 02:44:04 [read]
 
   A new module is available: `services.mpdscribble`
   
@@ -1581,7 +1592,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-25 23:48:21 [unread]
+* 2025-03-25 23:48:21 [read]
 
   A new module is available: `programs.ripgrep-all`
   
@@ -1589,7 +1600,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-25 20:37:24 [unread]
+* 2025-03-25 20:37:24 [read]
 
   A new module is available: `programs.mergiraf`
   
@@ -1597,7 +1608,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-24 22:31:45 [unread]
+* 2025-03-24 22:31:45 [read]
 
   The following default values change from 'true' to
   'false':
@@ -1608,7 +1619,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-24 15:29:33 [unread]
+* 2025-03-24 15:29:33 [read]
 
   A new module is available: 'programs.smug'.
   
@@ -1617,7 +1628,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-03-21 03:19:14 [unread]
+* 2025-03-21 03:19:14 [read]
 
   A new module is available: 'programs.distrobox'.
   
@@ -1629,7 +1640,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-22 16:53:20 [unread]
+* 2025-02-22 16:53:20 [read]
 
   A new module is available: 'programs.jqp'.
   
@@ -1637,7 +1648,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-22 16:46:56 [unread]
+* 2025-02-22 16:46:56 [read]
 
   A new module is available: 'services.wpaperd'.
   
@@ -1646,7 +1657,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-21 16:53:20 [unread]
+* 2025-02-21 16:53:20 [read]
 
   A new module is available: 'programs.earthly'.
   
@@ -1655,7 +1666,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-20 18:39:31 [unread]
+* 2025-02-20 18:39:31 [read]
 
   A new module is available: 'programs.swayimg'.
   
@@ -1665,7 +1676,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-16 17:00:00 [unread]
+* 2025-02-16 17:00:00 [read]
 
   A new module is available: 'services.wluma'.
   
@@ -1674,7 +1685,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-12 15:56:00 [unread]
+* 2025-02-12 15:56:00 [read]
 
   A new module is available: 'programs.tex-fmt'.
   
@@ -1683,7 +1694,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-11 15:25:26 [unread]
+* 2025-02-11 15:25:26 [read]
 
   A new module is available: 'programs.git-worktree-switcher'.
   
@@ -1693,7 +1704,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-02-07 22:31:45 [unread]
+* 2025-02-07 22:31:45 [read]
 
   All 'programs.<PROGRAM>.enable<SHELL>Integration' values now default
   to the new 'home.shell.enable<SHELL>Integration' options, which
@@ -1708,7 +1719,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-30 09:18:55 [unread]
+* 2025-01-30 09:18:55 [read]
 
   A new module is available: 'services.linux-wallpaperengine'.
   
@@ -1717,7 +1728,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-26 16:40:00 [unread]
+* 2025-01-26 16:40:00 [read]
 
   A new module is available: 'programs.mods'
   
@@ -1727,7 +1738,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-04 15:00:00 [unread]
+* 2025-01-04 15:00:00 [read]
 
   A new module is available: 'wayland.windowManager.wayfire'.
   
@@ -1740,7 +1751,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-02 11:21:19 [unread]
+* 2025-01-02 11:21:19 [read]
 
   A new module is available: 'services.mpdscribble'.
   
@@ -1749,7 +1760,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-01 23:16:35 [unread]
+* 2025-01-01 23:16:35 [read]
 
   A new module is available: 'programs.ghostty'.
   
@@ -1760,7 +1771,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2025-01-01 15:31:15 [unread]
+* 2025-01-01 15:31:15 [read]
 
   The 'systemd.user.startServices' option now defaults to 'true',
   meaning that services will automatically be restarted as needed when
@@ -1774,7 +1785,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-12-22 08:24:29 [unread]
+* 2024-12-22 08:24:29 [read]
 
   A new module is available: 'programs.cavalier'.
   
@@ -1782,7 +1793,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-12-21 17:07:49 [unread]
+* 2024-12-21 17:07:49 [read]
 
   A new module is available: 'programs.pay-respects'.
   
@@ -1791,7 +1802,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-12-04 20:00:00 [unread]
+* 2024-12-04 20:00:00 [read]
 
   
   A new option 'programs.starship.enableInteractive' is available for
@@ -1801,7 +1812,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-12-01 19:34:04 [unread]
+* 2024-12-01 19:34:04 [read]
 
   
   A new module is available: 'programs.kubecolor'.
@@ -1811,7 +1822,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-12-01 19:17:40 [unread]
+* 2024-12-01 19:17:40 [read]
 
   
   A new module is available: 'programs.nix-your-shell'.
@@ -1821,7 +1832,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-11-01 19:44:59 [unread]
+* 2024-11-01 19:44:59 [read]
 
   
   A new module is available: 'services.podman'.
@@ -1834,7 +1845,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-25 08:18:30 [unread]
+* 2024-10-25 08:18:30 [read]
 
   
   A new module is available: 'nixGL'.
@@ -1845,7 +1856,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-20 07:53:54 [unread]
+* 2024-10-20 07:53:54 [read]
 
   
   A new module is available: 'programs.nh'.
@@ -1856,7 +1867,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-18 14:01:07 [unread]
+* 2024-10-18 14:01:07 [read]
 
   
   A new module is available: 'programs.cmus'.
@@ -1865,7 +1876,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-17 13:07:55 [unread]
+* 2024-10-17 13:07:55 [read]
 
   
   A new module is available: 'programs.zed-editor'.
@@ -1875,7 +1886,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-11 08:23:19 [unread]
+* 2024-10-11 08:23:19 [read]
 
   
   A new module is available: 'programs.vifm'.
@@ -1885,7 +1896,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-10-09 06:16:23 [unread]
+* 2024-10-09 06:16:23 [read]
 
   
   A new module is available: 'services.snixembed'.
@@ -1896,7 +1907,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-09-20 07:00:11 [unread]
+* 2024-09-20 07:00:11 [read]
 
   
   The option 'programs.kitty.theme' has been deprecated, please use
@@ -1909,7 +1920,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-09-13 09:50:49 [unread]
+* 2024-09-13 09:50:49 [read]
 
   
   A new module is available: 'programs.neovide'.
@@ -1920,7 +1931,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-09-13 08:58:17 [unread]
+* 2024-09-13 08:58:17 [read]
 
   
   A new module is available: 'services.trayscale'.
@@ -1929,7 +1940,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-08-18 11:42:08 [unread]
+* 2024-08-18 11:42:08 [read]
 
   
   A new module is available: 'programs.lapce'.
@@ -1939,7 +1950,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-06-28 14:18:16 [unread]
+* 2024-06-28 14:18:16 [read]
 
   
   A new module is available: 'services.glance'.
@@ -1949,7 +1960,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-06-22 05:49:48 [unread]
+* 2024-06-22 05:49:48 [read]
 
   
   A new module is available: 'services.blanket'.
@@ -1960,7 +1971,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-25 14:36:03 [unread]
+* 2024-05-25 14:36:03 [read]
 
   
   Multiple new options are available:
@@ -1971,7 +1982,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-21 20:22:57 [unread]
+* 2024-05-21 20:22:57 [read]
 
   
   The Git module now supports signing via SSH and X.509 keys, in addition to OpenPGP/GnuPG,
@@ -1987,7 +1998,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-10 21:28:38 [unread]
+* 2024-05-10 21:28:38 [read]
 
   
   A new module is available: 'programs.yambar'.
@@ -2000,7 +2011,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-10 13:35:19 [unread]
+* 2024-05-10 13:35:19 [read]
 
   
   A new module is available: 'services.hyprpaper'.
@@ -2012,7 +2023,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-10 11:48:34 [unread]
+* 2024-05-10 11:48:34 [read]
 
   
   A new module is available: 'programs.hyprlock'.
@@ -2022,7 +2033,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-10 10:30:58 [unread]
+* 2024-05-10 10:30:58 [read]
 
   
   A new module is available: 'programs.fastfetch'.
@@ -2033,7 +2044,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-06 07:36:13 [unread]
+* 2024-05-06 07:36:13 [read]
 
   
   A new module is available: 'programs.gnome-shell'.
@@ -2044,7 +2055,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-05-05 07:22:01 [unread]
+* 2024-05-05 07:22:01 [read]
 
   
   A new module is available: 'services.hypridle'.
@@ -2054,7 +2065,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-30 21:57:23 [unread]
+* 2024-04-30 21:57:23 [read]
 
   
   A new module is available: 'services.conky'.
@@ -2065,7 +2076,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-30 18:28:28 [unread]
+* 2024-04-30 18:28:28 [read]
 
   
   A new module is available: 'programs.freetube'.
@@ -2076,7 +2087,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-29 22:01:51 [unread]
+* 2024-04-29 22:01:51 [read]
 
   
   A new module is available: 'services.swaync'.
@@ -2087,7 +2098,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-28 20:27:08 [unread]
+* 2024-04-28 20:27:08 [read]
 
   
   A new module is available: 'services.psd'.
@@ -2098,7 +2109,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-22 18:04:47 [unread]
+* 2024-04-22 18:04:47 [read]
 
   
   A new module is available: 'services.amberol'.
@@ -2110,7 +2121,7 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-21 20:53:09 [unread]
+* 2024-04-21 20:53:09 [read]
 
   
   A new module is available: 'programs.poetry'.
@@ -2120,105 +2131,105 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-04-19 14:53:17 [unread]
+* 2024-04-19 14:53:17 [read]
 
   
   A new module is available: 'services.remmina'.
   
 
 
-* 2024-04-19 10:01:55 [unread]
+* 2024-04-19 10:01:55 [read]
 
   
   A new module is available: 'programs.spotify-player'.
   
 
 
-* 2024-04-19 09:23:52 [unread]
+* 2024-04-19 09:23:52 [read]
 
   
   A new module is available: 'programs.tofi'.
   
 
 
-* 2024-04-18 22:30:49 [unread]
+* 2024-04-18 22:30:49 [read]
 
   
   A new module is available: 'programs.fd'.
   
 
 
-* 2024-04-08 21:43:38 [unread]
+* 2024-04-08 21:43:38 [read]
 
   
   A new module is available: 'programs.bun'.
   
 
 
-* 2024-03-28 17:02:19 [unread]
+* 2024-03-28 17:02:19 [read]
 
   
   A new module is available: 'services.amberol'.
   
 
 
-* 2024-03-15 08:39:52 [unread]
+* 2024-03-15 08:39:52 [read]
 
   
   A new module is available: 'services.activitywatch'.
   
 
 
-* 2024-03-13 13:28:22 [unread]
+* 2024-03-13 13:28:22 [read]
 
   
   A new module is available: 'programs.joplin-desktop'.
   
 
 
-* 2024-03-08 22:23:24 [unread]
+* 2024-03-08 22:23:24 [read]
 
   
   A new module is available: 'programs.ranger'.
   
 
 
-* 2024-03-08 22:20:04 [unread]
+* 2024-03-08 22:20:04 [read]
 
   
   A new module is available: 'programs.zk'
   
 
 
-* 2024-02-21 23:01:27 [unread]
+* 2024-02-21 23:01:27 [read]
 
   
   A new module is available: 'wayland.windowManager.river'.
   
 
 
-* 2024-02-05 22:45:37 [unread]
+* 2024-02-05 22:45:37 [read]
 
   
   A new module is available: 'programs.jetbrains-remote'
   
 
 
-* 2024-02-05 22:33:54 [unread]
+* 2024-02-05 22:33:54 [read]
 
   
   A new module is available: 'services.arrpc'
   
 
 
-* 2024-01-27 22:53:00 [unread]
+* 2024-01-27 22:53:00 [read]
 
   
   A new module is available: 'services.wob'.
   
 
 
-* 2024-01-20 23:45:07 [unread]
+* 2024-01-20 23:45:07 [read]
 
   
   A new module is available: 'programs.mise'.
@@ -2227,133 +2238,133 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2024-01-03 19:25:09 [unread]
+* 2024-01-03 19:25:09 [read]
 
   
   A new module is available: 'xdg.portal'.
   
 
 
-* 2024-01-01 09:09:42 [unread]
+* 2024-01-01 09:09:42 [read]
 
   
   A new module is available: 'programs.i3blocks'.
   
 
 
-* 2023-12-29 08:22:40 [unread]
+* 2023-12-29 08:22:40 [read]
 
   
   A new module is available: 'programs.bemenu'.
   
 
 
-* 2023-12-28 13:01:15 [unread]
+* 2023-12-28 13:01:15 [read]
 
   
   A new module is available: 'programs.sftpman'.
   
 
 
-* 2023-12-28 08:28:26 [unread]
+* 2023-12-28 08:28:26 [read]
 
   
   A new module is available: 'services.osmscout-server'.
   
 
 
-* 2023-12-20 11:41:10 [unread]
+* 2023-12-20 11:41:10 [read]
 
   
   A new module is available: 'programs.gradle'.
   
 
 
-* 2023-12-19 22:57:52 [unread]
+* 2023-12-19 22:57:52 [read]
 
   
   A new module is available: 'programs.sapling'.
   
 
 
-* 2023-11-26 23:18:01 [unread]
+* 2023-11-26 23:18:01 [read]
 
   
   A new module is available: 'services.signaturepdf'.
   
 
 
-* 2023-11-22 22:42:16 [unread]
+* 2023-11-22 22:42:16 [read]
 
   
   A new module is available: 'programs.ruff'.
   
 
 
-* 2023-11-01 21:18:20 [unread]
+* 2023-11-01 21:18:20 [read]
 
   
   A new module is available: 'programs.granted'.
   
 
 
-* 2023-10-24 06:14:53 [unread]
+* 2023-10-24 06:14:53 [read]
 
   
   A new module is available: 'programs.cava'.
   
 
 
-* 2023-10-17 06:33:24 [unread]
+* 2023-10-17 06:33:24 [read]
 
   
   A new module is available: 'services.darkman'.
   
 
 
-* 2023-10-04 18:35:42 [unread]
+* 2023-10-04 18:35:42 [read]
 
   
   A new module is available: 'programs.openstackclient'.
   
 
 
-* 2023-10-04 06:44:15 [unread]
+* 2023-10-04 06:44:15 [read]
 
   
   A new module is available: 'programs.thefuck'.
   
 
 
-* 2023-10-01 07:28:45 [unread]
+* 2023-10-01 07:28:45 [read]
 
   
   A new module is available: 'programs.khard'.
   
 
 
-* 2023-10-01 07:23:26 [unread]
+* 2023-10-01 07:23:26 [read]
 
   
   A new module is available: 'programs.wpaperd'.
   
 
 
-* 2023-09-30 07:47:23 [unread]
+* 2023-09-30 07:47:23 [read]
 
   
   A new module is available: 'programs.awscli'.
   
 
 
-* 2023-09-24 10:06:47 [unread]
+* 2023-09-24 10:06:47 [read]
 
   
   A new module is available: 'programs.bacon'.
   
 
 
-* 2023-09-18 11:44:11 [unread]
+* 2023-09-18 11:44:11 [read]
 
   
   A new module is available: 'programs.rio'.
@@ -2362,91 +2373,91 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2023-09-07 14:52:19 [unread]
+* 2023-09-07 14:52:19 [read]
 
   
   A new module is available: 'programs.eza'.
   
 
 
-* 2023-09-05 06:38:05 [unread]
+* 2023-09-05 06:38:05 [read]
 
   
   A new module is available: 'programs.carapace'.
   
 
 
-* 2023-08-23 12:01:06 [unread]
+* 2023-08-23 12:01:06 [read]
 
   
   A new module is available: 'programs.yazi'.
   
 
 
-* 2023-08-22 16:06:52 [unread]
+* 2023-08-22 16:06:52 [read]
 
   
   A new module is available: 'programs.qcal'.
   
 
 
-* 2023-08-16 15:43:30 [unread]
+* 2023-08-16 15:43:30 [read]
 
   
   A new module is available: 'programs.pqiv'.
   
 
 
-* 2023-08-15 15:45:45 [unread]
+* 2023-08-15 15:45:45 [read]
 
   
   A new module is available: 'programs.xplr'.
   
 
 
-* 2023-07-24 10:38:23 [unread]
+* 2023-07-24 10:38:23 [read]
 
   
   A new module is available: 'programs.gh-dash'
   
 
 
-* 2023-07-20 21:56:49 [unread]
+* 2023-07-20 21:56:49 [read]
 
   
   A new module is available: 'wayland.windowManager.hyprland'
   
 
 
-* 2023-07-08 09:44:56 [unread]
+* 2023-07-08 09:44:56 [read]
 
   
   A new module is available: 'services.swayosd'
   
 
 
-* 2023-07-08 09:21:06 [unread]
+* 2023-07-08 09:21:06 [read]
 
   
   A new module is available: 'programs.pyenv'.
   
 
 
-* 2023-07-08 08:27:41 [unread]
+* 2023-07-08 08:27:41 [read]
 
   
   A new modules is available: 'programs.darcs'
   
 
 
-* 2023-06-30 14:46:22 [unread]
+* 2023-06-30 14:46:22 [read]
 
   
   A new module is available: 'services.ssh-agent'
   
 
 
-* 2023-06-14 21:41:22 [unread]
+* 2023-06-14 21:41:22 [read]
 
   
   Two new modules are available:
@@ -2456,154 +2467,154 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2023-06-14 21:25:34 [unread]
+* 2023-06-14 21:25:34 [read]
 
   
   A new module is available: 'programs.git-credential-oauth'.
   
 
 
-* 2023-06-09 19:13:39 [unread]
+* 2023-06-09 19:13:39 [read]
 
   
   A new module is available: 'programs.boxxy'.
   
 
 
-* 2023-06-07 12:16:55 [unread]
+* 2023-06-07 12:16:55 [read]
 
   
   A new module is available: 'programs.imv'.
   
 
 
-* 2023-06-07 06:01:16 [unread]
+* 2023-06-07 06:01:16 [read]
 
   
   A new module is available: 'programs.rtx'.
   
 
 
-* 2023-06-03 22:19:32 [unread]
+* 2023-06-03 22:19:32 [read]
 
   
   A new module is available: 'programs.ripgrep'.
   
 
 
-* 2023-05-18 21:03:30 [unread]
+* 2023-05-18 21:03:30 [read]
 
   
   A new module is available: 'programs.script-directory'.
   
 
 
-* 2023-05-13 13:51:18 [unread]
+* 2023-05-13 13:51:18 [read]
 
   
   A new module is available: 'programs.fuzzel'.
   
 
 
-* 2023-05-12 21:31:05 [unread]
+* 2023-05-12 21:31:05 [read]
 
   
   A new module is available: 'programs.translate-shell'.
   
 
 
-* 2023-05-09 16:06:56 [unread]
+* 2023-05-09 16:06:56 [read]
 
   
   A new module is available: 'programs.git-cliff'.
   
 
 
-* 2023-04-28 19:59:23 [unread]
+* 2023-04-28 19:59:23 [read]
 
   
   A new module is available: 'programs.jujutsu'.
   
 
 
-* 2023-04-19 15:33:07 [unread]
+* 2023-04-19 15:33:07 [read]
 
   
   A new module is available: 'programs.mr'.
   
 
 
-* 2023-04-18 06:28:31 [unread]
+* 2023-04-18 06:28:31 [read]
 
   
   A new module is available: 'services.batsignal'.
   
 
 
-* 2023-03-25 14:53:57 [unread]
+* 2023-03-25 14:53:57 [read]
 
   
   A new module is available: 'programs.hstr'.
   
 
 
-* 2023-03-22 07:31:38 [unread]
+* 2023-03-22 07:31:38 [read]
 
   
   A new module is available: 'services.copyq'.
   
 
 
-* 2023-03-22 07:20:00 [unread]
+* 2023-03-22 07:20:00 [read]
 
   
   A new module is available: 'services.listenbrainz-mpd'.
   
 
 
-* 2023-02-22 22:16:37 [unread]
+* 2023-02-22 22:16:37 [read]
 
   
   A new module is available: 'services.avizo'.
   
 
 
-* 2023-02-20 22:31:23 [unread]
+* 2023-02-20 22:31:23 [read]
 
   
   A new module is available: 'services.mpd-mpris'.
   
 
 
-* 2023-02-02 20:49:05 [unread]
+* 2023-02-02 20:49:05 [read]
 
   
   A new module is available: 'services.autorandr'.
   
 
 
-* 2023-01-31 22:08:41 [unread]
+* 2023-01-31 22:08:41 [read]
 
   
   A new module is available: 'programs.rbenv'.
   
 
 
-* 2023-01-30 10:39:11 [unread]
+* 2023-01-30 10:39:11 [read]
 
   
   A new module is available: 'programs.wlogout'.
   
 
 
-* 2023-01-28 17:35:49 [unread]
+* 2023-01-28 17:35:49 [read]
 
   
   A new module is available: 'programs.papis'.
   
 
 
-* 2023-01-07 10:47:03 [unread]
+* 2023-01-07 10:47:03 [read]
 
   
   'xsession.windowManager.i3.config.[window|floating].titlebar' and
@@ -2611,63 +2622,63 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2022-12-28 21:48:22 [unread]
+* 2022-12-28 21:48:22 [read]
 
   
   A new module is available: 'services.clipman'.
   
 
 
-* 2022-12-25 08:41:32 [unread]
+* 2022-12-25 08:41:32 [read]
 
   
   A new module is available: 'services.cachix-agent'.
   
 
 
-* 2022-12-16 15:01:20 [unread]
+* 2022-12-16 15:01:20 [read]
 
   
   A new module is available: 'services.megasync'.
   
 
 
-* 2022-11-04 14:56:46 [unread]
+* 2022-11-04 14:56:46 [read]
 
   
   A new module is available: 'programs.thunderbird'.
   
 
 
-* 2022-11-02 10:56:14 [unread]
+* 2022-11-02 10:56:14 [read]
 
   
   A new module is available: 'xfconf'.
   
 
 
-* 2022-11-01 23:57:50 [unread]
+* 2022-11-01 23:57:50 [read]
 
   
   A new module is available: 'programs.oh-my-posh'.
   
 
 
-* 2022-10-24 22:05:27 [unread]
+* 2022-10-24 22:05:27 [read]
 
   
   A new module is available: 'programs.k9s'.
   
 
 
-* 2022-10-18 08:07:43 [unread]
+* 2022-10-18 08:07:43 [read]
 
   
   A new module is available: 'programs.looking-glass-client'.
   
 
 
-* 2022-10-16 19:49:46 [unread]
+* 2022-10-16 19:49:46 [read]
 
   
   Two new modules are available:
@@ -2680,455 +2691,455 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2022-10-12 23:10:48 [unread]
+* 2022-10-12 23:10:48 [read]
 
   
   A new module is available: 'programs.discocss'.
   
 
 
-* 2022-10-06 23:19:10 [unread]
+* 2022-10-06 23:19:10 [read]
 
   
   A new module is available: 'programs.havoc'.
   
 
 
-* 2022-10-06 23:06:08 [unread]
+* 2022-10-06 23:06:08 [read]
 
   
   A new module is available: 'programs.ledger'.
   
 
 
-* 2022-09-29 13:43:02 [unread]
+* 2022-09-29 13:43:02 [read]
 
   
   A new module is available: 'programs.pls'.
   
 
 
-* 2022-09-25 22:22:17 [unread]
+* 2022-09-25 22:22:17 [read]
 
   
   A new module is available: 'programs.tmate'.
   
 
 
-* 2022-09-25 21:00:05 [unread]
+* 2022-09-25 21:00:05 [read]
 
   
   A new module is available: 'services.safeeyes'.
   
 
 
-* 2022-09-21 22:42:42 [unread]
+* 2022-09-21 22:42:42 [read]
 
   
   A new module is available: 'xsession.windowManager.fluxbox'.
   
 
 
-* 2022-09-09 09:55:50 [unread]
+* 2022-09-09 09:55:50 [read]
 
   
   A new module is available: 'programs.gallery-dl'.
   
 
 
-* 2022-09-08 17:50:43 [unread]
+* 2022-09-08 17:50:43 [read]
 
   
   A new module is available: 'programs.yt-dlp'.
   
 
 
-* 2022-09-08 15:41:46 [unread]
+* 2022-09-08 15:41:46 [read]
 
   
   A new module is available: 'programs.nheko'.
   
 
 
-* 2022-09-05 12:33:11 [unread]
+* 2022-09-05 12:33:11 [read]
 
   
   A new module is available: 'programs.btop'.
   
 
 
-* 2022-09-05 11:05:25 [unread]
+* 2022-09-05 11:05:25 [read]
 
   
   A new module is available: 'editorconfig'.
   
 
 
-* 2022-08-25 21:01:37 [unread]
+* 2022-08-25 21:01:37 [read]
 
   
   A new module is available: 'services.pueue'.
   
 
 
-* 2022-08-08 16:11:22 [unread]
+* 2022-08-08 16:11:22 [read]
 
   
   A new module is available: 'programs.bashmount'.
   
 
 
-* 2022-08-07 09:07:35 [unread]
+* 2022-08-07 09:07:35 [read]
 
   
   A new module is available: 'programs.wezterm'.
   
 
 
-* 2022-08-01 16:35:28 [unread]
+* 2022-08-01 16:35:28 [read]
 
   
   A new module is available: 'programs.hyfetch'.
   
 
 
-* 2022-07-27 12:22:37 [unread]
+* 2022-07-27 12:22:37 [read]
 
   
   A new module is available: 'services.recoll'.
   
 
 
-* 2022-07-25 11:29:14 [unread]
+* 2022-07-25 11:29:14 [read]
 
   
   A new module is available: 'xsession.windowManager.spectrwm'.
   
 
 
-* 2022-07-13 13:28:54 [unread]
+* 2022-07-13 13:28:54 [read]
 
   
   A new module is available: 'programs.librewolf'.
   
 
 
-* 2022-06-26 19:29:25 [unread]
+* 2022-06-26 19:29:25 [read]
 
   
   A new module is available: 'services.sctd'.
   
 
 
-* 2022-06-24 22:40:27 [unread]
+* 2022-06-24 22:40:27 [read]
 
   
   A new module is available: 'programs.pistol'.
   
 
 
-* 2022-06-24 17:18:32 [unread]
+* 2022-06-24 17:18:32 [read]
 
   
   A new module is available: 'programs.micro'.
   
 
 
-* 2022-06-21 22:29:37 [unread]
+* 2022-06-21 22:29:37 [read]
 
   
   A new module is available: 'programs.mujmap'.
   
 
 
-* 2022-05-18 22:09:45 [unread]
+* 2022-05-18 22:09:45 [read]
 
   
   A new module is available: 'services.mopidy'.
   
 
 
-* 2022-05-02 20:55:46 [unread]
+* 2022-05-02 20:55:46 [read]
 
   
   A new module is available: 'programs.tealdeer'.
   
 
 
-* 2022-03-13 20:59:38 [unread]
+* 2022-03-13 20:59:38 [read]
 
   
   A new module is available: 'services.fusuma'.
   
 
 
-* 2022-03-06 09:40:17 [unread]
+* 2022-03-06 09:40:17 [read]
 
   
   A new module is available: 'programs.pubs'.
   
 
 
-* 2022-03-06 08:50:32 [unread]
+* 2022-03-06 08:50:32 [read]
 
   
   A new module is available: 'programs.just'.
   
 
 
-* 2022-02-24 22:35:22 [unread]
+* 2022-02-24 22:35:22 [read]
 
   
   A new module is available: 'programs.gitui'.
   
 
 
-* 2022-02-17 23:11:13 [unread]
+* 2022-02-17 23:11:13 [read]
 
   
   A new module is available: 'services.espanso'.
   
 
 
-* 2022-02-17 17:12:46 [unread]
+* 2022-02-17 17:12:46 [read]
 
   
   A new module is available: 'programs.eww'.
   
 
 
-* 2022-02-16 23:50:35 [unread]
+* 2022-02-16 23:50:35 [read]
 
   
   A new module is available: 'programs.zellij'.
   
 
 
-* 2022-02-03 23:23:49 [unread]
+* 2022-02-03 23:23:49 [read]
 
   
   A new module is available: 'services.twmn'.
   
 
 
-* 2022-01-26 22:08:29 [unread]
+* 2022-01-26 22:08:29 [read]
 
   
   A new module is available: 'programs.kodi'.
   
 
 
-* 2022-01-22 17:39:20 [unread]
+* 2022-01-22 17:39:20 [read]
 
   
   A new module is available: 'programs.pandoc'.
   
 
 
-* 2022-01-22 16:54:31 [unread]
+* 2022-01-22 16:54:31 [read]
 
   
   A new module is available: 'programs.tint2'.
   
 
 
-* 2022-01-22 15:33:42 [unread]
+* 2022-01-22 15:33:42 [read]
 
   
   A new module is available: 'programs.timidity'.
   
 
 
-* 2022-01-22 15:12:20 [unread]
+* 2022-01-22 15:12:20 [read]
 
   
   A new module is available: 'programs.watson'.
   
 
 
-* 2022-01-22 14:36:25 [unread]
+* 2022-01-22 14:36:25 [read]
 
   
   A new module is available: 'programs.helix'.
   
 
 
-* 2022-01-11 12:26:43 [unread]
+* 2022-01-11 12:26:43 [read]
 
   
   A new module is available: 'programs.sagemath'.
   
 
 
-* 2022-01-03 10:34:45 [unread]
+* 2022-01-03 10:34:45 [read]
 
   
   A new module is available: 'services.swayidle'.
   
 
 
-* 2021-12-31 09:39:20 [unread]
+* 2021-12-31 09:39:20 [read]
 
   
   A new module is available: 'xsession.windowManager.herbstluftwm'.
   
 
 
-* 2021-12-21 22:17:30 [unread]
+* 2021-12-21 22:17:30 [read]
 
   
   A new module is available: 'services.systembus-notify'.
   
 
 
-* 2021-12-12 17:09:38 [unread]
+* 2021-12-12 17:09:38 [read]
 
   
   A new module is available: 'services.opensnitch-ui'.
   
 
 
-* 2021-12-11 16:07:00 [unread]
+* 2021-12-11 16:07:00 [read]
 
   
   A new module is available: 'services.gromit-mpx'.
   
 
 
-* 2021-12-11 11:55:12 [unread]
+* 2021-12-11 11:55:12 [read]
 
   
   A new module is available: 'programs.navi'.
   
 
 
-* 2021-12-10 23:19:57 [unread]
+* 2021-12-10 23:19:57 [read]
 
   
   A new module is available: 'programs.sqls'.
   
 
 
-* 2021-11-30 22:28:12 [unread]
+* 2021-11-30 22:28:12 [read]
 
   
   A new module is available: 'programs.less'.
   
 
 
-* 2021-10-23 17:12:22 [unread]
+* 2021-10-23 17:12:22 [read]
 
   
   A new module is available: 'programs.hexchat'.
   
 
 
-* 2021-10-05 22:15:00 [unread]
+* 2021-10-05 22:15:00 [read]
 
   
   A new module is available: 'programs.nnn'.
   
 
 
-* 2021-10-05 20:55:07 [unread]
+* 2021-10-05 20:55:07 [read]
 
   
   A new module is available: 'programs.atuin'.
   
 
 
-* 2021-09-14 21:31:03 [unread]
+* 2021-09-14 21:31:03 [read]
 
   
   A new module is available: 'programs.bottom'.
   
 
 
-* 2021-08-31 18:44:26 [unread]
+* 2021-08-31 18:44:26 [read]
 
   
   A new module is available: 'services.betterlockscreen'.
   
 
 
-* 2021-08-26 06:40:59 [unread]
+* 2021-08-26 06:40:59 [read]
 
   
   A new module is available: 'services.fnott'.
   
 
 
-* 2021-08-16 21:59:02 [unread]
+* 2021-08-16 21:59:02 [read]
 
   
   A new module is available: 'services.git-sync'.
   
 
 
-* 2021-08-11 13:55:51 [unread]
+* 2021-08-11 13:55:51 [read]
 
   
   A new module is available: 'services.easyeffects'.
   
 
 
-* 2021-08-10 21:28:40 [unread]
+* 2021-08-10 21:28:40 [read]
 
   
   A new module is available: 'programs.java'.
   
 
 
-* 2021-07-23 22:22:31 [unread]
+* 2021-07-23 22:22:31 [read]
 
   
   A new module is available: 'services.trayer'.
   
 
 
-* 2021-07-19 01:30:46 [unread]
+* 2021-07-19 01:30:46 [read]
 
   
   A new module is available: 'services.notify-osd'.
   
 
 
-* 2021-07-15 13:38:32 [unread]
+* 2021-07-15 13:38:32 [read]
 
   
   A new module is available: 'services.xsettingsd'.
   
 
 
-* 2021-07-14 20:06:18 [unread]
+* 2021-07-14 20:06:18 [read]
 
   
   A new module is available: 'services.volnoti'.
   
 
 
-* 2021-07-11 17:45:56 [unread]
+* 2021-07-11 17:45:56 [read]
 
   
   A new module is available: 'programs.sm64ex'.
   
 
 
-* 2021-06-24 22:36:11 [unread]
+* 2021-06-24 22:36:11 [read]
 
   
   A new module is available: 'i18n.inputMethod'.
   
 
 
-* 2021-06-22 14:43:53 [unread]
+* 2021-06-22 14:43:53 [read]
 
   
   A new module is available: 'programs.himalaya'.
   
 
 
-* 2021-06-16 01:26:16 [unread]
+* 2021-06-16 01:26:16 [read]
 
   
   The xmonad module now compiles the configuration before
@@ -3146,28 +3157,28 @@ warning: Git tree '/home/boss/Documents/ESSENTIALS/installs' has uncommitted cha
   
 
 
-* 2021-06-12 05:00:22 [unread]
+* 2021-06-12 05:00:22 [read]
 
   
   A new module is available: 'programs.mangohud'.
   
 
 
-* 2021-06-07 20:44:00 [unread]
+* 2021-06-07 20:44:00 [read]
 
   
   A new module is available: 'services.pantalaimon'.
   
 
 
-* 2021-06-02 04:24:10 [unread]
+* 2021-06-02 04:24:10 [read]
 
   
   A new module is available: 'services.xidlehook'.
   
 
 
-* 2020-04-26 13:32:17 [unread]
+* 2020-04-26 13:32:17 [read]
 
   
   A number of new modules are available:

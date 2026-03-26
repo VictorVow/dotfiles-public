@@ -35,6 +35,9 @@ Exclusions are stored in the `exclusionmodel` and `backupprofilemodel` tables of
 | recycle-bin-trash | ✓ | ✓ | |
 
 **Raw exclusions — BorgBase.com & rsync.net** (identical lists):
+
+Note: `SSD-1TB-Transcend` is ignored. And so is Vorta's preset exclusions.
+
 ```
 node_modules
 /home/*/node_modules
@@ -159,129 +162,6 @@ node_modules
 /home/boss/Videos/Replays/
 /home/boss/Videos/Syncthing/
 /home/boss/Videos/X/
-/home/boss/vmware/
-```
-
-**Raw exclusions — SSD-1TB-Transcend** (differences from cloud profiles noted with `*`):
-```
-node_modules
-/home/*/node_modules
-/home/boss/.bitmonero/lmdb/data.mdb
-/home/boss/.cache/activitywatch/log/aw-watcher-window/   # * (specific cache subdirs only, not whole ~/.cache/)
-/home/boss/.cache/appstream/
-/home/boss/.cache/lutris/
-/home/boss/.cache/thumbnails/
-/home/boss/.cache/mesa_shader_cache/
-/home/boss/.cache/mozilla/firefox/zd2lxszj.default-release/cache2/entries/
-/home/boss/.cache/winetricks/Games/
-/home/boss/.cache/winetricks/win7sp1/
-/home/boss/.config/GeForce NOW/Cache/
-/home/boss/.config/GeForce NOW/Service Worker/
-/home/boss/.config/GeForce NOW/Code Cache/
-/home/boss/.config/google-chrome/Default/Service Worker/
-/home/boss/.config/itch/Partitions/itchio-4159193/Cache/
-/home/boss/.config/itch/Partitions/itchio-4159193/Code Cache/
-/home/boss/.config/itch/Partitions/itchio-4159193/Service Worker/
-/home/boss/.config/lbry/Cache/
-/home/boss/.config/Logseq/search/
-/home/boss/.config/Signal/
-/home/boss/.config/syncthing/index-v0.14.0.db/
-/home/boss/.config/WorkFlowy/Cache/
-/home/boss/.local/share/baloo/
-/home/boss/.local/share/lbry/lbrynet/blobfiles/
-/home/boss/.local/share/lutris/
-/home/boss/.local/share/plasma-vault/
-/home/boss/.local/share/Steam/
-/home/boss/.local/share/Tabletop Simulator/
-/home/boss/.local/share/TelegramDesktop/tdata/
-/home/boss/.local/share/Trash/
-/home/boss/.local/share/Vircadia/Interface/ktx_cache/
-/home/boss/.local/share/waydroid/data/
-/home/boss/.npm/_cacache/
-/home/boss/.var/app/com.brave.Browser/cache/BraveSoftware/Brave-Browser/Default/Cache/
-/home/boss/.var/app/com.brave.Browser/cache/BraveSoftware/Brave-Browser/Default/Code Cache/
-/home/boss/.var/app/com.discordapp.Discord/config/discord/Code Cache/
-/home/boss/.var/app/com.discordapp.Discord/config/discord/Cache/
-/home/boss/.var/app/com.gitlab.KRypt0n_.an-anime-game-launcher/data/anime-game-launcher/
-/home/boss/.var/app/com.logseq.Logseq/config/Logseq/search/
-/home/boss/.var/app/com.logseq.Logseq/config/Logseq/Cache/
-/home/boss/.var/app/com.slack.Slack/config/Slack/Cache/Cache_Data/
-/home/boss/.var/app/com.slack.Slack/config/Slack/Service Worker/CacheStorage/
-/home/boss/.var/app/com.spotify.Client/cache/spotify/Browser/Cache/Cache_Data/
-/home/boss/.var/app/com.stremio.Stremio/.stremio-server/stremio-cache/
-/home/boss/.var/app/com.usebottles.bottles/data/bottles/
-/home/boss/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/
-/home/boss/.var/app/com.visualstudio.code/cache/Cypress/
-/home/boss/.var/app/io.freetubeapp.FreeTube/config/FreeTube/Cache/
-/home/boss/.var/app/io.gitlab.librewolf-community/cache/
-/home/boss/.var/app/net.lutris.Lutris/cache/lutris/
-/home/boss/.var/app/net.lutris.Lutris/data/lutris/runners/wine/
-/home/boss/.var/app/org.chromium.Chromium/cache/
-/home/boss/.var/app/org.chromium.Chromium/config/chromium/Default/Service Worker/
-/home/boss/.var/app/org.kde.dolphin/cache/
-/home/boss/.var/app/org.kde.dolphin/data/Trash/
-/home/boss/.var/app/org.mozilla.firefox/cache/mozilla/firefox/09muof4b.MASTER/cache2/entries/
-/home/boss/.var/app/org.mozilla.firefox/cache/mozilla/firefox/w4q5aadv.LEISURE/cache2/entries/
-/home/boss/.var/app/org.mozilla.firefox/cache/mozilla/firefox/89q24drb.CIKFORUM/cache2/entries/
-/home/boss/.var/app/org.mozilla.firefox/cache/mozilla/firefox/6nxpopo7.PLAIN/cache2/entries/
-/home/boss/.var/app/org.mozilla.firefox/cache/mozilla/firefox/kxnl5iqx.WORK/cache2/entries/
-/home/boss/.var/app/org.polymc.PolyMC/data/polymc/
-/home/boss/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data/
-/home/boss/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data#2/
-/home/boss/.var/app/io.lbry.lbry-app/data/lbry/lbrynet/blobfiles/
-/home/boss/.wine/drive_c/
-/home/boss/Documents/Git/Categories/Machine-Learning/alpaca.cpp/   # * (not in cloud)
-/home/boss/Documents/Linux.iso
-/home/boss/Documents/MUSEUM/Docker/NocoDB/
-/home/boss/Documents/MUSEUM/Docker/LanguageTool/optional_ngrams/en/
-/home/boss/Documents/MUSEUM/Docker/zlib-searcher/index/
-/home/boss/Documents/OPTIONAL/ISOs/
-/home/boss/Documents/OPTIONAL/Android/PocophoneF1-beryllium/ROMs/
-/home/boss/Documents/OPTIONAL/Android/PocophoneF1-beryllium/Partitions/
-/home/boss/Documents/VMs/
-/home/boss/Downloads/ytdlp/   # * (cloud has Downloads/MEGA/ instead)
-/home/boss/Games/1Git/
-/home/boss/Games/Adult/
-/home/boss/Games/byond-513/
-/home/boss/Games/byond-ss13/
-/home/boss/Games/epic-games/
-/home/boss/Games/gog-galaxy/drive_c/windows/
-/home/boss/Games/gog-games/
-/home/boss/Games/itchio-games/
-/home/boss/Games/league-of-legends/   # * (not in cloud)
-/home/boss/Games/league-of-legends1/  # * (not in cloud)
-/home/boss/Games/magic-the-gathering-arena/  # * (not in cloud)
-/home/boss/Games/magic-the-gathering-online/
-/home/boss/Games/multimc/
-/home/boss/Games/minecraft/
-/home/boss/Games/minecraft-all/
-/home/boss/Games/Pirated/
-/home/boss/Games/ShinobiLifeOnline/   # * (not in cloud)
-/home/boss/Games/SteamLibrary/steamapps/
-/home/boss/Games/SteamOther/
-/home/boss/Games/SpaceStation14/      # * (not in cloud)
-/home/boss/Games/XMage/
-/home/boss/Mounts/
-/home/boss/Vaults/gocryptfs1/1Vault/wikispooks/
-/home/boss/Vaults/gocryptfs1/Android-sync/Android-Backups/
-/home/boss/Vaults/gocryptfs1/Android-sync/Android-NewPipe/
-/home/boss/Vaults/gocryptfs1/Android-sync/Android-WhatsApp/Databases/
-/home/boss/Vaults/gocryptfs1/Browsers/MASTER/firefox/
-/home/boss/Vaults/gocryptfs1/Browsers/MASTER/profile/cache2/entries/
-/home/boss/Vaults/gocryptfs1/Browsers/MASTER/profile/storage/default/
-/home/boss/Vaults/gocryptfs1/Cloud/Cloud Drive/Android-MP/.stversions/1-Export to PC/Android-NewPipe/
-/home/boss/Vaults/gocryptfs1/Cloud/Cloud Drive/Android-MP/1-Export to PC/Android-NewPipe/NewPipe-Video/
-/home/boss/Vaults/gocryptfs1/Thunderbird/profile/cache2/entries/
-/home/boss/Vaults/gocryptfs1/Thunderbird/profile/calendar-data/
-/home/boss/Vaults/gocryptfs1/Thunderbird/thunderbird/
-/home/boss/Vaults/gocryptfs2/
-/home/boss/Videos/1-Downloading/
-/home/boss/Videos/2-Complete/
-/home/boss/Videos/9-LBRY/
-/home/boss/Videos/NewPipe-Video/
-/home/boss/Videos/Replays/
-/home/boss/Videos/Uploads/   # * (not in cloud)
-/home/boss/Videos/X2/        # * (cloud has Videos/X/ instead)
 /home/boss/vmware/
 ```
 
