@@ -106,6 +106,10 @@ in
     # Shell integration (eval "$(starship init bash)") is injected automatically.
     # The theme config is managed as a verbatim TOML file via home.file below
     # to preserve the gruvbox_dark powerline theme exactly (Unicode symbols, etc.).
+    # 
+    # Note: still need to `hms` before `source ~/.bashrc` to reload config changes
+    # This is because whilst the symlink from nix/dotfiles/starship.toml to ~/.config/starship.toml
+    # the symlink still points to the old store path with the old content since these files are immutable
   };
 
   # Gruvbox dark powerline theme — verbatim copy of ~/.config/starship.toml.
