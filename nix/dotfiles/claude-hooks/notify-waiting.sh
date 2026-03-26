@@ -66,8 +66,20 @@ YAKUAKE_TAB=$(
 
     OFFSET=$(( FIRST_W - FIRST_Y ))
     YAKUAKE_SESS=$(( WINDOW_ID - OFFSET ))
-    qdbus6 org.kde.yakuake /yakuake/tabs \
-        org.kde.yakuake.tabTitle "$YAKUAKE_SESS" 2>/dev/null
+    TAB_TITLE=$(qdbus6 org.kde.yakuake /yakuake/tabs \
+        org.kde.yakuake.tabTitle "$YAKUAKE_SESS" 2>/dev/null) || exit 0
+
+    if [[ "$TAB_TITLE" == *"Shell"* ]]; then
+        PANE_TITLE=$(tmux display-message -p '#{pane_title}' 2>/dev/null || true)
+        if [[ ${#PANE_TITLE} -gt 2 ]]; then
+            NEW_TITLE="${PANE_TITLE:2}"
+            qdbus6 org.kde.yakuake /yakuake/tabs \
+                org.kde.yakuake.setTabTitle "$YAKUAKE_SESS" "$NEW_TITLE" 2>/dev/null || true
+            TAB_TITLE="$NEW_TITLE"
+        fi
+    fi
+
+    echo "$TAB_TITLE"
 ) || true
 
 # ── 3. Deduplicate ───────────────────────────────────────────────────────────
