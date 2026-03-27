@@ -121,17 +121,13 @@
     - name: Hold apt packages superseded by Nix
       # Prevents apt / KDE Discover from reinstalling Kubuntu defaults that are
       # already managed by home-manager. Equivalent to: apt-mark hold <pkg>
-      ansible.builtin.apt:
-        name:
-          # ── System / CLI ──────────────────────────────────────────────────────
-          - procps   # pgrep, ps, kill — superseded by nix#procps
-
-          # ── Container / Virtualisation ────────────────────────────────────────
-          - podman   # OCI backend — superseded by nix#podman (5.8.1 vs apt 5.4.2)
-
-          # ── Development: Tools & Editors ──────────────────────────────────────
-          - kate     # KDE text editor — superseded by nix#kdePackages.kate
-        state: held
+      ansible.builtin.dpkg_selections:
+        name: "{{ item.name }}"
+        selection: hold
+      loop:
+        - { name: procps, comment: "pgrep, ps, kill — superseded by nix#procps" }
+        - { name: podman, comment: "OCI backend — superseded by nix#podman (5.8.1 vs apt 5.4.2)" }
+        - { name: kate,   comment: "KDE text editor — superseded by nix#kdePackages.kate" }
       become: yes
 
     - name: Find all scripts in the 3rd-party-packages subdirectory
