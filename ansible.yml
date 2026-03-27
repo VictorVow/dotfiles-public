@@ -180,6 +180,8 @@
           echo "waydroid not found in boss PATH — run 'hms' first" >&2
           exit 1
         fi
+        # Symlink to /usr/local/bin so 'sudo waydroid init' works (sudo loses Nix PATH)
+        ln -sf "$WAYDROID_BIN" /usr/local/bin/waydroid
         cat > /etc/systemd/system/waydroid-container.service <<EOF
         [Unit]
         Description=Waydroid Container
