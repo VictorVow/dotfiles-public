@@ -62,6 +62,7 @@ in
       "credential \"https://dev.azure.com\"".useHttpPath = true;
 
       alias.ll = "log --oneline";
+      core.editor = "micro";
       alias.su =
         let
           set1 = "git config user.name 'Victor239'"

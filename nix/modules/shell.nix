@@ -147,9 +147,9 @@
   # launched from the KDE application launcher also see them.
 
   home.sessionVariables = {
-    # Default terminal editor — nano is simpler for quick edits; nvim is still available
-    EDITOR = "nano";
-    VISUAL = "nano";
+    # Default terminal editor — micro for quick edits; nvim is still available
+    EDITOR = "micro";
+    VISUAL = "micro";
 
     # npm global prefix — keeps npm global installs user-local (no sudo)
     NPM_CONFIG_PREFIX = "$HOME/.npm-global";
