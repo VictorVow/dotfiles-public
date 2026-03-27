@@ -316,6 +316,16 @@ HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#boss" 2>&1 | grep -v 
 if [[ -z "$HM_NEWS_OUTPUT" ]]; then
   info "No home-manager news output."
 else
+  # Filter to [unread] entries only
+  HM_NEWS_UNREAD=$(awk '
+    /^\* / {
+      if (block != "" && unread) printf "%s", block
+      block = $0 "\n"; unread = ($0 ~ /\[unread\]/); next
+    }
+    { block = block $0 "\n" }
+    END { if (block != "" && unread) printf "%s", block }
+  ' <<< "$HM_NEWS_OUTPUT")
+
   # Extract existing News section content for comparison
   EXISTING_NEWS=""
   if [[ -f "$HM_NEWS_FILE" ]]; then
@@ -324,15 +334,19 @@ else
     EXISTING_NEWS="${EXISTING_NEWS#$'\n'}"
   fi
 
-  if [[ "$HM_NEWS_OUTPUT" == "$EXISTING_NEWS" ]]; then
-    info "No new home-manager news since last update."
+  if [[ "$HM_NEWS_UNREAD" == "$EXISTING_NEWS" ]]; then
+    info "No unread home-manager news since last update."
   else
     WRITE_NEWS=false
     if $DRY_RUN; then
       echo -e "  ${DIM}[dry-run] Would prompt to update $HM_NEWS_FILE${NC}"
     elif [[ -t 0 ]]; then
       echo ""
-      echo -e "${YELLOW}New home-manager news is available.${NC}"
+      if [[ -n "$HM_NEWS_UNREAD" ]]; then
+        echo -e "${YELLOW}New unread home-manager news is available.${NC}"
+      else
+        echo -e "${YELLOW}All home-manager news has been read — clearing news file.${NC}"
+      fi
       printf "  Overwrite docs/home-manager-news.md? [Y/n] "
       read -r ANSWER </dev/tty || ANSWER="N"
       ANSWER="${ANSWER:-Y}"
@@ -348,17 +362,17 @@ else
         printf 'This file is maintained by `update.sh` and updated during system updates.\n\n'
         printf '**Structure:**\n'
         printf -- '- **Meta** (this section): Documents the structure and formatting of this file.\n'
-        printf -- '- **News**: Raw plain-text output from `home-manager news`, captured silently.\n\n'
+        printf -- '- **News**: Unread entries only — `[read]` entries are excluded.\n\n'
         printf '**Formatting rules for the News section:**\n'
-        printf -- '- Content is the verbatim output of `home-manager news` — do not hand-edit it.\n'
-        printf -- '- Each news entry starts with a `#` heading (package name and version range).\n'
+        printf -- '- Content is filtered output of `home-manager news` — do not hand-edit it.\n'
+        printf -- '- Each news entry starts with a `* DATE [unread]` header.\n'
         printf -- '- Entries are separated by blank lines.\n\n'
-        printf '**Update behaviour:** `update.sh` compares new news output against the stored\n'
+        printf '**Update behaviour:** `update.sh` compares new unread news against the stored\n'
         printf 'News section and prompts before overwriting (Y/n, default Y). Skipped in\n'
         printf 'non-interactive (cron) sessions.\n\n'
         printf 'Last updated: %s\n\n' "$(date '+%Y-%m-%d %H:%M:%S')"
         printf '## News\n\n'
-        printf '%s\n' "$HM_NEWS_OUTPUT"
+        [[ -n "$HM_NEWS_UNREAD" ]] && printf '%s\n' "$HM_NEWS_UNREAD"
       } > "$HM_NEWS_FILE"
       success "docs/home-manager-news.md updated."
     fi
