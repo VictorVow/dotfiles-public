@@ -68,14 +68,6 @@
       # Required for portals, screen sharing, and Wayland tooling.
       export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
-      # ── Console Ninja ───────────────────────────────────────────────────────
-      # IDE runtime-value inspector; installed via the IDE extension, not Nix.
-      export PATH="$HOME/.console-ninja/.bin:$PATH"
-
-      # ── grab-site (ArchiveTeam web archiving tool) ───────────────────────────
-      # Installed in a dedicated venv; exposed here for CLI use.
-      export PATH="$PATH:$HOME/gs-venv/bin"
-
       # ── fnm (Fast Node Manager) ─────────────────────────────────────────────
       # --use-on-cd: auto-switch Node version when entering a directory with .node-version/.nvmrc
       # --resolve-engines=false: don't try to resolve engines.node from package.json — fnm can't

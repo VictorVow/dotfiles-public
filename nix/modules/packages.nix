@@ -62,7 +62,9 @@
     solaar  # Logitech Unifying receiver / Bolt manager
             # Note: logiops (for advanced Logitech customisation) stays in apt
             # because it requires a system service and /etc/logiops.yml
-    libratbag # (piper dependency) HID++ device configuration daemon
+    libratbag   # (piper dependency) HID++ device configuration daemon
+    noisetorch  # Microphone noise suppression via PulseAudio virtual device
+                # Replaces manually-installed ~/.local/bin/noisetorch
 
     # ── Networking ────────────────────────────────────────────────────────────
     sniffnet # Network traffic monitor — shows which apps are using the network
@@ -200,7 +202,9 @@
              # Provides ansible-playbook, ansible-galaxy, etc.
 
     # ── System / CLI Utilities ────────────────────────────────────────────────
-    screenkey # Display keyboard input on screen — useful for screencasts
+    screenkey  # Display keyboard input on screen — useful for screencasts
+    mouseless  # Keyboard-driven app-switcher overlay
+               # Replaces manually-installed ~/.local/bin/mouseless
 
     # ── Prompt / Terminal UI ──────────────────────────────────────────────────
     starship # Cross-shell prompt written in Rust (replaces brew install starship)

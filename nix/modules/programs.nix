@@ -172,6 +172,23 @@ in
     executable = true;
   };
 
+  # ── Logseq vector search config ────────────────────────────────────────────────
+  # Declares the config read by mcp-logseq[vector] at runtime. LanceDB writes its
+  # index to db_path; this config file itself is read-only (Nix-store symlink).
+  # After hms, run the one-time initial index:
+  #   LOGSEQ_CONFIG_FILE=~/.logseq-vector/config.json \
+  #     uv run --with "mcp-logseq[vector]" logseq-sync --once
+  home.file.".logseq-vector/config.json".text = builtins.toJSON {
+    logseq_graph_path = "/home/boss/logseq";
+    vector = {
+      enabled          = true;
+      db_path          = "/home/boss/.logseq-vector/db";
+      embedder         = { model = "nomic-embed-text"; };
+      include_journals = true;
+      min_chunk_length = 50;
+    };
+  };
+
   # ── Text Editors ──────────────────────────────────────────────────────────────
 
   programs.neovim = {
@@ -489,7 +506,10 @@ in
       logseq = {
         command = "uv";
         args    = [ "run" "--with" "mcp-logseq[vector]" "mcp-logseq" ];
-        env     = { LOGSEQ_API_URL = "http://localhost:12315"; };
+        env     = {
+          LOGSEQ_API_URL     = "http://localhost:12315";
+          LOGSEQ_CONFIG_FILE = "/home/boss/.logseq-vector/config.json";
+        };
       };
 
       # Local file system — exposes ~/Documents for navigation and file operations.
