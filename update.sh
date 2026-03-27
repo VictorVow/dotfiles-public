@@ -305,7 +305,7 @@ fi
 success "All updates complete."
 
 # ── Home Manager News ─────────────────────────────────────────────────────────
-HM_NEWS_FILE="$SCRIPT_DIR/docs/home-manager-news.md"
+HM_NEWS_FILE="$SCRIPT_DIR/docs/research/home-manager-news.md"
 
 echo ""
 echo -e "${CYAN}${BOLD}━━━ Home Manager News ━━━${NC}"
