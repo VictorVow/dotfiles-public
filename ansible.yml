@@ -170,8 +170,37 @@
     #   nix/modules/programs.nix   — program configurations
 
     # ── Waydroid ──────────────────────────────────────────────────────────
-    # Waydroid itself is installed by 3rd-party-packages/waydroid.sh (PPA).
-    # These tasks load the required kernel module and manage the system service.
+    # waydroid binary is managed by Nix (home.packages) — no PPA needed.
+    # These tasks wire it up as a system service, following the same pattern
+    # as the Solaar udev rules above: resolve the Nix store path dynamically
+    # so it stays correct after waydroid updates (hms → ansible).
+    #
+    # Run order: hms first (installs waydroid binary), then ansible.
+
+    - name: Create waydroid-container systemd service pointing to Nix store binary
+      ansible.builtin.shell: |
+        WAYDROID_BIN=$(readlink -f $(su - boss -c 'which waydroid' 2>/dev/null) 2>/dev/null)
+        if [ -z "$WAYDROID_BIN" ]; then
+          echo "waydroid not found in boss PATH — run 'hms' first" >&2
+          exit 1
+        fi
+        cat > /etc/systemd/system/waydroid-container.service <<EOF
+        [Unit]
+        Description=Waydroid Container
+        After=network.target local-fs.target
+
+        [Service]
+        ExecStart=${WAYDROID_BIN} container start
+        ExecStop=${WAYDROID_BIN} container stop
+        Restart=on-failure
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+      become: yes
+      changed_when: false
+      failed_when: false  # non-fatal if hms hasn't run yet
 
     - name: Persist binder_linux kernel module for Waydroid
       ansible.builtin.copy:
@@ -187,7 +216,7 @@
         name: binder_linux
         state: present
       become: yes
-      failed_when: false  # non-fatal: module may not be available until after install + reboot
+      failed_when: false  # non-fatal: module file absent until linux-modules-extra is installed
 
     - name: Enable and start waydroid-container service
       ansible.builtin.systemd:
@@ -196,4 +225,4 @@
         state: started
         daemon_reload: yes
       become: yes
-      failed_when: false  # non-fatal: service unit absent until waydroid.sh has run
+      failed_when: false  # non-fatal: service unit absent if hms hasn't run yet

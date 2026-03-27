@@ -25,25 +25,25 @@ KDE Plasma (Wayland)
 
 ## First-Time Setup
 
+waydroid is installed via Nix (no external PPA required). The binary comes from nixpkgs;
+ansible wires it up as a system service by resolving the current Nix store path.
+
 ```bash
-# 1. Install waydroid + kernel module extras (adds PPA, installs package)
-bash 3rd-party-packages/waydroid.sh
-
-# 2. Enable service + load binder_linux module
-ansible-playbook ansible.yml --ask-become-pass
-
-# 3. Add waydroid-helper to PATH
+# 1. Install waydroid binary (and waydroid-helper) via Nix
 hms
 
-# 4. Download LineageOS system + vendor images with MindTheGapps (~1.5 GB)
+# 2. Create system service + load binder_linux kernel module
+ansible-playbook ansible.yml --ask-become-pass
+
+# 3. Download LineageOS system + vendor images with MindTheGapps (~1.5 GB)
 waydroid init -s LINEAGE -r gapps
 
-# 5. Start session and open Android home screen
+# 4. Start session and open Android home screen
 waydroid session start && waydroid show-full-ui
 ```
 
-If `binder_linux` doesn't load after step 2 (e.g. `linux-modules-extra-*` wasn't yet
-installed for the running kernel), reboot after step 1 and re-run step 2.
+Re-run steps 1→2 after any waydroid version upgrade (`hms` then `ansible`) so the
+service file stays pointed at the current Nix store path.
 
 Images land in `/var/lib/waydroid/images/`. To switch variants later (e.g. to vanilla):
 ```bash

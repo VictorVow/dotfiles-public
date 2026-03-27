@@ -18,6 +18,7 @@
     # ── Android / Mobile ─────────────────────────────────────────────────────
     android-tools  # Provides adb and fastboot
     scrcpy         # Mirror and control Android devices over USB/network
+    waydroid         # Android container for Linux (binary via Nix; service wired up by ansible.yml)
     waydroid-helper  # Waydroid extension manager: install ARM translation (libhoudini/libndk),
                      # Magisk, GApps helpers. Usage: sudo waydroid-helper (requires root to patch images)
 
