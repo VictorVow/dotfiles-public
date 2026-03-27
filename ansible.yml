@@ -168,3 +168,32 @@
     #   nix/modules/packages.nix   — home.packages list
     #   nix/modules/shell.nix      — npm AI CLIs via activation script
     #   nix/modules/programs.nix   — program configurations
+
+    # ── Waydroid ──────────────────────────────────────────────────────────
+    # Waydroid itself is installed by 3rd-party-packages/waydroid.sh (PPA).
+    # These tasks load the required kernel module and manage the system service.
+
+    - name: Persist binder_linux kernel module for Waydroid
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/waydroid.conf
+        content: "binder_linux\n"
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+
+    - name: Load binder_linux kernel module
+      community.general.modprobe:
+        name: binder_linux
+        state: present
+      become: yes
+      failed_when: false  # non-fatal: module may not be available until after install + reboot
+
+    - name: Enable and start waydroid-container service
+      ansible.builtin.systemd:
+        name: waydroid-container
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      become: yes
+      failed_when: false  # non-fatal: service unit absent until waydroid.sh has run
