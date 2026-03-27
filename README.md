@@ -1,15 +1,54 @@
-# installs
+# Overview
 
 System configuration for Kubuntu (KDE Plasma on Ubuntu). Manages packages, dotfiles, shell environment, and development containers through a layered approach: **Nix + Home Manager** handles user-space, **Ansible** handles system-level packages.
 
-## Prerequisites
+## Structure
+
+```
+installs/
+├── bootstrap.sh              # Install Nix + activate Home Manager (run first)
+├── migrate.sh                # Safely migrate from old apt/brew/pipx/npm setup
+├── update.sh                 # Update all package managers in one pass
+├── ansible.yml               # System-level packages (requires sudo)
+├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
+├── arkenfox.sh               # Firefox privacy hardening (Arkenfox)
+├── 3rd-party-packages/       # Scripts for tools not in standard repos
+│   ├── docker.sh
+│   ├── mullvad-vpn.sh
+│   ├── android-studio.sh
+│   └── ...
+├── nix/                      # Home Manager flake — all user-space config
+│   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)
+│   ├── home.nix              # Top-level Home Manager config, imports modules
+│   ├── dotfiles/             # Verbatim config files managed via home.file
+│   │   └── starship.toml     # Gruvbox dark powerline prompt theme
+│   └── modules/
+│       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
+│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop
+│       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
+│       └── distrobox.nix     # Declarative distrobox containers (dev + media)
+└── docs/
+    ├── architecture.md       # How the layers fit together and why
+    ├── packages.md           # Full inventory: what's managed where
+    ├── daily-workflow.md     # Common tasks and recipes
+    ├── migration.md          # How migrate.sh works, verification, recovery
+    ├── limitations.md        # What can't be Nix-managed + alternatives
+    └── system/               # Aspects that are already implemented, installed, in regular use. The entrypoint is architecture.md.
+    └── research/             # Things that are not yet implemented but could in the future be.
+    └── archive/              # Information regarding historically relevant information but no longer applied to the current system. 
+
+```
+
+
+
+## Quick Start
+
+### Prerequisites
 
 - Kubuntu / Ubuntu-based system
 - `curl` (available by default)
 - `git` (to clone this repo)
 - Not running as root
-
-## Quick Start
 
 ### Fresh install (new machine)
 
@@ -52,39 +91,6 @@ If you already have the old apt/brew/pipx/npm setup:
 | Enter dev container | `dbe dev` |
 | Enter media container | `dbe media` |
 | Roll back Home Manager | `home-manager generations` → `home-manager switch --switch-generation <N>` |
-
-## Structure
-
-```
-installs/
-├── bootstrap.sh              # Install Nix + activate Home Manager (run first)
-├── migrate.sh                # Safely migrate from old apt/brew/pipx/npm setup
-├── update.sh                 # Update all package managers in one pass
-├── ansible.yml               # System-level packages (requires sudo)
-├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
-├── arkenfox.sh               # Firefox privacy hardening (Arkenfox)
-├── 3rd-party-packages/       # Scripts for tools not in standard repos
-│   ├── docker.sh
-│   ├── mullvad-vpn.sh
-│   ├── android-studio.sh
-│   └── ...
-├── nix/                      # Home Manager flake — all user-space config
-│   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)
-│   ├── home.nix              # Top-level Home Manager config, imports modules
-│   ├── dotfiles/             # Verbatim config files managed via home.file
-│   │   └── starship.toml     # Gruvbox dark powerline prompt theme
-│   └── modules/
-│       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
-│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop
-│       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
-│       └── distrobox.nix     # Declarative distrobox containers (dev + media)
-└── docs/
-    ├── architecture.md       # How the layers fit together and why
-    ├── packages.md           # Full inventory: what's managed where
-    ├── daily-workflow.md     # Common tasks and recipes
-    ├── migration.md          # How migrate.sh works, verification, recovery
-    └── limitations.md        # What can't be Nix-managed + alternatives
-```
 
 ## Further Reading
 
