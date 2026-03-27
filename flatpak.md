@@ -104,6 +104,7 @@ net.newpipe.NewPipe
 net.runelite.RuneLite
 net.sapples.LiveCaptions
 net.sourceforge.squirrel_sql
+nl.hjdskes.gcolor3
 no.mifi.losslesscut
 org.DolphinEmu.dolphin-emu
 org.briarproject.Briar
