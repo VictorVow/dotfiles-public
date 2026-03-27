@@ -45,6 +45,27 @@ waydroid session start && waydroid show-full-ui
 Re-run steps 1→2 after any waydroid version upgrade (`hms` then `ansible`) so the
 service file stays pointed at the current Nix store path.
 
+After step 2, verify `binder_linux` loaded before proceeding:
+
+```bash
+lsmod | grep binder_linux
+# Expected output: binder_linux   <size>  0
+```
+
+If the output is empty, the module didn't load. Check why:
+
+```bash
+# See if the module file exists for the running kernel
+modinfo binder_linux
+
+# If "Module not found", the extras package is missing — install and reboot
+sudo apt install "linux-modules-extra-$(uname -r)"
+sudo reboot
+
+# After reboot, re-run ansible to load the module and start the service
+ansible-playbook ansible.yml --ask-become-pass
+```
+
 Images land in `/var/lib/waydroid/images/`. To switch variants later (e.g. to vanilla):
 ```bash
 sudo waydroid init -f -s LINEAGE -r vanilla
