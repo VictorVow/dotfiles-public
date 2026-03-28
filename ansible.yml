@@ -88,6 +88,11 @@
           - libvdpau1
           - libcurl4
 
+          # ── Gaming ────────────────────────
+          # Too much effort to get and keep working on a Nix setup
+          - steam
+          - lutris
+
           # ── System tray / indicator library ──────────────────────────────
           - libayatana-appindicator3-1     # Tray icon support for Lutris
 

@@ -112,33 +112,6 @@
                        # Important for Wine/Lutris — many Windows apps expect these metrics
 
     # ── Gaming ────────────────────────────────────────────────────────────────
-    # Open-source gaming platform (Wine/Proton/native games).
-    #
-    # extraPkgs puts libayatana-appindicator into Lutris's FHS rootfs so the
-    # .so is present at /usr/lib64/. However, the typelib is NOT automatically
-    # found by Python-gi there — the Lutris FHS env places it at /usr/lib64/
-    # whereas Python-gi searches /usr/lib/girepository-1.0/ by default.
-    # The wrapProgram prefix injects the Nix store path of the typelib into
-    # GI_TYPELIB_PATH on the outer bwrap script, before the sandbox starts;
-    # this env var persists into the bwrap namespace where Python runs.
-    # procps ensures pgrep is present in the FHS sandbox (Lutris's internal
-    # game bwrap overlays /usr/bin from the Nix profile; procps must be listed
-    # in extraPkgs so it is included in that overlay).
-    # See docs/buildFHSEnv.md for full context.
-    # https://github.com/NixOS/nixpkgs/issues/503530
-    (symlinkJoin {
-      name = "lutris";
-      paths = [ (lutris.override {
-        extraPkgs      = pkgs: [ pkgs.libayatana-appindicator pkgs.procps ];
-        extraLibraries = pkgs: [ pkgs.libayatana-appindicator ];
-      }) ];
-      buildInputs = [ makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/lutris \
-          --prefix GI_TYPELIB_PATH : "${libayatana-appindicator}/lib/girepository-1.0"
-      '';
-    })
-    steam     # Valve's game distribution platform (requires allowUnfree = true)
     gamemode  # Feral Interactive's game performance optimiser
     gamescope # Valve's micro-compositor for gaming (FSR, resolution scaling)
               # Note: plasma-gamemode (KDE integration) stays in apt
@@ -216,6 +189,7 @@
     # ── Syncing ───────────────────────────────────────────────────────────────
     syncthing # Continuous file synchronisation (replaces apt install syncthing)
               # Start manually with: syncthing serve
+    syncthingtray # Tray app for Syncthing (replaces pre-built binary)
 
     glow # Markdown viewer
   ];
