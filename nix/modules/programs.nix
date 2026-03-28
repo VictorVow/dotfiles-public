@@ -519,6 +519,13 @@ in
         args    = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
       };
 
+      # NixOS/nixpkgs — real package names, options, and Home Manager config lookups.
+      # No NixOS required; queries upstream APIs. Works on any system.
+      nixos = {
+        command = "uvx";
+        args    = [ "mcp-nixos" ];
+      };
+
     };
   };
 

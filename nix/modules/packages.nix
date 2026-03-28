@@ -59,6 +59,7 @@
     # ── Security / Privacy ────────────────────────────────────────────────────
     gnupg   # GNU Privacy Guard — GPG encryption and signing
     firejail # Sandboxing tool for running applications in restricted environments
+    veracrypt # On-the-fly disk/file-container encryption (VeraCrypt GUI + CLI)
 
     # ── Hardware / Peripherals ────────────────────────────────────────────────
     piper   # GTK application for configuring gaming mice (uses ratbagd)

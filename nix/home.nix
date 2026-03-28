@@ -51,4 +51,15 @@
     Type=Application
     X-KDE-autostart-after=panel
   '';
+
+  # Start VeraCrypt background task in the system tray on login.
+  # WAYLAND_DISPLAY is unset so wxWidgets falls back to the XEmbed tray
+  # protocol via XWayland, where xembedsniproxy bridges it to KDE's SNI tray.
+  home.file.".config/autostart/veracrypt.desktop".text = ''
+    [Desktop Entry]
+    Name=VeraCrypt
+    Exec=env WAYLAND_DISPLAY= ${pkgs.veracrypt}/bin/veracrypt --background-task
+    Type=Application
+    X-KDE-autostart-after=panel
+  '';
 }

@@ -117,7 +117,7 @@
 
       # Nix shortcuts
       nsp   = "nix search nixpkgs";       # Search nixpkgs: nsp <package>
-      nsh   = "nix shell nixpkgs#";       # Temp shell with package: nsh <package>
+      nsh   = "nix shell nixpkgs#";       # Temp shell with package: nsh <package> | it'll now be available as if it was installed (`which package`)
 
       # Distrobox shortcuts
       dbe   = "distrobox enter";
