@@ -183,6 +183,91 @@
     mouseless  # Keyboard-driven app-switcher overlay
                # Replaces manually-installed ~/.local/bin/mouseless
 
+    # ── App Launcher ─────────────────────────────────────────────────────────
+    rofi  # dmenu/launcher with Wayland support (rofi-wayland merged into rofi); invoked by vault-launch
+    dex           # .desktop executor — handles Exec= field codes, Flatpak, Terminal=true
+
+    (pkgs.writeShellApplication {
+      name = "vault-launch";
+      runtimeInputs = [ pkgs.rofi pkgs.dex pkgs.libnotify ];
+      text = ''
+        VAULT="$HOME/Vaults/gocryptfs1/0SHORTCUTS"
+
+        if [[ ! -d "$VAULT/0STARTUP" ]]; then
+          notify-send -u critical "vault-launch" "Vault is not mounted"
+          exit 1
+        fi
+
+        TMPDIR_LOCAL=$(mktemp -d)
+        trap 'rm -rf "$TMPDIR_LOCAL"' EXIT
+        INDEX="$TMPDIR_LOCAL/index"   # PATH<TAB>TYPE  (one line per item, tab-separated)
+        INPUT="$TMPDIR_LOCAL/input"   # rofi dmenu input (null-byte icon annotations)
+
+        add_item() {
+          local path="$1" type="$2" display="$3" icon="$4"
+          printf '%s\t%s\n' "$path" "$type" >> "$INDEX"
+          if [[ -n "$icon" ]]; then
+            printf '%s\x00icon\x1f%s\n' "$display" "$icon" >> "$INPUT"
+          else
+            printf '%s\n' "$display" >> "$INPUT"
+          fi
+        }
+
+        process_file() {
+          local file="$1"
+          local category="" name="" icon="" display=""
+
+          # Category prefix for items inside 1COMMON subdirectories
+          if [[ "$file" == "$VAULT/1COMMON/"*"/"* ]]; then
+            local rel
+            rel="''${file#"$VAULT/1COMMON/"}"
+            category="''${rel%%/*}"
+          fi
+
+          if [[ "$file" == *.desktop ]]; then
+            name=$(grep -m1 "^Name=" "$file" 2>/dev/null | cut -d= -f2-) || true
+            [[ -z "$name" ]] && return 0
+            icon=$(grep -m1 "^Icon=" "$file" 2>/dev/null | cut -d= -f2-) || true
+            display="''${category:+[$category] }$name"
+            add_item "$file" "desktop" "$display" "$icon"
+          elif [[ -x "$file" ]]; then
+            name=$(basename "$file")
+            display="''${category:+[$category] }$name"
+            add_item "$file" "exec" "$display" ""
+          fi
+        }
+
+        while IFS= read -r -d "" f; do
+          process_file "$f"
+        done < <(
+          {
+            # All of 0SHORTCUTS except .git and 2OTHER (recurse into 1COMMON subdirs)
+            find "$VAULT" \
+              \( -path "$VAULT/.git" -o -path "$VAULT/2OTHER" \) -prune \
+              -o \( -type f -o \( -type l -xtype f \) \) -print0
+
+            # 2OTHER top-level only; -xtype f excludes symlinks pointing to directories
+            find "$VAULT/2OTHER" -maxdepth 1 \
+              \( -type f -o \( -type l -xtype f \) \) -print0
+          } | sort -z
+        )
+
+        [[ ! -s "$INPUT" ]] && { notify-send "vault-launch" "No launchable items found"; exit 0; }
+
+        selected_idx=$(rofi -dmenu -show-icons -p " Launch" -i -format "i" -no-custom \
+          < "$INPUT" 2>/dev/null) || exit 0
+        [[ -z "$selected_idx" ]] && exit 0
+
+        item_path=$(awk -F'\t' -v n="$((selected_idx + 1))" 'NR == n { print $1 }' "$INDEX")
+        item_type=$(awk -F'\t' -v n="$((selected_idx + 1))" 'NR == n { print $2 }' "$INDEX")
+
+        case "$item_type" in
+          desktop) dex "$item_path" ;;
+          exec)    nohup "$item_path" > /dev/null 2>&1 & ;;
+        esac
+      '';
+    })
+
     # ── Prompt / Terminal UI ──────────────────────────────────────────────────
     starship # Cross-shell prompt written in Rust (replaces brew install starship)
              # Also configured via programs.starship in programs.nix

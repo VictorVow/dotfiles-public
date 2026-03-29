@@ -469,6 +469,18 @@ in
     nix-direnv.enable = true;
   };
 
+  # ── App Launcher ──────────────────────────────────────────────────────────────
+
+  programs.rofi = {
+    enable  = true;
+    package = pkgs.rofi;
+    font    = "Noto Sans 11";
+    extraConfig = {
+      show-icons = true;
+      icon-theme = "breeze";
+    };
+  };
+
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
