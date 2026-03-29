@@ -643,6 +643,7 @@ in
     };
 
     # ── Commands — creates ~/.claude/commands/<key>.md ────────────────────────────
+    # Can be run directly within a Claude window (similar to `/effort` in order to take an action)
 
     commands = {
 
@@ -655,6 +656,38 @@ in
         3. If it failed, show the full error and suggest a fix.
         4. Don't run `home-manager news` unless it's part of the update.sh script. 
       '';
+
+      "git-commit" = ''
+        ---
+        description: Make a git commit of the changes from this Claude session.
+        ---
+        - `git add` only the files touched by this session.
+        - git commit messages should follow the Conventional Commit structure i.e.
+        <type>[optional scope]: <description>
+
+        [optional body]
+
+        [optional footer]
+          - Examples:
+            - feat: allow provided config object to extend other configs
+            - docs(lang): correct spelling of CHANGELOG
+            - fix: minor typos in code
+
+              see the issue for details on the typos fixed
+
+              fixes issue #12
+        - Aim to have a descriptive commit message body unless the change is trivial
+          - Examples:
+            - feat(api.ts): add OpenAI class with generateCommitMessage method
+
+              This commit adds a new OpenAI class with a generateCommitMessage method that uses 
+              the OpenAI API to generate a commit message based on an array of messages. The 
+              method takes an array of ChatCompletionRequestMessage objects and returns a 
+              Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI 
+              class is exported as a singleton instance named api.
+            - fix(README): fixed two small typos
+      '';
+
 
       "git-who" = ''
         ---
