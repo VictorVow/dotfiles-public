@@ -152,9 +152,9 @@ in
       bind -n C-Tab  next-window
       bind -n C-BTab previous-window
 
-      # New/close window without prefix — Ctrl+N / Ctrl+W
+      # New/close window without prefix — Ctrl+N / Ctrl+Q
       bind -n C-n new-window -c "#{pane_current_path}"
-      bind -n C-w kill-window
+      bind -n C-q confirm-before -p "kill window? (y/n)" kill-window
     '';
   };
 
