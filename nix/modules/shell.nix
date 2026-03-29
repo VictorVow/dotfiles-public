@@ -13,6 +13,11 @@
     # automatically by their respective programs.* modules in programs.nix.
 
     initExtra = ''
+      # ── TTY: disable XON/XOFF flow control ──────────────────────────────────
+      # Frees C-s and C-q for tmux/readline (XON/XOFF is a 70s serial-terminal
+      # feature with no practical use on modern terminals).
+      stty -ixon
+
       # ── HM session vars: re-source when nix store path changes ──────────────
       # home.sessionVariables are blocked by __HM_SESS_VARS_SOURCED (a "source
       # once" guard). New vars added after login never appear until full logout,
