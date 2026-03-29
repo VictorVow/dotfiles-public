@@ -1,0 +1,5 @@
+fvm 4.0.5
+gemini-cli 0.35.2
+git-credential-libsecret 2.53.0
+icu4c@76 76.1_2
+nvm 0.40.4
