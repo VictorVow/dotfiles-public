@@ -102,6 +102,25 @@
         fastfetch
       }
 
+      # ── tmux-agent: 4-pane agent workspace ──────────────────────────────────
+      # Works in any context: inside an existing tmux session (applies splits to
+      # the current window) or outside tmux (creates a new session first).
+      #          67%        33%
+      # ┌────────────────────┬──────────┐
+      # │    top-L           │  top-R   │   67%
+      # │                    │          │
+      # ├───────────────┬────┴──────────┤
+      # │    bot-L      │    bot-R      │   33%
+      # └───────────────┴───────────────┘
+      #       50%             50%
+      tmux-agent() {
+        if [ -n "$TMUX" ]; then
+          tmux split-window -v -p 33 \; select-pane -t 0 \; split-window -h -p 33 \; select-pane -t 2 \; split-window -h \; select-pane -t 0 \; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+        else
+          tmux new-session \; split-window -v -p 33 \; select-pane -t 0 \; split-window -h -p 33 \; select-pane -t 2 \; split-window -h \; select-pane -t 0 \; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+        fi
+      }
+
       # eza uses its own built-in colour support (dircolors not needed)
     '';
 
@@ -130,17 +149,6 @@
       ll  = "eza -l";
       la  = "eza -la";
       lt  = "eza --tree";
-
-      # Launch a tmux agent workspace (auto-numbered session, no conflicts):
-      #          67%        33%
-      # ┌────────────────────┬──────────┐
-      # │    top-L           │  top-R   │   67%
-      # │                    │          │
-      # ├───────────────┬────┴──────────┤
-      # │    bot-L      │    bot-R      │   33%
-      # └───────────────┴───────────────┘
-      #       50%             50%
-      tmux-agent = "tmux new-session \\; split-window -v -p 33 \\; select-pane -t 0 \\; split-window -h -p 33 \\; select-pane -t 2 \\; split-window -h \\; select-pane -t 0 \\; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter";
     };
   };
 
