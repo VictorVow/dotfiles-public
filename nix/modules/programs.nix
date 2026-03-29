@@ -130,8 +130,31 @@ in
       set -g pane-border-status top
       set -g pane-border-style fg="#00c1ff",bg=default
 
-      # Visual indicator in the status bar when the PREFIX key is active
-      set -g status-right "#{?client_prefix,⌨️  PREFIX,}"
+      # ── Status bar ──────────────────────────────────────────────────────────
+      set -g status-style         bg="#1a1a2e",fg="#cdd6f4"
+      set -g status-left          " [#S] "
+      set -g status-left-style    fg="#00c1ff",bold
+      set -g status-right         "#{?client_prefix,⌨️  PREFIX,}"
+      set -g status-right-style   fg="#ffcc00",bold
+
+      # Inactive windows: dim text, no background
+      set -g window-status-format        " #I:#W#{?window_flags,#{window_flags}, } "
+      set -g window-status-style         fg="#666688",bg=default
+
+      # Active window: cyan background, dark text, bold
+      set -g window-status-current-format " #I:#W#{?window_flags,#{window_flags}, } "
+      set -g window-status-current-style  fg="#1a1a2e",bg="#00c1ff",bold
+
+      # Window with activity: amber highlight
+      set -g window-status-activity-style fg="#ffcc00",bg=default
+
+      # Cycle windows without prefix — Ctrl+Tab / Ctrl+Shift+Tab
+      bind -n C-Tab  next-window
+      bind -n C-BTab previous-window
+
+      # New/close window without prefix — Ctrl+N / Ctrl+W
+      bind -n C-n new-window -c "#{pane_current_path}"
+      bind -n C-w kill-window
     '';
   };
 
