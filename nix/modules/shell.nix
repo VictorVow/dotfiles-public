@@ -102,8 +102,7 @@
         fastfetch
       }
 
-      # Colours for ls
-      eval "$(dircolors -b)"
+      # eza uses its own built-in colour support (dircolors not needed)
     '';
 
     # ── Shell Aliases ──────────────────────────────────────────────────────────
@@ -126,8 +125,11 @@
       # System update shortcut — runs all package managers in one pass
       update-all = "~/Documents/ESSENTIALS/installs/update.sh";
 
-      # Colours for ls - may be redundantc
-      ls = "ls --color=auto";
+      # eza replaces uutils ls (Ubuntu 24.04 default) which has broken locale sorting
+      ls  = "eza";
+      ll  = "eza -l";
+      la  = "eza -la";
+      lt  = "eza --tree";
 
       # Launch a tmux agent workspace (auto-numbered session, no conflicts):
       #          67%        33%
