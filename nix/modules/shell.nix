@@ -114,10 +114,19 @@
       # └───────────────┴───────────────┘
       #       50%             50%
       tmux-agent() {
+        local -a splits=(
+          split-window -v -p 33 \;
+          select-pane -t 0 \;
+          split-window -h -p 33 \;
+          select-pane -t 2 \;
+          split-window -h \;
+          select-pane -t 0 \;
+          send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+        )
         if [ -n "$TMUX" ]; then
-          tmux split-window -v -p 33 \; select-pane -t 0 \; split-window -h -p 33 \; select-pane -t 2 \; split-window -h \; select-pane -t 0 \; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+          tmux "''${splits[@]}"
         else
-          tmux new-session \; split-window -v -p 33 \; select-pane -t 0 \; split-window -h -p 33 \; select-pane -t 2 \; split-window -h \; select-pane -t 0 \; send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+          tmux new-session \; "''${splits[@]}"
         fi
       }
 
