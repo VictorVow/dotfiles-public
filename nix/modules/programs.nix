@@ -175,6 +175,39 @@ in
   # Edit nix/dotfiles/starship.toml to change the prompt appearance.
   home.file.".config/starship.toml".source = ../dotfiles/starship.toml;
 
+  # ── Shell Input (readline / .inputrc) ────────────────────────────────────────
+
+  programs.readline = {
+    enable = true;
+    variables = {
+      completion-ignore-case     = true;   # case-insensitive tab completion
+      show-all-if-ambiguous      = true;   # show list on first Tab, not second
+      colored-stats              = true;   # color completions by file type (LS_COLORS)
+      colored-completion-prefix  = true;   # color the typed prefix in the list
+      expand-tilde               = false;  # keep ~ as ~ instead of expanding to /home/boss
+      skip-completed-text        = true;   # no duplicate chars when completing mid-word
+      mark-symlinked-directories = true;   # append / to symlinks → directories
+      completion-map-case        = true;   # treat - and _ as equivalent
+      enable-bracketed-paste     = true;   # prevent accidental execution of pasted text
+      echo-control-characters    = false;  # don't print ^C on Ctrl+C
+      bell-style                 = "none"; # no audible or visible bell
+      page-completions           = false;  # show list inline, not via pager
+      keyseq-timeout             = 50;     # ms to wait for escape sequences (default 500)
+    };
+    bindings = {
+      # Up/Down: search history by already-typed prefix (e.g. "git" + Up → git commands)
+      "\\e[A"    = "history-search-backward";
+      "\\e[B"    = "history-search-forward";
+      "\\eOA"    = "history-search-backward";  # alternate escape sequence (kitty etc.)
+      "\\eOB"    = "history-search-forward";
+      # Delete key → forward-delete character
+      "\\e[3~"   = "delete-char";
+      # Ctrl+Right / Ctrl+Left → move word by word
+      "\\e[1;5C" = "forward-word";
+      "\\e[1;5D" = "backward-word";
+    };
+  };
+
   # Tell ripgrep (and tools that use it, like Claude Code and Gemini CLI) to skip
   # the rclone FUSE mount — traversing it causes high CPU on the rclone mount process.
   home.file.".ignore".text = ''
