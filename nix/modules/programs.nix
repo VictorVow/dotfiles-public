@@ -686,18 +686,8 @@ in
               Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI 
               class is exported as a singleton instance named api.
             - fix(README): fixed two small typos
-      '';
-
-
-      "git-who" = ''
-        ---
-        description: Show the active git identity for this repo and offer to switch.
-        ---
-        Run `git config user.name` and `git config user.email`.
-        Known identities:
-        - Identity 1 (default): Victor239 <12621257+Victor239@users.noreply.github.com>
-        - Identity 2 (personal): USER2   <22418751+USER2@users.noreply.github.com>
-        If neither matches, note it. Offer `git su 1` or `git su 2` to switch.
+        - Do not `git push` unless it's necessary because a pull request, workflow action or 
+          something else in our intended next steps needs the commit pushed first.
       '';
 
       "dbox-status" = ''
