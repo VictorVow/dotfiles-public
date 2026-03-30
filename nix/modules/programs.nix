@@ -450,6 +450,9 @@ in
       "terminal.integrated.allowChords"  = false;
       "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
 
+      # ── Theme ──────────────────────────────────────────────────────────────────
+      "workbench.colorTheme" = "Default Dark+";
+
       # ── Claude Code ────────────────────────────────────────────────────────────
       "claudeCode.preferredLocation" = "panel";
 
