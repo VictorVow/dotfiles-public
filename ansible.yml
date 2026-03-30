@@ -94,7 +94,8 @@
           - lutris
 
           # ── System tray / indicator library ──────────────────────────────
-          - libayatana-appindicator3-1     # Tray icon support for Lutris
+          - libayatana-appindicator3-1         # Tray icon support for Lutris (C library)
+          - gir1.2-ayatanaappindicator3-0.1    # GIR typelib needed by Python-GI to load AppIndicator
 
           # ── XDG Desktop Portal ────────────────────────────────────────────
           # Needed for Flameshot + NormCap to work on Wayland
@@ -241,3 +242,66 @@
         daemon_reload: yes
       become: yes
       failed_when: false  # non-fatal: service unit absent if hms hasn't run yet
+
+    # ── Suspend / Lid-close fix ────────────────────────────────────────────
+    # Prevents spurious ACPI lid events (Framework 13 AMD EC bug with CalDigit
+    # TS4 dock) from triggering suspend. Crash analysis: 2026-03-30 00:14 —
+    # false lid-close event fired, KWin D-Bus inhibit rejected, systemd-sleep
+    # froze user.slice for 30s → both displays went black, required hard reset.
+    - name: Ensure systemd logind drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/logind.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      become: yes
+
+    - name: Create systemd logind drop-in to ignore lid events
+      ansible.builtin.copy:
+        dest: /etc/systemd/logind.conf.d/lid.conf
+        content: |
+          [Login]
+          HandleLidSwitch=ignore
+          HandleLidSwitchExternalPower=ignore
+          HandleLidSwitchDocked=ignore
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+      notify: Restart systemd-logind
+
+    - name: Ensure systemd system.conf drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/system.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      become: yes
+
+    - name: Create systemd freeze timeout drop-in
+      # Extends the cgroup freeze window from 30s to 90s. If suspend is ever
+      # triggered while KWin is active, this gives it more time to freeze
+      # cleanly rather than hanging indefinitely until a hard reset is needed.
+      ansible.builtin.copy:
+        dest: /etc/systemd/system.conf.d/freeze-timeout.conf
+        content: |
+          [Manager]
+          DefaultTimeoutStopSec=90s
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+      notify: Reload systemd daemon
+
+  handlers:
+    - name: Restart systemd-logind
+      ansible.builtin.systemd:
+        name: systemd-logind
+        state: restarted
+      become: yes
+
+    - name: Reload systemd daemon
+      ansible.builtin.command: systemctl daemon-reload
+      become: yes
