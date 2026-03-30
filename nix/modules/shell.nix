@@ -135,6 +135,12 @@
         fi
       }
 
+      # ── md/Markdown: open file(s) in MarkText Flatpak ──────────────────────────
+      md() {
+        /usr/bin/flatpak run --branch=stable --arch=x86_64 --command=marktext --file-forwarding com.github.marktext.marktext @@ "$@" @@ &
+        disown
+      }
+
       # eza uses its own built-in colour support (dircolors not needed)
     '';
 
@@ -163,6 +169,7 @@
       ll  = "eza -l";
       la  = "eza -la";
       lt  = "eza --tree";
+
     };
   };
 
