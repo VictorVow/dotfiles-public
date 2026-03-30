@@ -447,7 +447,8 @@ in
       "explorer.confirmDelete" = false;
 
       # ── Terminal ───────────────────────────────────────────────────────────────
-      "terminal.integrated.allowChords" = false;
+      "terminal.integrated.allowChords"  = false;
+      "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
 
       # ── Claude Code ────────────────────────────────────────────────────────────
       "claudeCode.preferredLocation" = "panel";
