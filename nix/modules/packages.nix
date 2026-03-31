@@ -268,6 +268,68 @@
       '';
     })
 
+    # ── Git Utilities ────────────────────────────────────────────────────────
+    (pkgs.writeShellApplication {
+      name = "git-checkout-fb";
+      runtimeInputs = [ pkgs.git ];
+      text = ''
+        usage() {
+          echo "Usage: git checkout-fb <github-url>"
+          echo "Example: git checkout-fb https://github.com/owner/repo/tree/branch-name"
+          exit 1
+        }
+
+        [[ $# -eq 1 ]] || usage
+
+        url="$1"
+
+        if [[ ! "$url" =~ ^https://github\.com/([^/]+)/([^/]+)/tree/(.+)$ ]]; then
+          echo "Error: URL must be in format: https://github.com/owner/repo/tree/branch"
+          exit 1
+        fi
+
+        owner="''${BASH_REMATCH[1]}"
+        repo="''${BASH_REMATCH[2]}"
+        branch="''${BASH_REMATCH[3]}"
+        remote_url="https://github.com/$owner/$repo"
+
+        echo "Fetching $owner/$repo @ $branch"
+
+        # Reuse an existing remote if it already points to the same repo
+        added_remote=false
+        remote_name=$(git remote -v | awk -v url="$remote_url" '$2 == url && $3 == "(fetch)" {print $1; exit}')
+
+        if [[ -z "$remote_name" ]]; then
+          if git remote | grep -q '^fork$'; then
+            existing_fork_url=$(git remote get-url fork)
+            echo "Error: 'fork' remote already exists pointing to $existing_fork_url"
+            echo "Remove it first: git remote remove fork"
+            exit 1
+          fi
+          git remote add fork "$remote_url"
+          remote_name="fork"
+          added_remote=true
+        else
+          echo "Using existing remote '$remote_name'"
+        fi
+
+        git fetch "$remote_name" "$branch"
+
+        if git show-ref --verify --quiet "refs/heads/$branch"; then
+          echo "Note: local branch '$branch' already exists — checking it out (not updated)"
+          git checkout "$branch"
+        else
+          git checkout -b "$branch" FETCH_HEAD
+        fi
+
+        if $added_remote; then
+          git remote remove fork
+        fi
+
+        echo "Done. On branch '$branch' (from $remote_url)"
+      '';
+    })
+
     # ── Prompt / Terminal UI ──────────────────────────────────────────────────
     starship # Cross-shell prompt written in Rust (replaces brew install starship)
              # Also configured via programs.starship in programs.nix

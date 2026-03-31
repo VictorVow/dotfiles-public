@@ -61,6 +61,7 @@ in
       "credential \"https://gist.github.com\"".helper = "libsecret";
       "credential \"https://dev.azure.com\"".useHttpPath = true;
 
+      # git checkout-fb (shell application) - checkout an arbitrary branch and then remove that remote
       alias.ll = "log --oneline";
       core.editor = "micro";
       alias.su =
