@@ -171,6 +171,20 @@
     #   nix/modules/shell.nix      — npm AI CLIs via activation script
     #   nix/modules/programs.nix   — program configurations
 
+    # ── Podman / container infrastructure ────────────────────────────────────
+    # Ubuntu 24.04+ sets kernel.apparmor_restrict_unprivileged_userns=1, which
+    # blocks crun from writing uid_map when starting rootless containers.
+    # /etc/apparmor.d/crun ships with the system and has the correct userns
+    # permission, but isn't loaded into the kernel automatically after package
+    # install — this task ensures it is. Without it, podman compose fails with:
+    #   crun: write to `uid_map`: Operation not permitted: OCI permission denied
+    - name: Load AppArmor profile for crun (required for rootless podman)
+      ansible.builtin.command:
+        cmd: apparmor_parser -r /etc/apparmor.d/crun
+      become: yes
+      changed_when: false
+      when: ansible_facts['os_family'] == 'Debian'
+
     # ── Waydroid ──────────────────────────────────────────────────────────
     # waydroid binary is managed by Nix (home.packages) — no PPA needed.
     # These tasks wire it up as a system service, following the same pattern
