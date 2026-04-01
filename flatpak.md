@@ -23,6 +23,7 @@ com.github.PintaProject.Pinta
 com.github.ahrm.sioyek
 com.github.dynobo.normcap
 com.github.jeromerobert.pdfarranger
+com.github.marktext.marktext
 com.github.mtkennerly.ludusavi
 com.github.tchx84.Flatseal
 com.github.unrud.VideoDownloader
