@@ -539,6 +539,7 @@ in
     enable  = true;
     package = pkgs.rofi;
     font    = "Noto Sans 11";
+    theme   = "Arc-Dark";
     extraConfig = {
       show-icons = true;
       icon-theme = "breeze";

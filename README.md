@@ -2,7 +2,9 @@
 
 System configuration for Kubuntu (KDE Plasma on Ubuntu). Manages packages, dotfiles, shell environment, and development containers through a layered approach: **Nix + Home Manager** handles user-space, **Ansible** handles system-level packages.
 
-## Structure
+## Repo Structure
+
+Note: High-level view with not every file/directory is listed, only the most important ones.
 
 ```
 installs/
@@ -28,14 +30,16 @@ installs/
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 └── docs/
-    ├── architecture.md       # How the layers fit together and why
+    └── archive/              # Previously relevant, only kept for historical purposes
+    └── system/               # Aspects that are already implemented, installed, in regular use.
+        ├── architecture.md       # How the layers fit together and why
+        ...
+    └── research/             # Things that are not yet implemented but in the future could be.
     ├── packages.md           # Full inventory: what's managed where
     ├── daily-workflow.md     # Common tasks and recipes
     ├── migration.md          # How migrate.sh works, verification, recovery
     ├── limitations.md        # What can't be Nix-managed + alternatives
-    └── system/               # Aspects that are already implemented, installed, in regular use. The entrypoint is architecture.md.
-    └── research/             # Things that are not yet implemented but could in the future be.
-    └── archive/              # Information regarding historically relevant information but no longer applied to the current system. 
+    └── ...
 
 ```
 
