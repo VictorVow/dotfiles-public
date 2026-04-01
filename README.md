@@ -23,23 +23,25 @@ installs/
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)
 │   ├── home.nix              # Top-level Home Manager config, imports modules
 │   ├── dotfiles/             # Verbatim config files managed via home.file
-│   │   └── starship.toml     # Gruvbox dark powerline prompt theme
+│   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
+│   │   └── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
-│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop
+│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop, claude-code
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 └── docs/
-    └── archive/              # Previously relevant, only kept for historical purposes
-    └── system/               # Aspects that are already implemented, installed, in regular use.
-        ├── architecture.md       # How the layers fit together and why
-        ...
-    └── research/             # Things that are not yet implemented but in the future could be.
-    ├── packages.md           # Full inventory: what's managed where
-    ├── daily-workflow.md     # Common tasks and recipes
-    ├── migration.md          # How migrate.sh works, verification, recovery
-    ├── limitations.md        # What can't be Nix-managed + alternatives
-    └── ...
+    ├── archive/              # Previously relevant, only kept for historical purposes
+    ├── system/               # Reference docs for this system's config (implemented, in use)
+    │   ├── architecture.md   # How the layers fit together and why
+    │   └── ...
+    └── research/             # Deep-dive research and comparison docs
+        ├── system/           # Tools actively in use on this system
+        │   └── claude-code.md
+        ├── git-worktrees.md
+        ├── app-launchers.md
+        ├── mesh-networks.md
+        └── ...
 
 ```
 
