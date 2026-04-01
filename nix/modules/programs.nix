@@ -13,6 +13,9 @@ let
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
     effortLevel         = "medium";
+    permissions = {
+      allow = [ "WebFetch" "WebSearch" ];
+    };
     hooks = {
       Stop             = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh stop";      }]; }];
       Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
@@ -738,5 +741,18 @@ in
     fi
     $DRY_RUN_CMD install -m 644 ${claudeCodeSettings} "$dest"
   '';
+
+  # ── SSH ──────────────────────────────────────────────────────────────────────
+
+  programs.ssh = {
+    enable = true;
+    # Suppress deprecation warning — defaults will be removed in a future HM release;
+    # all desired settings are explicitly set in matchBlocks below.
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      serverAliveInterval = 60;
+      serverAliveCountMax = 10;
+    };
+  };
 
 }
