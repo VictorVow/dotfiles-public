@@ -156,9 +156,12 @@ in
       bind -n C-Tab  next-window
       bind -n C-BTab previous-window
 
-      # New/close window without prefix — Ctrl+N / Ctrl+Q
+      # New window without prefix — Ctrl+N
       bind -n C-n new-window -c "#{pane_current_path}"
-      bind -n C-q confirm-before -p "kill window? (y/n)" kill-window
+      # Close window with prefix — prefix+X
+      # Note: C-w conflicts with Readline delete word. C-q conflicts with Micro quit
+      # (prefix) C-x = kill pane, so it mirrors this pattern
+      bind X confirm-before -p "kill window? (y/n)" kill-window
     '';
   };
 

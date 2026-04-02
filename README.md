@@ -8,12 +8,10 @@ Note: High-level view with not every file/directory is listed, only the most imp
 
 ```
 installs/
-├── bootstrap.sh              # Install Nix + activate Home Manager (run first)
-├── migrate.sh                # Safely migrate from old apt/brew/pipx/npm setup
+├── bootstrap.sh              # Install Nix + activate Home Manager on a fresh system
 ├── update.sh                 # Update all package managers in one pass
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
-├── arkenfox.sh               # Firefox privacy hardening (Arkenfox)
 ├── 3rd-party-packages/       # Scripts for tools not in standard repos
 │   ├── docker.sh
 │   ├── mullvad-vpn.sh
@@ -30,14 +28,12 @@ installs/
 │       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop, claude-code
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
-└── docs/
+└── docs/                     # All documentation
     ├── archive/              # Previously relevant, only kept for historical purposes
     ├── system/               # Reference docs for this system's config (implemented, in use)
     │   ├── architecture.md   # How the layers fit together and why
     │   └── ...
     └── research/             # Deep-dive research and comparison docs
-        ├── system/           # Tools actively in use on this system
-        │   └── claude-code.md
         ├── git-worktrees.md
         ├── app-launchers.md
         ├── mesh-networks.md
