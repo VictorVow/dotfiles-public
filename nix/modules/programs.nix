@@ -534,6 +534,9 @@ in
     enable = true;
     enableBashIntegration = true;
     nix-direnv.enable = true;
+    config = {
+      global.hide_env_diff = true;
+    };
   };
 
   # ── App Launcher ──────────────────────────────────────────────────────────────
@@ -654,10 +657,10 @@ in
 
     };
 
-    # ── Commands — creates ~/.claude/commands/<key>.md ────────────────────────────
+    # ── Skills — creates ~/.claude/skills/<key>/SKILL.md ─────────────────────────
     # Can be run directly within a Claude window (similar to `/effort` in order to take an action)
 
-    commands = {
+    skills = {
 
       "nix-switch" = ''
         ---
