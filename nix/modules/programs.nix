@@ -436,10 +436,9 @@ in
 
       userSettings = {
       # ── Telemetry ──────────────────────────────────────────────────────────────
-      "telemetry.enableCrashReporter" = false;
-      "telemetry.enableTelemetry"     = false;
+      "telemetry.telemetryLevel"      = "off";
       "redhat.telemetry.enabled"      = false;
-      "amazonQ.telemetry"             = false;
+
 
       # ── Editor ─────────────────────────────────────────────────────────────────
       "editor.inlineSuggest.enabled" = true;
@@ -464,12 +463,10 @@ in
       "claudeCode.preferredLocation" = "panel";
 
       # ── Copilot ────────────────────────────────────────────────────────────────
-      "github.copilot.advanced"                    = {};
-      "github.copilot.nextEditSuggestions.enabled" = true;
+"github.copilot.nextEditSuggestions.enabled" = true;
 
       # ── Continue ───────────────────────────────────────────────────────────────
-      "continue.showInlineTip" = false;
-      # yaml.schemas intentionally omitted: version-specific Continue paths become
+# yaml.schemas intentionally omitted: version-specific Continue paths become
       # stale on every extension update; Continue manages its own schema registration.
 
       # ── vscode-neovim ──────────────────────────────────────────────────────────
@@ -506,7 +503,6 @@ in
       # ── Misc extension settings ─────────────────────────────────────────────────
       "dreammaker.autoUpdate"   = true;
       "dreammaker.tickOnCreate" = true;
-      "cmake.showOptionsMovedNotification"           = false;
       "docker.extension.enableComposeLanguageServer" = false;
       "java.autobuild.enabled"                       = false;
       "java.imports.gradle.wrapper.checksums" = [
@@ -613,6 +609,7 @@ in
   };
 
   # ── Claude Code ────────────────────────────────────────────────────────────────
+  # Home Manager claude-code.nix source: https://github.com/nix-community/home-manager/blob/master/modules/programs/claude-code.nix
 
   programs.claude-code = {
     enable               = true;

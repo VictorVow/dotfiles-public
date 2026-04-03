@@ -34,6 +34,7 @@ com.jetpackduba.Gitnuro
 com.jgraph.drawio.desktop
 com.logseq.Logseq
 com.moonlight_stream.Moonlight
+com.nuclearplayer.Nuclear
 com.parsecgaming.parsec
 com.poweriso.PowerISO
 com.rafaelmardojai.Blanket
@@ -120,7 +121,6 @@ org.gnome.Characters
 org.gnome.Showtime
 org.gnome.Solanum
 org.gnucash.GnuCash
-org.js.nuclear.Nuclear
 org.kde.dragonplayer
 org.kde.elisa
 org.kde.itinerary
