@@ -158,10 +158,16 @@ in
 
       # New window without prefix — Ctrl+N
       bind -n C-n new-window -c "#{pane_current_path}"
+      
       # Close window with prefix — prefix+X
       # Note: C-w conflicts with Readline delete word. C-q conflicts with Micro quit
       # (prefix) C-x = kill pane, so it mirrors this pattern
       bind X confirm-before -p "kill window? (y/n)" kill-window
+
+      # Resize current pane width interactively — prefix+r, then type e.g. 50%
+      bind r command-prompt -p "width (e.g. 50%):" "resize-pane -x %%"
+
+      # Ctrl+D closes panes/windows via shell EOF (bash default behaviour, not a tmux binding)
     '';
   };
 
