@@ -107,6 +107,18 @@
         fastfetch
       }
 
+      # ── Yakuake new-tab: cd to last tmux pane directory ────────────────────
+      # In tmux panes: persist $PWD to ~/.tmux_last_dir on every prompt.
+      # In new non-tmux shells (new Yakuake tabs): cd to that saved path.
+      if [[ -n "$TMUX" ]]; then
+        _tmux_save_dir() { printf '%s' "$PWD" > "$HOME/.tmux_last_dir"; }
+        PROMPT_COMMAND="_tmux_save_dir''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+      elif [[ -f "$HOME/.tmux_last_dir" ]]; then
+        _tmux_dir=$(< "$HOME/.tmux_last_dir")
+        [[ -d "$_tmux_dir" ]] && cd "$_tmux_dir"
+        unset _tmux_dir
+      fi
+
       # ── tmux-agent: 4-pane agent workspace ──────────────────────────────────
       # Works in any context: inside an existing tmux session (applies splits to
       # the current window) or outside tmux (creates a new session first).
