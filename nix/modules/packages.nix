@@ -55,6 +55,7 @@
     tmux    # Terminal multiplexer (modern) — also configured in programs.nix
     # micro — managed by programs.micro in programs.nix (installs it automatically)
     lynx    # Text-only web browser
+    ripgrep  # Fast text search
 
     # ── Security / Privacy ────────────────────────────────────────────────────
     gnupg   # GNU Privacy Guard — GPG encryption and signing
