@@ -759,4 +759,15 @@ in
     };
   };
 
+  # Replace the Nix-store symlink with a real file so Flatpak sandboxes
+  # (e.g. Vorta) can follow ~/.ssh/config without needing /nix/store access.
+  home.activation.sshConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.ssh/config"
+    if [ -L "$dest" ]; then
+      src=$(readlink -f "$dest")
+      $DRY_RUN_CMD rm "$dest"
+      $DRY_RUN_CMD install -m 600 "$src" "$dest"
+    fi
+  '';
+
 }
