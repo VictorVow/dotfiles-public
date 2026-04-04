@@ -154,8 +154,15 @@
       hmn   = "home-manager news --flake ~/Documents/ESSENTIALS/installs/nix#boss";
 
       # Nix shortcuts
-      nsp   = "nix search nixpkgs";       # Search nixpkgs: nsp <package>
+      #
+      # nsp results show a 'legacyPackages.x86_64-linux.' prefix — this is normal. nixpkgs exposes
+      # packages under the 'legacyPackages' attribute in flakes (vs 'packages' for individual derivations).
+      # It does not mean the packages are outdated.
+      #
+      # Search nixpkgs: nsp <package>
+      nsp   = "echo 'Ignore the legacyPackages.x86_64-linux. prefix' && echo '' && nix search nixpkgs";
       nsh   = "nix shell nixpkgs#";       # Temp shell with package: nsh <package> | it'll now be available as if it was installed (`which package`)
+      nr    = "nix run nixpkgs#";         # Run package without installing: nr <package>
 
       # Distrobox shortcuts
       dbe   = "distrobox enter";
