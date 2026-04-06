@@ -90,6 +90,12 @@ in
   # Git LFS — large file storage integration
   programs.git.lfs.enable = true;
 
+  # Global gitignore — local tooling artifacts that should never be committed
+  programs.git.ignores = [
+    ".direnv/"
+    ".envrc"
+  ];
+
   # Auto-select USER2 identity for repos under ~/Documents/ESSENTIALS/installs/
   # The trailing slash makes gitdir: match any repo inside the directory tree.
   # See docs/git-identity-management.md for the full picture of identity management.
