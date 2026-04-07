@@ -135,8 +135,10 @@
     # ── Development: Languages & Runtimes ─────────────────────────────────────
     rustup       # Rust toolchain installer (includes cargo and rustc)
                  # Manages stable/beta/nightly toolchains via `rustup toolchain`
-    jdk17        # OpenJDK 17 (JDK + JRE) — needed for Minecraft (Prism Launcher),
-                 # Remnants of the Precursors, and other Java apps
+    (lib.lowPrio pkgs.jdk17) # OpenJDK 17 — needed for Minecraft (Prism Launcher),
+                              # Remnants of the Precursors, and other Java apps;
+                              # lowPrio so jdk21 wins file conflicts in buildEnv
+    jdk21        # OpenJDK 21 LTS — default Java; required by Suwayomi-Server JAR
     mono         # .NET/Mono runtime — replaces mono-complete apt package
     dotnet-sdk   # Microsoft .NET SDK — for C# development, Grayjay, etc.
     clojure      # Clojure language + deps CLI (was: clojure/tools/clojure in Homebrew)
@@ -174,6 +176,22 @@
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
     zrok    # Peer-to-peer reverse proxy / tunnel (replaces brew install zrok)
+
+    (let
+      appimagetool-bin = pkgs.runCommand "appimagetool-bin" {
+        src = pkgs.fetchurl {
+          url = "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage";
+          sha256 = "1lmdwwmqyfb5ig9cx24lxzql45had0kmni4alzylaxcn325ll3xr";
+        };
+      } "install -m755 $src $out";
+    in pkgs.writeShellApplication {
+      name = "appimagetool";
+      text = ''
+        exec "${appimagetool-bin}" --appimage-extract-and-run "$@"
+      '';
+    })
+    # appimagetool — not in nixpkgs; fetched as a fixed-output derivation and
+    # wrapped to pass --appimage-extract-and-run (required on NixOS without FUSE)
 
     # ── System Administration ─────────────────────────────────────────────────
     ansible  # IT automation — used to run ansible.yml after bootstrap

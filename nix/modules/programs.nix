@@ -94,6 +94,7 @@ in
   programs.git.ignores = [
     ".direnv/"
     ".envrc"
+    "**/.claude/settings.local.json"
   ];
 
   # Auto-select USER2 identity for repos under ~/Documents/ESSENTIALS/installs/
