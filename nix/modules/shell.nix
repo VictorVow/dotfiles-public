@@ -217,6 +217,9 @@
     # Firefox Wayland native support (was previously in ~/.pam_environment)
     MOZ_ENABLE_WAYLAND = "1";
 
+    # Default Java home — JDK 21 LTS (jdk17 still installed for Minecraft/legacy apps)
+    JAVA_HOME = "${pkgs.jdk21}";
+
     # Android SDK root — SDK tool paths are added to PATH in initExtra above
     ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
 
