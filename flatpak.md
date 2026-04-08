@@ -2,7 +2,6 @@
 
 app.comaps.comaps
 app.grayjay.Grayjay
-app.twintaillauncher.ttl
 au.stevetech.yafi
 br.com.wiselabs.simplexity
 chat.delta.desktop
@@ -43,6 +42,7 @@ com.sigil_ebook.Sigil
 com.slack.Slack
 com.spacestation14.Launcher
 com.spotify.Client
+com.stremio.Service
 com.usebottles.bottles
 com.valvesoftware.Steam
 com.valvesoftware.SteamLink
