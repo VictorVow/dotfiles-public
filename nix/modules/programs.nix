@@ -470,7 +470,7 @@ in
       "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
 
       # ── Theme ──────────────────────────────────────────────────────────────────
-      "workbench.colorTheme" = "Default Dark+";
+      "workbench.colorTheme" = "Dark+";
 
       # ── Claude Code ────────────────────────────────────────────────────────────
       "claudeCode.preferredLocation" = "panel";
