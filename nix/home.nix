@@ -62,4 +62,42 @@
     Type=Application
     X-KDE-autostart-after=panel
   '';
+
+  # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
+  # convention into `gio launch`.
+  #
+  # Firefox Developer Edition (and possibly other Firefox builds)
+  # invokes external protocol handlers (e.g. logseq://) by calling:
+  #
+  #     xdg-open <desktop-file-path> <uri>
+  #
+  # Standard xdg-open (xdg-utils) only accepts a single URL/file
+  # argument, so the URI is rejected as "unexpected argument" and the
+  # click silently fails. That 2-arg form is actually the `gio launch`
+  # calling convention — Firefox is mixing up two tools.
+  #
+  # This wrapper detects the 2-arg "<desktop> <uri>" shape and
+  # translates it to `gio launch`. All other invocations are forwarded
+  # unchanged to the real /usr/bin/xdg-open, so standard 1-arg calls
+  # keep working for every other app.
+  #
+  # Precedence: ~/.local/bin is ahead of /usr/bin in PATH (via pipx
+  # setup in shell.nix), so Firefox resolves this wrapper before the
+  # system xdg-utils.
+  #
+  # Can be removed if upstream Firefox fixes its calling convention,
+  # or if upstream xdg-utils grows support for the 2-arg form.
+  home.file.".local/bin/xdg-open" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      if [ $# -eq 2 ] \
+         && [[ "$1" == *.desktop ]] \
+         && [ -f "$1" ] \
+         && [[ "$2" == *://* ]]; then
+        exec gio launch "$1" "$2"
+      fi
+      exec /usr/bin/xdg-open "$@"
+    '';
+  };
 }
