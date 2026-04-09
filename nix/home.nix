@@ -81,23 +81,23 @@
   # unchanged to the real /usr/bin/xdg-open, so standard 1-arg calls
   # keep working for every other app.
   #
-  # Precedence: ~/.local/bin is ahead of /usr/bin in PATH (via pipx
-  # setup in shell.nix), so Firefox resolves this wrapper before the
-  # system xdg-utils.
+  # Installed as a nix-packaged binary (writeShellScriptBin) so it
+  # lands in ~/.nix-profile/bin/xdg-open, which is at the front of
+  # PATH for every process — including GUI apps launched from KDE's
+  # launcher, where ~/.local/bin (from shell.nix's initExtra) is not
+  # visible because initExtra only runs in interactive bash shells.
   #
   # Can be removed if upstream Firefox fixes its calling convention,
   # or if upstream xdg-utils grows support for the 2-arg form.
-  home.file.".local/bin/xdg-open" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
+  home.packages = [
+    (pkgs.writeShellScriptBin "xdg-open" ''
       if [ $# -eq 2 ] \
          && [[ "$1" == *.desktop ]] \
          && [ -f "$1" ] \
          && [[ "$2" == *://* ]]; then
-        exec gio launch "$1" "$2"
+        exec ${pkgs.glib}/bin/gio launch "$1" "$2"
       fi
       exec /usr/bin/xdg-open "$@"
-    '';
-  };
+    '')
+  ];
 }
