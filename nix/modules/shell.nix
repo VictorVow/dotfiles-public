@@ -189,6 +189,9 @@
       la  = "eza -la";
       lt  = "eza --tree";
 
+      # Assorted
+      cwd = "pwd | wl-copy"; # Copy working directory to clipboard
+
     };
   };
 
