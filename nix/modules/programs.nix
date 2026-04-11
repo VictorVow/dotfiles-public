@@ -745,6 +745,8 @@ in
   programs.gemini-cli = {
     enable  = true;
     package = pkgs.gemini-cli;
+    enableMcpIntegration = true;
+    settings.security.auth.selectedType = "oauth-personal";
   };
 
   # ── Claude Code settings (writable copy) ────────────────────────────────────
