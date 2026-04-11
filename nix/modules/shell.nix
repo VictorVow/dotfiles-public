@@ -153,6 +153,37 @@
         disown
       }
 
+      # ── Nix shortcuts: nsh / nr ────────────────────────────────────────────
+      # Defined as functions (not aliases) because bash aliases always insert a
+      # space between the alias value and the next word. An alias
+      # `nsh="nix shell nixpkgs#"` followed by `nsh foo` expands to
+      # `nix shell nixpkgs# foo` — Nix then reads `nixpkgs#` as a flake ref with
+      # an empty attr path (→ packages.x86_64-linux.default) and errors out
+      # before ever looking at `foo`.
+
+      # Temp shell with package: nsh <package> | it'll now be available as if
+      # it was installed (`which package`)
+      nsh() {
+        if [ $# -eq 0 ]; then
+          echo "usage: nsh <pkg> [pkg...]" >&2
+          return 2
+        fi
+        local -a installables=()
+        local p
+        for p in "$@"; do installables+=("nixpkgs#$p"); done
+        nix shell "''${installables[@]}"
+      }
+
+      # Run package without installing: nr <package> [-- args...]
+      nr() {
+        if [ $# -eq 0 ]; then
+          echo "usage: nr <pkg> [-- args...]" >&2
+          return 2
+        fi
+        local pkg="$1"; shift
+        nix run "nixpkgs#$pkg" "$@"
+      }
+
       # eza uses its own built-in colour support (dircolors not needed)
     '';
 
@@ -172,9 +203,9 @@
       # It does not mean the packages are outdated.
       #
       # Search nixpkgs: nsp <package>
+      # Note: `nsh` and `nr` are bash functions defined in `initExtra` above,
+      # not aliases — see the comment there for why.
       nsp   = "echo 'Ignore the legacyPackages.x86_64-linux. prefix' && echo '' && nix search nixpkgs";
-      nsh   = "nix shell nixpkgs#";       # Temp shell with package: nsh <package> | it'll now be available as if it was installed (`which package`)
-      nr    = "nix run nixpkgs#";         # Run package without installing: nr <package>
 
       # Distrobox shortcuts
       dbe   = "distrobox enter";
