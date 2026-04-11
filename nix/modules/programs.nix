@@ -739,8 +739,11 @@ in
   };
 
   # ── Gemini CLI ─────────────────────────────────────────────────────────────────
-  # settings intentionally omitted — the module writes settings.json as a read-only
-  # Nix store symlink, which blocks OAuth login (home-manager#8654).
+  # enableMcpIntegration merges programs.mcp.servers → settings.mcpServers, which
+  # causes HM to write ~/.gemini/settings.json as a read-only Nix store symlink.
+  # OAuth tokens live in ~/.gemini/oauth_creds.json (unmanaged), so the symlink
+  # no longer blocks login (home-manager#8654). The auth selection is preserved
+  # here so gemini-cli doesn't re-prompt on launch.
 
   programs.gemini-cli = {
     enable  = true;
