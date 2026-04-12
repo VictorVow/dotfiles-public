@@ -34,6 +34,22 @@
       changed_when: false
       register: whoami_result
 
+    # ── sudo: add Nix profile paths to secure_path ──────────────────────
+    # By default sudo resets PATH to secure_path, which doesn't include
+    # Nix-managed binaries. This drop-in appends the user and system Nix
+    # profile bin dirs so `sudo micro`, `sudo waydroid init`, etc. work
+    # without full-path workarounds.
+    - name: Add Nix paths to sudo secure_path
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/nix-path
+        content: |
+          Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/home/boss/.nix-profile/bin:/nix/var/nix/profiles/default/bin"
+        owner: root
+        group: root
+        mode: '0440'
+        validate: 'visudo -cf %s'
+      become: yes
+
     - name: Install system-level apt packages
       ansible.builtin.apt:
         name:
@@ -257,6 +273,18 @@
       become: yes
       failed_when: false  # non-fatal: service unit absent if hms hasn't run yet
 
+    # ── zswap ──────────────────────────────────────────────────────────────
+    # Enable zswap (compressed swap cache in front of disk swap) with zstd
+    # compression. Dramatically reduces swap I/O latency vs plain disk swap.
+    # See: https://chrisdown.name/2026/03/24/zswap-vs-zram-when-to-use-what.html
+    - name: Enable zswap with zstd compression in GRUB
+      ansible.builtin.lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd"'
+      become: yes
+      notify: Update GRUB
+
     # ── Suspend / Lid-close fix ────────────────────────────────────────────
     # Prevents spurious ACPI lid events (Framework 13 AMD EC bug with CalDigit
     # TS4 dock) from triggering suspend. Crash analysis: 2026-03-30 00:14 —
@@ -318,4 +346,8 @@
 
     - name: Reload systemd daemon
       ansible.builtin.command: systemctl daemon-reload
+      become: yes
+
+    - name: Update GRUB
+      ansible.builtin.command: update-grub
       become: yes
