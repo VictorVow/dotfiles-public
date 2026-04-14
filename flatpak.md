@@ -115,6 +115,7 @@ org.citra_emu.citra
 org.electrum.electrum
 org.fcast.Receiver
 org.ferdium.Ferdium
+org.flatpak.Builder
 org.getmonero.Monero
 org.gitfourchette.gitfourchette
 org.gnome.Characters
