@@ -93,7 +93,6 @@ in
   # Global gitignore — local tooling artifacts that should never be committed
   programs.git.ignores = [
     ".direnv/"
-    ".envrc"
     "**/.claude/settings.local.json"
   ];
 
