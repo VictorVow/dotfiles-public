@@ -163,6 +163,10 @@
 
       # Temp shell with package: nsh <package> | it'll now be available as if
       # it was installed (`which package`)
+      #
+      # NIXPKGS_ALLOW_UNFREE=1 + --impure: Home Manager's allowUnfree config
+      # doesn't apply to ad-hoc `nix shell`/`nix run` invocations — they need
+      # the env var, and `--impure` is required to let flake commands read it.
       nsh() {
         if [ $# -eq 0 ]; then
           echo "usage: nsh <pkg> [pkg...]" >&2
@@ -171,7 +175,7 @@
         local -a installables=()
         local p
         for p in "$@"; do installables+=("nixpkgs#$p"); done
-        nix shell "''${installables[@]}"
+        NIXPKGS_ALLOW_UNFREE=1 nix shell --impure "''${installables[@]}"
       }
 
       # Run package without installing: nr <package> [-- args...]
@@ -181,7 +185,7 @@
           return 2
         fi
         local pkg="$1"; shift
-        nix run "nixpkgs#$pkg" "$@"
+        NIXPKGS_ALLOW_UNFREE=1 nix run --impure "nixpkgs#$pkg" "$@"
       }
 
       # eza uses its own built-in colour support (dircolors not needed)
