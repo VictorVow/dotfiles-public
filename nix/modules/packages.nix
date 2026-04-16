@@ -9,7 +9,7 @@
 #   - System libraries (Shadow PC): libva-*, libvdpau1, libcurl4, libayatana-appindicator3-1
 #   - System portals: xdg-desktop-portal-gnome
 #   - Ubuntu-only GUI tools: gdebi, synaptic
-#   - Third-party daemons: mullvad-vpn (via mullvad-vpn.sh), docker (via docker.sh)
+#   - Third-party daemons: mullvad-vpn (via mullvad-vpn.sh), docker (via docker.sh), tailscale (via tailscale.sh)
 #   - Android Studio — now Nix-managed via androidStudioPackages.stable (android-studio.sh retained as fallback)
 #   - Flatpak (system-level integration)
 {

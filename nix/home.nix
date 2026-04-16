@@ -63,6 +63,17 @@
     X-KDE-autostart-after=panel
   '';
 
+  # Start Tailscale system tray icon on login.
+  # Tailscale is installed via apt (3rd-party-packages/tailscale.sh), not Nix,
+  # so we use the absolute system path rather than a Nix store reference.
+  home.file.".config/autostart/tailscale-systray.desktop".text = ''
+    [Desktop Entry]
+    Name=Tailscale
+    Exec=/usr/bin/tailscale systray
+    Type=Application
+    X-KDE-autostart-after=panel
+  '';
+
   # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
   # convention into `gio launch`.
   #
