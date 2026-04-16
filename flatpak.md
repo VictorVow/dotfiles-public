@@ -174,6 +174,10 @@ com.nvidia.geforcenow
 
 com.stremio.Stremio
 
+## grayjay1-origin
+
+app.fork.Grayjay
+
 ## launcher.moe
 
 moe.celica.BabyloniaTerminal
