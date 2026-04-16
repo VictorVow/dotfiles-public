@@ -41,10 +41,10 @@ in
     };
 
     settings = {
-      # Default identity (1 = Victor239); use `git su [1|2]` to switch per-repo
+      # Default identity (1 = VictorVow); use `git su [1|2]` to switch per-repo
       # Identity 2 (USER2): 22418751+USER2@users.noreply.github.com, key GPGKEY2
-      user.name  = "Victor239";
-      user.email = "12621257+Victor239@users.noreply.github.com";
+      user.name  = "VictorVow";
+      user.email = "12621257+VictorVow@users.noreply.github.com";
 
       init.defaultBranch   = "main";
       pull.rebase          = false;
@@ -69,10 +69,10 @@ in
       core.editor = "micro";
       alias.su =
         let
-          set1 = "git config user.name 'Victor239'"
-            + " && git config user.email '12621257+Victor239@users.noreply.github.com'"
+          set1 = "git config user.name 'VictorVow'"
+            + " && git config user.email '12621257+VictorVow@users.noreply.github.com'"
             + " && git config user.signingkey 'GPGKEY1'"
-            + " && echo 'switched -> Victor239 (identity 1)'";
+            + " && echo 'switched -> VictorVow (identity 1)'";
           set2 = "git config user.name 'USER2'"
             + " && git config user.email '22418751+USER2@users.noreply.github.com'"
             + " && git config user.signingkey 'GPGKEY2'"
@@ -468,6 +468,18 @@ in
       "terminal.integrated.allowChords"  = false;
       "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
 
+      # Pin the integrated terminal shell to bashInteractive. The nixpkgs VSCode
+      # wrapper resolves `bash` to the minimal (non-interactive) bash in its own
+      # closure, which is built without programmable completion or prompt-string
+      # decoding — so starship's \[...\] wrappers render literally and compgen is
+      # missing. bashInteractive is what Yakuake/programs.bash use.
+      "terminal.integrated.defaultProfile.linux" = "bash";
+      "terminal.integrated.profiles.linux" = {
+        bash = {
+          path = "${pkgs.bashInteractive}/bin/bash";
+        };
+      };
+
       # ── Theme ──────────────────────────────────────────────────────────────────
       "workbench.colorTheme" = "Dark+";
 
@@ -492,9 +504,9 @@ in
       # (extension: onlyutkarsh.git-config-user-profiles)
       "gitConfigUser.profiles" = [
         {
-          label      = "Psuedononymous [Victor239]";
-          email      = "12621257+Victor239@users.noreply.github.com";
-          userName   = "Victor239";
+          label      = "Psuedononymous [VictorVow]";
+          email      = "12621257+VictorVow@users.noreply.github.com";
+          userName   = "VictorVow";
           selected   = true;
           id         = "f4feda82-9f84-40ed-ae25-45893e812650";
           signingKey = "GPGKEY1";
