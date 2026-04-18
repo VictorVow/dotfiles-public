@@ -354,6 +354,7 @@
              # Also configured via programs.starship in programs.nix
 
     # ── Syncing ───────────────────────────────────────────────────────────────
+    megasync  # MEGA Cloud Drive sync client
     syncthing # Continuous file synchronisation (replaces apt install syncthing)
               # Start manually with: syncthing serve
     syncthingtray # Tray app for Syncthing (replaces pre-built binary)
