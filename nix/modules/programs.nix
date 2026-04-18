@@ -114,6 +114,249 @@ in
         signingkey = GPGKEY2
   '';
 
+  # ── Web Browser ──────────────────────────────────────────────────────────────
+
+  programs.firefox = {
+    enable = true;
+
+    # Nix-wrapped Firefox uses its own native-messaging-host paths, so the
+    # system-level /usr/lib/mozilla/native-messaging-hosts/ is not found.
+    # KeePassXC (Flatpak) uses ~/.mozilla/native-messaging-hosts/ which the
+    # wrapper does check, so it continues to work without being listed here.
+    nativeMessagingHosts = [
+      pkgs.kdePackages.plasma-browser-integration
+    ];
+
+    profiles.VERTEX = {
+      id = 0;
+      isDefault = true;
+
+      # Homepage is NOT declared here because the PRIME profile's homepage string
+      # contains moz-extension:// UUIDs specific to Sidebery tab groups. Those
+      # UUIDs are generated per-profile and won't match in VERTEX. After Sidebery
+      # installs via Firefox Sync, reconfigure the homepage manually in about:config
+      # (browser.startup.homepage) with the new UUIDs.
+
+      settings = {
+        # ── Session ───────────────────────────────────────────────────────────
+        "browser.startup.page" = 3;  # restore previous session
+
+        # ── Appearance ────────────────────────────────────────────────────────
+        "browser.display.background_color"                  = "#000000";
+        "browser.display.foreground_color"                  = "#f6f5f4";
+        "extensions.activeThemeID"                          = "firefox-compact-dark@mozilla.org";
+        "browser.theme.content-theme"                       = 0;
+        "browser.theme.toolbar-theme"                       = 0;
+        "layout.css.prefers-color-scheme.content-override"  = 0;  # dark
+
+        # ── Privacy / Security ────────────────────────────────────────────────
+        "dom.security.https_only_mode"                       = true;
+        "privacy.userContext.enabled"                         = true;
+        "privacy.userContext.ui.enabled"                      = true;
+        "privacy.sanitize.sanitizeOnShutdown"                 = true;
+        "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;
+        "privacy.clearOnShutdown_v2.formdata"                = true;
+        "privacy.history.custom"                             = true;
+        "privacy.resistFingerprinting.letterboxing"          = true;
+        "privacy.resistFingerprinting.block_mozAddonManager" = true;
+        "network.dns.disablePrefetch"                        = true;
+        "network.prefetch-next"                              = false;
+        "network.http.speculative-parallel-limit"            = 0;
+        "network.trr.mode"                                   = 5;  # DoH disabled
+        "browser.contentblocking.category"                   = "standard";
+
+        # ── Telemetry / Studies ───────────────────────────────────────────────
+        "app.shield.optoutstudies.enabled"             = false;
+        "datareporting.healthreport.uploadEnabled"     = false;
+        "datareporting.usage.uploadEnabled"            = false;
+        "browser.tabs.crashReporting.sendReport"       = false;
+        "toolkit.telemetry.reportingpolicy.firstRun"   = false;
+
+        # ── New Tab Page ──────────────────────────────────────────────────────
+        "browser.newtabpage.activity-stream.feeds.topsites"       = false;
+        "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
+        "browser.newtabpage.activity-stream.showSponsored"        = false;
+        "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
+        "browser.newtabpage.activity-stream.showSponsoredCheckboxes" = false;
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn" = false;
+        "browser.urlbar.suggest.engines"                          = false;
+        "browser.urlbar.suggest.quicksuggest.sponsored"           = false;
+        "browser.urlbar.quicksuggest.scenario"                    = "history";
+
+        # ── UI / Toolbar ──────────────────────────────────────────────────────
+        "browser.tabs.inTitlebar"                                    = 0;
+        "sidebar.visibility"                                         = "hide-sidebar";
+        "browser.search.openintab"                                   = true;
+        "browser.search.widget.inNavBar"                             = true;
+        "browser.search.suggest.enabled.private"                     = true;
+        "browser.bookmarks.defaultLocation"                          = "toolbar_____";
+        "browser.bookmarks.showMobileBookmarks"                      = true;
+        "browser.toolbars.bookmarks.visibility"                      = "always";
+        "browser.zoom.siteSpecific"                                  = false;
+        "browser.tabs.groups.smart.userEnabled"                      = false;
+        "toolkit.legacyUserProfileCustomizations.stylesheets"        = true;
+
+        # ── Media / Hardware Acceleration ─────────────────────────────────────
+        "media.eme.enabled"                              = true;   # DRM (Widevine)
+        "media.ffmpeg.vaapi.enabled"                     = true;   # VA-API hw decode
+        "media.ffvpx.enabled"                            = false;
+        "media.hardware-video-decoding.force-enabled"    = true;
+        "media.webspeech.synth.enabled"                  = false;
+        "gfx.webrender.all"                              = true;
+
+        # ── DevTools ──────────────────────────────────────────────────────────
+        "devtools.theme"        = "dark";
+        "devtools.toolbox.host" = "right";
+
+        # ── AI Chat Sidebar ───────────────────────────────────────────────────
+        "browser.ml.chat.provider"         = "https://claude.ai/new";
+        "browser.ml.chat.shortcuts"        = false;
+        "browser.ml.chat.page.footerBadge" = false;
+
+        # ── Reader Mode ───────────────────────────────────────────────────────
+        "reader.color_scheme"  = "contrast";
+        "reader.font_size"     = 10;
+        "reader.content_width" = 9;
+
+        # ── Misc ─────────────────────────────────────────────────────────────
+        "extensions.formautofill.creditCards.enabled" = false;
+        "browser.translation.detectLanguage"          = false;
+        "browser.translation.ui.show"                 = false;
+      };
+
+      # Hide the horizontal tab bar — Sidebery provides vertical tabs instead.
+      userChrome = ''
+        #TabsToolbar {
+            visibility: collapse !important;
+        }
+      '';
+
+      # Multi-Account Containers — mirrored from the PRIME profile.
+      containers = {
+        Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
+        Work     = { id = 2; color = "orange"; icon = "briefcase";   };
+        Banking  = { id = 3; color = "green";  icon = "dollar";      };
+        Shopping = { id = 4; color = "pink";   icon = "cart";        };
+      };
+      containersForce = true;
+
+    # Extensions are managed by Firefox Sync, not declaratively. The NUR
+    # firefox-addons attrset would provide some, but nixpkgs itself has very
+    # few. Since 74 extensions are installed in PRIME, Sync is the practical
+    # path. Below is a reference inventory of all installed extensions.
+    #
+    # addon@darkreader.org                    Dark Reader
+    # uBlock0@raymondhill.net                 uBlock Origin
+    # sponsorBlocker@ajay.app                SponsorBlock
+    # {3c078156-979c-498b-8990-85f7987dd929} Sidebery (vertical tabs)
+    # keepassxc-browser@keepassxc.org         KeePassXC Browser
+    # zotero@chnm.gmu.edu                    Zotero Connector
+    # enhancerforyoutube@maximerf.addons.mozilla.org  Enhancer for YouTube
+    # redirector@einaregilsson.com            Redirector
+    # page-assist@nazeem                      Page Assist (local AI)
+    # plasma-browser-integration@kde.org      Plasma Browser Integration
+    # WebToEpub@Baka-tsuki.org                Web to EPUB
+    # faststream@andrews                      FastStream
+    # feed-preview@code.guido-berhoerster.org Feed Preview
+    # firefox-extension@steamdb.info          SteamDB
+    # gdpr@cavi.au.dk                         GDPR consent manager
+    # harper@writewithharper.com              Harper (grammar checker)
+    # i@diygod.me                             RSSHub Radar
+    # amptra@keepa.com                        Keepa (Amazon price tracker)
+    # browser-extension@anonaddy              AnonAddy / SimpleLogin
+    # chrome-mask@overengineer.dev            Chrome Mask (UA spoofing)
+    # copy-opaque-image@qw.thucfb.com        Copy Opaque Image
+    # fakedata@haterapps.com                  Fake Data
+    # dont-accept-webp@jeffersonscher.com     Don't Accept WebP
+    # webpconverter@hilberteikelboom.nl       WebP Converter
+    # zoompage-we@DW-dev                      ZoomPage WE
+    # refinedhackernews@mihir.ch              Refined Hacker News
+    # save-as-pdf-ff@pdfcrowd.com             Save as PDF
+    # youtube-rss-finder@gustiaux.com         YouTube RSS Finder
+    # wappalyzer@crunchlabz.com               Wappalyzer (tech detector)
+    # readit@lucidity                         Read It
+    # @activatereaderview                      Activate Reader View
+    # referer-mod@9a5ba22d-...                Referer Mod
+    # jid0-dsq67mf5kjjhiiju2dfb6kk8dfw@jetpack  DownThemAll
+    # your-dynamic-dashboard@ditom.com        Dynamic Dashboard (new tab)
+    # 7esoorv3@alefvanoon.anonaddy.me         SimpleLogin
+    # dharmikparmar2004@yahoo.com             (unknown)
+    # + ~40 additional extensions identified by GUID only
+    };
+
+    # ── Pre-existing profiles (registered in profiles.ini so Firefox can find them) ──
+
+    profiles.PRIME = {
+      id = 1;
+      path = "xsy8besa.PRIME";
+    };
+
+    profiles.minimal-amnesic = {
+      id = 2;
+      path = "zd2lxszj.default-release";
+    };
+
+    profiles.minimal-persistent = {
+      id = 3;
+      path = "1ti21wt1.minimal-persistent";
+    };
+
+    profiles.dev-edition-default = {
+      id = 4;
+      path = "fm78666x.dev-edition-default";
+    };
+  };
+
+  # Replace the HM-managed profiles.ini symlink with a writable copy that
+  # includes [Install*] sections. Firefox uses these to map installation IDs
+  # to default profiles — without them, Firefox Developer Edition (and other
+  # parallel installs) show "Profile Missing" on launch.
+  home.activation.firefoxProfilesIni = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    dest="$HOME/.mozilla/firefox/profiles.ini"
+    if [ -L "$dest" ]; then
+      src=$(readlink -f "$dest")
+      $DRY_RUN_CMD rm "$dest"
+      $DRY_RUN_CMD install -m 644 "$src" "$dest"
+    fi
+    # Append Install sections only if not already present
+    if ! grep -q 'Install9255EBAFD2F5B3DD' "$dest" 2>/dev/null; then
+      cat >> "$dest" << 'INSTALLS'
+
+[Install9255EBAFD2F5B3DD]
+Default=xsy8besa.PRIME
+Locked=1
+
+[InstallF7E9AADF645338CA]
+Default=fm78666x.dev-edition-default
+Locked=1
+
+[Install4F96D1932A9F858E]
+Default=vw6ecpgi.Default
+Locked=1
+
+[Install3703CE5FC1A60019]
+Default=/home/boss/Vaults/gocryptfs1/Browsers/DEVELOP/profile
+Locked=1
+
+[Install5217A8ECA6170CFA]
+Default=dxka9jsp.firefox-test-2023
+Locked=1
+
+[Install48512B97725692BF]
+Default=jsyi7924.default-release-1
+Locked=1
+
+[Install52D6329630FDDB0C]
+Default=/home/boss/Vaults/gocryptfs1/Browsers/MASTER/profile
+Locked=1
+
+[Install81EC076AA7E7C9D3]
+Default=/home/boss/Vaults/gocryptfs1/Browsers/WORK2/profile
+Locked=1
+INSTALLS
+    fi
+  '';
+
   # ── Terminal Multiplexers ─────────────────────────────────────────────────────
 
   programs.tmux = {
