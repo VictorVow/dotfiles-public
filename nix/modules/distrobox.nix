@@ -2,9 +2,10 @@
 
 # Declarative Distrobox container definitions.
 #
-# Two containers are managed here:
-#   1. "dev"   — ubuntu:24.04  — development tools in the Debian/Ubuntu ecosystem
-#   2. "media" — fedora:latest — media production tools in the Fedora/RPM ecosystem
+# Three containers are managed here:
+#   1. "dev"    — ubuntu:24.04  — development tools in the Debian/Ubuntu ecosystem
+#   2. "media"  — fedora:latest — media production tools in the Fedora/RPM ecosystem
+#   3. "fedora" — fedora:latest — Trivalent browser (hardened Chromium) from secureblue repo
 #
 # Containers are created and initialised via Home Manager activation scripts.
 # `distrobox create` is idempotent — it is safe to re-run if the container
@@ -26,6 +27,7 @@
 # To re-run package initialisation:
 #   rm ~/.local/share/distrobox-hm-init/dev-initialized
 #   rm ~/.local/share/distrobox-hm-init/media-initialized
+#   rm ~/.local/share/distrobox-hm-init/fedora-initialized
 {
   home.activation.distroboxContainers =
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -128,6 +130,40 @@
           $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app kdenlive   --container media 2>/dev/null || true
         else
           echo "WARNING: 'media' container package install failed; will retry next switch."
+        fi
+      fi
+
+      # ── Container 3: fedora (fedora:latest) ─────────────────────────────────
+      # Purpose: Trivalent browser — a hardened, security-focused Chromium
+      # browser from the secureblue project.
+
+      $DRY_RUN_CMD "$DISTROBOX" create \
+        --name fedora \
+        --image fedora:latest \
+        --yes \
+        --no-entry \
+        >/dev/null 2>&1 || true
+
+      $DRY_RUN_CMD "$PODMAN" start fedora 2>/dev/null || true
+
+      # Install Trivalent on first initialisation only.
+      # Delete ~/.local/share/distrobox-hm-init/fedora-initialized to re-run.
+      if [ ! -f "$SENTINEL_DIR/fedora-initialized" ]; then
+        echo "Initialising 'fedora' container packages (this may take a few minutes)..."
+        if $DRY_RUN_CMD "$PODMAN" exec --user root fedora bash -c '
+          rpm --import https://repo.secureblue.dev/secureblue.gpg && \
+          curl -o /etc/yum.repos.d/secureblue.repo \
+            https://repo.secureblue.dev/secureblue.repo && \
+          dnf install -y --quiet \
+            trivalent
+        '; then
+          $DRY_RUN_CMD touch "$SENTINEL_DIR/fedora-initialized"
+
+          # Export Trivalent to the host desktop.
+          DISTROBOX_EXPORT="${pkgs.distrobox}/bin/distrobox-export"
+          $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app trivalent --container fedora 2>/dev/null || true
+        else
+          echo "WARNING: 'fedora' container package install failed; will retry next switch."
         fi
       fi
     '';
