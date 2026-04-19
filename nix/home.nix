@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, claude-desktop, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
@@ -17,6 +17,7 @@
   # Allow non-free (proprietary) packages.
   # Needed for: VS Code, Steam, and other proprietary software.
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [ claude-desktop.overlays.default ];
 
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)

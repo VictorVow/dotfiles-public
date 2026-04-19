@@ -363,6 +363,7 @@
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
     rustdesk 
+    claude-desktop # Official Claude AI desktop app (via aaddrick/claude-desktop-debian)
     jan # ChatBox-like desktop LLM chat app
     streamlink-twitch-gui-bin
     suwayomi-server
