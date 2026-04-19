@@ -162,6 +162,7 @@
     # vscode — managed by programs.vscode in programs.nix (installs it automatically)
     kdePackages.kate          # KDE text editor with syntax highlighting and plugins
     kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
+    code-cursor # AI-powered code editor built on vscode
 
     androidStudioPackages.stable
     # Official Android IDE (~3 GB on first build). Uses buildFHSEnv internally
@@ -362,7 +363,8 @@
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
     rustdesk 
-
+    jan # ChatBox-like desktop LLM chat app
+    streamlink-twitch-gui-bin
 
   ];
 }
