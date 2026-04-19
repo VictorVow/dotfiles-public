@@ -365,6 +365,10 @@
     rustdesk 
     jan # ChatBox-like desktop LLM chat app
     streamlink-twitch-gui-bin
+    suwayomi-server
+    amdgpu_top # Tool to display AMDGPU usage
 
+    # ── Chromium-based - needs to be non-Flatpak to retain it's stronger sandboxing ──────────────────────────
+    ungoogled-chromium
   ];
 }
