@@ -512,6 +512,8 @@ INSTALLS
     # defaultEditor is intentionally not set; EDITOR/VISUAL are set to nano in shell.nix.
     vimAlias  = true;   # Alias `vim` → `nvim`
     viAlias   = true;   # Alias `vi`  → `nvim`
+    withRuby = false;     # Suppresses warnings
+    withPython3 = false;  # Suppresses warnings
     extraConfig = ''
       " Enable line numbers
       set number
