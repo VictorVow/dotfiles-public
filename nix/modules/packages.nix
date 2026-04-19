@@ -359,6 +359,13 @@
               # Start manually with: syncthing serve
     syncthingtray # Tray app for Syncthing (replaces pre-built binary)
 
+    # ── Cryptocurrency ───────────────────────────────────────────────────────────────
+    ledger-live-desktop # Ledger Live desktop client
+
+    # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
+    rustdesk 
+
+
   ];
 }
