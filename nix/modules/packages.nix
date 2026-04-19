@@ -119,9 +119,6 @@
               # Note: plasma-gamemode (KDE integration) stays in apt
     wine      # Windows application compatibility layer
 
-    # ── Communication ─────────────────────────────────────────────────────────
-    signal-desktop # Encrypted messaging (requires allowUnfree = true)
-
     # ── Database ──────────────────────────────────────────────────────────────
     sqlitebrowser # GUI browser and editor for SQLite databases
 
