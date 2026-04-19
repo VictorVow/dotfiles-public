@@ -115,6 +115,13 @@ in
   '';
 
   # ── Web Browser ──────────────────────────────────────────────────────────────
+  #
+  # Home Manager Firefox module — docs and source:
+  #   Options reference: https://nix-community.github.io/home-manager/options.xhtml#opt-programs.firefox.enable
+  #   Source code:       https://github.com/nix-community/home-manager/tree/master/modules/programs/firefox
+  #   Release notes:     https://nix-community.github.io/home-manager/release-notes.xhtml
+  #   Commit history:    https://github.com/nix-community/home-manager/commits/master/modules/programs/firefox
+  #   Local docs:        docs/system/nix-firefox.md
 
   programs.firefox = {
     enable = true;
@@ -306,6 +313,12 @@ in
       path = "fm78666x.dev-edition-default";
     };
   };
+
+  # The post-link activation script below converts the HM-managed profiles.ini
+  # symlink into a writable copy (to append [Install*] sections). On the next
+  # switch, HM sees the regular file and refuses to overwrite it. Setting
+  # force = true makes HM replace it unconditionally.
+  home.file.".mozilla/firefox/profiles.ini".force = true;
 
   # Replace the HM-managed profiles.ini symlink with a writable copy that
   # includes [Install*] sections. Firefox uses these to map installation IDs
@@ -1086,9 +1099,15 @@ INSTALLS
     };
   };
 
+  # The activation script below converts the HM-managed ssh config symlink
+  # into a real file so Flatpak sandboxes (e.g. Vorta) can read it without
+  # /nix/store access. force = true lets HM overwrite the regular file on
+  # the next switch without a "would be clobbered" / "in the way" warning.
+  home.file.".ssh/config".force = true;
+
   # Replace the Nix-store symlink with a real file so Flatpak sandboxes
   # (e.g. Vorta) can follow ~/.ssh/config without needing /nix/store access.
-  home.activation.sshConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.sshConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     dest="$HOME/.ssh/config"
     if [ -L "$dest" ]; then
       src=$(readlink -f "$dest")
