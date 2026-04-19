@@ -149,8 +149,7 @@
 
       # ── md/Markdown: open file(s) in MarkText Flatpak ──────────────────────────
       md() {
-        /usr/bin/flatpak run --branch=stable --arch=x86_64 --command=marktext --file-forwarding com.github.marktext.marktext @@ "$@" @@ &
-        disown
+        ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
       }
 
       # ── Nix shortcuts: nsh / nr ────────────────────────────────────────────
