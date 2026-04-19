@@ -50,7 +50,7 @@
         --image ubuntu:24.04 \
         --yes \
         --no-entry \
-        2>/dev/null || true
+        >/dev/null 2>&1 || true
 
       # Start the container so podman exec can reach it.
       $DRY_RUN_CMD "$PODMAN" start dev 2>/dev/null || true
@@ -96,7 +96,7 @@
         --image fedora:latest \
         --yes \
         --no-entry \
-        2>/dev/null || true
+        >/dev/null 2>&1 || true
 
       $DRY_RUN_CMD "$PODMAN" start media 2>/dev/null || true
 
