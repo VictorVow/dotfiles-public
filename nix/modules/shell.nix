@@ -260,6 +260,9 @@
     # Android SDK root — SDK tool paths are added to PATH in initExtra above
     ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
 
+    # Disable GitHub CLI telemetry (enabled by default since gh ≥ 2.91.0)
+    GH_TELEMETRY = "false";
+
     # MCP server secrets — inherited by MCP server subprocesses at runtime.
     # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
     # shell-inherited values and an empty string would shadow the real value.
