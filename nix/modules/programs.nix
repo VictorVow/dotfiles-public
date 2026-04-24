@@ -295,89 +295,89 @@ in
       settings = {
         # ── Session ───────────────────────────────────────────────────────────
         "browser.startup.page" = 3;  # restore previous session
-        "browser.startup.homepage" = "about:home";
+        "browser.startup.homepage" = "about:home";  # default Firefox home page
 
         # ── Appearance ────────────────────────────────────────────────────────
-        "browser.display.background_color"                  = "#000000";
-        "browser.display.foreground_color"                  = "#f6f5f4";
-        "extensions.activeThemeID"                          = "firefox-compact-dark@mozilla.org";
-        "browser.theme.content-theme"                       = 0;
-        "browser.theme.toolbar-theme"                       = 0;
-        "layout.css.prefers-color-scheme.content-override"  = 0;  # dark
+        "browser.display.background_color"                  = "#000000";  # page bg for unstyled pages
+        "browser.display.foreground_color"                  = "#f6f5f4";  # page text for unstyled pages
+        "extensions.activeThemeID"                          = "firefox-compact-dark@mozilla.org";  # compact dark theme
+        "browser.theme.content-theme"                       = 0;  # dark content area
+        "browser.theme.toolbar-theme"                       = 0;  # dark toolbar
+        "layout.css.prefers-color-scheme.content-override"  = 0;  # report prefers-color-scheme: dark to pages
 
         # ── Privacy / Security ────────────────────────────────────────────────
-        "dom.security.https_only_mode"                       = true;
-        "privacy.userContext.enabled"                         = true;
-        "privacy.userContext.ui.enabled"                      = true;
-        "privacy.sanitize.sanitizeOnShutdown"                 = true;
-        "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;
-        "privacy.clearOnShutdown_v2.formdata"                = true;
-        "privacy.history.custom"                             = true;
-        "privacy.resistFingerprinting.letterboxing"          = true;
-        "privacy.resistFingerprinting.block_mozAddonManager" = true;
-        "network.dns.disablePrefetch"                        = true;
-        "network.prefetch-next"                              = false;
-        "network.http.speculative-parallel-limit"            = 0;
-        "network.trr.mode"                                   = 5;  # DoH disabled
-        "browser.contentblocking.category"                   = "standard";
+        "dom.security.https_only_mode"                       = true;   # upgrade all connections to HTTPS
+        "privacy.userContext.enabled"                         = true;   # enable Multi-Account Containers
+        "privacy.userContext.ui.enabled"                      = true;   # show container UI in menus
+        "privacy.sanitize.sanitizeOnShutdown"                 = true;   # clear data on shutdown
+        "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # keep history on shutdown
+        "privacy.clearOnShutdown_v2.formdata"                = true;   # clear form data on shutdown
+        "privacy.history.custom"                             = true;   # use custom history settings
+        "privacy.resistFingerprinting.letterboxing"          = true;   # pad window to resist fingerprinting
+        "privacy.resistFingerprinting.block_mozAddonManager" = true;   # block addon manager fingerprinting
+        "network.dns.disablePrefetch"                        = true;   # no DNS prefetching
+        "network.prefetch-next"                              = false;  # no link prefetching
+        "network.http.speculative-parallel-limit"            = 0;      # no speculative connections
+        "network.trr.mode"                                   = 5;      # disable DNS-over-HTTPS
+        "browser.contentblocking.category"                   = "standard";  # standard tracking protection
 
         # ── Telemetry / Studies ───────────────────────────────────────────────
-        "app.shield.optoutstudies.enabled"             = false;
-        "datareporting.healthreport.uploadEnabled"     = false;
-        "datareporting.usage.uploadEnabled"            = false;
-        "browser.tabs.crashReporting.sendReport"       = false;
-        "toolkit.telemetry.reportingpolicy.firstRun"   = false;
+        "app.shield.optoutstudies.enabled"             = false;  # no Shield studies
+        "datareporting.healthreport.uploadEnabled"     = false;  # no health report uploads
+        "datareporting.usage.uploadEnabled"            = false;  # no usage data uploads
+        "browser.tabs.crashReporting.sendReport"       = false;  # no crash reports
+        "toolkit.telemetry.reportingpolicy.firstRun"   = false;  # skip telemetry first-run prompt
 
         # ── New Tab Page ──────────────────────────────────────────────────────
-        "browser.newtabpage.activity-stream.feeds.topsites"       = false;
-        "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
-        "browser.newtabpage.activity-stream.showSponsored"        = false;
-        "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-        "browser.newtabpage.activity-stream.showSponsoredCheckboxes" = false;
-        "browser.newtabpage.activity-stream.system.showWeatherOptIn" = false;
-        "browser.urlbar.suggest.engines"                          = false;
-        "browser.urlbar.suggest.quicksuggest.sponsored"           = false;
-        "browser.urlbar.quicksuggest.scenario"                    = "history";
+        "browser.newtabpage.activity-stream.feeds.topsites"       = false;  # no top sites
+        "browser.newtabpage.activity-stream.feeds.section.topstories" = false;  # no Pocket stories
+        "browser.newtabpage.activity-stream.showSponsored"        = false;  # no sponsored content
+        "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;  # no sponsored top sites
+        "browser.newtabpage.activity-stream.showSponsoredCheckboxes" = false;  # hide sponsored opt-in checkboxes
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn" = false;  # no weather widget prompt
+        "browser.urlbar.suggest.engines"                          = false;  # no search engine suggestions in URL bar
+        "browser.urlbar.suggest.quicksuggest.sponsored"           = false;  # no sponsored suggestions in URL bar
+        "browser.urlbar.quicksuggest.scenario"                    = "history";  # URL bar suggests from history only
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
-        "browser.tabs.inTitlebar"                                    = 0;
-        "sidebar.visibility"                                         = "hide-sidebar";
-        "browser.search.openintab"                                   = true;
-        "browser.search.widget.inNavBar"                             = true;
-        "browser.search.suggest.enabled.private"                     = true;
-        "browser.bookmarks.defaultLocation"                          = "toolbar_____";
-        "browser.bookmarks.showMobileBookmarks"                      = true;
-        "browser.toolbars.bookmarks.visibility"                      = "always";
-        "browser.zoom.siteSpecific"                                  = false;
-        "browser.tabs.groups.smart.userEnabled"                      = false;
-        "toolkit.legacyUserProfileCustomizations.stylesheets"        = true;
+        "browser.tabs.inTitlebar"                                    = 0;      # tabs below title bar
+        "sidebar.visibility"                                         = "hide-sidebar";  # sidebar hidden by default
+        "browser.search.openintab"                                   = true;   # search results open in new tab
+        "browser.search.widget.inNavBar"                             = true;   # show search bar in toolbar
+        "browser.search.suggest.enabled.private"                     = true;   # allow search suggestions in private windows
+        "browser.bookmarks.defaultLocation"                          = "toolbar_____";  # new bookmarks go to toolbar
+        "browser.bookmarks.showMobileBookmarks"                      = true;   # show synced mobile bookmarks
+        "browser.toolbars.bookmarks.visibility"                      = "always";  # always show bookmarks bar
+        "browser.zoom.siteSpecific"                                  = false;  # global zoom instead of per-site
+        "browser.tabs.groups.smart.userEnabled"                      = false;  # no automatic tab grouping
+        "toolkit.legacyUserProfileCustomizations.stylesheets"        = true;   # enable userChrome.css
 
         # ── Media / Hardware Acceleration ─────────────────────────────────────
-        "media.eme.enabled"                              = true;   # DRM (Widevine)
-        "media.ffmpeg.vaapi.enabled"                     = true;   # VA-API hw decode
-        "media.ffvpx.enabled"                            = false;
-        "media.hardware-video-decoding.force-enabled"    = true;
-        "media.webspeech.synth.enabled"                  = false;
-        "gfx.webrender.all"                              = true;
+        "media.eme.enabled"                              = true;   # DRM / Widevine playback
+        "media.ffmpeg.vaapi.enabled"                     = true;   # VA-API hardware video decode
+        "media.ffvpx.enabled"                            = false;  # disable bundled ffvpx decoder (prefer system)
+        "media.hardware-video-decoding.force-enabled"    = true;   # force hardware video decode
+        "media.webspeech.synth.enabled"                  = false;  # disable speech synthesis API
+        "gfx.webrender.all"                              = true;   # force WebRender compositor
 
         # ── DevTools ──────────────────────────────────────────────────────────
-        "devtools.theme"        = "dark";
-        "devtools.toolbox.host" = "right";
+        "devtools.theme"        = "dark";   # dark devtools UI
+        "devtools.toolbox.host" = "right";  # dock devtools to right side
 
         # ── AI Chat Sidebar ───────────────────────────────────────────────────
-        "browser.ml.chat.provider"         = "https://claude.ai/new";
-        "browser.ml.chat.shortcuts"        = false;
-        "browser.ml.chat.page.footerBadge" = false;
+        "browser.ml.chat.provider"         = "https://claude.ai/new";  # Claude as AI sidebar provider
+        "browser.ml.chat.shortcuts"        = false;  # no AI chat keyboard shortcuts
+        "browser.ml.chat.page.footerBadge" = false;  # no AI badge on pages
 
         # ── Reader Mode ───────────────────────────────────────────────────────
-        "reader.color_scheme"  = "contrast";
-        "reader.font_size"     = 10;
-        "reader.content_width" = 9;
+        "reader.color_scheme"  = "contrast";  # high-contrast reader theme
+        "reader.font_size"     = 10;          # reader font size (1-9 scale + 10)
+        "reader.content_width" = 9;           # reader content width (1-9 scale)
 
         # ── Misc ─────────────────────────────────────────────────────────────
-        "extensions.formautofill.creditCards.enabled" = false;
-        "browser.translation.detectLanguage"          = false;
-        "browser.translation.ui.show"                 = false;
+        "extensions.formautofill.creditCards.enabled" = false;  # no credit card autofill
+        "browser.translation.detectLanguage"          = false;  # no automatic language detection
+        "browser.translation.ui.show"                 = false;  # hide translation toolbar
       };
 
       # Hide the horizontal tab bar — Sidebery provides vertical tabs instead.
@@ -451,74 +451,74 @@ in
 
       settings = {
         # ── Session ───────────────────────────────────────────────────────────
-        "browser.startup.page" = 3;
-        "browser.startup.homepage" = "about:home";
+        "browser.startup.page" = 3;  # restore previous session
+        "browser.startup.homepage" = "about:home";  # default Firefox home page
 
         # ── Appearance ────────────────────────────────────────────────────────
-        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";
-        "browser.theme.content-theme"                      = 0;
-        "browser.theme.toolbar-theme"                      = 0;
-        "layout.css.prefers-color-scheme.content-override" = 0;
+        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";  # compact dark theme
+        "browser.theme.content-theme"                      = 0;  # dark content area
+        "browser.theme.toolbar-theme"                      = 0;  # dark toolbar
+        "layout.css.prefers-color-scheme.content-override" = 0;  # report prefers-color-scheme: dark to pages
 
         # ── Privacy / Security ────────────────────────────────────────────────
-        "dom.security.https_only_mode"            = true;
-        "privacy.userContext.enabled"              = true;
-        "privacy.userContext.ui.enabled"           = true;
-        "privacy.sanitize.sanitizeOnShutdown"      = true;
-        "privacy.sanitize.timeSpan"               = 0;
-        "privacy.clearOnShutdown.offlineApps"     = true;
-        "privacy.clearOnShutdown.siteSettings"    = true;
-        "privacy.clearOnShutdown_v2.formdata"     = true;
-        "privacy.clearOnShutdown_v2.siteSettings" = true;
-        "privacy.history.custom"                  = true;
-        "privacy.spoof_english"                   = 2;
-        "places.history.enabled"                  = false;
-        "browser.contentblocking.category"        = "custom";
-        "browser.formfill.enable"                 = false;
-        "browser.shell.checkDefaultBrowser"       = false;
-        "signon.rememberSignons"                  = false;
+        "dom.security.https_only_mode"            = true;   # upgrade all connections to HTTPS
+        "privacy.userContext.enabled"              = true;   # enable Multi-Account Containers
+        "privacy.userContext.ui.enabled"           = true;   # show container UI in menus
+        "privacy.sanitize.sanitizeOnShutdown"      = true;   # clear data on shutdown
+        "privacy.sanitize.timeSpan"               = 0;      # clear everything (all time)
+        "privacy.clearOnShutdown.offlineApps"     = true;   # clear offline app data on shutdown
+        "privacy.clearOnShutdown.siteSettings"    = true;   # clear site permissions on shutdown
+        "privacy.clearOnShutdown_v2.formdata"     = true;   # clear form data on shutdown
+        "privacy.clearOnShutdown_v2.siteSettings" = true;   # clear site settings on shutdown (v2 pref)
+        "privacy.history.custom"                  = true;   # use custom history settings
+        "privacy.spoof_english"                   = 2;      # send English Accept-Language headers
+        "places.history.enabled"                  = false;  # disable all history recording
+        "browser.contentblocking.category"        = "custom";  # custom tracking protection rules
+        "browser.formfill.enable"                 = false;  # no form autofill suggestions
+        "browser.shell.checkDefaultBrowser"       = false;  # no default browser prompt
+        "signon.rememberSignons"                  = false;  # never save passwords
 
         # ── Telemetry / Studies ───────────────────────────────────────────────
-        "app.shield.optoutstudies.enabled"           = false;
-        "datareporting.healthreport.uploadEnabled"   = false;
-        "datareporting.usage.uploadEnabled"          = false;
-        "toolkit.telemetry.reportingpolicy.firstRun" = false;
-        "browser.discovery.enabled"                  = false;
-        "extensions.pocket.enabled"                  = false;
+        "app.shield.optoutstudies.enabled"           = false;  # no Shield studies
+        "datareporting.healthreport.uploadEnabled"   = false;  # no health report uploads
+        "datareporting.usage.uploadEnabled"          = false;  # no usage data uploads
+        "toolkit.telemetry.reportingpolicy.firstRun" = false;  # skip telemetry first-run prompt
+        "browser.discovery.enabled"                  = false;  # no addon discovery/recommendations
+        "extensions.pocket.enabled"                  = false;  # disable Pocket integration
 
         # ── New Tab Page ──────────────────────────────────────────────────────
-        "browser.newtabpage.activity-stream.feeds.topsites"            = false;
-        "browser.newtabpage.activity-stream.feeds.section.topstories"  = false;
-        "browser.newtabpage.activity-stream.showSponsored"             = false;
-        "browser.newtabpage.activity-stream.showSponsoredTopSites"     = false;
-        "browser.newtabpage.activity-stream.showSponsoredCheckboxes"   = false;
-        "browser.newtabpage.activity-stream.system.showWeatherOptIn"   = false;
-        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons"   = false;
-        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;
-        "browser.urlbar.quicksuggest.scenario"       = "history";
-        "browser.urlbar.suggest.searches"            = false;
-        "browser.urlbar.showSearchSuggestionsFirst"  = false;
+        "browser.newtabpage.activity-stream.feeds.topsites"            = false;  # no top sites
+        "browser.newtabpage.activity-stream.feeds.section.topstories"  = false;  # no Pocket stories
+        "browser.newtabpage.activity-stream.showSponsored"             = false;  # no sponsored content
+        "browser.newtabpage.activity-stream.showSponsoredTopSites"     = false;  # no sponsored top sites
+        "browser.newtabpage.activity-stream.showSponsoredCheckboxes"   = false;  # hide sponsored opt-in checkboxes
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn"   = false;  # no weather widget prompt
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons"   = false;  # no addon recommendations
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;  # no feature recommendations
+        "browser.urlbar.quicksuggest.scenario"       = "history";  # URL bar suggests from history only
+        "browser.urlbar.suggest.searches"            = false;  # no search suggestions in URL bar
+        "browser.urlbar.showSearchSuggestionsFirst"  = false;  # show history before search suggestions
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
-        "browser.search.openintab"               = true;
-        "browser.search.widget.inNavBar"         = true;
-        "browser.search.suggest.enabled"         = false;
-        "browser.toolbars.bookmarks.visibility"  = "never";
-        "sidebar.visibility"                     = "hide-sidebar";
+        "browser.search.openintab"               = true;   # search results open in new tab
+        "browser.search.widget.inNavBar"         = true;   # show search bar in toolbar
+        "browser.search.suggest.enabled"         = false;  # no search suggestions globally
+        "browser.toolbars.bookmarks.visibility"  = "never";  # hide bookmarks bar
+        "sidebar.visibility"                     = "hide-sidebar";  # sidebar hidden by default
 
         # ── Media ─────────────────────────────────────────────────────────────
-        "media.autoplay.default"         = 5;
-        "media.ffmpeg.vaapi.enabled"     = true;
+        "media.autoplay.default"         = 5;     # block all autoplay (audio and video)
+        "media.ffmpeg.vaapi.enabled"     = true;  # VA-API hardware video decode
 
         # ── Reader Mode ───────────────────────────────────────────────────────
-        "reader.color_scheme"  = "dark";
-        "reader.font_size"     = 10;
-        "reader.content_width" = 9;
+        "reader.color_scheme"  = "dark";  # dark reader theme
+        "reader.font_size"     = 10;      # reader font size
+        "reader.content_width" = 9;       # reader content width
 
         # ── Misc ─────────────────────────────────────────────────────────────
-        "findbar.highlightAll"             = true;
-        "intl.accept_languages"            = "en-US, en";
-        "javascript.use_us_english_locale" = true;
+        "findbar.highlightAll"             = true;        # highlight all find matches
+        "intl.accept_languages"            = "en-US, en"; # preferred languages for web content
+        "javascript.use_us_english_locale" = true;        # use en-US for JS locale
       };
 
       containers = {
@@ -535,23 +535,23 @@ in
 
       settings = {
         # ── Session ───────────────────────────────────────────────────────────
-        "browser.startup.page" = 3;
-        "browser.startup.homepage" = "about:home";
+        "browser.startup.page" = 3;  # restore previous session
+        "browser.startup.homepage" = "about:home";  # default Firefox home page
 
         # ── Appearance ────────────────────────────────────────────────────────
-        "browser.theme.toolbar-theme" = 0;
+        "browser.theme.toolbar-theme" = 0;  # dark toolbar
 
         # ── Privacy / Security ────────────────────────────────────────────────
-        "privacy.userContext.enabled"                = true;
-        "privacy.userContext.ui.enabled"             = true;
-        "privacy.clearOnShutdown_v2.formdata"        = true;
-        "browser.contentblocking.category"           = "custom";
-        "network.dns.disablePrefetch"                = true;
-        "network.prefetch-next"                      = false;
-        "network.http.speculative-parallel-limit"    = 0;
+        "privacy.userContext.enabled"                = true;   # enable Multi-Account Containers
+        "privacy.userContext.ui.enabled"             = true;   # show container UI in menus
+        "privacy.clearOnShutdown_v2.formdata"        = true;   # clear form data on shutdown
+        "browser.contentblocking.category"           = "custom";  # custom tracking protection rules
+        "network.dns.disablePrefetch"                = true;   # no DNS prefetching
+        "network.prefetch-next"                      = false;  # no link prefetching
+        "network.http.speculative-parallel-limit"    = 0;      # no speculative connections
 
         # ── UI ────────────────────────────────────────────────────────────────
-        "sidebar.visibility" = "hide-sidebar";
+        "sidebar.visibility" = "hide-sidebar";  # sidebar hidden by default
       };
 
       containers = {
@@ -568,69 +568,69 @@ in
 
       settings = {
         # ── Session ───────────────────────────────────────────────────────────
-        "browser.startup.page" = 3;
-        "browser.startup.homepage" = "about:home";
-        "browser.sessionstore.resume_from_crash" = false;
-        "browser.warnOnQuit"                     = false;
-        "browser.tabs.warnOnCloseOtherTabs"      = false;
-        "browser.tabs.warnOnOpen"                = false;
+        "browser.startup.page" = 3;  # restore previous session
+        "browser.startup.homepage" = "about:home";  # default Firefox home page
+        "browser.sessionstore.resume_from_crash" = false;  # don't restore after crash
+        "browser.warnOnQuit"                     = false;  # no quit confirmation
+        "browser.tabs.warnOnCloseOtherTabs"      = false;  # no warning when closing other tabs
+        "browser.tabs.warnOnOpen"                = false;  # no warning when opening many tabs
 
         # ── Appearance ────────────────────────────────────────────────────────
-        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";
-        "browser.theme.content-theme"                      = 0;
-        "browser.theme.toolbar-theme"                      = 0;
-        "layout.css.prefers-color-scheme.content-override" = 0;
+        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";  # compact dark theme
+        "browser.theme.content-theme"                      = 0;  # dark content area
+        "browser.theme.toolbar-theme"                      = 0;  # dark toolbar
+        "layout.css.prefers-color-scheme.content-override" = 0;  # report prefers-color-scheme: dark to pages
 
         # ── Privacy / Security ────────────────────────────────────────────────
-        "privacy.userContext.enabled"                  = true;
-        "privacy.userContext.ui.enabled"               = true;
-        "privacy.clearOnShutdown_v2.formdata"          = true;
-        "permissions.isolateBy.userContext"             = true;
-        "browser.contentblocking.category"             = "custom";
-        "browser.shell.checkDefaultBrowser"            = false;
-        "network.dns.disablePrefetch"                  = true;
-        "network.prefetch-next"                        = false;
-        "network.http.speculative-parallel-limit"      = 0;
-        "signon.rememberSignons"                       = false;
-        "signon.autofillForms"                         = false;
-        "extensions.formautofill.addresses.enabled"    = false;
-        "extensions.formautofill.creditCards.enabled"   = false;
+        "privacy.userContext.enabled"                  = true;   # enable Multi-Account Containers
+        "privacy.userContext.ui.enabled"               = true;   # show container UI in menus
+        "privacy.clearOnShutdown_v2.formdata"          = true;   # clear form data on shutdown
+        "permissions.isolateBy.userContext"             = true;   # isolate permissions per container
+        "browser.contentblocking.category"             = "custom";  # custom tracking protection rules
+        "browser.shell.checkDefaultBrowser"            = false;  # no default browser prompt
+        "network.dns.disablePrefetch"                  = true;   # no DNS prefetching
+        "network.prefetch-next"                        = false;  # no link prefetching
+        "network.http.speculative-parallel-limit"      = 0;      # no speculative connections
+        "signon.rememberSignons"                       = false;  # never save passwords
+        "signon.autofillForms"                         = false;  # no password autofill
+        "extensions.formautofill.addresses.enabled"    = false;  # no address autofill
+        "extensions.formautofill.creditCards.enabled"   = false;  # no credit card autofill
 
         # ── Safe Browsing (off for dev/testing) ───────────────────────────────
-        "browser.safebrowsing.blockedURIs.enabled" = false;
-        "browser.safebrowsing.downloads.enabled"   = false;
-        "browser.safebrowsing.malware.enabled"     = false;
-        "browser.safebrowsing.phishing.enabled"    = false;
+        "browser.safebrowsing.blockedURIs.enabled" = false;  # no blocked URI checks
+        "browser.safebrowsing.downloads.enabled"   = false;  # no download scanning
+        "browser.safebrowsing.malware.enabled"     = false;  # no malware protection
+        "browser.safebrowsing.phishing.enabled"    = false;  # no phishing protection
 
         # ── Telemetry ─────────────────────────────────────────────────────────
-        "datareporting.healthreport.uploadEnabled"    = false;
-        "datareporting.policy.dataSubmissionEnabled"  = false;
-        "datareporting.usage.uploadEnabled"           = false;
-        "toolkit.telemetry.reportingpolicy.firstRun"  = false;
-        "browser.discovery.enabled"                   = false;
+        "datareporting.healthreport.uploadEnabled"    = false;  # no health report uploads
+        "datareporting.policy.dataSubmissionEnabled"  = false;  # no data submission at all
+        "datareporting.usage.uploadEnabled"           = false;  # no usage data uploads
+        "toolkit.telemetry.reportingpolicy.firstRun"  = false;  # skip telemetry first-run prompt
+        "browser.discovery.enabled"                   = false;  # no addon discovery/recommendations
 
         # ── New Tab Page ──────────────────────────────────────────────────────
-        "browser.newtabpage.activity-stream.showSponsoredTopSites"             = false;
-        "browser.newtabpage.activity-stream.system.showWeatherOptIn"          = false;
-        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features"  = false;
-        "browser.topsites.contile.enabled"           = false;
-        "browser.urlbar.suggest.searches"            = false;
+        "browser.newtabpage.activity-stream.showSponsoredTopSites"             = false;  # no sponsored top sites
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn"          = false;  # no weather widget prompt
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features"  = false;  # no feature recommendations
+        "browser.topsites.contile.enabled"           = false;  # no Contile sponsored tiles
+        "browser.urlbar.suggest.searches"            = false;  # no search suggestions in URL bar
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
-        "browser.toolbars.bookmarks.visibility" = "never";
-        "browser.translations.enable"           = false;
-        "sidebar.visibility"                    = "hide-sidebar";
+        "browser.toolbars.bookmarks.visibility" = "never";  # hide bookmarks bar
+        "browser.translations.enable"           = false;  # disable translation feature
+        "sidebar.visibility"                    = "hide-sidebar";  # sidebar hidden by default
 
         # ── Developer ─────────────────────────────────────────────────────────
-        "devtools.chrome.enabled"         = true;
-        "devtools.toolbox.host"           = "right";
-        "browser.dom.window.dump.enabled" = true;
-        "dom.disable_open_during_load"    = false;
-        "xpinstall.signatures.required"   = false;
-        "extensions.update.enabled"       = false;
-        "browser.search.update"           = false;
-        "browser.backup.enabled"          = false;
-        "browser.ml.enable"              = false;
+        "devtools.chrome.enabled"         = true;   # enable browser chrome debugging
+        "devtools.toolbox.host"           = "right";  # dock devtools to right side
+        "browser.dom.window.dump.enabled" = true;   # enable window.dump() for debugging
+        "dom.disable_open_during_load"    = false;  # allow popups during page load
+        "xpinstall.signatures.required"   = false;  # allow unsigned extensions
+        "extensions.update.enabled"       = false;  # no automatic extension updates
+        "browser.search.update"           = false;  # no search engine updates
+        "browser.backup.enabled"          = false;  # no profile backups
+        "browser.ml.enable"              = false;   # disable on-device ML features
       };
 
       containers = {
