@@ -292,15 +292,10 @@ in
       id = 0;
       isDefault = true;
 
-      # Homepage is NOT declared here because the PRIME profile's homepage string
-      # contains moz-extension:// UUIDs specific to Sidebery tab groups. Those
-      # UUIDs are generated per-profile and won't match in VERTEX. After Sidebery
-      # installs via Firefox Sync, reconfigure the homepage manually in about:config
-      # (browser.startup.homepage) with the new UUIDs.
-
       settings = {
         # ── Session ───────────────────────────────────────────────────────────
         "browser.startup.page" = 3;  # restore previous session
+        "browser.startup.homepage" = "about:home";
 
         # ── Appearance ────────────────────────────────────────────────────────
         "browser.display.background_color"                  = "#000000";
@@ -445,26 +440,22 @@ in
     # + ~40 additional extensions identified by GUID only
     };
 
-    # ── Pre-existing profiles (registered in profiles.ini so Firefox can find them) ──
+    # ── Other profiles ──
 
     profiles.PRIME = {
       id = 1;
-      path = "xsy8besa.PRIME";
     };
 
     profiles.minimal-amnesic = {
       id = 2;
-      path = "zd2lxszj.default-release";
     };
 
     profiles.minimal-persistent = {
       id = 3;
-      path = "1ti21wt1.minimal-persistent";
     };
 
     profiles.dev-edition-default = {
       id = 4;
-      path = "fm78666x.dev-edition-default";
     };
   };
 
@@ -494,7 +485,7 @@ Default=xsy8besa.PRIME
 Locked=1
 
 [InstallF7E9AADF645338CA]
-Default=fm78666x.dev-edition-default
+Default=dev-edition-default
 Locked=1
 
 [Install4F96D1932A9F858E]
