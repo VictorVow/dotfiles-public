@@ -44,11 +44,59 @@
       ansible.builtin.copy:
         dest: /etc/sudoers.d/nix-path
         content: |
-          Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/home/boss/.nix-profile/bin:/nix/var/nix/profiles/default/bin"
+          Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/boss/.nix-profile/bin:/nix/var/nix/profiles/default/bin"
         owner: root
         group: root
         mode: '0440'
         validate: 'visudo -cf %s'
+      become: yes
+
+    # ── Snap: remove and permanently block ──────────────────────────────
+    # Snap is not used — all packages come from Nix, apt, or Flatpak.
+    # Removing snapd frees ~150 MB RAM (snapd daemon + snap mounts) and
+    # prevents Ubuntu from silently installing snap packages behind apt.
+    - name: Remove all installed snaps
+      ansible.builtin.shell: |
+        if command -v snap &>/dev/null && snap list 2>/dev/null | grep -qv '^Name'; then
+          snap list 2>/dev/null | awk 'NR>1 {print $1}' | while read pkg; do
+            snap remove --purge "$pkg" 2>/dev/null || true
+          done
+        fi
+      become: yes
+      changed_when: false
+
+    - name: Remove snapd and related packages
+      ansible.builtin.apt:
+        name:
+          - snapd
+          - gnome-software-plugin-snap
+        state: absent
+        purge: yes
+        autoremove: yes
+      become: yes
+
+    - name: Pin snapd to prevent reinstallation
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/no-snapd
+        content: |
+          Package: snapd
+          Pin: release a=*
+          Pin-Priority: -10
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+
+    - name: Clean up leftover snap directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /snap
+        - /var/snap
+        - /var/lib/snapd
+        - /var/cache/snapd
+        - "{{ ansible_env.HOME }}/snap"
       become: yes
 
     - name: Install system-level apt packages
