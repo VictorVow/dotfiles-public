@@ -448,14 +448,198 @@ in
 
     profiles.minimal-amnesic = {
       id = 2;
+
+      settings = {
+        # ── Session ───────────────────────────────────────────────────────────
+        "browser.startup.page" = 3;
+        "browser.startup.homepage" = "about:home";
+
+        # ── Appearance ────────────────────────────────────────────────────────
+        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";
+        "browser.theme.content-theme"                      = 0;
+        "browser.theme.toolbar-theme"                      = 0;
+        "layout.css.prefers-color-scheme.content-override" = 0;
+
+        # ── Privacy / Security ────────────────────────────────────────────────
+        "dom.security.https_only_mode"            = true;
+        "privacy.userContext.enabled"              = true;
+        "privacy.userContext.ui.enabled"           = true;
+        "privacy.sanitize.sanitizeOnShutdown"      = true;
+        "privacy.sanitize.timeSpan"               = 0;
+        "privacy.clearOnShutdown.offlineApps"     = true;
+        "privacy.clearOnShutdown.siteSettings"    = true;
+        "privacy.clearOnShutdown_v2.formdata"     = true;
+        "privacy.clearOnShutdown_v2.siteSettings" = true;
+        "privacy.history.custom"                  = true;
+        "privacy.spoof_english"                   = 2;
+        "places.history.enabled"                  = false;
+        "browser.contentblocking.category"        = "custom";
+        "browser.formfill.enable"                 = false;
+        "browser.shell.checkDefaultBrowser"       = false;
+        "signon.rememberSignons"                  = false;
+
+        # ── Telemetry / Studies ───────────────────────────────────────────────
+        "app.shield.optoutstudies.enabled"           = false;
+        "datareporting.healthreport.uploadEnabled"   = false;
+        "datareporting.usage.uploadEnabled"          = false;
+        "toolkit.telemetry.reportingpolicy.firstRun" = false;
+        "browser.discovery.enabled"                  = false;
+        "extensions.pocket.enabled"                  = false;
+
+        # ── New Tab Page ──────────────────────────────────────────────────────
+        "browser.newtabpage.activity-stream.feeds.topsites"            = false;
+        "browser.newtabpage.activity-stream.feeds.section.topstories"  = false;
+        "browser.newtabpage.activity-stream.showSponsored"             = false;
+        "browser.newtabpage.activity-stream.showSponsoredTopSites"     = false;
+        "browser.newtabpage.activity-stream.showSponsoredCheckboxes"   = false;
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn"   = false;
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons"   = false;
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;
+        "browser.urlbar.quicksuggest.scenario"       = "history";
+        "browser.urlbar.suggest.searches"            = false;
+        "browser.urlbar.showSearchSuggestionsFirst"  = false;
+
+        # ── UI / Toolbar ──────────────────────────────────────────────────────
+        "browser.search.openintab"               = true;
+        "browser.search.widget.inNavBar"         = true;
+        "browser.search.suggest.enabled"         = false;
+        "browser.toolbars.bookmarks.visibility"  = "never";
+        "sidebar.visibility"                     = "hide-sidebar";
+
+        # ── Media ─────────────────────────────────────────────────────────────
+        "media.autoplay.default"         = 5;
+        "media.ffmpeg.vaapi.enabled"     = true;
+
+        # ── Reader Mode ───────────────────────────────────────────────────────
+        "reader.color_scheme"  = "dark";
+        "reader.font_size"     = 10;
+        "reader.content_width" = 9;
+
+        # ── Misc ─────────────────────────────────────────────────────────────
+        "findbar.highlightAll"             = true;
+        "intl.accept_languages"            = "en-US, en";
+        "javascript.use_us_english_locale" = true;
+      };
+
+      containers = {
+        Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
+        Work     = { id = 2; color = "orange"; icon = "briefcase";   };
+        Banking  = { id = 3; color = "green";  icon = "dollar";      };
+        Shopping = { id = 4; color = "pink";   icon = "cart";        };
+      };
+      containersForce = true;
     };
 
     profiles.minimal-persistent = {
       id = 3;
+
+      settings = {
+        # ── Session ───────────────────────────────────────────────────────────
+        "browser.startup.page" = 3;
+        "browser.startup.homepage" = "about:home";
+
+        # ── Appearance ────────────────────────────────────────────────────────
+        "browser.theme.toolbar-theme" = 0;
+
+        # ── Privacy / Security ────────────────────────────────────────────────
+        "privacy.userContext.enabled"                = true;
+        "privacy.userContext.ui.enabled"             = true;
+        "privacy.clearOnShutdown_v2.formdata"        = true;
+        "browser.contentblocking.category"           = "custom";
+        "network.dns.disablePrefetch"                = true;
+        "network.prefetch-next"                      = false;
+        "network.http.speculative-parallel-limit"    = 0;
+
+        # ── UI ────────────────────────────────────────────────────────────────
+        "sidebar.visibility" = "hide-sidebar";
+      };
+
+      containers = {
+        Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
+        Work     = { id = 2; color = "orange"; icon = "briefcase";   };
+        Banking  = { id = 3; color = "green";  icon = "dollar";      };
+        Shopping = { id = 4; color = "pink";   icon = "cart";        };
+      };
+      containersForce = true;
     };
 
     profiles.dev-edition-default = {
       id = 4;
+
+      settings = {
+        # ── Session ───────────────────────────────────────────────────────────
+        "browser.startup.page" = 3;
+        "browser.startup.homepage" = "about:home";
+        "browser.sessionstore.resume_from_crash" = false;
+        "browser.warnOnQuit"                     = false;
+        "browser.tabs.warnOnCloseOtherTabs"      = false;
+        "browser.tabs.warnOnOpen"                = false;
+
+        # ── Appearance ────────────────────────────────────────────────────────
+        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";
+        "browser.theme.content-theme"                      = 0;
+        "browser.theme.toolbar-theme"                      = 0;
+        "layout.css.prefers-color-scheme.content-override" = 0;
+
+        # ── Privacy / Security ────────────────────────────────────────────────
+        "privacy.userContext.enabled"                  = true;
+        "privacy.userContext.ui.enabled"               = true;
+        "privacy.clearOnShutdown_v2.formdata"          = true;
+        "permissions.isolateBy.userContext"             = true;
+        "browser.contentblocking.category"             = "custom";
+        "browser.shell.checkDefaultBrowser"            = false;
+        "network.dns.disablePrefetch"                  = true;
+        "network.prefetch-next"                        = false;
+        "network.http.speculative-parallel-limit"      = 0;
+        "signon.rememberSignons"                       = false;
+        "signon.autofillForms"                         = false;
+        "extensions.formautofill.addresses.enabled"    = false;
+        "extensions.formautofill.creditCards.enabled"   = false;
+
+        # ── Safe Browsing (off for dev/testing) ───────────────────────────────
+        "browser.safebrowsing.blockedURIs.enabled" = false;
+        "browser.safebrowsing.downloads.enabled"   = false;
+        "browser.safebrowsing.malware.enabled"     = false;
+        "browser.safebrowsing.phishing.enabled"    = false;
+
+        # ── Telemetry ─────────────────────────────────────────────────────────
+        "datareporting.healthreport.uploadEnabled"    = false;
+        "datareporting.policy.dataSubmissionEnabled"  = false;
+        "datareporting.usage.uploadEnabled"           = false;
+        "toolkit.telemetry.reportingpolicy.firstRun"  = false;
+        "browser.discovery.enabled"                   = false;
+
+        # ── New Tab Page ──────────────────────────────────────────────────────
+        "browser.newtabpage.activity-stream.showSponsoredTopSites"             = false;
+        "browser.newtabpage.activity-stream.system.showWeatherOptIn"          = false;
+        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features"  = false;
+        "browser.topsites.contile.enabled"           = false;
+        "browser.urlbar.suggest.searches"            = false;
+
+        # ── UI / Toolbar ──────────────────────────────────────────────────────
+        "browser.toolbars.bookmarks.visibility" = "never";
+        "browser.translations.enable"           = false;
+        "sidebar.visibility"                    = "hide-sidebar";
+
+        # ── Developer ─────────────────────────────────────────────────────────
+        "devtools.chrome.enabled"         = true;
+        "devtools.toolbox.host"           = "right";
+        "browser.dom.window.dump.enabled" = true;
+        "dom.disable_open_during_load"    = false;
+        "xpinstall.signatures.required"   = false;
+        "extensions.update.enabled"       = false;
+        "browser.search.update"           = false;
+        "browser.backup.enabled"          = false;
+        "browser.ml.enable"              = false;
+      };
+
+      containers = {
+        Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
+        Work     = { id = 2; color = "orange"; icon = "briefcase";   };
+        Banking  = { id = 3; color = "green";  icon = "dollar";      };
+        Shopping = { id = 4; color = "pink";   icon = "cart";        };
+      };
+      containersForce = true;
     };
   };
 
