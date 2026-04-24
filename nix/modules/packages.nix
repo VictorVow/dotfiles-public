@@ -14,6 +14,8 @@
 #   - Flatpak (system-level integration)
 {
   home.packages = with pkgs; [
+    # How to search for the binary name if which doesn't show it:
+    # ls $(nix-store -qR ~/.nix-profile | grep package-name)/bin/
 
     # ── Android / Mobile ─────────────────────────────────────────────────────
     android-tools  # Provides adb and fastboot
