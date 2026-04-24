@@ -3,70 +3,6 @@
 let
   jsonFormat = pkgs.formats.json { };
 
-  # ── Shared Firefox profile building blocks ──────────────────────────────
-
-  # Containers shared by every managed profile
-  ffContainers = {
-    Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
-    Work     = { id = 2; color = "orange"; icon = "briefcase";   };
-    Banking  = { id = 3; color = "green";  icon = "dollar";      };
-    Shopping = { id = 4; color = "pink";   icon = "cart";        };
-  };
-
-  # Settings shared by every managed profile (VERTEX + all 3 others)
-  ffBase = {
-    "browser.startup.page"                                       = 3;            # restore previous session
-    "browser.startup.homepage"                                   = "about:home"; # default Firefox home page
-    "browser.theme.toolbar-theme"                                = 0;      # dark toolbar
-    "privacy.userContext.enabled"                                = true;   # enable Multi-Account Containers
-    "privacy.userContext.ui.enabled"                             = true;   # show container UI in menus
-    "privacy.clearOnShutdown_v2.formdata"                        = true;   # clear form data on shutdown
-    "datareporting.healthreport.uploadEnabled"                   = false;  # no health report uploads
-    "datareporting.usage.uploadEnabled"                          = false;  # no usage data uploads
-    "toolkit.telemetry.reportingpolicy.firstRun"                 = false;  # skip telemetry first-run prompt
-    "browser.newtabpage.activity-stream.showSponsoredTopSites"   = false;  # no sponsored top sites
-    "browser.newtabpage.activity-stream.system.showWeatherOptIn" = false;  # no weather widget prompt
-  };
-
-  # Hardened defaults for non-primary profiles (amnesic + persistent)
-  # Extends ffBase with: telemetry lockdown, clean new tab, clean URL bar,
-  # toolbar/search/reader/locale preferences
-  ffHardened = {
-    "browser.contentblocking.category"       = "custom";  # custom tracking protection rules
-    "app.shield.optoutstudies.enabled"       = false;  # no Shield studies
-    "browser.discovery.enabled"              = false;  # no addon discovery/recommendations
-    "extensions.pocket.enabled"              = false;  # disable Pocket integration
-    # ── Network Privacy - No DNS/link/speculative prefetching
-    "network.dns.disablePrefetch"             = true;   # no DNS prefetching
-    "network.prefetch-next"                   = false;  # no link prefetching
-    "network.http.speculative-parallel-limit" = 0;      # no speculative connections
-    # ── New Tab Page
-    "browser.newtabpage.activity-stream.feeds.topsites"                   = false;  # no top sites
-    "browser.newtabpage.activity-stream.feeds.section.topstories"         = false;  # no Pocket stories
-    "browser.newtabpage.activity-stream.showSponsored"                    = false;  # no sponsored content
-    "browser.newtabpage.activity-stream.showSponsoredCheckboxes"          = false;  # hide sponsored opt-in checkboxes
-    "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons"   = false;  # no addon recommendations
-    "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;  # no feature recommendations
-    # ── URL bar
-    "browser.urlbar.quicksuggest.scenario"      = "history";  # URL bar suggests from history only
-    "browser.urlbar.suggest.searches"           = false;  # no search suggestions in URL bar
-    "browser.urlbar.showSearchSuggestionsFirst" = false;  # show history before search suggestions
-    # ── UI / Toolbar
-    "browser.search.openintab"              = true;     # search results open in new tab
-    "browser.search.widget.inNavBar"        = true;     # show search bar in toolbar
-    "browser.toolbars.bookmarks.visibility" = "never";  # hide bookmarks bar
-    # ── Media
-    "media.ffmpeg.vaapi.enabled" = true;  # VA-API hardware video decode
-    # ── Reader Mode
-    "reader.color_scheme"  = "dark";  # dark reader theme
-    "reader.font_size"     = 10;      # reader font size
-    "reader.content_width" = 9;       # reader content width
-    # ── Misc
-    "findbar.highlightAll"             = true;        # highlight all find matches
-    "intl.accept_languages"            = "en-US, en"; # preferred languages for web content
-    "javascript.use_us_english_locale" = true;        # use en-US for JS locale
-  };
-
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
   # modify it at runtime — e.g. the /effort slash command rewrites this file.
   # Same content that programs.claude-code.settings would generate, but
@@ -186,6 +122,109 @@ in
   #   Release notes:     https://nix-community.github.io/home-manager/release-notes.xhtml
   #   Commit history:    https://github.com/nix-community/home-manager/commits/master/modules/programs/firefox
   #   Local docs:        docs/system/nix-firefox.md
+
+
+  # ── Shared Firefox profile building blocks ──────────────────────────────
+
+  # Containers shared by every managed profile
+  ffContainers = {
+    Personal = { id = 1; color = "blue";   icon = "fingerprint"; };
+    Work     = { id = 2; color = "orange"; icon = "briefcase";   };
+    Banking  = { id = 3; color = "green";  icon = "dollar";      };
+    Shopping = { id = 4; color = "pink";   icon = "cart";        };
+  };
+
+  # Settings shared by every managed profile (VERTEX + all 3 others)
+  ffBase = {
+    "browser.startup.page"                                       = 3;            # restore previous session
+    "browser.startup.homepage"                                   = "about:home"; # default Firefox home page
+    # ── Appearance ────────────────────────────────────────────────────────
+    "browser.theme.toolbar-theme"                                = 0;      # dark toolbar (0 = dark, 1 = light, 2 = system)
+    "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";  # compact dark theme
+    "browser.theme.content-theme"                      = 0;  # dark content area for built-in pages (new tab, settings, etc.) (0 = dark, 1 = light, 2 = system)
+    "layout.css.prefers-color-scheme.content-override" = 0;  # tell websites to use dark mode via CSS prefers-color-scheme media query (0 = dark, 1 = light, 2 = system)
+    # ── Privacy / Security ───────────────────────────────────────────────
+    "privacy.clearOnShutdown_v2.formdata"                        = true;   # clear form data on shutdown
+    "privacy.userContext.enabled"                                = true;   # enable Multi-Account Containers
+    "privacy.userContext.ui.enabled"                             = true;   # show container UI in menus
+    # ── Telemetry / Studies ───────────────────────────────────────────────
+    "toolkit.telemetry.reportingpolicy.firstRun"                 = false;  # suppress the "help improve Firefox" telemetry opt-in dialog on first launch
+    "browser.newtabpage.activity-stream.showSponsoredTopSites"   = false;  # no sponsored top sites
+    "browser.newtabpage.activity-stream.system.showWeatherOptIn" = false;  # no weather widget prompt
+    "datareporting.healthreport.uploadEnabled"                   = false;  # no health report uploads
+    "datareporting.usage.uploadEnabled"                          = false;  # no usage data uploads
+    # ── New Tab Page
+    "browser.newtabpage.activity-stream.feeds.topsites"                   = false;  # no top sites
+    "browser.newtabpage.activity-stream.feeds.section.topstories"         = false;  # no Pocket stories
+    "browser.newtabpage.activity-stream.showSponsored"                    = false;  # no sponsored content
+    "browser.newtabpage.activity-stream.showSponsoredCheckboxes"          = false;  # hide sponsored opt-in checkboxes
+    "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons"   = false;  # disable CFR (Contextual Feature Recommender) popup notifications suggesting addons
+    "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;  # disable CFR popup notifications promoting Firefox features ("did you know...")
+    # ── URL bar ──────────────────────────────────────────────────────
+    "browser.urlbar.suggest.engines"                               = false;  # hide search engine names/icons when typing in the URL bar
+    "browser.urlbar.suggest.quicksuggest.sponsored"                = false;  # no sponsored suggestions in URL bar
+    "browser.urlbar.quicksuggest.scenario"                         = "history";  # disable Mozilla's cloud-based Firefox Suggest service; only suggest from local history
+        "browser.urlbar.showSearchSuggestionsFirst" = false;  # show history before search suggestions
+    # ── UI / Toolbar
+    "browser.search.openintab"              = true;     # search results open in new tab
+    "browser.search.widget.inNavBar"        = true;     # show search bar in toolbar
+    "browser.toolbars.bookmarks.visibility" = "never";  # hide bookmarks bar
+    # ── Media / Hardware Acceleration ─────────────────────────────────────
+    "media.eme.enabled"                           = true;   # DRM / Widevine playback
+    "media.ffmpeg.vaapi.enabled"                  = true;   # VA-API hardware video decode
+    "media.ffvpx.enabled"                         = false;  # disable Firefox's bundled FFmpeg fork; forces use of system FFmpeg/VA-API for better hw acceleration
+    "media.hardware-video-decoding.force-enabled" = true;   # force hardware video decode
+    "media.webspeech.synth.enabled"               = false;  # disable the Web Speech API speechSynthesis interface; prevents websites from using text-to-speech
+    "gfx.webrender.all"                           = true;   # force WebRender compositor
+    # ── Reader Mode ───────────────────────────────────────────────────────
+    "reader.color_scheme"  = "dark";  # dark reader theme
+    "reader.font_size"     = 10;      # reader font size
+    "reader.content_width" = 9;       # reader content width
+    # ── AI Chat Sidebar ───────────────────────────────────────────────────
+    "browser.ml.chat.provider"         = "https://claude.ai/new";  # Claude as AI sidebar provider
+    "browser.ml.chat.shortcuts"        = false;  # prevent AI sidebar keyboard shortcuts from conflicting with existing keybindings
+    "browser.ml.chat.page.footerBadge" = false;  # hide the small AI icon that appears in page footers suggesting the AI sidebar
+    # ── DevTools ──────────────────────────────────────────────────────────
+    "devtools.theme"        = "dark";   # dark devtools UI
+    "devtools.toolbox.host" = "right";  # dock devtools to right side
+    # ── Misc
+    "findbar.highlightAll"             = true;        # highlight all find matches
+    "intl.accept_languages"            = "en-US, en"; # set Accept-Language HTTP header sent to web servers for content negotiation
+    "extensions.formautofill.creditCards.enabled" = false;  # no credit card autofill
+    "extensions.pocket.enabled"              = false;  # disable Pocket integration
+    "browser.tabs.groups.smart.userEnabled"               = false;  # disable Firefox's AI-powered automatic tab grouping that clusters tabs by topic
+
+
+  };
+
+  # Hardened defaults for non-primary profiles (amnesic + persistent)
+  # Extends ffBase with: telemetry lockdown, clean new tab, clean URL bar,
+  # toolbar/search/reader/locale preferences
+  ffHardened = {
+    # ── Privacy / Security ────────────────────────────────────────────────
+    "browser.contentblocking.category"       = "custom";  # use custom tracking protection rather than "standard"/"strict" presets, allowing granular control
+    # ── Telemetry / Studies ───────────────────────────────────────────────
+    "app.shield.optoutstudies.enabled"       = false;  # opt out of Mozilla Shield studies (A/B testing that silently installs experimental features)
+    "browser.tabs.crashReporting.sendReport" = false;  # no crash reports
+    "datareporting.policy.dataSubmissionEnabled" = false;  # master switch for all Mozilla data collection; overrides individual data reporting prefs
+    "browser.discovery.enabled"                  = false;  # hide the "Recommended Extensions" section in about:addons
+
+    # ── Network Privacy - No DNS/link/speculative prefetching
+    "network.dns.disablePrefetch"             = true;   # prevent preemptive DNS resolution of links on a page, which leaks browsing patterns to DNS servers
+    "network.prefetch-next"                   = false;  # prevent background downloading of linked pages, which leaks browsing intent and wastes bandwidth
+    "network.http.speculative-parallel-limit" = 0;      # prevent Firefox from opening TCP connections to servers it predicts you'll visit (e.g. autocomplete hover)
+    "network.trr.mode"                                   = 5;      # fully disable DNS-over-HTTPS (mode 5); system already uses a trusted resolver / local DNS filtering
+    "dom.security.https_only_mode"                       = true;   # enable HTTPS-Only Mode — blocks or warns on all plain HTTP connections
+
+    # ── URL bar
+    "browser.urlbar.suggest.searches"           = false;  # prevent URL bar from querying the default search engine for live suggestions as you type
+    # ── Media ─────────────────────────────────────────────────────────────
+    "media.autoplay.default" = 5;  # block all autoplay (audio and video)
+    # ── UI ────────────────────────────────────────────────────────────────
+    "browser.search.suggest.enabled" = false;  # global switch disabling search suggestions in all contexts (URL bar, search bar, new tab)
+
+  };
+
 
   programs.firefox = {
     enable = true;
@@ -356,76 +395,28 @@ in
       id = 0;
       isDefault = true;
 
-      settings = ffBase // {
+      settings = ffBase // ffHardened // {
         # ── Appearance ────────────────────────────────────────────────────────
         "browser.display.background_color"                  = "#000000";  # page bg for unstyled pages
         "browser.display.foreground_color"                  = "#f6f5f4";  # page text for unstyled pages
-        "extensions.activeThemeID"                          = "firefox-compact-dark@mozilla.org";  # compact dark theme
-        "browser.theme.content-theme"                       = 0;  # dark content area
-        "layout.css.prefers-color-scheme.content-override"  = 0;  # report prefers-color-scheme: dark to pages
 
         # ── Privacy / Security ────────────────────────────────────────────────
-        "dom.security.https_only_mode"                       = true;   # upgrade all connections to HTTPS
-        "privacy.sanitize.sanitizeOnShutdown"                 = true;   # clear data on shutdown
-        "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # keep history on shutdown
-        "privacy.history.custom"                             = true;   # use custom history settings
+        "privacy.sanitize.sanitizeOnShutdown"                 = true;   # enable "Delete cookies and site data when Firefox is closed" (exceptions via Cookies.Allow above)
+        "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # exempt browsing history from the sanitize-on-shutdown sweep so navigation history is preserved
+        "privacy.history.custom"                             = true;   # enable "Use custom settings for history" in about:preferences#privacy for granular history control
         "privacy.resistFingerprinting.letterboxing"          = true;   # pad window to resist fingerprinting
-        "privacy.resistFingerprinting.block_mozAddonManager" = true;   # block addon manager fingerprinting
-        "network.trr.mode"                                   = 5;      # disable DNS-over-HTTPS
-        "browser.contentblocking.category"                   = "standard";  # standard tracking protection
-
-        # ── Telemetry / Studies ───────────────────────────────────────────────
-        "app.shield.optoutstudies.enabled"       = false;  # no Shield studies
-        "browser.tabs.crashReporting.sendReport" = false;  # no crash reports
-
-        # ── New Tab Page ──────────────────────────────────────────────────────
-        "browser.newtabpage.activity-stream.feeds.topsites"            = false;  # no top sites
-        "browser.newtabpage.activity-stream.feeds.section.topstories"  = false;  # no Pocket stories
-        "browser.newtabpage.activity-stream.showSponsored"             = false;  # no sponsored content
-        "browser.newtabpage.activity-stream.showSponsoredCheckboxes"   = false;  # hide sponsored opt-in checkboxes
-        "browser.urlbar.suggest.engines"                               = false;  # no search engine suggestions in URL bar
-        "browser.urlbar.suggest.quicksuggest.sponsored"                = false;  # no sponsored suggestions in URL bar
-        "browser.urlbar.quicksuggest.scenario"                         = "history";  # URL bar suggests from history only
+        "privacy.resistFingerprinting.block_mozAddonManager" = true;   # prevent websites from detecting installed addons via the mozAddonManager API (fingerprinting vector)
+        "browser.contentblocking.category"                   = "standard";  # balanced preset (blocks known trackers, cryptominers, fingerprinters); overrides ffHardened's "custom" for this profile
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
         "browser.tabs.inTitlebar"                             = 0;      # tabs below title bar
-        "sidebar.visibility"                                  = "hide-sidebar";  # sidebar hidden by default
-        "browser.search.openintab"                            = true;   # search results open in new tab
-        "browser.search.widget.inNavBar"                      = true;   # show search bar in toolbar
         "browser.search.suggest.enabled.private"              = true;   # allow search suggestions in private windows
         "browser.bookmarks.defaultLocation"                   = "toolbar_____";  # new bookmarks go to toolbar
-        "browser.bookmarks.showMobileBookmarks"               = true;   # show synced mobile bookmarks
+        "browser.bookmarks.showMobileBookmarks"               = true;   # make bookmarks synced from Firefox for Android/iOS visible in the bookmarks menu
         "browser.toolbars.bookmarks.visibility"               = "always";  # always show bookmarks bar
-        "browser.zoom.siteSpecific"                           = false;  # global zoom instead of per-site
-        "browser.tabs.groups.smart.userEnabled"               = false;  # no automatic tab grouping
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;   # enable userChrome.css
+        "browser.zoom.siteSpecific"                           = false;  # apply zoom level uniformly across all sites rather than remembering zoom per domain
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;   # load userChrome.css/userContent.css from the profile dir to customize Firefox UI (required for Sidebery tab bar hiding below)
 
-        # ── Media / Hardware Acceleration ─────────────────────────────────────
-        "media.eme.enabled"                           = true;   # DRM / Widevine playback
-        "media.ffmpeg.vaapi.enabled"                  = true;   # VA-API hardware video decode
-        "media.ffvpx.enabled"                         = false;  # disable bundled ffvpx decoder (prefer system)
-        "media.hardware-video-decoding.force-enabled" = true;   # force hardware video decode
-        "media.webspeech.synth.enabled"               = false;  # disable speech synthesis API
-        "gfx.webrender.all"                           = true;   # force WebRender compositor
-
-        # ── DevTools ──────────────────────────────────────────────────────────
-        "devtools.theme"        = "dark";   # dark devtools UI
-        "devtools.toolbox.host" = "right";  # dock devtools to right side
-
-        # ── AI Chat Sidebar ───────────────────────────────────────────────────
-        "browser.ml.chat.provider"         = "https://claude.ai/new";  # Claude as AI sidebar provider
-        "browser.ml.chat.shortcuts"        = false;  # no AI chat keyboard shortcuts
-        "browser.ml.chat.page.footerBadge" = false;  # no AI badge on pages
-
-        # ── Reader Mode ───────────────────────────────────────────────────────
-        "reader.color_scheme"  = "contrast";  # high-contrast reader theme
-        "reader.font_size"     = 10;          # reader font size (1-9 scale + 10)
-        "reader.content_width" = 9;           # reader content width (1-9 scale)
-
-        # ── Misc ─────────────────────────────────────────────────────────────
-        "extensions.formautofill.creditCards.enabled" = false;  # no credit card autofill
-        "browser.translation.detectLanguage"          = false;  # no automatic language detection
-        "browser.translation.ui.show"                 = false;  # hide translation toolbar
       };
 
       # Hide the horizontal tab bar — Sidebery provides vertical tabs instead.
@@ -495,17 +486,9 @@ in
         # ── Privacy / Security (amnesic extras) ───────────────────────────────
         "privacy.sanitize.sanitizeOnShutdown"      = true;   # clear data on shutdown
         "privacy.sanitize.timeSpan"               = 0;      # clear everything (all time)
-        "privacy.clearOnShutdown.offlineApps"     = true;   # clear offline app data on shutdown
-        "privacy.clearOnShutdown.siteSettings"    = true;   # clear site permissions on shutdown
-        "privacy.clearOnShutdown_v2.siteSettings" = true;   # clear site settings on shutdown (v2 pref)
+        "privacy.clearOnShutdown_v2.siteSettings" = true;   # reset per-site permissions (camera, mic, notifications, location, etc.) on shutdown
         "privacy.history.custom"                  = true;   # use custom history settings
         "signon.rememberSignons"                  = false;  # never save passwords
-
-        # ── UI ────────────────────────────────────────────────────────────────
-        "browser.search.suggest.enabled" = false;  # no search suggestions globally
-
-        # ── Media ─────────────────────────────────────────────────────────────
-        "media.autoplay.default" = 5;  # block all autoplay (audio and video)
       };
 
       containers = ffContainers;
@@ -523,56 +506,28 @@ in
       id = 4;
 
       settings = ffBase // {
-        # ── Session ───────────────────────────────────────────────────────────
-        "browser.sessionstore.resume_from_crash" = false;  # don't restore after crash
-        "browser.warnOnQuit"                     = false;  # no quit confirmation
-        "browser.tabs.warnOnCloseOtherTabs"      = false;  # no warning when closing other tabs
-        "browser.tabs.warnOnOpen"                = false;  # no warning when opening many tabs
-
-        # ── Appearance ────────────────────────────────────────────────────────
-        "extensions.activeThemeID"                         = "firefox-compact-dark@mozilla.org";  # compact dark theme
-        "browser.theme.content-theme"                      = 0;  # dark content area
-        "layout.css.prefers-color-scheme.content-override" = 0;  # report prefers-color-scheme: dark to pages
-
         # ── Privacy / Security ────────────────────────────────────────────────
-        "permissions.isolateBy.userContext"          = true;   # isolate permissions per container
-        "browser.contentblocking.category"          = "custom";  # custom tracking protection rules
-        "browser.shell.checkDefaultBrowser"         = false;  # no default browser prompt
+        "permissions.isolateBy.userContext"          = true;   # each Multi-Account Container gets its own permission grants (e.g. camera in Personal ≠ camera in Banking)
+        "browser.contentblocking.category"          = "custom";  # use custom tracking protection rather than "standard"/"strict" presets, allowing granular control
         "signon.rememberSignons"                    = false;  # never save passwords
         "signon.autofillForms"                      = false;  # no password autofill
         "extensions.formautofill.addresses.enabled" = false;  # no address autofill
-        "extensions.formautofill.creditCards.enabled" = false;  # no credit card autofill
-
         # ── Safe Browsing (off for dev/testing) ───────────────────────────────
         "browser.safebrowsing.blockedURIs.enabled" = false;  # no blocked URI checks
-        "browser.safebrowsing.downloads.enabled"   = false;  # no download scanning
+        "browser.safebrowsing.downloads.enabled"   = false;  # disable Google Safe Browsing checks on downloads; off for dev profile since it can block legitimate tools
         "browser.safebrowsing.malware.enabled"     = false;  # no malware protection
         "browser.safebrowsing.phishing.enabled"    = false;  # no phishing protection
 
-        # ── Telemetry ─────────────────────────────────────────────────────────
-        "datareporting.policy.dataSubmissionEnabled" = false;  # no data submission at all
-        "browser.discovery.enabled"                  = false;  # no addon discovery/recommendations
 
         # ── New Tab Page ──────────────────────────────────────────────────────
-        "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;  # no feature recommendations
-        "browser.topsites.contile.enabled"           = false;  # no Contile sponsored tiles
-        "browser.urlbar.suggest.searches"            = false;  # no search suggestions in URL bar
-
-        # ── UI / Toolbar ──────────────────────────────────────────────────────
-        "browser.toolbars.bookmarks.visibility" = "never";  # hide bookmarks bar
-        "browser.translations.enable"           = false;  # disable translation feature
-        "sidebar.visibility"                    = "hide-sidebar";  # sidebar hidden by default
+        "browser.topsites.contile.enabled"           = false;  # disable Contile (Mozilla's ad-tile partnership) sponsored shortcut tiles on the new tab page
+        "browser.urlbar.suggest.searches"            = false;  # prevent URL bar from querying the default search engine for live suggestions as you type
 
         # ── Developer ─────────────────────────────────────────────────────────
-        "devtools.chrome.enabled"         = true;   # enable browser chrome debugging
-        "devtools.toolbox.host"           = "right";  # dock devtools to right side
         "browser.dom.window.dump.enabled" = true;   # enable window.dump() for debugging
-        "dom.disable_open_during_load"    = false;  # allow popups during page load
         "xpinstall.signatures.required"   = false;  # allow unsigned extensions
         "extensions.update.enabled"       = false;  # no automatic extension updates
-        "browser.search.update"           = false;  # no search engine updates
-        "browser.backup.enabled"          = false;  # no profile backups
-        "browser.ml.enable"              = false;   # disable on-device ML features
+        "browser.backup.enabled"          = false;  # disable Firefox's built-in profile backup feature that periodically saves profile snapshots
       };
 
       containers = ffContainers;
