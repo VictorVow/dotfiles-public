@@ -63,7 +63,7 @@ let
     "browser.urlbar.suggest.engines"                               = false;  # hide search engine names/icons when typing in the URL bar
     "browser.urlbar.suggest.quicksuggest.sponsored"                = false;  # no sponsored suggestions in URL bar
     "browser.urlbar.quicksuggest.scenario"                         = "history";  # disable Mozilla's cloud-based Firefox Suggest service; only suggest from local history
-        "browser.urlbar.showSearchSuggestionsFirst" = false;  # show history before search suggestions
+    "browser.urlbar.showSearchSuggestionsFirst" = false;                   # show history before search suggestions
     # ── UI / Toolbar
     "browser.search.openintab"              = true;     # search results open in new tab
     "browser.search.widget.inNavBar"        = true;     # show search bar in toolbar
@@ -99,7 +99,13 @@ let
   # toolbar/search/reader/locale preferences
   ffHardened = {
     # ── Privacy / Security ────────────────────────────────────────────────
-    "browser.contentblocking.category"       = "custom";  # use custom tracking protection rather than "standard"/"strict" presets, allowing granular control
+    # "custom" stops Firefox from enforcing a preset — "standard" and "strict" silently
+    # override individual prefs (privacy.trackingprotection.enabled, network.cookie.cookieBehavior,
+    # cryptomining/fingerprinting blocking, etc.) to match their preset values on every startup.
+    # "custom" disables that override so the individual prefs below (and in profiles) are respected as-is.
+    # It is not based on any preset; it is the absence of one.
+    "browser.contentblocking.category"       = "custom";
+    "privacy.resistFingerprinting.block_mozAddonManager" = true;   # prevent websites from detecting installed addons via the mozAddonManager API (fingerprinting vector)
     # ── Telemetry / Studies ───────────────────────────────────────────────
     "app.shield.optoutstudies.enabled"       = false;  # opt out of Mozilla Shield studies (A/B testing that silently installs experimental features)
     "browser.tabs.crashReporting.sendReport" = false;  # no crash reports
@@ -401,8 +407,10 @@ in
         "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # exempt browsing history from the sanitize-on-shutdown sweep so navigation history is preserved
         "privacy.history.custom"                             = true;   # enable "Use custom settings for history" in about:preferences#privacy for granular history control
         "privacy.resistFingerprinting.letterboxing"          = true;   # pad window to resist fingerprinting
-        "privacy.resistFingerprinting.block_mozAddonManager" = true;   # prevent websites from detecting installed addons via the mozAddonManager API (fingerprinting vector)
-        "browser.contentblocking.category"                   = "standard";  # balanced preset (blocks known trackers, cryptominers, fingerprinters); overrides ffHardened's "custom" for this profile
+        # Overrides ffHardened's "custom" — "standard" enforces its own values for tracking/cookie/fingerprint
+        # prefs on every startup, so individual overrides for those prefs are ignored in this profile.
+        # Blocks: known trackers (private windows only), third-party tracking cookies, cryptominers, fingerprinters.
+        "browser.contentblocking.category"                   = "standard";
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
         "browser.tabs.inTitlebar"                             = 0;      # tabs below title bar
@@ -504,7 +512,9 @@ in
       settings = ffBase // {
         # ── Privacy / Security ────────────────────────────────────────────────
         "permissions.isolateBy.userContext"          = true;   # each Multi-Account Container gets its own permission grants (e.g. camera in Personal ≠ camera in Banking)
-        "browser.contentblocking.category"          = "custom";  # use custom tracking protection rather than "standard"/"strict" presets, allowing granular control
+        # "custom" prevents Firefox from overriding individual tracking/cookie/fingerprint prefs with a
+        # preset's values on startup — the explicit prefs in this profile (and inherited from ffBase) are used as-is.
+        "browser.contentblocking.category"          = "custom";
         "signon.rememberSignons"                    = false;  # never save passwords
         "signon.autofillForms"                      = false;  # no password autofill
         "extensions.formautofill.addresses.enabled" = false;  # no address autofill
