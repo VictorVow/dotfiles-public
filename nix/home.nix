@@ -1,4 +1,4 @@
-{ config, pkgs, lib, claude-desktop, ... }:
+{ config, pkgs, lib, claude-desktop, llm-agents, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
@@ -17,7 +17,12 @@
   # Allow non-free (proprietary) packages.
   # Needed for: VS Code, Steam, and other proprietary software.
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [ claude-desktop.overlays.default ];
+  nixpkgs.overlays = [
+    claude-desktop.overlays.default
+    # Exposes pkgs.llm-agents.{claude-code,codex,gemini-cli,...} using
+    # pre-built binaries from numtide's cache (cache.numtide.com).
+    llm-agents.overlays.default
+  ];
 
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)

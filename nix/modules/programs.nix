@@ -62,7 +62,6 @@ let
     # ── URL bar ──────────────────────────────────────────────────────
     "browser.urlbar.suggest.engines"                               = false;  # hide search engine names/icons when typing in the URL bar
     "browser.urlbar.suggest.quicksuggest.sponsored"                = false;  # no sponsored suggestions in URL bar
-    "browser.urlbar.quicksuggest.scenario"                         = "history";  # disable Mozilla's cloud-based Firefox Suggest service; only suggest from local history
     "browser.urlbar.showSearchSuggestionsFirst" = false;                   # show history before search suggestions
     # ── UI / Toolbar
     "browser.search.openintab"              = true;     # search results open in new tab
@@ -92,6 +91,7 @@ let
     "extensions.formautofill.creditCards.enabled" = false;  # no credit card autofill
     "extensions.pocket.enabled"              = false;  # disable Pocket integration
     "browser.tabs.groups.smart.userEnabled"               = false;  # disable Firefox's AI-powered automatic tab grouping that clusters tabs by topic
+    "toolkit.legacyUserProfileCustomizations.stylesheets" = true;   # load userChrome.css/userContent.css from profile dir
   };
 
   # Hardened defaults for non-primary profiles (amnesic + persistent)
@@ -103,28 +103,319 @@ let
     # override individual prefs (privacy.trackingprotection.enabled, network.cookie.cookieBehavior,
     # cryptomining/fingerprinting blocking, etc.) to match their preset values on every startup.
     # "custom" disables that override so the individual prefs below (and in profiles) are respected as-is.
-    # It is not based on any preset; it is the absence of one.
-    "browser.contentblocking.category"       = "custom";
+    # "custom" does NOT build on "standard" — it simply stops all preset enforcement. Individual prefs
+    # fall back to Firefox's factory defaults unless explicitly set. Since neither ffHardened nor the
+    # profiles set network.cookie.cookieBehavior, it defaults to 5 (Total Cookie Protection / dFPI —
+    # same as "strict", not "standard" which uses 4). Similarly, privacy.trackingprotection.enabled
+    # defaults to false (tracking protection off outside private browsing, same as "standard").
+    #   standard: trackingprotection only in private windows, blocks third-party tracking cookies
+    #             (cookieBehavior=4), cryptominers, and fingerprinters.
+    #   strict:   trackingprotection in ALL windows, blocks ALL third-party cookies (cookieBehavior=5),
+    #             cryptominers, fingerprinters, and adds strict list annotation + email tracking protection.
+    #             More likely to break sites (e.g. embedded logins, payment flows relying on third-party cookies).
+    #   custom:
+    "browser.contentblocking.category"       = "strict";
+    # ── Privacy / Security
+    "privacy.fingerprintingProtection" = true;    # Basic, high compatibility fingerprinting protection
     "privacy.resistFingerprinting.block_mozAddonManager" = true;   # prevent websites from detecting installed addons via the mozAddonManager API (fingerprinting vector)
     # ── Telemetry / Studies ───────────────────────────────────────────────
     "app.shield.optoutstudies.enabled"       = false;  # opt out of Mozilla Shield studies (A/B testing that silently installs experimental features)
     "browser.tabs.crashReporting.sendReport" = false;  # no crash reports
     "datareporting.policy.dataSubmissionEnabled" = false;  # master switch for all Mozilla data collection; overrides individual data reporting prefs
     "browser.discovery.enabled"                  = false;  # hide the "Recommended Extensions" section in about:addons
-
     # ── Network Privacy - No DNS/link/speculative prefetching
     "network.dns.disablePrefetch"             = true;   # prevent preemptive DNS resolution of links on a page, which leaks browsing patterns to DNS servers
     "network.prefetch-next"                   = false;  # prevent background downloading of linked pages, which leaks browsing intent and wastes bandwidth
     "network.http.speculative-parallel-limit" = 0;      # prevent Firefox from opening TCP connections to servers it predicts you'll visit (e.g. autocomplete hover)
     "network.trr.mode"                                   = 5;      # fully disable DNS-over-HTTPS (mode 5); system already uses a trusted resolver / local DNS filtering
-    "dom.security.https_only_mode"                       = true;   # enable HTTPS-Only Mode — blocks or warns on all plain HTTP connections
-
-    # ── URL bar
+    # ── Live suggestions
+    "browser.urlbar.quicksuggest.scenario"    = "history";  # disable Mozilla's cloud-based Firefox Suggest service; only suggest from local history
     "browser.urlbar.suggest.searches"           = false;  # prevent URL bar from querying the default search engine for live suggestions as you type
+    "browser.search.suggest.enabled"           = false;  # global switch disabling search engine live suggestions in all contexts (URL bar, search bar, new tab)
     # ── Media ─────────────────────────────────────────────────────────────
     "media.autoplay.default" = 5;  # block all autoplay (audio and video)
-    # ── UI ────────────────────────────────────────────────────────────────
-    "browser.search.suggest.enabled" = false;  # global switch disabling search suggestions in all contexts (URL bar, search bar, new tab)
+  };
+
+  # Search engines shared by minimal profiles (extracted from VERTEX)
+  ffIcons = ../assets/firefox-search-icons;
+
+  ffSearch = {
+    default = "Brave";
+    force = true;
+    order = [
+      "Brave"
+      "google"
+      "ddg"
+      "wikipedia"
+      "Google (Verbatim, De-personalized)"
+      "Yandex"
+      "Thesaurus.com"
+      "Firefox Add-ons"
+      "Mycroft Project"
+      "F-Droid"
+      "Google Play"
+      "NixOS packages"
+      "flathub.org"
+      "GitHub"
+      "AlternativeTo"
+      "brew.sh"
+      "Ubuntu Packages"
+      "NPM"
+      "Arch Packages"
+      "pypi.org"
+      "Reddit - Google"
+      "reddit"
+      "Hacker News Search"
+      "Steam"
+      "Lutris"
+      "ProtonDB"
+      "Scryfall"
+      "IGDB game search"
+      "vndb.org"
+      "Goodreads"
+      "youtube"
+      "Rumble"
+      "Twitch"
+      "AniList Anime"
+      "TMDB"
+      "Trakt"
+      "Wikitubia (en)"
+      "Last.fm"
+      "Last.fm - Tracks"
+      "Amazon UK"
+      "Temu.com"
+      "Aliexpress"
+      "Wikispooks (en)"
+      "Conservapedia (en)"
+      "Grokipedia"
+    ];
+    engines = {
+      # ── Built-in engine overrides ────────────────────────────────────────
+      ddg.metaData.alias = "@duck";
+      bing.metaData.hidden = true;
+      ebay.metaData.hidden = true;
+      ecosia.metaData.hidden = true;
+      qwant.metaData.hidden = true;
+      amazondotcom-us.metaData.hidden = true;
+
+      # ── Custom engines ─────────────────────────────────────────────────
+
+      # ── Search ─────────────────────────────────────────────────
+      "Brave" = {
+        urls = [{ template = "https://search.brave.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/brave.ico";
+        definedAliases = [ "@brave" ];
+      };
+      "Google (Verbatim, De-personalized)" = {
+        urls = [{ template = "https://www.google.com/search?q={searchTerms}&tbs=li:1&pws=0"; }];
+        icon = "${ffIcons}/google.ico";
+      };
+      "Yandex" = {
+        urls = [{ template = "https://yandex.com/search/?text={searchTerms}&from=os&clid=1836587"; }];
+        icon = "${ffIcons}/yandex.ico";
+      };
+      # ── Utilities ─────────────────────────────────────────────────
+      "Thesaurus.com" = {
+        urls = [{ template = "https://www.thesaurus.com/browse/{searchTerms}"; }];
+        icon = "${ffIcons}/thesaurus.png";
+        definedAliases = [ "@thesaurus" ];
+      };
+      # ── Software ─────────────────────────────────────────────────
+      "Firefox Add-ons" = {
+        urls = [{ template = "https://addons.mozilla.org/en-GB/firefox/search/?q={searchTerms}"; }];
+        icon = "${ffIcons}/firefox-addons.ico";
+        definedAliases = [ "@addons" ];
+      };
+      "Mycroft Project" = {
+        urls = [{ template = "https://mycroftproject.com/search-engines.html?name={searchTerms}"; }];
+        icon = "${ffIcons}/mycroft.ico";
+        definedAliases = [ "@mycroft" ];
+      };
+      "F-Droid" = {
+        urls = [{ template = "https://search.f-droid.org/?q={searchTerms}"; }];
+        icon = "${ffIcons}/f-droid.ico";
+        definedAliases = [ "@fdroid" ];
+      };
+      "Google Play" = {
+        urls = [{ template = "https://play.google.com/store/search?q={searchTerms}&utm_source=opensearch"; }];
+        icon = "${ffIcons}/google-play.ico";
+        definedAliases = [ "@googleplay" ];
+      };
+      "NixOS packages" = {
+        urls = [{ template = "https://search.nixos.org/packages?query={searchTerms}"; }];
+        icon = "${ffIcons}/nixos-packages.png";
+        definedAliases = [ "@nix" ];
+      };
+      "flathub.org" = {
+        urls = [{ template = "https://flathub.org/apps/search/{searchTerms}"; }];
+        icon = "${ffIcons}/flathub.ico";
+        definedAliases = [ "@flat" ];
+      };
+      "GitHub" = {
+        urls = [{ template = "https://github.com/search?q={searchTerms}&ref=opensearch"; }];
+        icon = "${ffIcons}/github.ico";
+        definedAliases = [ "@github" ];
+      };
+      "AlternativeTo" = {
+        urls = [{ template = "https://alternativeto.net/browse/search/?q={searchTerms}"; }];
+        icon = "${ffIcons}/alternativeto.ico";
+        definedAliases = [ "@alternative" ];
+      };
+      "brew.sh" = {
+        urls = [{ template = "https://formulae.brew.sh/?search={searchTerms}"; }];
+        icon = "${ffIcons}/brew.ico";
+        definedAliases = [ "@brew" ];
+      };
+      "Ubuntu Packages" = {
+        urls = [{ template = "http://packages.ubuntu.com/search?suite=default&section=all&arch=any&searchon=names&keywords={searchTerms}"; }];
+        icon = "${ffIcons}/ubuntu.png";
+        definedAliases = [ "@ubuntu" ];
+      };
+      "NPM" = {
+        urls = [{ template = "https://npmjs.org/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/npm.png";
+        definedAliases = [ "@npm" ];
+      };
+      "Arch Packages" = {
+        urls = [{ template = "https://archlinux.org/packages/?q={searchTerms}"; }];
+        icon = "${ffIcons}/archlinux.ico";
+      };
+      "pypi.org" = {
+        urls = [{ template = "https://pypi.org/search/"; params = [{ name = "q"; value = "{searchTerms}"; }]; }];
+        icon = "${ffIcons}/pypi.ico";
+        definedAliases = [ "@python" ];
+      };
+      # ── Social Media ─────────────────────────────────────────────────
+      "Reddit - Google" = {
+        urls = [{ template = "http://www.google.com/search?q={searchTerms}+site%3Areddit.com"; }];
+        icon = "${ffIcons}/reddit.ico";
+      };
+      reddit = {
+        name = "Reddit";
+        urls = [{ template = "https://www.reddit.com/search/?q={searchTerms}"; }];
+        icon = "${ffIcons}/reddit.ico";
+        definedAliases = [ "@reddit" ];
+      };
+      "Hacker News Search" = {
+        urls = [{ template = "https://hn.algolia.com/?query={searchTerms}&sort=byPopularity&prefix&page=0&dateRange=all&type=story"; }];
+        icon = "${ffIcons}/hackernews.ico";
+        definedAliases = [ "@hacker" ];
+      };
+      # ── Gaming ─────────────────────────────────────────────────
+      "Steam" = {
+        urls = [{ template = "https://store.steampowered.com/search/?term={searchTerms}"; }];
+        icon = "${ffIcons}/steam.ico";
+        definedAliases = [ "@steam" ];
+      };
+      "Lutris" = {
+        urls = [{ template = "https://lutris.net/games?q={searchTerms}"; }];
+        icon = "${ffIcons}/lutris.ico";
+        definedAliases = [ "@lutris" ];
+      };
+      "ProtonDB" = {
+        urls = [{ template = "https://www.protondb.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/protondb.ico";
+        definedAliases = [ "@protondb" ];
+      };
+      "Scryfall" = {
+        urls = [{ template = "https://scryfall.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/scryfall.ico";
+        definedAliases = [ "@scry" ];
+      };
+      "IGDB game search" = {
+        urls = [{ template = "http://igdb.com/search?utf8=✓&q={searchTerms}&commit=search"; }];
+        icon = "${ffIcons}/igdb.png";
+      };
+      "vndb.org" = {
+        urls = [{ template = "https://vndb.org/v"; params = [{ name = "sq"; value = "{searchTerms}"; }]; }];
+        icon = "${ffIcons}/vndb.ico";
+        definedAliases = [ "@visualnovel" ];
+      };
+      # ── Reading ─────────────────────────────────────────────────
+      "Goodreads" = {
+        urls = [{ template = "http://www.goodreads.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/goodreads.ico";
+        definedAliases = [ "@books" ];
+      };
+      # ── Video ─────────────────────────────────────────────────
+      youtube = {
+        name = "YouTube";
+        urls = [{ template = "https://www.youtube.com/results?search_query={searchTerms}&search=Search"; }];
+        icon = "${ffIcons}/youtube.ico";
+        definedAliases = [ "@yt" ];
+      };
+      "Rumble" = {
+        urls = [{ template = "https://rumble.com/search/video?q={searchTerms}"; }];
+        icon = "${ffIcons}/rumble.ico";
+        definedAliases = [ "@rumble" ];
+      };
+      "Twitch" = {
+        urls = [{ template = "https://www.twitch.tv/search?term={searchTerms}"; }];
+        icon = "${ffIcons}/twitch.ico";
+        definedAliases = [ "@twitch" ];
+      };
+      "AniList Anime" = {
+        urls = [{ template = "https://anilist.co/search/anime?search={searchTerms}"; }];
+        icon = "${ffIcons}/anilist.ico";
+        definedAliases = [ "@anime" ];
+      };
+      "TMDB" = {
+        urls = [{ template = "https://www.themoviedb.org/search?query={searchTerms}"; }];
+        icon = "${ffIcons}/tmdb.ico";
+        definedAliases = [ "@tmdb" ];
+      };
+      "Trakt" = {
+        urls = [{ template = "http://trakt.tv/search?utf8=✓&query={searchTerms}"; }];
+        icon = "${ffIcons}/trakt.ico";
+        definedAliases = [ "@trakt" ];
+      };
+      "Wikitubia (en)" = {
+        urls = [{ template = "https://youtube.fandom.com/wiki/Special:Search?search={searchTerms}&opensearch=1"; }];
+        icon = "${ffIcons}/wikitubia.png";
+      };
+      # ── Audio ─────────────────────────────────────────────────
+      "Last.fm" = {
+        urls = [{ template = "http://www.last.fm/search?m=all&q={searchTerms}"; }];
+        icon = "${ffIcons}/lastfm.ico";
+        definedAliases = [ "@last" ];
+      };
+      "Last.fm - Tracks" = {
+        urls = [{ template = "http://www.last.fm/search?q={searchTerms}&type=track"; }];
+        icon = "${ffIcons}/lastfm.ico";
+        definedAliases = [ "@music" ];
+      };
+      # ── Shopping ─────────────────────────────────────────────────
+      "Amazon UK" = {
+        urls = [{ template = "https://www.amazon.co.uk/s?k={searchTerms}"; }];
+        icon = "${ffIcons}/amazon-uk.ico";
+        definedAliases = [ "@amazon" ];
+      };
+      "Temu.com" = {
+        urls = [{ template = "https://www.temu.com/search_result.html?search_key={searchTerms}&search_method=user"; }];
+        icon = "${ffIcons}/temu.png";
+        definedAliases = [ "@temu" ];
+      };
+      "Aliexpress" = {
+        urls = [{ template = "https://www.aliexpress.com/wholesale?catId=0&initiative_id=SB_20190730094114&SearchText={searchTerms}&switch_new_app=n"; }];
+        icon = "${ffIcons}/aliexpress.ico";
+        definedAliases = [ "@ali" ];
+      };
+      # ── Political ─────────────────────────────────────────────────
+      "Wikispooks (en)" = {
+        urls = [{ template = "https://wikispooks.com/w/index.php?title=Special:Search&search={searchTerms}"; }];
+        icon = "${ffIcons}/wikispooks.ico";
+      };
+      "Conservapedia (en)" = {
+        urls = [{ template = "https://conservapedia.com/index.php?title=Special:Search&search={searchTerms}"; }];
+        icon = "${ffIcons}/conservapedia.png";
+        definedAliases = [ "@conservapedia" ];
+      };
+      "Grokipedia" = {
+        urls = [{ template = "https://grokipedia.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/grokipedia.ico";
+        definedAliases = [ "@grok" ];
+      };
+    };
   };
 
 in
@@ -243,7 +534,8 @@ in
     # Sites listed in Allow keep their cookies even with sanitizeOnShutdown.
     #
     # These sites can track whatever I do on them and that it's me the same 
-    # user visiting each time despite VPN pseudononymisation
+    # user visiting each time despite VPN pseudononymisation. Additionally 
+    # local attacks (evil maid) can see my account info / steal cookies.
     policies.Cookies.Allow = [
       "http://15-baikal.example.com"
       "http://localhost:8080"
@@ -261,8 +553,8 @@ in
       "https://app.element.io"
       "https://apps.axahealth.co.uk"
       "https://auth.mozilla.auth0.com"
-      "https://auth.my.idmobile.co.uk"
-      "https://auth.openai.com"
+      "https://auth.openai.com" 
+      "https://auth.scribd.com" # uses email 2FA
       "https://auth.rumble.com"
       "https://backloggd.com"
       "https://bank.barclays.co.uk"
@@ -271,13 +563,11 @@ in
       "https://bugzilla.mozilla.org"
       "https://chatgpt.com"
       "https://christisking.cc"
-      "https://cla-assistant.io"
       "https://claude.ai"
       "https://cloud.digitalocean.com"
       "https://community.frame.work"
       "https://community.signalusers.org"
       "https://confer.to"
-      "https://console.scaleway.com"
       "https://dental.bupa.co.uk"
       "https://discord.com"
       "https://discuss.grapheneos.org"
@@ -309,6 +599,7 @@ in
       "https://login.mailbox.org"
       "https://login.nvgs.nvidia.com"
       "https://login.tailscale.com"
+      "https://stremio.tailee8f02.ts.net"   # My Stremio instance - AIOStreams
       "https://login.us-east-1.auth.skillbuilder.aws"
       "https://logseq.com"
       "https://mega.nz"
@@ -342,9 +633,6 @@ in
       "https://redlib.pussthecat.org"
       "https://redlib.r4fo.com"
       "https://roadmap.sh"
-      "https://rule34.xxx"
-      "https://secure.nexdock.com"
-      "https://signup.cloud.oracle.com"
       "https://skillbuilder.aws"
       "https://slack.com"
       "https://sso.crunchyroll.com"
@@ -369,8 +657,6 @@ in
       "https://www.codecademy.com"
       "https://www.direct.aviva.co.uk"
       "https://www.epicgames.com"
-      "https://www.fanfiction.net"
-      "https://www.feelgoodcontacts.com"
       "https://www.goodreads.com"
       "https://www.google.com"
       "https://www.instagram.com"
@@ -382,7 +668,6 @@ in
       "https://www.paypal.com"
       "https://www.reddit.com"
       "https://www.royalroad.com"
-      "https://www.thetrainline.com"
       "https://www.tiktok.com"
       "https://www.tripadvisor.co.uk"
       "https://www.twitch.tv"
@@ -407,21 +692,17 @@ in
         "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # exempt browsing history from the sanitize-on-shutdown sweep so navigation history is preserved
         "privacy.history.custom"                             = true;   # enable "Use custom settings for history" in about:preferences#privacy for granular history control
         "privacy.resistFingerprinting.letterboxing"          = true;   # pad window to resist fingerprinting
-        # Overrides ffHardened's "custom" — "standard" enforces its own values for tracking/cookie/fingerprint
-        # prefs on every startup, so individual overrides for those prefs are ignored in this profile.
-        # Blocks: known trackers (private windows only), third-party tracking cookies, cryptominers, fingerprinters.
-        "browser.contentblocking.category"                   = "standard";
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
         "browser.tabs.inTitlebar"                             = 0;      # tabs below title bar
-        "browser.search.suggest.enabled.private"              = true;   # allow search suggestions in private windows
         "browser.bookmarks.defaultLocation"                   = "toolbar_____";  # new bookmarks go to toolbar
         "browser.bookmarks.showMobileBookmarks"               = true;   # make bookmarks synced from Firefox for Android/iOS visible in the bookmarks menu
         "browser.toolbars.bookmarks.visibility"               = "always";  # always show bookmarks bar
         "browser.zoom.siteSpecific"                           = false;  # apply zoom level uniformly across all sites rather than remembering zoom per domain
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;   # load userChrome.css/userContent.css from the profile dir to customize Firefox UI (required for Sidebery tab bar hiding below)
 
       };
+
+      search = ffSearch;
 
       # Hide the horizontal tab bar — Sidebery provides vertical tabs instead.
       userChrome = ''
@@ -495,6 +776,18 @@ in
         "signon.rememberSignons"                  = false;  # never save passwords
       };
 
+      search = ffSearch;
+      userChrome = ''
+        /* Show search one-off engines as a grid of icons instead of a vertical list */
+        #PopupSearchAutoComplete .search-panel-one-offs {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+        #PopupSearchAutoComplete .searchbar-engine-one-off-item {
+            flex-basis: calc(25% - 4px) !important;
+            margin: 2px !important;
+        }
+      '';
       containers = ffContainers;
       containersForce = true;
     };
@@ -502,6 +795,18 @@ in
     profiles.minimal-persistent = {
       id = 3;
       settings = ffBase // ffHardened;
+      search = ffSearch;
+      userChrome = ''
+        /* Show search one-off engines as a grid of icons instead of a vertical list */
+        #PopupSearchAutoComplete .search-panel-one-offs {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+        #PopupSearchAutoComplete .searchbar-engine-one-off-item {
+            flex-basis: calc(25% - 4px) !important;
+            margin: 2px !important;
+        }
+      '';
       containers = ffContainers;
       containersForce = true;
     };
@@ -514,7 +819,7 @@ in
         "permissions.isolateBy.userContext"          = true;   # each Multi-Account Container gets its own permission grants (e.g. camera in Personal ≠ camera in Banking)
         # "custom" prevents Firefox from overriding individual tracking/cookie/fingerprint prefs with a
         # preset's values on startup — the explicit prefs in this profile (and inherited from ffBase) are used as-is.
-        "browser.contentblocking.category"          = "custom";
+        "browser.contentblocking.category"          = "standard";
         "signon.rememberSignons"                    = false;  # never save passwords
         "signon.autofillForms"                      = false;  # no password autofill
         "extensions.formautofill.addresses.enabled" = false;  # no address autofill
@@ -1021,6 +1326,16 @@ INSTALLS
     };
   };
 
+  # ── VSCodium settings ────────────────────────────────────────────────────────
+  # VSCodium is installed outside Nix (not pkgs.vscode), so programs.vscode doesn't
+  # cover its config directory. Manage the settings file declaratively here instead.
+
+  xdg.configFile."VSCodium/User/settings.json".source = jsonFormat.generate "vscodium-settings" {
+    "diffEditor.ignoreTrimWhitespace" = false;
+    "markdown.preview.fontSize"       = 18;
+    "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
+  };
+
   # ── Nix Utilities ─────────────────────────────────────────────────────────────
 
   # nix-index provides `nix-locate` to find which package provides a given file,
@@ -1128,9 +1443,9 @@ INSTALLS
   # Home Manager claude-code.nix source: https://github.com/nix-community/home-manager/blob/master/modules/programs/claude-code.nix
 
   programs.claude-code = {
-    enable               = true;
-    package              = pkgs.claude-code;  # required when enableMcpIntegration = true
-    enableMcpIntegration = true;              # merges programs.mcp.servers → ~/.claude/.mcp.json
+    enable  = true;
+    package = pkgs.llm-agents.claude-code;
+    # enableMcpIntegration — not available until HM 26.05
 
     # ── Agents — creates ~/.claude/agents/<key>.md ────────────────────────────────
 
@@ -1284,9 +1599,9 @@ INSTALLS
   # ── Codex ──────────────────────────────────────────────────────────────────────
 
   programs.codex = {
-    enable               = true;
-    package              = pkgs.codex;
-    enableMcpIntegration = true;  # merges programs.mcp.servers → ~/.codex/.mcp.json
+    enable  = true;
+    package = pkgs.llm-agents.codex;
+    # enableMcpIntegration — not available until HM 26.05
   };
 
   # ── Gemini CLI ─────────────────────────────────────────────────────────────────
@@ -1297,9 +1612,9 @@ INSTALLS
   # here so gemini-cli doesn't re-prompt on launch.
 
   programs.gemini-cli = {
-    enable  = true;
-    package = pkgs.gemini-cli;
-    enableMcpIntegration = true;
+    enable   = true;
+    package  = pkgs.llm-agents.gemini-cli;
+    # enableMcpIntegration — not available until HM 26.05
     settings.security.auth.selectedType = "oauth-personal";
   };
 

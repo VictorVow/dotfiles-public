@@ -6,6 +6,7 @@
 {
   # ── Bash Integration ──────────────────────────────────────────────────────────
 
+  # i.e. ~/.bashrc equivalent
   programs.bash = {
     enable = true;
     # Home Manager appends these to ~/.bashrc automatically.
@@ -113,7 +114,7 @@
       if [[ -n "$TMUX" ]]; then
         _tmux_save_dir() { printf '%s' "$PWD" > "$HOME/.tmux_last_dir"; }
         PROMPT_COMMAND="_tmux_save_dir''${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
-      elif [[ -f "$HOME/.tmux_last_dir" ]]; then
+      elif [[ -f "$HOME/.tmux_last_dir" ]] && pstree -s $$ | grep -qi yakuake; then
         _tmux_dir=$(< "$HOME/.tmux_last_dir")
         [[ -d "$_tmux_dir" ]] && cd "$_tmux_dir"
         unset _tmux_dir
@@ -150,6 +151,115 @@
       # ── md/Markdown: open file(s) in MarkText Flatpak ──────────────────────────
       md() {
         ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
+      }
+
+      # ── hms: home-manager switch ───────────────────────────────────────────
+      # 1. Evaluates the flake and builds a stopping set of user-level packages
+      #    by expanding through HM aggregator drvs (home-manager-path, etc.).
+      # 2. Dry-runs against the binary cache to find what needs local compilation.
+      # 3. If nothing: switches immediately with max-jobs 0 (substitutes only).
+      # 4. If something: shows a table of (derivation → top-level cause) and
+      #    asks for Y/n confirmation before proceeding with a full switch.
+      hms() {
+        local flake="$HOME/Documents/ESSENTIALS/installs/nix"
+        local config="boss"
+
+        # Strip the nix store hash prefix and .drv suffix from a store path.
+        _drv_name() { basename "$1" | sed 's/^[a-z0-9]\{32\}-//; s/\.drv$//'; }
+
+        # BFS upward through the .drv referrer graph. Returns the name of the
+        # first ancestor found in _hms_stops (the user-level package set).
+        _hms_find_cause() {
+          local target="$1"
+          [[ -v "_hms_stops[$target]" ]] && { _drv_name "$target"; return; }
+          local -A seen=(["$target"]=1)
+          local -a frontier=("$target")
+          local depth node ref
+          for ((depth = 0; depth < 25; depth++)); do
+            local -a next=()
+            for node in "''${frontier[@]}"; do
+              while IFS= read -r ref; do
+                [[ -z "$ref" || -v "seen[$ref]" ]] && continue
+                seen["$ref"]=1
+                if [[ -v "_hms_stops[$ref]" ]]; then _drv_name "$ref"; return; fi
+                next+=("$ref")
+              done < <(nix-store -q --referrers "$node" 2>/dev/null | grep '\.drv$' || true)
+            done
+            [[ ''${#next[@]} -eq 0 ]] && break
+            frontier=("''${next[@]}")
+          done
+          printf '(unknown)'
+        }
+
+        # ── 1. evaluate flake ──────────────────────────────────────────────
+        printf 'Evaluating flake...\r'
+        local act_drv
+        act_drv=$(nix eval --raw \
+          "$flake#homeConfigurations.$config.activationPackage.drvPath" \
+          2>&1 | grep '^/nix/store') || {
+          printf '\033[31mERROR: flake evaluation failed\033[0m\n' >&2
+          return 1
+        }
+
+        # ── 2. build stopping set: expand HM aggregators one level ─────────
+        # home-manager-path bundles home.packages; home-manager-files holds
+        # dotfiles; activation-script orchestrates activation. Expanding through
+        # them exposes the actual user packages as BFS stop nodes.
+        local -A _hms_stops=()
+        _hms_stops["$act_drv"]=1
+        local l1_dep l1_name child
+        while IFS= read -r l1_dep; do
+          l1_name=$(_drv_name "$l1_dep")
+          if [[ "$l1_name" == home-manager-* || "$l1_name" == activation-script* ]]; then
+            while IFS= read -r child; do
+              [[ -n "$child" ]] && _hms_stops["$child"]=1
+            done < <(nix-store -q --references "$l1_dep" 2>/dev/null | grep '\.drv$')
+          else
+            _hms_stops["$l1_dep"]=1
+          fi
+        done < <(nix-store -q --references "$act_drv" 2>/dev/null | grep '\.drv$')
+
+        # ── 3. dry-run to check binary cache ───────────────────────────────
+        printf 'Checking binary cache...\r'
+        local dry
+        dry=$(nix build --dry-run \
+          "$flake#homeConfigurations.$config.activationPackage" 2>&1) || {
+          printf '%s\n' "$dry" >&2
+          return 1
+        }
+
+        local -a to_build
+        mapfile -t to_build < <(
+          printf '%s\n' "$dry" \
+          | grep -E '^\s+/nix/store/[a-z0-9]+-.*\.drv$' \
+          | sed 's/^[[:space:]]*//'
+        )
+
+        # ── 4. nothing to compile: switch immediately (cache-only) ─────────
+        if [[ ''${#to_build[@]} -eq 0 ]]; then
+          printf '                        \r'
+          home-manager switch --flake "$flake#$config" --option max-jobs 0
+          return
+        fi
+
+        # ── 5. show dependency table ────────────────────────────────────────
+        printf '\n\033[33mNot in binary cache — will require local compilation:\033[0m\n\n'
+        printf '  %-54s  %s\n' 'Derivation' 'Caused by'
+        printf '  %s\n' "$(printf '─%.0s' {1..74})"
+        local drv name cause
+        for drv in "''${to_build[@]}"; do
+          name=$(_drv_name "$drv")
+          cause=$(_hms_find_cause "$drv")
+          printf '  \033[36m%-54s\033[0m  \033[33m%s\033[0m\n' "$name" "$cause"
+        done
+
+        # ── 6. confirm before compiling ─────────────────────────────────────
+        printf '\nProceed with local compilation? [y/N] '
+        local reply
+        read -r reply
+        [[ "$reply" =~ ^[Yy]$ ]] || { printf 'Aborted.\n'; return 1; }
+
+        home-manager switch --flake "$flake#$config"
       }
 
       # ── Nix shortcuts: nsh / nr ────────────────────────────────────────────
@@ -196,7 +306,8 @@
       # NOTE: Aliases are only loaded in interactive shells — non-interactive tools
       # (e.g. Claude's Bash tool, scripts, cron jobs) cannot resolve them.
       # Use the full `home-manager switch --flake ...` command in those contexts.
-      hms   = "home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss";
+      # hms is a function (defined in initExtra) not an alias — it runs a cache
+      # preflight check before switching.
       hmn   = "home-manager news --flake ~/Documents/ESSENTIALS/installs/nix#boss";
 
       # Nix shortcuts
