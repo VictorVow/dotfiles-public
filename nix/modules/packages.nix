@@ -116,7 +116,8 @@
                        # Important for Wine/Lutris — many Windows apps expect these metrics
 
     # ── Gaming ────────────────────────────────────────────────────────────────
-    gamemode  # Feral Interactive's game performance optimiser
+    # gamemode — stays in apt; gamemode-daemon is a system service and the apt
+    #            gamemoderun binary avoids the nix bash-wrapper/libc conflict
     gamescope # Valve's micro-compositor for gaming (FSR, resolution scaling)
               # Note: plasma-gamemode (KDE integration) stays in apt
     wine      # Windows application compatibility layer
