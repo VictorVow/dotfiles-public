@@ -7,7 +7,7 @@
       After = [ "network.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.ollama}/bin/ollama serve";
+      ExecStart = "${pkgs.ollama-vulkan}/bin/ollama serve";
       Restart = "always";
       RestartSec = "3";
       Environment = [
@@ -19,6 +19,6 @@
     };
   };
 
-  home.packages = [ pkgs.ollama ];
+  home.packages = [ pkgs.ollama-vulkan ];
 
 }
