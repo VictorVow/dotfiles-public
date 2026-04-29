@@ -1,8 +1,0 @@
-# Homebrew packages — canonical source of truth.
-# Add a package here and run update-all (or brew.sh) to install it.
-# Removing a package here does NOT auto-uninstall it; run `brew remove <pkg>` manually.
-
-fvm                        # Flutter version manager
-git-credential-libsecret   # Git credential helper using libsecret keyring
-icu4c@76                   # ICU Unicode library (versioned formula)
-nvm                        # Node Version Manager

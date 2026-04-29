@@ -245,20 +245,8 @@ else
   # brew upgrade: upgrades installed formulae to latest versions
   run_step "brew update + upgrade" bash -c "brew update && brew upgrade"
 
-  # Install any packages declared in brew-packages.txt that aren't yet installed.
-  # This is how newly-added entries in the canonical list get picked up.
-  BREW_LIST_FILE="$SCRIPT_DIR/brew-packages.txt"
-  if [[ -f "$BREW_LIST_FILE" ]]; then
-    TO_INSTALL=()
-    while IFS= read -r line; do
-      pkg="${line%%#*}"; pkg="${pkg// /}"
-      [[ -z "$pkg" ]] && continue
-      brew list --formula "$pkg" &>/dev/null 2>&1 || TO_INSTALL+=("$pkg")
-    done < "$BREW_LIST_FILE"
-    if [[ ${#TO_INSTALL[@]} -gt 0 ]]; then
-      run_step "brew install new" brew install "${TO_INSTALL[@]}"
-    fi
-  fi
+  # Sync declared state: install new entries, remove unlisted ones.
+  run_step "brew bundle sync" brew bundle install --cleanup --file="$SCRIPT_DIR/Brewfile"
 
   success "Homebrew done."
 fi
