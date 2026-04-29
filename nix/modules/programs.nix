@@ -521,14 +521,7 @@ in
 
   programs.firefox = {
     enable = true;
-
-    # Nix-wrapped Firefox uses its own native-messaging-host paths, so the
-    # system-level /usr/lib/mozilla/native-messaging-hosts/ is not found.
-    # KeePassXC (Flatpak) uses ~/.mozilla/native-messaging-hosts/ which the
-    # wrapper does check, so it continues to work without being listed here.
-    nativeMessagingHosts = [
-      pkgs.kdePackages.plasma-browser-integration
-    ];
+    package = null; # Use the non-Nix tarball at ~/Documents/ESSENTIALS/Programs/firefox
 
     # Cookie exceptions — populated from xsy8besa.PRIME permissions.sqlite.
     # Sites listed in Allow keep their cookies even with sanitizeOnShutdown.
@@ -845,6 +838,11 @@ in
       containersForce = true;
     };
   };
+
+  # Non-Nix Firefox checks the standard per-user path for native messaging hosts.
+  # The Nix-wrapped binary used its own vendored path; the tarball does not.
+  home.file.".mozilla/native-messaging-hosts/org.kde.plasma.browser_integration.json".source =
+    "${pkgs.kdePackages.plasma-browser-integration}/lib/mozilla/native-messaging-hosts/org.kde.plasma.browser_integration.json";
 
   # The post-link activation script below converts the HM-managed profiles.ini
   # symlink into a writable copy (to append [Install*] sections). On the next
@@ -1330,10 +1328,13 @@ INSTALLS
   # VSCodium is installed outside Nix (not pkgs.vscode), so programs.vscode doesn't
   # cover its config directory. Manage the settings file declaratively here instead.
 
-  xdg.configFile."VSCodium/User/settings.json".source = jsonFormat.generate "vscodium-settings" {
-    "diffEditor.ignoreTrimWhitespace" = false;
-    "markdown.preview.fontSize"       = 18;
-    "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
+  xdg.configFile."VSCodium/User/settings.json" = {
+    force = true;
+    source = jsonFormat.generate "vscodium-settings" {
+      "diffEditor.ignoreTrimWhitespace" = false;
+      "markdown.preview.fontSize"       = 18;
+      "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
+    };
   };
 
   # ── Nix Utilities ─────────────────────────────────────────────────────────────
