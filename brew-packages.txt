@@ -3,7 +3,6 @@
 # Removing a package here does NOT auto-uninstall it; run `brew remove <pkg>` manually.
 
 fvm                        # Flutter version manager
-gemini-cli                 # Google Gemini AI CLI
 git-credential-libsecret   # Git credential helper using libsecret keyring
 icu4c@76                   # ICU Unicode library (versioned formula)
 nvm                        # Node Version Manager

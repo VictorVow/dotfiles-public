@@ -13,17 +13,15 @@ com.axosoft.GitKraken
 com.bilingify.readest
 com.bktus.gpgfrontend
 com.borgbase.Vorta
-com.brave.Browser
 com.calibre_ebook.calibre
 com.dec05eba.gpu_screen_recorder
 com.discordapp.Discord
-com.github.KRTirtho.Spotube
-com.github.PintaProject.Pinta
 com.github.ahrm.sioyek
 com.github.dynobo.normcap
 com.github.jeromerobert.pdfarranger
-com.github.marktext.marktext
+com.github.KRTirtho.Spotube
 com.github.mtkennerly.ludusavi
+com.github.PintaProject.Pinta
 com.github.tchx84.Flatseal
 com.github.unrud.VideoDownloader
 com.github.wwmm.easyeffects
@@ -34,6 +32,7 @@ com.jgraph.drawio.desktop
 com.logseq.Logseq
 com.moonlight_stream.Moonlight
 com.nuclearplayer.Nuclear
+com.openwebui.open-webui
 com.parsecgaming.parsec
 com.poweriso.PowerISO
 com.rafaelmardojai.Blanket
@@ -60,7 +59,6 @@ io.appflowy.AppFlowy
 io.dbeaver.DBeaverCommunity
 io.frama.tractor.carburetor
 io.freetubeapp.FreeTube
-io.github.Bavarder.Bavarder
 io.github.alainm23.planify
 io.github.astralvixen.geforce-infinity
 io.github.celluloid_player.Celluloid
@@ -68,18 +66,18 @@ io.github.chidiwilliams.Buzz
 io.github.diegopvlk.Cine
 io.github.dvlv.boxbuddyrs
 io.github.flattool.Warehouse
+io.github.forkgram.tdesktop
 io.github.giantpinkrobots.flatsweep
 io.github.hmlendea.geforcenow-electron
 io.github.ihhub.Fheroes2
 io.github.ilya_zlobintsev.LACT
-io.github.mohfy.word2ipa
+io.github.maniacx.BudsLink
 io.github.nozwock.Packet
 io.github.peazip.PeaZip
 io.github.pieterdd.RcloneShuttle
 io.github.pwr_solaar.solaar
 io.github.qwersyk.Newelle
 io.github.radiolamp.mangojuice
-io.github.ryubing.Ryujinx
 io.github.seadve.Kooha
 io.github.shonubot.Spruce
 io.github.shundhammer.qdirstat
@@ -108,10 +106,9 @@ net.sapples.LiveCaptions
 net.sourceforge.squirrel_sql
 nl.hjdskes.gcolor3
 no.mifi.losslesscut
-org.DolphinEmu.dolphin-emu
 org.briarproject.Briar
 org.chromium.Chromium
-org.citra_emu.citra
+org.DolphinEmu.dolphin-emu
 org.electrum.electrum
 org.fcast.Receiver
 org.ferdium.Ferdium
@@ -136,10 +133,9 @@ org.kde.kolourpaint
 org.kde.kommit
 org.kde.merkuro
 org.keepassxc.KeePassXC
-org.kiwix.desktop
 org.libreoffice.LibreOffice
-org.mozilla.Thunderbird
 org.mozilla.firefox
+org.mozilla.Thunderbird
 org.nickvision.tubeconverter
 org.nicotine_plus.Nicotine
 org.onionshare.OnionShare
@@ -155,7 +151,6 @@ org.telegram.desktop
 org.torproject.torbrowser-launcher
 org.tribler.Tribler
 org.videolan.VLC
-org.yuzu_emu.yuzu
 org.zotero.Zotero
 page.codeberg.JakobDev.jdSystemMonitor
 page.codeberg.vendillah.GamepadMirror
@@ -163,16 +158,15 @@ page.kramo.Cartridges
 re.fossplant.songrec
 re.sonny.Eloquent
 re.sonny.Junction
-sa.sy.bluerecorder
 us.zoom.Zoom
-
-## GeForce NOW
-
-com.nvidia.geforcenow
 
 ## Flathub Beta
 
 com.stremio.Stremio
+
+## GeForce NOW
+
+com.nvidia.geforcenow
 
 ## grayjay1-origin
 
@@ -185,7 +179,3 @@ moe.celica.BabyloniaTerminal
 ## pied-origin
 
 com.mikeasoft.pied
-
-## popcorntime-origin
-
-org.popcorntime.PopcornTime
