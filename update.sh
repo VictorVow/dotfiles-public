@@ -17,6 +17,7 @@
 #   ./update.sh --no-nix           # Skip Nix flake update (faster, uses locked versions)
 #   ./update.sh --no-distrobox     # Skip container OS upgrades
 #   ./update.sh --no-stable-check  # Skip the nixpkgs stable-release upgrade check
+#   ./update.sh --no-gc            # Skip Nix store garbage collection
 #   ./update.sh --dry-run          # Print what would run without executing
 #
 # Cron example (daily at 10:00):
@@ -28,6 +29,7 @@ set -euo pipefail
 UPDATE_NIX=true
 UPDATE_DISTROBOX=true
 CHECK_STABLE=true
+GC_NIX=true
 DRY_RUN=false
 
 for arg in "$@"; do
@@ -35,6 +37,7 @@ for arg in "$@"; do
     --no-nix)           UPDATE_NIX=false ;;
     --no-distrobox)     UPDATE_DISTROBOX=false ;;
     --no-stable-check)  CHECK_STABLE=false ;;
+    --no-gc)            GC_NIX=false ;;
     --dry-run)          DRY_RUN=true ;;
     --help|-h)
       grep '^#' "$0" | head -21 | sed 's/^# \?//'
@@ -131,7 +134,7 @@ export NPM_CONFIG_PREFIX="$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.nix-profile/bin:$HOME/.cargo/bin:$PATH"
 
 # ── 1. Nix + Home Manager ────────────────────────────────────────────────────
-step "1/7  Nix + Home Manager"
+step "1/8  Nix + Home Manager"
 
 if ! command -v nix &>/dev/null; then
   warn "nix not found — skipping Nix updates. Run ./bootstrap.sh first."
@@ -217,7 +220,7 @@ else
 fi
 
 # ── 2. apt (system packages) ─────────────────────────────────────────────────
-step "2/7  apt (system packages)"
+step "2/8  apt (system packages)"
 
 if ! command -v apt-get &>/dev/null; then
   warn "apt-get not found — not an apt-based system?"
@@ -232,7 +235,7 @@ else
 fi
 
 # ── 3. Homebrew ───────────────────────────────────────────────────────────────
-step "3/7  Homebrew"
+step "3/8  Homebrew"
 
 if ! command -v brew &>/dev/null; then
   skipped "brew not found — skipping."
@@ -261,7 +264,7 @@ else
 fi
 
 # ── 4. npm global AI CLIs ─────────────────────────────────────────────────────
-step "4/7  npm global packages (AI CLIs)"
+step "4/8  npm global packages (AI CLIs)"
 
 if ! command -v npm &>/dev/null; then
   skipped "npm not found — skipping."
@@ -282,7 +285,7 @@ else
 fi
 
 # ── 5. Flatpak ────────────────────────────────────────────────────────────────
-step "5/7  Flatpak"
+step "5/8  Flatpak"
 
 if ! command -v flatpak &>/dev/null; then
   skipped "flatpak not found — skipping."
@@ -327,7 +330,7 @@ else
 fi
 
 # ── 6. pipx ───────────────────────────────────────────────────────────────────
-step "6/7  pipx"
+step "6/8  pipx"
 
 if ! command -v pipx &>/dev/null; then
   skipped "pipx not found — skipping."
@@ -340,7 +343,7 @@ else
 fi
 
 # ── 7. Distrobox containers ───────────────────────────────────────────────────
-step "7/7  Distrobox containers"
+step "7/8  Distrobox containers"
 
 if ! command -v distrobox &>/dev/null; then
   skipped "distrobox not found — skipping."
@@ -357,6 +360,24 @@ else
   success "Distrobox containers done."
 fi
 
+# ── 8. Nix garbage collection ────────────────────────────────────────────────
+step "8/8  Nix garbage collection"
+
+if ! command -v nix-collect-garbage &>/dev/null; then
+  skipped "nix-collect-garbage not found — skipping."
+  RESULTS["Nix GC"]="skipped (not installed)"
+elif ! $GC_NIX; then
+  skipped "Skipping Nix GC (--no-gc)."
+  RESULTS["Nix GC"]="skipped (--no-gc)"
+else
+  BEFORE=$(df --output=avail /nix 2>/dev/null | tail -1 || echo 0)
+  run_step "Nix GC" nix-collect-garbage --delete-older-than 30d
+  AFTER=$(df --output=avail /nix 2>/dev/null | tail -1 || echo 0)
+  FREED=$(( (AFTER - BEFORE) / 1024 ))
+  [[ $FREED -gt 0 ]] && info "Freed ~${FREED} MiB from /nix."
+  success "Nix garbage collection done."
+fi
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 ELAPSED=$(( $(date +%s) - START_TIME ))
 MINUTES=$(( ELAPSED / 60 ))
@@ -367,7 +388,7 @@ echo -e "${BOLD}━━━ Update Summary ━━━━━━━━━━━━━
 printf "  %-30s %s\n" "Step" "Result"
 printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" "Nix flake update" "home-manager switch" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"
