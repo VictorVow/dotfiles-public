@@ -13,10 +13,11 @@
 #   7. Distrobox           — OS packages inside containers
 #
 # Usage:
-#   ./update.sh                 # Full update (all managers)
-#   ./update.sh --no-nix        # Skip Nix flake update (faster, uses locked versions)
-#   ./update.sh --no-distrobox  # Skip container OS upgrades
-#   ./update.sh --dry-run       # Print what would run without executing
+#   ./update.sh                    # Full update (all managers)
+#   ./update.sh --no-nix           # Skip Nix flake update (faster, uses locked versions)
+#   ./update.sh --no-distrobox     # Skip container OS upgrades
+#   ./update.sh --no-stable-check  # Skip the nixpkgs stable-release upgrade check
+#   ./update.sh --dry-run          # Print what would run without executing
 #
 # Cron example (daily at 10:00):
 #   0 10 * * * /home/boss/Documents/ESSENTIALS/installs/update.sh >> /tmp/update.log 2>&1
@@ -26,15 +27,17 @@ set -euo pipefail
 # ── Options ───────────────────────────────────────────────────────────────────
 UPDATE_NIX=true
 UPDATE_DISTROBOX=true
+CHECK_STABLE=true
 DRY_RUN=false
 
 for arg in "$@"; do
   case "$arg" in
-    --no-nix)        UPDATE_NIX=false ;;
-    --no-distrobox)  UPDATE_DISTROBOX=false ;;
-    --dry-run)       DRY_RUN=true ;;
+    --no-nix)           UPDATE_NIX=false ;;
+    --no-distrobox)     UPDATE_DISTROBOX=false ;;
+    --no-stable-check)  CHECK_STABLE=false ;;
+    --dry-run)          DRY_RUN=true ;;
     --help|-h)
-      grep '^#' "$0" | head -20 | sed 's/^# \?//'
+      grep '^#' "$0" | head -21 | sed 's/^# \?//'
       exit 0
       ;;
   esac
@@ -93,6 +96,18 @@ run_step() {
   fi
 }
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+# Query GitHub for the highest nixos-XX.YY branch name (e.g. "nixos-25.11").
+# Returns empty string if gh is unavailable or the query fails.
+_latest_stable_release() {
+  gh api 'repos/NixOS/nixpkgs/branches?per_page=100' --paginate \
+    --jq '.[].name' 2>/dev/null \
+    | grep -E '^nixos-[0-9]+\.[0-9]+$' \
+    | sort -V \
+    | tail -1
+}
+
 # ── Setup ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FLAKE_DIR="$SCRIPT_DIR/nix"
@@ -123,10 +138,68 @@ if ! command -v nix &>/dev/null; then
   RESULTS["Nix"]="skipped (not installed)"
 else
   if $UPDATE_NIX; then
-    # Update flake.lock to pull latest commits from nixpkgs-unstable and
-    # home-manager. This is what actually updates package versions — without
-    # this step, home-manager switch just re-applies the locked versions.
-    info "Updating flake.lock (fetching latest nixpkgs-unstable + home-manager)..."
+    # ── Stable-release upgrade check ──────────────────────────────────────────
+    # If the config is pinned to a named stable release (nixos-XX.YY), check
+    # whether a newer stable branch has shipped. If so, offer to update both
+    # nixpkgs.url and home-manager.url in flake.nix before regenerating the lock.
+    # llm-agents.nix is intentionally left untouched (no release versioning).
+    if $CHECK_STABLE && command -v gh &>/dev/null; then
+      current_channel=$(grep -oP '(?<=NixOS/nixpkgs/)[^"]+' "$NIX_FLAKE_DIR/flake.nix" | head -1)
+
+      if [[ "$current_channel" =~ ^nixos-[0-9]+\.[0-9]+$ ]]; then
+        info "Checking for newer nixpkgs stable release (current: $current_channel)..."
+        latest_stable=$(_latest_stable_release)
+
+        if [[ -z "$latest_stable" ]]; then
+          warn "Could not fetch latest stable release from GitHub — skipping check."
+          RESULTS["nixpkgs stable upgrade"]="skipped (fetch failed)"
+        elif [[ "$latest_stable" == "$current_channel" ]]; then
+          info "nixpkgs is already on the latest stable ($current_channel)."
+          RESULTS["nixpkgs stable upgrade"]="✓ up to date"
+        else
+          echo ""
+          warn "New stable release available: ${current_channel} → ${latest_stable}"
+          DO_UPGRADE=false
+          if $DRY_RUN; then
+            echo -e "  ${DIM}[dry-run] Would prompt to upgrade flake.nix to $latest_stable${NC}"
+            RESULTS["nixpkgs stable upgrade"]="skipped (dry-run)"
+          elif [[ -t 1 ]]; then
+            printf "  Upgrade flake.nix to %s? [Y/n] " "$latest_stable"
+            read -r STABLE_ANSWER </dev/tty || STABLE_ANSWER="N"
+            STABLE_ANSWER="${STABLE_ANSWER:-Y}"
+            [[ "$STABLE_ANSWER" =~ ^[Yy]$ ]] && DO_UPGRADE=true
+          else
+            info "Non-interactive session — skipping stable upgrade."
+            info "Run update.sh interactively to upgrade to $latest_stable."
+            RESULTS["nixpkgs stable upgrade"]="skipped (non-interactive)"
+          fi
+
+          if $DO_UPGRADE; then
+            sed -i "s|NixOS/nixpkgs/${current_channel}|NixOS/nixpkgs/${latest_stable}|g" \
+              "$NIX_FLAKE_DIR/flake.nix"
+            # Derive the matching home-manager release tag (nixos-25.11 → release-25.11)
+            hm_new="release-${latest_stable#nixos-}"
+            hm_old="release-${current_channel#nixos-}"
+            sed -i "s|home-manager/${hm_old}|home-manager/${hm_new}|g" \
+              "$NIX_FLAKE_DIR/flake.nix"
+            success "flake.nix updated: $current_channel → $latest_stable"
+            RESULTS["nixpkgs stable upgrade"]="✓ ${current_channel}→${latest_stable}"
+          fi
+        fi
+
+      elif [[ "$current_channel" =~ ^nixpkgs-unstable$|^nixos-unstable$ ]]; then
+        latest_stable=$(_latest_stable_release)
+        if [[ -n "$latest_stable" ]]; then
+          info "On unstable. Latest stable release is ${latest_stable} (FYI — no action taken)."
+        fi
+        RESULTS["nixpkgs stable upgrade"]="— (on unstable)"
+      fi
+    fi
+
+    # Update flake.lock to pull latest commits for the pinned inputs.
+    # This is what actually updates package versions — without this step,
+    # home-manager switch just re-applies the locked versions.
+    info "Updating flake.lock..."
     run_step "Nix flake update" nix flake update --flake "$NIX_FLAKE_DIR"
   else
     info "Skipping flake.lock update (--no-nix). Using locked package versions."
@@ -293,8 +366,8 @@ echo ""
 echo -e "${BOLD}━━━ Update Summary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 printf "  %-30s %s\n" "Step" "Result"
 printf "  %-30s %s\n" "----" "------"
-for key in "Nix flake update" "home-manager switch" "apt" "Homebrew" \
-           "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox"; do
+for key in "nixpkgs stable upgrade" "Nix flake update" "home-manager switch" \
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"
