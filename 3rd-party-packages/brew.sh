@@ -14,6 +14,19 @@ else
     echo "Homebrew is already installed."
 fi
 
-# Save installed package list to file (overwrites if exists)
-brew leaves | xargs brew list --versions > brew-packages.txt
-echo "Brew packages list saved to brew-packages.txt"
+# Install packages declared in brew-packages.txt
+BREW_LIST="$(dirname "$0")/../brew-packages.txt"
+if [[ -f "$BREW_LIST" ]]; then
+  echo "Installing packages from brew-packages.txt..."
+  while IFS= read -r line; do
+    pkg="${line%%#*}"   # strip inline comments
+    pkg="${pkg// /}"    # trim whitespace
+    [[ -z "$pkg" ]] && continue
+    if brew list --formula "$pkg" &>/dev/null 2>&1; then
+      echo "  already installed: $pkg"
+    else
+      echo "  installing: $pkg"
+      brew install "$pkg"
+    fi
+  done < "$BREW_LIST"
+fi

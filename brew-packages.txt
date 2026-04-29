@@ -1,5 +1,9 @@
-fvm 4.0.5
-gemini-cli 0.37.2
-git-credential-libsecret 2.53.0
-icu4c@76 76.1_2
-nvm 0.40.4
+# Homebrew packages — canonical source of truth.
+# Add a package here and run update-all (or brew.sh) to install it.
+# Removing a package here does NOT auto-uninstall it; run `brew remove <pkg>` manually.
+
+fvm                        # Flutter version manager
+gemini-cli                 # Google Gemini AI CLI
+git-credential-libsecret   # Git credential helper using libsecret keyring
+icu4c@76                   # ICU Unicode library (versioned formula)
+nvm                        # Node Version Manager
