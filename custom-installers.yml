@@ -1,0 +1,328 @@
+---
+# custom-installers.yml — Idempotent replacements for the shell scripts in this directory.
+# Re-running at any time is safe; each tool only installs if absent.
+#
+# Run standalone:
+#   ansible-playbook 3rd-party-packages/custom-installers.yml --ask-become-pass
+# Invoked from ansible.yml via import_playbook.
+
+- name: Install 3rd-party packages not in standard Ubuntu repos
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    deb_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+    dnvm_arch: "{{ 'x64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+
+  tasks:
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    # ════════════════════════════════════════════════════════════════════════
+    # DOCKER — https://docs.docker.com/engine/install/ubuntu/
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Docker | ensure keyring directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      become: yes
+      when: ansible_facts.packages['docker-ce'] is not defined
+
+    - name: Docker | download GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['docker-ce'] is not defined
+
+    - name: Docker | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ deb_arch }} signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_distribution_release }} stable
+        filename: docker
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['docker-ce'] is not defined
+
+    - name: Docker | install packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      become: yes
+      when: ansible_facts.packages['docker-ce'] is not defined
+
+    # Group add runs unconditionally: idempotent, and covers cases where
+    # docker was installed externally without this playbook.
+    - name: Docker | add user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+      become: yes
+
+    # ════════════════════════════════════════════════════════════════════════
+    # TAILSCALE — https://tailscale.com/kb/1187/install-ubuntu-2204
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Tailscale | download GPG keyring
+      ansible.builtin.get_url:
+        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_distribution_release }}.noarmor.gpg"
+        dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['tailscale'] is not defined
+
+    - name: Tailscale | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg]
+          https://pkgs.tailscale.com/stable/ubuntu
+          {{ ansible_distribution_release }} main
+        filename: tailscale
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['tailscale'] is not defined
+
+    - name: Tailscale | install package
+      ansible.builtin.apt:
+        name: tailscale
+        state: present
+      become: yes
+      when: ansible_facts.packages['tailscale'] is not defined
+
+    # Enable unconditionally: covers tailscale installed by other means with
+    # the service never started.
+    - name: Tailscale | enable and start tailscaled service
+      ansible.builtin.systemd:
+        name: tailscaled
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      become: yes
+
+    # ════════════════════════════════════════════════════════════════════════
+    # MULLVAD VPN — https://mullvad.net/en/help/install-mullvad-app-linux#ubuntu-debian
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Mullvad | download GPG keyring
+      ansible.builtin.get_url:
+        url: https://repository.mullvad.net/deb/mullvad-keyring.asc
+        dest: /usr/share/keyrings/mullvad-keyring.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['mullvad-vpn'] is not defined
+
+    - name: Mullvad | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch={{ deb_arch }}]
+          https://repository.mullvad.net/deb/stable
+          {{ ansible_distribution_release }} main
+        filename: mullvad
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['mullvad-vpn'] is not defined
+
+    - name: Mullvad | install package
+      ansible.builtin.apt:
+        name: mullvad-vpn
+        state: present
+      become: yes
+      when: ansible_facts.packages['mullvad-vpn'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # ANDROID STUDIO
+    # Primary: Nix (androidStudioPackages.stable via buildFHSEnv).
+    # PPA only runs when the Nix binary is absent.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Android Studio | check for Nix-managed binary
+      ansible.builtin.stat:
+        path: "/home/{{ ansible_user_id }}/.nix-profile/bin/android-studio"
+      register: android_studio_nix
+
+    - name: Android Studio | check for PPA-managed installation
+      ansible.builtin.stat:
+        path: /opt/android-studio
+      register: android_studio_ppa
+
+    - name: Android Studio | add PPA
+      ansible.builtin.apt_repository:
+        repo: 'ppa:maarten-fonville/android-studio'
+        state: present
+        update_cache: yes
+      become: yes
+      when:
+        - not android_studio_nix.stat.exists
+        - not android_studio_ppa.stat.exists
+        - ansible_facts.packages['android-studio'] is not defined
+
+    - name: Android Studio | install from PPA
+      ansible.builtin.apt:
+        name: android-studio
+        state: present
+      become: yes
+      when:
+        - not android_studio_nix.stat.exists
+        - not android_studio_ppa.stat.exists
+        - ansible_facts.packages['android-studio'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # DNVM — .NET Version Manager — https://github.com/dn-vm/dnvm
+    # selfinstall places the binary at ~/.local/share/dnvm/dnvm.
+    # No root needed — installs to user home.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: dnvm | check if already installed
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/share/dnvm/dnvm"
+      register: dnvm_binary
+
+    - name: dnvm | fetch latest release metadata from GitHub
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/dn-vm/dnvm/releases/latest
+        return_content: yes
+      register: dnvm_release
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | resolve architecture-specific download URL
+      ansible.builtin.set_fact:
+        dnvm_download_url: >-
+          {{ dnvm_release.json.assets
+             | selectattr('name', 'search', 'linux-' + dnvm_arch + '\\.tar\\.gz$')
+             | rejectattr('name', 'search', '\\.sig$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | download release archive
+      ansible.builtin.get_url:
+        url: "{{ dnvm_download_url }}"
+        dest: /tmp/dnvm-latest.tar.gz
+        mode: '0644'
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | create temp extraction directory
+      ansible.builtin.file:
+        path: /tmp/dnvm-extract
+        state: directory
+        mode: '0755'
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | extract archive
+      ansible.builtin.unarchive:
+        src: /tmp/dnvm-latest.tar.gz
+        dest: /tmp/dnvm-extract
+        remote_src: yes
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | run selfinstall
+      ansible.builtin.command:
+        cmd: /tmp/dnvm-extract/dnvm selfinstall
+      when: not dnvm_binary.stat.exists
+
+    - name: dnvm | clean up temp files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/dnvm-latest.tar.gz
+        - /tmp/dnvm-extract
+      when: not dnvm_binary.stat.exists
+
+    # ════════════════════════════════════════════════════════════════════════
+    # HOMEBREW — https://brew.sh/
+    # Shell integration (eval "$(brew shellenv)") is in nix/modules/shell.nix.
+    # No root needed — installs to /home/linuxbrew as current user.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Homebrew | check if already installed
+      ansible.builtin.stat:
+        path: /home/linuxbrew/.linuxbrew/bin/brew
+      register: brew_binary
+
+    # NONINTERACTIVE=1 suppresses all install prompts.
+    - name: Homebrew | run official installer
+      ansible.builtin.shell:
+        cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        creates: /home/linuxbrew/.linuxbrew/bin/brew
+      environment:
+        NONINTERACTIVE: "1"
+      when: not brew_binary.stat.exists
+
+    # playbook_dir = 3rd-party-packages/; ../Brewfile = installs/Brewfile.
+    - name: Homebrew | check if Brewfile exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../Brewfile"
+      register: brewfile
+
+    - name: Homebrew | install packages from Brewfile
+      ansible.builtin.command:
+        cmd: "/home/linuxbrew/.linuxbrew/bin/brew bundle install --file={{ playbook_dir }}/../Brewfile"
+      when: brewfile.stat.exists
+      changed_when: false
+
+    # ════════════════════════════════════════════════════════════════════════
+    # AWATCHER — https://github.com/2e3s/awatcher
+    # ActivityWatch-compatible window + idle watcher distributed as .deb.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: awatcher | fetch latest release metadata from GitHub
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/2e3s/awatcher/releases/latest
+        return_content: yes
+      register: awatcher_release
+      when: ansible_facts.packages['awatcher'] is not defined
+
+    # '^awatcher_' anchor excludes the 'aw-awatcher' bundle .deb without a rejectattr.
+    - name: awatcher | resolve .deb download URL
+      ansible.builtin.set_fact:
+        awatcher_download_url: >-
+          {{ awatcher_release.json.assets
+             | selectattr('name', 'search', '^awatcher_.*_amd64\\.deb$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: ansible_facts.packages['awatcher'] is not defined
+
+    - name: awatcher | download .deb package
+      ansible.builtin.get_url:
+        url: "{{ awatcher_download_url }}"
+        dest: /tmp/awatcher.deb
+        mode: '0644'
+      when: ansible_facts.packages['awatcher'] is not defined
+
+    - name: awatcher | install .deb
+      ansible.builtin.apt:
+        deb: /tmp/awatcher.deb
+      become: yes
+      when: ansible_facts.packages['awatcher'] is not defined
+
+    - name: awatcher | clean up temp .deb
+      ansible.builtin.file:
+        path: /tmp/awatcher.deb
+        state: absent
+      when: ansible_facts.packages['awatcher'] is not defined

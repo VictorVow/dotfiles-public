@@ -201,20 +201,6 @@
         - { name: kate,   comment: "KDE text editor — superseded by nix#kdePackages.kate" }
       become: yes
 
-    - name: Find all scripts in the 3rd-party-packages subdirectory
-      find:
-        paths: "3rd-party-packages"
-        patterns: "*.sh"
-        use_regex: no
-      register: found_scripts
-
-    - name: Execute each script in the 3rd-party-packages subdirectory
-      shell: bash "{{ item.path }}"
-      loop: "{{ found_scripts.files }}"
-      when: found_scripts.matched > 0
-      tags: run_scripts
-      no_log: true
-
     # Install Solaar's udev rules so it can access Logitech hidraw devices.
     # Solaar is managed by Nix (home.packages), but on non-NixOS the Nix store
     # rules are never auto-installed to /etc/udev/rules.d/. This task resolves
@@ -460,3 +446,5 @@
     - name: Update GRUB
       ansible.builtin.command: update-grub
       become: yes
+
+- ansible.builtin.import_playbook: custom-installers.yml
