@@ -26,6 +26,10 @@
 # To re-run package initialisation:
 #   rm ~/.local/share/distrobox-hm-init/fedora-initialized
 #   rm ~/.local/share/distrobox-hm-init/arch-initialized
+#
+# To export an app:
+#   distrobox enter arch -- distrobox-export --app logitune
+#
 {
   home.activation.distroboxContainers =
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
