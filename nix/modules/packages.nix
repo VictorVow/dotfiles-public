@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, tuxManager, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -37,6 +37,8 @@
     vnstat   # Network traffic monitor (user CLI; daemon stays in apt)
     inxi     # Hardware detection and system info (e.g. check which GPU is detected)
     fastfetch # Fast system information tool (neofetch alternative)
+    tuxManager.packages.${pkgs.stdenv.hostPlatform.system}.default
+             # Qt6 GUI system/process manager (TuxManager)
 
     # ── Container / Virtualisation ────────────────────────────────────────────
     distrobox    # Create and manage OCI containers integrated with the host

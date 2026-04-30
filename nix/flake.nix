@@ -19,16 +19,19 @@
     # Intentionally NOT following nixpkgs so the pre-built packages in numtide's
     # cache (built against unstable) remain valid store paths — cache hits work.
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    tuxManager.url = "github:benapetr/TuxManager/";
+    tuxManager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, tuxManager, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix ];
 
       extraSpecialArgs = {
-        inherit claude-desktop llm-agents;
+        inherit claude-desktop llm-agents tuxManager;
         pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
       };
     };

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, claude-desktop, llm-agents, ... }:
+{ config, pkgs, lib, claude-desktop, llm-agents, tuxManager, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
