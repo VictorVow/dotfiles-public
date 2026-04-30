@@ -3,7 +3,7 @@
 # Re-running at any time is safe; each tool only installs if absent.
 #
 # Run standalone:
-#   ansible-playbook 3rd-party-packages/custom-installers.yml --ask-become-pass
+#   ansible-playbook custom-installers.yml --ask-become-pass
 # Invoked from ansible.yml via import_playbook.
 
 - name: Install 3rd-party packages not in standard Ubuntu repos
