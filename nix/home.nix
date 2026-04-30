@@ -70,7 +70,7 @@
   '';
 
   # Start Tailscale system tray icon on login.
-  # Tailscale is installed via apt (3rd-party-packages/tailscale.sh), not Nix,
+  # Tailscale is installed via apt (custom-installers.yml), not Nix,
   # so we use the absolute system path rather than a Nix store reference.
   home.file.".config/autostart/tailscale-systray.desktop".text = ''
     [Desktop Entry]

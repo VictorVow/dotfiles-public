@@ -11,12 +11,8 @@ installs/
 ├── bootstrap.sh              # Install Nix + activate Home Manager on a fresh system
 ├── update.sh                 # Update all package managers in one pass
 ├── ansible.yml               # System-level packages (requires sudo)
+├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, etc.) — imported by ansible.yml
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
-├── 3rd-party-packages/       # Scripts for tools not in standard repos
-│   ├── docker.sh
-│   ├── mullvad-vpn.sh
-│   ├── android-studio.sh
-│   └── ...
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)
 │   ├── home.nix              # Top-level Home Manager config, imports modules
@@ -60,12 +56,8 @@ installs/
 
 # Open a new terminal, then:
 
-# 2. Install system-level packages (KDE integration, services, Docker, etc.)
+# 2. Install system-level packages + 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, etc.)
 ansible-playbook ansible.yml --ask-become-pass
-
-# 3. Run any 3rd-party installers you need (Docker, Mullvad, etc.)
-./3rd-party-packages/docker.sh
-./3rd-party-packages/mullvad-vpn.sh
 ```
 
 ### Migrating an existing system

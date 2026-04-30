@@ -78,7 +78,7 @@
     # ── Networking ────────────────────────────────────────────────────────────
     sniffnet # Network traffic monitor — shows which apps are using the network
              # Similar to GlassWire on Windows
-    ngrok    # Secure tunnels to localhost — replaces 3rd-party-packages/ngrok.sh
+    ngrok    # Secure tunnels to localhost
 
     # ── Media Playback ────────────────────────────────────────────────────────
     haruna       # KDE media player — hardware video decoding works better than Flatpak
@@ -172,7 +172,7 @@
     androidStudioPackages.stable
     # Official Android IDE (~3 GB on first build). Uses buildFHSEnv internally
     # to handle prebuilt SDK binaries with hardcoded interpreter paths.
-    # Replaces 3rd-party-packages/android-studio.sh (PPA).
+    # Replaces the android-studio task in custom-installers.yml (PPA).
     # ANDROID_HOME is set in shell.nix; no additional config needed.
     # See docs/buildFHSEnv.md for details.
 
