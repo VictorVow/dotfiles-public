@@ -6,13 +6,13 @@
 {
   # ── Bash Integration ──────────────────────────────────────────────────────────
 
-  # i.e. ~/.bashrc equivalent
   programs.bash = {
     enable = true;
     # Home Manager appends these to ~/.bashrc automatically.
     # Note: starship, nix-index, and other program integrations are injected
     # automatically by their respective programs.* modules in programs.nix.
 
+    # i.e. ~/.bashrc equivalent
     initExtra = ''
       # ── TTY: disable XON/XOFF flow control ──────────────────────────────────
       # Frees C-s and C-q for tmux/readline (XON/XOFF is a 70s serial-terminal
@@ -63,12 +63,6 @@
       # ── Flatpak exports ─────────────────────────────────────────────────────
       # Needed for VSCode NeoVim extension and other Flatpak-installed binaries.
       export PATH="$PATH:/var/lib/flatpak/exports/bin"
-
-      # ── Native Firefox ──────────────────────────────────────────────────────
-      # Firefox installed as a native binary tarball (not Flatpak or snap).
-      if [ -d "/home/boss/Documents/ESSENTIALS/Programs/firefox" ]; then
-        export PATH="/home/boss/Documents/ESSENTIALS/Programs/firefox:$PATH"
-      fi
 
       # ── Wayland / XDG ───────────────────────────────────────────────────────
       # Required for portals, screen sharing, and Wayland tooling.

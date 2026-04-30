@@ -1,15 +1,9 @@
 {
   description = "Home Manager configuration for boss's Kubuntu system";
 
-  nixConfig = {
-    extra-substituters      = [ "https://cache.numtide.com" ];
-    extra-trusted-public-keys = [
-      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-    ];
-  };
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -27,13 +21,16 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
-  outputs = { nixpkgs, home-manager, claude-desktop, llm-agents, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix ];
 
-      extraSpecialArgs = { inherit claude-desktop llm-agents; };
+      extraSpecialArgs = {
+        inherit claude-desktop llm-agents;
+        pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+      };
     };
   };
 }

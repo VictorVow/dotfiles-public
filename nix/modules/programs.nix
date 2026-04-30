@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, pkgs-unstable, ... }:
 
 let
   jsonFormat = pkgs.formats.json { };
@@ -279,6 +279,7 @@ let
       "Arch Packages" = {
         urls = [{ template = "https://archlinux.org/packages/?q={searchTerms}"; }];
         icon = "${ffIcons}/archlinux.ico";
+        definedAliases = [ "@aur" ];
       };
       "pypi.org" = {
         urls = [{ template = "https://pypi.org/search/"; params = [{ name = "q"; value = "{searchTerms}"; }]; }];
@@ -521,7 +522,12 @@ in
 
   programs.firefox = {
     enable = true;
-    package = null; # Use the non-Nix tarball at ~/Documents/ESSENTIALS/Programs/firefox
+    # With `package = null` it would use the non-Nix tarball at ~/Documents/ESSENTIALS/Programs/firefox
+    # WARNING: With package = null, Home Manager skips writing policies.json to the Firefox installation directory entirely — it doesn't 
+    # know where to put it. The policies in programs.firefox.policies are just ignored.
+    # Fix: write policies.json directly to your tarball Firefox's distribution/ directory via home.file.
+    package = pkgs-unstable.firefox;
+    nativeMessagingHosts = [ pkgs.kdePackages.plasma-browser-integration ];
 
     # Cookie exceptions — populated from xsy8besa.PRIME permissions.sqlite.
     # Sites listed in Allow keep their cookies even with sanitizeOnShutdown.
@@ -530,6 +536,7 @@ in
     # user visiting each time despite VPN pseudononymisation. Additionally 
     # local attacks (evil maid) can see my account info / steal cookies.
     policies.Cookies.Allow = [
+      "https://13-ttrss.example.com"
       "http://15-baikal.example.com"
       "http://localhost:8080"
       "http://localhost:8193"
@@ -578,15 +585,9 @@ in
       "https://gg.deals"
       "https://github.com"
       "https://gitlab.com"
-      "https://gitlab.torproject.org"
       "https://howlongtobeat.com"
-      "https://itch.io"
       "https://jam.aws.com"
       "https://kjy1zvaces13.share.zrok.io"
-      "https://l.opnxng.com"
-      "https://libreddit.kavin.rocks"
-      "https://libreddit.privacydev.net"
-      "https://listenbrainz.org"
       "https://login.coinbase.com"
       "https://login.live.com"
       "https://login.mailbox.org"
@@ -605,11 +606,11 @@ in
       "https://open.spotify.com"
       "https://openrouter.ai"
       "https://partnercentral.awspartner.com"
-      "https://pixeldrain.com"
       "https://platform.claude.com"
       "https://play.geforcenow.com"
       "https://profile.aws.amazon.com"
       "https://real-debrid.com"
+      # Redlib for Reddit
       "https://red.artemislena.eu"
       "https://reddit.adminforge.de"
       "https://reddit.nerdvpn.de"
@@ -635,8 +636,6 @@ in
       "https://store.steampowered.com"
       "https://streamable.com"
       "https://tdac.immigration.go.th"
-      "https://thegameawards.com"
-      "https://tmo.tescotravelmoney.com"
       "https://trakt.tv"
       "https://us-east-1.signin.aws"
       "https://users.nexusmods.com"
@@ -697,10 +696,22 @@ in
 
       search = ffSearch;
 
-      # Hide the horizontal tab bar — Sidebery provides vertical tabs instead.
+      
       userChrome = ''
+        /* Hide the horizontal tab bar — Sidebery provides vertical tabs instead. 
         #TabsToolbar {
             visibility: collapse !important;
+        }
+        */
+
+        /* Native tabs auto-hide when not hovered - for Tab Note/Split View usage https://github.com/mbnuqw/sidebery/issues/2327#issuecomment-4340647031 */
+        @media -moz-pref("sidebar.verticalTabs") and -moz-pref("sidebar.visibility","expand-on-hover"){
+          #main-window > body > #browser{
+            --sidebar-launcher-collapsed-width: 10px !important;
+          }
+          sidebar-main:not([expanded]){
+            max-width: 10px !important;
+          }
         }
       '';
 
@@ -838,11 +849,6 @@ in
       containersForce = true;
     };
   };
-
-  # Non-Nix Firefox checks the standard per-user path for native messaging hosts.
-  # The Nix-wrapped binary used its own vendored path; the tarball does not.
-  home.file.".mozilla/native-messaging-hosts/org.kde.plasma.browser_integration.json".source =
-    "${pkgs.kdePackages.plasma-browser-integration}/lib/mozilla/native-messaging-hosts/org.kde.plasma.browser_integration.json";
 
   # The post-link activation script below converts the HM-managed profiles.ini
   # symlink into a writable copy (to append [Install*] sections). On the next
@@ -1323,6 +1329,40 @@ INSTALLS
       };
     };
   };
+
+  # ── Zed Editor settings ────────────────────────────────────────────────────────
+  programs.zed-editor = {
+    enable = true;
+    # enableMcpIntegration = true;
+    # extensions = [ "swift" "nix" "xy-zed" ];
+    mutableUserKeymaps = false;
+    mutableUserSettings = false;
+    mutableUserTasks = false;
+    # userKeymapss = 
+    #   [
+    #     {
+    #       context = "Workspace";
+    #       bindings = {
+    #         ctrl-shift-t = "workspace::NewTerminal";
+    #       };
+    #     };
+    #   ];
+
+    # userSettings = 
+    #   {
+    #     features = {
+    #       copilot = false;
+    #     };
+    #     telemetry = {
+    #       metrics = false;
+    #     };
+    #     vim_mode = false;
+    #     ui_font_size = 16;
+    #     buffer_font_size = 16;
+    #   };
+
+  };
+
 
   # ── VSCodium settings ────────────────────────────────────────────────────────
   # VSCodium is installed outside Nix (not pkgs.vscode), so programs.vscode doesn't
