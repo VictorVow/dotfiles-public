@@ -1526,116 +1526,113 @@ INSTALLS
 
     };
 
-    # ── Skills — creates ~/.claude/skills/<key>/SKILL.md ─────────────────────────
-    # Can be run directly within a Claude window (similar to `/effort` in order to take an action)
-
-    skills = {
-
-      "nix-switch" = ''
-        ---
-        description: Run home-manager switch and show any new news items.
-        ---
-        1. If the user tells you to run `hms` then instead run `home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss` since you don't have access to `hms` from your Bash shell.
-        2. If you see "warning: Git tree <filepath> has uncommitted changes" then just ignore that warning.
-        3. If it failed, show the full error and suggest a fix.
-        4. Don't run `home-manager news` unless it's part of the update.sh script. 
-      '';
-
-      "git-commit" = ''
-        ---
-        description: Make a git commit of the changes from this Claude session.
-        ---
-        - `git add` only the files touched by this session.
-        - git commit messages should follow the Conventional Commit structure i.e.
-        <type>[optional scope]: <description>
-
-        [optional body]
-
-        [optional footer]
-          - Examples:
-            - feat: allow provided config object to extend other configs
-            - docs(lang): correct spelling of CHANGELOG
-            - fix: minor typos in code
-
-              see the issue for details on the typos fixed
-
-              fixes issue #12
-        - Aim to have a descriptive commit message body unless the change is trivial
-          - Examples:
-            - feat(api.ts): add OpenAI class with generateCommitMessage method
-
-              This commit adds a new OpenAI class with a generateCommitMessage method that uses 
-              the OpenAI API to generate a commit message based on an array of messages. The 
-              method takes an array of ChatCompletionRequestMessage objects and returns a 
-              Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI 
-              class is exported as a singleton instance named api.
-            - fix(README): fixed two small typos
-        - Do not `git push` unless it's necessary because a pull request, workflow action or 
-          something else in our intended next steps needs the commit pushed first.
-      '';
-
-      "dbox-status" = ''
-        ---
-        description: Show status of distrobox containers and their key packages.
-        ---
-        1. Run `dbl` to list containers and their running state.
-        2. For each container, state its purpose and key packages:
-           - dev: build tools (gcc, clang, cmake, ninja, gdb, valgrind), Python, Node
-           - media: ffmpeg, OBS, kdenlive, HandBrake, mpv, yt-dlp
-        3. Suggest next steps based on current context.
-      '';
-
-      "yt-summary" = ''
-        ---
-        description: Summarise a YouTube video using yt-dlp subtitles.
-        allowed_tools:
-          - Bash
-          - Write
-          - Read
-          - Edit
-        user_invocable: true
-        ---
-        The user will provide a YouTube URL and optionally an output file path.
-
-        ## Steps
-
-        1. **Get the video title:**
-           ```
-           yt-dlp --print title "<URL>"
-           ```
-
-        2. **Download subtitles** — prefer manual subs over auto-generated:
-           ```
-           yt-dlp --write-sub --sub-lang "en.*" --skip-download --sub-format vtt -o "/tmp/yt-summary" "<URL>" 2>&1
-           ```
-           Check if any `.vtt` files were written. If none were found (no manual subs), fall back to auto-generated:
-           ```
-           yt-dlp --write-auto-sub --sub-lang "en.*" --skip-download --sub-format vtt -o "/tmp/yt-summary" "<URL>" 2>&1
-           ```
-
-        3. **Extract clean text** from the VTT file (pick the `en-orig` variant if present, otherwise `en`):
-           ```
-           cat /tmp/yt-summary*.vtt | grep -v '^WEBVTT' | grep -v '^Kind:' | grep -v '^Language:' | grep -v '^$' | grep -v '^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]' | grep -v '^[0-9]*$' | grep -v '^\s*$' | sed 's/<[^>]*>//g' | awk '!seen[$0]++'
-           ```
-
-        4. **Summarise** the transcript into a Markdown document with:
-           - H1: the video title
-           - **Source:** link to the video
-           - **Summary** section: a short (2–4 sentence) overview
-           - Subsections (H3) for each major topic discussed, with a paragraph each
-           - A "Misc" or "Other Topics" subsection for brief tangents
-
-        5. **Write** the summary to the path the user specified. If no path was given, ask where to save it.
-
-        6. **Clean up** the temp files:
-           ```
-           rm -f /tmp/yt-summary*.vtt
-           ```
-      '';
-
-    };
-
   };
+
+  # ── Claude Code skills (home.file for correct subdirectory structure) ────────
+  # programs.claude-code.skills (current HM rev) generates flat .claude/skills/<name>.md
+  # but Claude Code 2.x requires .claude/skills/<name>/SKILL.md — use home.file directly.
+
+  home.file.".claude/skills/nix-switch/SKILL.md".text = ''
+    ---
+    description: Run home-manager switch and show any new news items.
+    ---
+    1. If the user tells you to run `hms` then instead run `home-manager switch --flake ~/Documents/ESSENTIALS/installs/nix#boss` since you don't have access to `hms` from your Bash shell.
+    2. If you see "warning: Git tree <filepath> has uncommitted changes" then just ignore that warning.
+    3. If it failed, show the full error and suggest a fix.
+    4. Don't run `home-manager news` unless it's part of the update.sh script.
+  '';
+
+  home.file.".claude/skills/git-commit/SKILL.md".text = ''
+    ---
+    description: Make a git commit of the changes from this Claude session.
+    ---
+    - `git add` only the files touched by this session.
+    - git commit messages should follow the Conventional Commit structure i.e.
+    <type>[optional scope]: <description>
+
+    [optional body]
+
+    [optional footer]
+      - Examples:
+        - feat: allow provided config object to extend other configs
+        - docs(lang): correct spelling of CHANGELOG
+        - fix: minor typos in code
+
+          see the issue for details on the typos fixed
+
+          fixes issue #12
+    - Aim to have a descriptive commit message body unless the change is trivial
+      - Examples:
+        - feat(api.ts): add OpenAI class with generateCommitMessage method
+
+          This commit adds a new OpenAI class with a generateCommitMessage method that uses
+          the OpenAI API to generate a commit message based on an array of messages. The
+          method takes an array of ChatCompletionRequestMessage objects and returns a
+          Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI
+          class is exported as a singleton instance named api.
+        - fix(README): fixed two small typos
+    - Do not `git push` unless it's necessary because a pull request, workflow action or
+      something else in our intended next steps needs the commit pushed first.
+  '';
+
+  home.file.".claude/skills/dbox-status/SKILL.md".text = ''
+    ---
+    description: Show status of distrobox containers and their key packages.
+    ---
+    1. Run `dbl` to list containers and their running state.
+    2. For each container, state its purpose and key packages:
+       - dev: build tools (gcc, clang, cmake, ninja, gdb, valgrind), Python, Node
+       - media: ffmpeg, OBS, kdenlive, HandBrake, mpv, yt-dlp
+    3. Suggest next steps based on current context.
+  '';
+
+  home.file.".claude/skills/yt-summary/SKILL.md".text = ''
+    ---
+    description: Summarise a YouTube video using yt-dlp subtitles.
+    allowed_tools:
+      - Bash
+      - Write
+      - Read
+      - Edit
+    user_invocable: true
+    ---
+    The user will provide a YouTube URL and optionally an output file path.
+
+    ## Steps
+
+    1. **Get the video title:**
+       ```
+       yt-dlp --print title "<URL>"
+       ```
+
+    2. **Download subtitles** — prefer manual subs over auto-generated:
+       ```
+       yt-dlp --write-sub --sub-lang "en.*" --skip-download --sub-format vtt -o "/tmp/yt-summary" "<URL>" 2>&1
+       ```
+       Check if any `.vtt` files were written. If none were found (no manual subs), fall back to auto-generated:
+       ```
+       yt-dlp --write-auto-sub --sub-lang "en.*" --skip-download --sub-format vtt -o "/tmp/yt-summary" "<URL>" 2>&1
+       ```
+
+    3. **Extract clean text** from the VTT file (pick the `en-orig` variant if present, otherwise `en`):
+       ```
+       cat /tmp/yt-summary*.vtt | grep -v '^WEBVTT' | grep -v '^Kind:' | grep -v '^Language:' | grep -v '^$' | grep -v '^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]' | grep -v '^[0-9]*$' | grep -v '^\s*\$' | sed 's/<[^>]*>//g' | awk '!seen[$0]++'
+       ```
+
+    4. **Summarise** the transcript into a Markdown document with:
+       - H1: the video title
+       - **Source:** link to the video
+       - **Summary** section: a short (2–4 sentence) overview
+       - Subsections (H3) for each major topic discussed, with a paragraph each
+       - A "Misc" or "Other Topics" subsection for brief tangents
+
+    5. **Write** the summary to the path the user specified. If no path was given, ask where to save it.
+
+    6. **Clean up** the temp files:
+       ```
+       rm -f /tmp/yt-summary*.vtt
+       ```
+  '';
 
   # ── Codex ──────────────────────────────────────────────────────────────────────
 
