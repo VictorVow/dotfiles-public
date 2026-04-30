@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# dotnet version manager
 # https://github.com/dn-vm/dnvm/releases
 
 # Check if dnvm is installed
