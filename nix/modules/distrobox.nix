@@ -6,10 +6,8 @@
 #   1. "fedora" — fedora:latest    — Trivalent browser (hardened Chromium) from secureblue repo
 #   2. "arch"   — archlinux:latest — AUR packages (logitune)
 #
-# Containers are created and initialised via Home Manager activation scripts.
-# `distrobox create` is idempotent — it is safe to re-run if the container
-# already exists. Package installation uses a sentinel file to avoid
-# reinstalling packages on every `home-manager switch`.
+# Container creation and package installs are each gated by a sentinel file so
+# `home-manager switch` is a no-op on normal runs.
 #
 # Package installs run via `podman exec --user root` to bypass the nosuid
 # restriction on container overlay filesystems (which prevents sudo from
@@ -23,7 +21,11 @@
 #   distrobox enter fedora -- ls
 #   distrobox enter arch   -- pacman -Q
 #
-# To re-run package initialisation:
+# To force container re-creation (also re-runs package init):
+#   rm ~/.local/share/distrobox-hm-init/fedora-created
+#   rm ~/.local/share/distrobox-hm-init/arch-created
+#
+# To re-run package initialisation only (container already exists):
 #   rm ~/.local/share/distrobox-hm-init/fedora-initialized
 #   rm ~/.local/share/distrobox-hm-init/arch-initialized
 #
@@ -37,7 +39,7 @@
       PODMAN="${pkgs.podman}/bin/podman"
 
       # Activation runs with a stripped PATH; add required tools.
-      export PATH="${pkgs.podman}/bin:${pkgs.crun}/bin:${pkgs.passt}/bin:${pkgs.gawk}/bin:${pkgs.util-linux}/bin:$PATH"
+      export PATH="${pkgs.podman}/bin:${pkgs.crun}/bin:${pkgs.passt}/bin:${pkgs.gawk}/bin:${pkgs.util-linux}/bin:${pkgs.coreutils}/bin:$PATH"
 
       # Rootless podman needs XDG_RUNTIME_DIR to locate the user's containers.
       export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -49,14 +51,17 @@
       # Purpose: Trivalent browser — a hardened, security-focused Chromium
       # browser from the secureblue project.
 
-      $DRY_RUN_CMD "$DISTROBOX" create \
-        --name fedora \
-        --image fedora:latest \
-        --yes \
-        --no-entry \
-        >/dev/null 2>&1 || true
-
-      $DRY_RUN_CMD "$PODMAN" start fedora 2>/dev/null || true
+      if [ ! -f "$SENTINEL_DIR/fedora-created" ]; then
+        echo "Creating 'fedora' container (first run)..."
+        $DRY_RUN_CMD timeout 60 "$DISTROBOX" create \
+          --name fedora \
+          --image fedora:latest \
+          --yes \
+          --no-entry \
+          >/dev/null 2>&1 || true
+        $DRY_RUN_CMD timeout 30 "$PODMAN" start fedora 2>/dev/null || true
+        $DRY_RUN_CMD touch "$SENTINEL_DIR/fedora-created"
+      fi
 
       # Install Trivalent on first initialisation only.
       # Delete ~/.local/share/distrobox-hm-init/fedora-initialized to re-run.
@@ -82,20 +87,24 @@
       # ── Container 2: arch (archlinux:latest) ───────────────────────────────
       # Purpose: AUR access — packages not available on Fedora or Ubuntu.
 
-      $DRY_RUN_CMD "$DISTROBOX" create \
-        --name arch \
-        --image archlinux:latest \
-        --yes \
-        --no-entry \
-        --pre-init-hooks "cp /etc/pacman.conf /tmp/pacman.conf.bak && sed -i s/^SigLevel.*/SigLevel=Never/ /etc/pacman.conf && pacman -Sy --noconfirm archlinux-keyring && pacman-key --init && pacman-key --populate archlinux && cp /tmp/pacman.conf.bak /etc/pacman.conf" \
-        >/dev/null 2>&1 || true
+      if [ ! -f "$SENTINEL_DIR/arch-created" ]; then
+        echo "Creating 'arch' container (first run)..."
+        $DRY_RUN_CMD timeout 60 "$DISTROBOX" create \
+          --name arch \
+          --image archlinux:latest \
+          --yes \
+          --no-entry \
+          --pre-init-hooks "cp /etc/pacman.conf /tmp/pacman.conf.bak && sed -i s/^SigLevel.*/SigLevel=Never/ /etc/pacman.conf && pacman -Sy --noconfirm archlinux-keyring && pacman-key --init && pacman-key --populate archlinux && cp /tmp/pacman.conf.bak /etc/pacman.conf" \
+          >/dev/null 2>&1 || true
+        $DRY_RUN_CMD timeout 30 "$PODMAN" start arch 2>/dev/null || true
 
-      $DRY_RUN_CMD "$PODMAN" start arch 2>/dev/null || true
+        # Wait for distrobox init to complete on first creation. Distrobox runs
+        # pacman -Syu during init; distrobox-enter blocks until the container
+        # user is available, which signals completion.
+        $DRY_RUN_CMD timeout 120 "$DISTROBOX" enter --name arch -- true 2>/dev/null || true
 
-      # Wait for distrobox init to complete. Distrobox runs pacman -Syu and
-      # installs additional-packages during init; distrobox-enter blocks until
-      # the container user is available, which signals init completion.
-      $DRY_RUN_CMD "$DISTROBOX" enter --name arch -- true 2>/dev/null || true
+        $DRY_RUN_CMD touch "$SENTINEL_DIR/arch-created"
+      fi
 
       # Install arch packages on first initialisation only.
       # Delete ~/.local/share/distrobox-hm-init/arch-initialized to re-run.
