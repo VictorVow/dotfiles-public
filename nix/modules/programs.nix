@@ -155,6 +155,8 @@ let
       "F-Droid"
       "Google Play"
       "NixOS packages"
+      "NUR"
+      "NUR (code)"
       "flathub.org"
       "GitHub"
       "AlternativeTo"
@@ -245,6 +247,16 @@ let
         urls = [{ template = "https://search.nixos.org/packages?query={searchTerms}"; }];
         icon = "${ffIcons}/nixos-packages.png";
         definedAliases = [ "@nix" ];
+      };
+      "NUR" = {
+        urls = [{ template = "https://nur.nix-community.org/?q={searchTerms}"; }];
+        icon = "${ffIcons}/nur.png";
+        definedAliases = [ "@nur" ];
+      };
+      "NUR (code)" = {
+        urls = [{ template = "https://github.com/search?q=repo%3Anix-community%2Fnur-combined+{searchTerms}&type=code"; }];
+        icon = "${ffIcons}/github.ico";
+        definedAliases = [ "@nurcode" ];
       };
       "flathub.org" = {
         urls = [{ template = "https://flathub.org/apps/search/{searchTerms}"; }];
