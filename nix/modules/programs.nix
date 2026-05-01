@@ -1383,7 +1383,26 @@ INSTALLS
       "editor.fontLigatures"            = true;
       "markdown.preview.fontSize"       = 18;
       "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
+      # fabiospampinato.vscode-open-in-application: route .md through marktext-wrap.
+      # The extension host runs with ELECTRON_RUN_AS_NODE=1, which it propagates to
+      # any child process. Without scrubbing, marktext.appimage's Electron binary
+      # is forced into Node mode, rejects --no-sandbox, and tries to exec the .md
+      # as a JS file. The wrapper unsets the var and launches normally.
+      "openInApplication.applications" = {
+        "md" = "${config.home.homeDirectory}/.local/bin/marktext-wrap";
+      };
     };
+  };
+
+  home.file.".local/bin/marktext-wrap" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      # Launch marktext.appimage with a clean env so it works when spawned from
+      # a VSCode/VSCodium extension host (which sets ELECTRON_RUN_AS_NODE=1).
+      exec setsid env -u ELECTRON_RUN_AS_NODE -u NODE_OPTIONS DESKTOPINTEGRATION=1 \
+        "${config.home.homeDirectory}/AppImages/marktext.appimage" --no-sandbox "$@"
+    '';
   };
 
   # Point VSCodium at Microsoft's VS Code Marketplace instead of Open VSX.
