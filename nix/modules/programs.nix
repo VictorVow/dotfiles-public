@@ -1386,6 +1386,29 @@ INSTALLS
     };
   };
 
+  # Point VSCodium at Microsoft's VS Code Marketplace instead of Open VSX.
+  # VSCodium reads VSCODE_GALLERY_* env vars at launch (see resources/app/out/main.js).
+  # environment.d covers systemd-user graphical launches (desktop entries, rofi);
+  # home.sessionVariables covers terminal launches via login shell.
+  # Caveat: violates MS marketplace ToS, and proprietary extensions (Pylance,
+  # Remote-SSH, Live Share, cpptools debugger) license-check for official VS Code
+  # and will refuse to run regardless of where they're sourced from.
+  xdg.configFile."environment.d/50-vscodium-gallery.conf".text = ''
+    VSCODE_GALLERY_SERVICE_URL=https://marketplace.visualstudio.com/_apis/public/gallery
+    VSCODE_GALLERY_ITEM_URL=https://marketplace.visualstudio.com/items
+    VSCODE_GALLERY_CONTROL_URL=https://az764295.vo.msecnd.net/extensions/marketplace.json
+    VSCODE_GALLERY_EXTENSION_URL_TEMPLATE=https://{publisher}.gallery.vsassets.io/_apis/public/gallery/publisher/{publisher}/extension/{name}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage
+    VSCODE_GALLERY_RESOURCE_URL_TEMPLATE=https://{publisher}.gallery.vsassets.io/_apis/public/gallery/publisher/{publisher}/extension/{name}/{version}/assetbyname/{path}
+  '';
+
+  home.sessionVariables = {
+    VSCODE_GALLERY_SERVICE_URL = "https://marketplace.visualstudio.com/_apis/public/gallery";
+    VSCODE_GALLERY_ITEM_URL    = "https://marketplace.visualstudio.com/items";
+    VSCODE_GALLERY_CONTROL_URL = "https://az764295.vo.msecnd.net/extensions/marketplace.json";
+    VSCODE_GALLERY_EXTENSION_URL_TEMPLATE  = "https://{publisher}.gallery.vsassets.io/_apis/public/gallery/publisher/{publisher}/extension/{name}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage";
+    VSCODE_GALLERY_RESOURCE_URL_TEMPLATE   = "https://{publisher}.gallery.vsassets.io/_apis/public/gallery/publisher/{publisher}/extension/{name}/{version}/assetbyname/{path}";
+  };
+
   # ── Nix Utilities ─────────────────────────────────────────────────────────────
 
   # nix-index provides `nix-locate` to find which package provides a given file,
