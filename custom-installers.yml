@@ -347,3 +347,48 @@
         path: /tmp/awatcher.deb
         state: absent
       when: ansible_facts.packages['awatcher'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # FW-FANCTRL — https://github.com/TamtamHero/fw-fanctrl
+    # Framework Laptop fan controller. Upstream install.sh bundles ectool, the
+    # systemd service, and the system-sleep hook — none of which the nixpkgs
+    # package ships. Idempotent: skipped if /usr/bin/fw-fanctrl already exists.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: fw-fanctrl | check if already installed
+      ansible.builtin.stat:
+        path: /usr/bin/fw-fanctrl
+      register: fw_fanctrl_bin
+
+    - name: fw-fanctrl | install build/runtime prerequisites
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-jsonschema
+          - libnotify-bin
+        state: present
+      become: yes
+      when: not fw_fanctrl_bin.stat.exists
+
+    - name: fw-fanctrl | clone repository
+      ansible.builtin.git:
+        repo: https://github.com/TamtamHero/fw-fanctrl.git
+        dest: /tmp/fw-fanctrl
+        version: v1.0.4
+        depth: 1
+        force: yes
+      when: not fw_fanctrl_bin.stat.exists
+
+    - name: fw-fanctrl | run upstream install.sh
+      ansible.builtin.command:
+        cmd: ./install.sh --no-sudo
+        chdir: /tmp/fw-fanctrl
+      become: yes
+      when: not fw_fanctrl_bin.stat.exists
+
+    - name: fw-fanctrl | clean up clone
+      ansible.builtin.file:
+        path: /tmp/fw-fanctrl
+        state: absent
+      when: not fw_fanctrl_bin.stat.exists
