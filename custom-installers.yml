@@ -192,6 +192,27 @@
         - ansible_facts.packages['android-studio'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
+    # MAINLINE — Ubuntu mainline kernel installer
+    # https://github.com/bkw777/mainline
+    # PPA: ppa:cappelikan/ppa (upstream-recommended)
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Mainline | add PPA
+      ansible.builtin.apt_repository:
+        repo: 'ppa:cappelikan/ppa'
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['mainline'] is not defined
+
+    - name: Mainline | install from PPA
+      ansible.builtin.apt:
+        name: mainline
+        state: present
+      become: yes
+      when: ansible_facts.packages['mainline'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
     # DNVM — .NET Version Manager — https://github.com/dn-vm/dnvm
     # selfinstall places the binary at ~/.local/share/dnvm/dnvm.
     # No root needed — installs to user home.
