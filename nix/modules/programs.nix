@@ -1252,6 +1252,8 @@ INSTALLS
 
 
       # ── Editor ─────────────────────────────────────────────────────────────────
+      "editor.fontFamily"            = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
+      "editor.fontLigatures"         = true;
       "editor.inlineSuggest.enabled" = true;
       "editor.defaultFormatter"      = "esbenp.prettier-vscode";
       "editor.formatOnSave"          = true;
@@ -1377,6 +1379,8 @@ INSTALLS
     force = true;
     source = jsonFormat.generate "vscodium-settings" {
       "diffEditor.ignoreTrimWhitespace" = false;
+      "editor.fontFamily"               = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
+      "editor.fontLigatures"            = true;
       "markdown.preview.fontSize"       = 18;
       "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
     };
