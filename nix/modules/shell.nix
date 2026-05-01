@@ -161,6 +161,23 @@
         # Strip the nix store hash prefix and .drv suffix from a store path.
         _drv_name() { basename "$1" | sed 's/^[a-z0-9]\{32\}-//; s/\.drv$//'; }
 
+        # Home Manager scaffolding that always misses the cache but builds in
+        # milliseconds (symlinks/file copies, no compilation). Filtered from
+        # the pre-flight prompt so only real package builds prompt the user.
+        # Combines name-pattern matching with a dep-graph set populated below
+        # (any drv that's a direct child of home-manager-files /
+        # home-manager-generation / activation-script — i.e. a dotfile or
+        # activation artifact — is trivial regardless of its leaf name).
+        _hms_is_trivial() {
+          local path="$1" name
+          name=$(_drv_name "$path")
+          case "$name" in
+            home-manager-files|home-manager-generation|home-manager-path) return 0 ;;
+            activation-script*|hm_*|unit-*) return 0 ;;
+          esac
+          [[ -v "_hms_trivial[$path]" ]]
+        }
+
         # BFS upward through the .drv referrer graph. Returns the name of the
         # first ancestor found in _hms_stops (the user-level package set).
         _hms_find_cause() {
@@ -200,13 +217,21 @@
         # dotfiles; activation-script orchestrates activation. Expanding through
         # them exposes the actual user packages as BFS stop nodes.
         local -A _hms_stops=()
+        # Children of HM dotfile/activation aggregators — populated in the
+        # walk below and consulted by _hms_is_trivial. home-manager-path is
+        # excluded because its children are real user packages (firefox, etc.).
+        local -A _hms_trivial=()
         _hms_stops["$act_drv"]=1
         local l1_dep l1_name child
         while IFS= read -r l1_dep; do
           l1_name=$(_drv_name "$l1_dep")
           if [[ "$l1_name" == home-manager-* || "$l1_name" == activation-script* ]]; then
             while IFS= read -r child; do
-              [[ -n "$child" ]] && _hms_stops["$child"]=1
+              [[ -z "$child" ]] && continue
+              _hms_stops["$child"]=1
+              if [[ "$l1_name" != home-manager-path ]]; then
+                _hms_trivial["$child"]=1
+              fi
             done < <(nix-store -q --references "$l1_dep" 2>/dev/null | grep '\.drv$')
           else
             _hms_stops["$l1_dep"]=1
@@ -222,17 +247,31 @@
           return 1
         }
 
-        local -a to_build
-        mapfile -t to_build < <(
+        local -a to_build_real=() to_build_trivial=()
+        local drv_path
+        while IFS= read -r drv_path; do
+          if _hms_is_trivial "$drv_path"; then
+            to_build_trivial+=("$drv_path")
+          else
+            to_build_real+=("$drv_path")
+          fi
+        done < <(
           printf '%s\n' "$dry" \
           | grep -E '^\s+/nix/store/[a-z0-9]+-.*\.drv$' \
           | sed 's/^[[:space:]]*//'
         )
 
-        # ── 4. nothing to compile: switch immediately (cache-only) ─────────
-        if [[ ''${#to_build[@]} -eq 0 ]]; then
+        # ── 4a. nothing to build at all: cache-only switch ─────────────────
+        if [[ ''${#to_build_real[@]} -eq 0 && ''${#to_build_trivial[@]} -eq 0 ]]; then
           printf '                        \r'
           home-manager switch --flake "$flake#$config" --option max-jobs 0
+          return
+        fi
+
+        # ── 4b. only HM scaffolding: full switch, no prompt ────────────────
+        if [[ ''${#to_build_real[@]} -eq 0 ]]; then
+          printf '                        \r'
+          home-manager switch --flake "$flake#$config"
           return
         fi
 
@@ -241,7 +280,7 @@
         printf '  %-54s  %s\n' 'Derivation' 'Caused by'
         printf '  %s\n' "$(printf '─%.0s' {1..74})"
         local drv name cause
-        for drv in "''${to_build[@]}"; do
+        for drv in "''${to_build_real[@]}"; do
           name=$(_drv_name "$drv")
           cause=$(_hms_find_cause "$drv")
           printf '  \033[36m%-54s\033[0m  \033[33m%s\033[0m\n' "$name" "$cause"
