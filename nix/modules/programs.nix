@@ -702,13 +702,12 @@ in
 
       
       userChrome = ''
-        /* Hide the horizontal tab bar — Sidebery provides vertical tabs instead. 
+        /* Hide the horizontal tab bar — Sidebery provides vertical tabs instead. */
         #TabsToolbar {
             visibility: collapse !important;
         }
-        */
 
-        /* Native tabs auto-hide when not hovered - for Tab Note/Split View usage https://github.com/mbnuqw/sidebery/issues/2327#issuecomment-4340647031 */
+        /* Native tabs auto-hide when not hovered - for Tab Note/Split View usage https://github.com/mbnuqw/sidebery/issues/2327#issuecomment-4340647031 
         @media -moz-pref("sidebar.verticalTabs") and -moz-pref("sidebar.visibility","expand-on-hover"){
           #main-window > body > #browser{
             --sidebar-launcher-collapsed-width: 10px !important;
@@ -717,6 +716,8 @@ in
             max-width: 10px !important;
           }
         }
+        Disabled because it gets in the way when I move my mouse off-screen
+        */
       '';
 
       containers = ffContainers;
