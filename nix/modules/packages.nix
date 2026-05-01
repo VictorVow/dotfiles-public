@@ -1,4 +1,4 @@
-{ config, pkgs, lib, tuxManager, ... }:
+{ config, pkgs, lib, tuxManager, ie-r, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -67,6 +67,9 @@
     veracrypt # On-the-fly disk/file-container encryption (VeraCrypt GUI + CLI)
 
     # ── Hardware / Peripherals ────────────────────────────────────────────────
+    ie-r.packages.${pkgs.stdenv.hostPlatform.system}.default
+             # System-wide color picker (Wayland + X11) — press hotkey, copies colour to clipboard
+
     piper   # GTK application for configuring gaming mice (uses ratbagd)
     solaar  # Logitech Unifying receiver / Bolt manager
             # Note: logiops (for advanced Logitech customisation) stays in apt

@@ -22,16 +22,18 @@
 
     tuxManager.url = "github:benapetr/TuxManager/";
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
+
+    ie-r.url = "github:miaupaw/ie-r";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, tuxManager, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, tuxManager, ie-r, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix ];
 
       extraSpecialArgs = {
-        inherit claude-desktop llm-agents tuxManager;
+        inherit claude-desktop llm-agents tuxManager ie-r;
         pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
       };
     };
