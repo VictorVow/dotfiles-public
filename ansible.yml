@@ -296,6 +296,45 @@
       changed_when: false
       when: ansible_facts['os_family'] == 'Debian'
 
+    # ── Vorta / Flatpak fusermount3 ──────────────────────────────────────────
+    # Refs:
+    #   https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/2120439
+    #   https://github.com/borgbase/vorta/issues/2255
+    #
+    # The upstream AppArmor profile shipped with apparmor 4.x is missing the
+    # unix-socket permission that fusermount3 needs when it is invoked from
+    # inside the Flatpak sandbox (e.g. by Vorta when mounting a borg archive
+    # over sshfs). Without the rule, Vorta crashes on every mount attempt.
+    #
+    # The upstream profile already does `include if exists <local/fusermount3>`,
+    # so dropping the missing rule into the local override is the smallest
+    # safe patch — no editing of the distribution-managed profile required, and
+    # the override survives apt upgrades of the apparmor package.
+    #
+    # Note: AppArmor upstream considers this a partial workaround; the long-term
+    # fix is conditional treatment of fusermount3 under Flatpak. Revisit when
+    # https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/2120439 is closed.
+    - name: Vorta | install local override for fusermount3 AppArmor profile
+      ansible.builtin.copy:
+        dest: /etc/apparmor.d/local/fusermount3
+        content: |
+          # Required for Flatpak apps (e.g. Vorta) that talk to fusermount3
+          # over a Unix domain socket. See:
+          #   https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/2120439
+          #   https://github.com/borgbase/vorta/issues/2255
+          unix (receive, send) type=stream,
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+
+    - name: Vorta | reload fusermount3 AppArmor profile
+      ansible.builtin.command:
+        cmd: apparmor_parser -r /etc/apparmor.d/fusermount3
+      become: yes
+      changed_when: false
+      when: ansible_facts['os_family'] == 'Debian'
+
     # ── Waydroid ──────────────────────────────────────────────────────────
     # waydroid binary is managed by Nix (home.packages) — no PPA needed.
     # These tasks wire it up as a system service, following the same pattern
