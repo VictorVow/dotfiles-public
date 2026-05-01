@@ -553,7 +553,7 @@ in
       "http://localhost:8193"
       "https://.claude.com"
       "https://.geforcenow.com"
-      "https://.google.com"
+      "https://accounts.google.com"
 
       # AWS
       "https://.amazon.com"
@@ -561,11 +561,10 @@ in
       "https://.awspartner.com"
       "https://.skillbuilder.aws"
       "https://.signin.aws"
-
-      "https://.steampowered.com"
-      "https://.example.com"
+      "https://.steampowered.com"    # "https://.steampowered.com" didn't work
+      "https://13-ttrss.example.com"  # "https://.example.com" didn't work
       "https://.ts.net"   # Tailscale
-      "https://.zrok.io"
+      "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
       "https://account.booking.com"
       "https://account.nuffieldhealth.com"
       "https://accounts.firefox.com"
@@ -647,8 +646,8 @@ in
       "https://trakt.tv"
       "https://.stremio.com"
       "https://.telegram.org"
-      "https://.whatsapp.com"
-      "https://.amazon.co.uk"
+      "https://web.whatsapp.com"
+      "https://www.amazon.co.uk"
       "https://www.axahealth.co.uk"
       "https://www.britishairways.com"
       "https://www.codecademy.com"
