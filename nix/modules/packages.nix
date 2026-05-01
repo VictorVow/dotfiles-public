@@ -77,8 +77,12 @@
     libratbag   # (piper dependency) HID++ device configuration daemon
     noisetorch  # Microphone noise suppression via PulseAudio virtual device
                 # Replaces manually-installed ~/.local/bin/noisetorch
+    # fw-fanctrl — installed via custom-installers.yml (upstream install.sh)
+    # because the nixpkgs package only ships the Python CLI; the systemd
+    # service, ectool, and system-sleep hooks need root and bundling.
 
     # ── Networking ────────────────────────────────────────────────────────────
+    mosh     # Mobile shell — SSH alternative with roaming and intermittent connectivity support
     sniffnet # Network traffic monitor — shows which apps are using the network
              # Similar to GlassWire on Windows
     ngrok    # Secure tunnels to localhost
