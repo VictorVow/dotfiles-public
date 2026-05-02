@@ -1329,7 +1329,13 @@ INSTALLS
       "dreammaker.autoUpdate"   = true;
       "dreammaker.tickOnCreate" = true;
       "docker.extension.enableComposeLanguageServer" = false;
+      # Disable Red Hat Java extension auto-build on save / on open — builds
+      # are on-demand only (Command Palette → "Java: Rebuild Projects").
       "java.autobuild.enabled"                       = false;
+      # Don't auto re-import the project when pom.xml / build.gradle change;
+      # user must trigger re-import explicitly. (other values: "automatic",
+      # "interactive")
+      "java.configuration.updateBuildConfiguration" = "disabled";
       "java.imports.gradle.wrapper.checksums" = [
         { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
       ];
@@ -1391,6 +1397,13 @@ INSTALLS
       "openInApplication.applications" = {
         "md" = "${config.home.homeDirectory}/.local/bin/marktext-wrap";
       };
+      # Disable Red Hat Java extension auto-build on save / on open — builds
+      # are on-demand only (Command Palette → "Java: Rebuild Projects").
+      "java.autobuild.enabled" = false;
+      # Don't auto re-import the project when pom.xml / build.gradle change;
+      # user must trigger re-import explicitly. (other values: "automatic",
+      # "interactive")
+      "java.configuration.updateBuildConfiguration" = "disabled";
     };
   };
 
