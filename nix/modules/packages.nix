@@ -170,8 +170,9 @@
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
-    # neovim — managed by programs.neovim in programs.nix (installs it automatically)
-    # vscode — managed by programs.vscode in programs.nix (installs it automatically)
+    # neovim   — managed by programs.neovim in programs.nix (installs it automatically)
+    # vscode   — managed by programs.vscode in programs.nix (installs it automatically)
+    # vscodium — managed by vscodiumPkg + home.packages in programs.nix
     kdePackages.kate          # KDE text editor with syntax highlighting and plugins
     kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
     code-cursor # AI-powered code editor built on vscode

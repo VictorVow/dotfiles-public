@@ -3,6 +3,30 @@
 let
   jsonFormat = pkgs.formats.json { };
 
+  # VSCodium with declarative extensions. Add Nix-managed extensions to the list
+  # below; user marketplace installs coexist in ~/.vscode-oss/extensions/ alongside them.
+  # programs.vscode only manages one editor, so VSCodium uses this pattern instead.
+  vscodiumPkg = pkgs.symlinkJoin {
+    name = "vscodium";
+    inherit (pkgs.vscodium) pname version meta;
+    # Nix store binaries can't have root-owned 4755 perms, so wrap with --no-sandbox
+    # (same sandbox issue as VS Code — see programs.vscode.package above).
+    paths = [
+      (pkgs.vscode-with-extensions.override {
+        vscode = pkgs.vscodium;
+        vscodeExtensions = with pkgs.vscode-extensions; [
+          # Add declarative VSCodium extensions here.
+          # pkgs.vscode-extensions mirrors the VS Code marketplace, so most extensions
+          # that work in VS Code are available. Check with: nix search nixpkgs vscode-extensions
+        ];
+      })
+    ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/codium --add-flags "--no-sandbox"
+    '';
+  };
+
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
   # modify it at runtime — e.g. the /effort slash command rewrites this file.
   # Same content that programs.claude-code.settings would generate, but
@@ -1377,9 +1401,12 @@ INSTALLS
   };
 
 
-  # ── VSCodium settings ────────────────────────────────────────────────────────
-  # VSCodium is installed outside Nix (not pkgs.vscode), so programs.vscode doesn't
-  # cover its config directory. Manage the settings file declaratively here instead.
+  # ── VSCodium ──────────────────────────────────────────────────────────────────
+  # Binary via pkgs.vscodium (see vscodiumPkg let-binding at top of file).
+  # programs.vscode only manages one editor, so settings live in xdg.configFile
+  # and extensions are declared via pkgs.vscode-with-extensions in vscodiumPkg.
+
+  home.packages = [ vscodiumPkg ];
 
   xdg.configFile."VSCodium/User/settings.json" = {
     force = true;
@@ -1388,6 +1415,12 @@ INSTALLS
       "editor.fontFamily"               = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
       "editor.fontLigatures"            = true;
       "markdown.preview.fontSize"       = 18;
+      # NOTE: this setting currently has no effect — VSCodium's patch to remove the onboarding
+      # screen (PR #2804) left IOnboardingService unregistered, so workbench.contrib.startupPageRunner
+      # fails to instantiate and the welcome page never auto-opens. Workaround: Ctrl+Shift+P →
+      # "Help: Welcome" or "File: Open Recent…". Track fix at:
+      #   https://github.com/VSCodium/vscodium/issues/2816 (bug report)
+      #   https://github.com/VSCodium/vscodium/pull/2804  (regression source)
       "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
       # fabiospampinato.vscode-open-in-application: route .md through marktext-wrap.
       # The extension host runs with ELECTRON_RUN_AS_NODE=1, which it propagates to
