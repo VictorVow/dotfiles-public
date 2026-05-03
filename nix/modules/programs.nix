@@ -1672,6 +1672,16 @@ INSTALLS
       something else in our intended next steps needs the commit pushed first.
   '';
 
+  home.file.".claude/skills/direnv-ignored/SKILL.md".text = ''
+    ---
+    description: Setup nix-direnv in this repo without having to commit it.
+    ---
+    1. Create `.envrc` in the top-level of repo with the content `use flake "path:$PWD/.nix"`.
+    2. Append to the repo `.git/info/exclude` this content: `.nix/`.
+    3. Create `.nix/flake.nix` with the packages needed in this project environment.
+    4. Execute `direnv allow` in order to activate nix-direnv and setup the project environment.
+  '';
+
   home.file.".claude/skills/dbox-status/SKILL.md".text = ''
     ---
     description: Show status of distrobox containers and their key packages.
