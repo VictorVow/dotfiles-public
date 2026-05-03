@@ -19,6 +19,21 @@
     };
   };
 
+  systemd.user.services.jackett = {
+    Unit = {
+      Description = "Jackett torrent indexer proxy";
+      After = [ "network.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.jackett}/bin/jackett --NoRestart --NoUpdates";
+      Restart = "always";
+      RestartSec = "5";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
   home.packages = [ pkgs.ollama-vulkan ];
 
 }
