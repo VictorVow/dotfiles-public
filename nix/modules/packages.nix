@@ -106,6 +106,12 @@
     # ── Audio / Music ─────────────────────────────────────────────────────────
     puddletag # Audio tag (ID3/etc.) editor
 
+    # ── Graphics / Pixel Art ──────────────────────────────────────────────────
+    aseprite # Pixel-art / sprite editor (source-available; nixpkgs builds from source)
+             # AI plugins (PixelLab.ai, Retro Diffusion) are installed manually via
+             # Edit > Preferences > Extensions > Add Extension. See
+             # docs/research/ai-sprite-art-creation.md for context.
+
     # ── Video Downloading ─────────────────────────────────────────────────────
     yt-dlp # Download video/audio from YouTube and 1000+ other sites
            # Replaces pipx install of yt-dlp[default]
