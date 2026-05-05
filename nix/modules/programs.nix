@@ -1262,6 +1262,11 @@ INSTALLS
     #     vscjava.vscode-maven
     #     zainchen.json
 
+      keybindings = [
+        # Ctrl+; → Tasks: Run Task (open the task picker)
+        { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
+      ];
+
       userSettings = {
       # ── Telemetry ──────────────────────────────────────────────────────────────
       "telemetry.telemetryLevel"      = "off";
@@ -1299,24 +1304,17 @@ INSTALLS
       };
 
       # ── Theme ──────────────────────────────────────────────────────────────────
-      "workbench.colorTheme" = "Dark+";
+      "workbench.colorTheme" = "Default Dark Modern";
 
       # ── Claude Code ────────────────────────────────────────────────────────────
       "claudeCode.preferredLocation" = "panel";
 
-      # ── Copilot ────────────────────────────────────────────────────────────────
-"github.copilot.nextEditSuggestions.enabled" = true;
-
       # ── Continue ───────────────────────────────────────────────────────────────
-# yaml.schemas intentionally omitted: version-specific Continue paths become
+      # yaml.schemas intentionally omitted: version-specific Continue paths become
       # stale on every extension update; Continue manages its own schema registration.
 
       # ── vscode-neovim ──────────────────────────────────────────────────────────
-      # Point to the Nix-managed nvim binary (was: /home/linuxbrew/.linuxbrew/bin/nvim)
-      "extensions.experimental.affinity"          = { "asvetliakov.vscode-neovim" = 1; };
-      "vscode-neovim.neovimExecutablePaths.linux"  = "${pkgs.neovim}/bin/nvim";
-      "vscode-neovim.neovimExecutablePaths.darwin" = "";
-      "vscode-neovim.neovimExecutablePaths.win32"  = "";
+      "extensions.experimental.affinity" = { "asvetliakov.vscode-neovim" = 1; };
 
       # ── Git Config User Profiles ────────────────────────────────────────────────
       # (extension: onlyutkarsh.git-config-user-profiles)
@@ -1439,6 +1437,14 @@ INSTALLS
       # "interactive")
       "java.configuration.updateBuildConfiguration" = "disabled";
     };
+  };
+
+  xdg.configFile."VSCodium/User/keybindings.json" = {
+    force = true;
+    source = jsonFormat.generate "vscodium-keybindings" [
+      # Ctrl+; → Tasks: Run Task (open the task picker)
+      { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
+    ];
   };
 
   home.file.".local/bin/marktext-wrap" = {
