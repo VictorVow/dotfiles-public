@@ -30,6 +30,7 @@
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
+    ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
   ];
 
   # Tell Home Manager this is a non-NixOS Linux system.

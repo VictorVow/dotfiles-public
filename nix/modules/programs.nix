@@ -474,8 +474,9 @@ in
     };
 
     settings = {
-      # Default identity (1 = VictorVow); use `git su [1|2]` to switch per-repo
-      # Identity 2 (USER2): 22418751+USER2@users.noreply.github.com, key GPGKEY2
+      # Default identity (1 = VictorVow); use `git su [1|2|3]` to switch per-repo
+      # Identity 2 (USER2):      22418751+USER2@users.noreply.github.com,      key GPGKEY2
+      # Identity 3 (USER3): 11584262+USER3@users.noreply.github.com, key GPGKEY3
       user.name  = "VictorVow";
       user.email = "12621257+VictorVow@users.noreply.github.com";
 
@@ -510,12 +511,17 @@ in
             + " && git config user.email '22418751+USER2@users.noreply.github.com'"
             + " && git config user.signingkey 'GPGKEY2'"
             + " && echo 'switched -> USER2 (identity 2)'";
+          set3 = "git config user.name 'USER3'"
+            + " && git config user.email '11584262+USER3@users.noreply.github.com'"
+            + " && git config user.signingkey 'GPGKEY3'"
+            + " && echo 'switched -> USER3 (identity 3)'";
         in
           "!f() { case \"$1\" in"
           + " 1) ${set1};;"
           + " 2) ${set2};;"
+          + " 3) ${set3};;"
           + " \"\") echo \"current: $(git config user.name) <$(git config user.email)>\";;"
-          + " *) echo 'usage: git su [1|2]';;"
+          + " *) echo 'usage: git su [1|2|3]';;"
           + " esac }; f";
     };
   };
@@ -528,24 +534,6 @@ in
     ".direnv/"
     "**/.claude/settings.local.json"
   ];
-
-  # Auto-select USER2 identity for repos under ~/Documents/ESSENTIALS/installs/
-  # The trailing slash makes gitdir: match any repo inside the directory tree.
-  # See docs/git-identity-management.md for the full picture of identity management.
-  programs.git.includes = [
-    {
-      condition = "gitdir:~/Documents/ESSENTIALS/installs/";
-      path      = "~/.config/git/identity-USER2";
-    }
-  ];
-
-  # Identity snippet loaded by the includeIf above
-  xdg.configFile."git/identity-USER2".text = ''
-    [user]
-        name       = USER2
-        email      = 22418751+USER2@users.noreply.github.com
-        signingkey = GPGKEY2
-  '';
 
   # ── Web Browser ──────────────────────────────────────────────────────────────
   #
@@ -592,6 +580,7 @@ in
       "https://account.booking.com"
       "https://account.nuffieldhealth.com"
       "https://accounts.firefox.com"
+      "https://accounts.spotify.com"
       "https://aiostreams.elfhosted.com"
       "https://anilist.co"
       "https://app.addy.io"
@@ -1343,6 +1332,14 @@ INSTALLS
           selected   = false;
           id         = "80ec2d0d-bf53-4508-a832-380861ee3118";
           signingKey = "GPGKEY2";
+        }
+        {
+          label      = "SS14 [USER3]";
+          email      = "11584262+USER3@users.noreply.github.com";
+          userName   = "USER3";
+          selected   = false;
+          id         = "76c2f45a-aaf8-4e49-a412-31f3785364c0";
+          signingKey = "GPGKEY3";
         }
       ];
       "gitConfigUser.workspaceProfileSelections" = {
