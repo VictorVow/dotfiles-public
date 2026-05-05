@@ -501,6 +501,10 @@ in
       # git checkout-fb (shell application) - checkout an arbitrary branch and then remove that remote
       alias.ll = "log --oneline";
       core.editor = "micro";
+      # Commit-identity-only fallback for non-Bash contexts (VS Code, GUIs,
+      # scripts, subshells). Bash overrides `git su` with a function in
+      # shell.nix that also realigns push auth (GITHUB_TOKEN + gh active
+      # account). See docs/system/git-identity-management.md.
       alias.su =
         let
           set1 = "git config user.name 'VictorVow'"

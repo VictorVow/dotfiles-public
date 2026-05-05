@@ -330,6 +330,60 @@
         NIXPKGS_ALLOW_UNFREE=1 nix run --impure "nixpkgs#$pkg" "$@"
       }
 
+      # ── git identity switch (full-axis) ─────────────────────────────────────
+      # Override `git su [N]` so it realigns push-auth state too — clearing
+      # GITHUB_TOKEN in this shell and switching the gh keyring active account
+      # — not just commit identity. All other `git ...` invocations fall
+      # through to real git unchanged. The `programs.git.settings.alias.su`
+      # entry in programs.nix remains as a commit-identity-only fallback for
+      # non-Bash callers (VS Code, GUIs, scripts, subshells) where this
+      # function isn't visible. See docs/system/git-identity-management.md.
+      git() {
+        if [ "$1" = "su" ]; then
+          shift
+          _git_su "$@"
+        else
+          command git "$@"
+        fi
+      }
+
+      _git_su() {
+        local id="$1" name email key current_gh
+        case "$id" in
+          1) name=VictorVow;   email=12621257+VictorVow@users.noreply.github.com;   key=GPGKEY1 ;;
+          2) name=USER2;      email=22418751+USER2@users.noreply.github.com;      key=GPGKEY2 ;;
+          3) name=USER3; email=11584262+USER3@users.noreply.github.com; key=GPGKEY3 ;;
+          "")
+            echo "commit identity: $(command git config user.name) <$(command git config user.email)>"
+            if [ -n "$GITHUB_TOKEN" ]; then
+              echo "push auth: GITHUB_TOKEN env var (gh sees: $(gh api user --jq .login 2>/dev/null || echo '?'))"
+            else
+              echo "push auth: gh keyring (active: $(gh api user --jq .login 2>/dev/null || echo 'none'))"
+            fi
+            return 0 ;;
+          *) echo "usage: git su [1|2|3]" >&2; return 1 ;;
+        esac
+
+        command git config user.name       "$name"
+        command git config user.email      "$email"
+        command git config user.signingkey "$key"
+        echo "commit identity -> $name (identity $id)"
+
+        if [ -n "$GITHUB_TOKEN" ]; then
+          unset GITHUB_TOKEN
+          echo "  unset GITHUB_TOKEN in this shell (was dominating push auth)"
+        fi
+
+        current_gh=$(gh api user --jq .login 2>/dev/null)
+        if [ "$current_gh" != "$name" ]; then
+          if gh auth switch -u "$name" >/dev/null 2>&1; then
+            echo "  gh active account -> $name"
+          else
+            echo "  WARN: could not switch gh to $name — run: gh auth login -u $name" >&2
+          fi
+        fi
+      }
+
       # eza uses its own built-in colour support (dircolors not needed)
     '';
 
