@@ -4,7 +4,9 @@ format = """
 ${custom.first_block_host}\
 ${custom.first_block_box}\
 $directory\
-[](fg:color_dark_yellow bg:color_aqua)\
+[](fg:color_dark_yellow bg:color_purple)\
+${custom.git_identity}\
+[](fg:color_purple bg:color_aqua)\
 $git_branch\
 $git_status\
 [](fg:color_aqua bg:color_blue)\
@@ -137,6 +139,15 @@ format = '[[ $symbol $branch ](fg:color_fg0 bg:color_aqua)]($style)'
 [git_status]
 style = "bg:color_aqua"
 format = '[[($all_status$ahead_behind )](fg:color_fg0 bg:color_aqua)]($style)'
+
+# Current git commit identity (user.name) — only inside a git repo.
+# Reflects local override set by `git su [1|2|3]` (see docs/system/git-identity-management.md).
+[custom.git_identity]
+description = "Current git user.name"
+when = "git rev-parse --is-inside-work-tree"
+command = "git config user.name"
+style = "bg:color_purple"
+format = '[[  $output ](fg:color_fg0 bg:color_purple)]($style)'
 
 [nodejs]
 symbol = ""
