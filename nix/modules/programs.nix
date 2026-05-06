@@ -3,24 +3,15 @@
 let
   jsonFormat = pkgs.formats.json { };
 
-  # VSCodium with declarative extensions. Add Nix-managed extensions to the list
-  # below; user marketplace installs coexist in ~/.vscode-oss/extensions/ alongside them.
-  # programs.vscode only manages one editor, so VSCodium uses this pattern instead.
+  # VSCodium with --no-sandbox wrap. Extensions are installed by the user via the
+  # marketplace into ~/.vscode-oss/extensions/ (writable). vscode-with-extensions
+  # is intentionally NOT used because it pins --extensions-dir to a read-only Nix
+  # store path, which breaks marketplace installs (EACCES on mkdir). If declarative
+  # extensions are needed later, switch back but also redirect the writable dir.
   vscodiumPkg = pkgs.symlinkJoin {
     name = "vscodium";
     inherit (pkgs.vscodium) pname version meta;
-    # Nix store binaries can't have root-owned 4755 perms, so wrap with --no-sandbox
-    # (same sandbox issue as VS Code — see programs.vscode.package above).
-    paths = [
-      (pkgs.vscode-with-extensions.override {
-        vscode = pkgs.vscodium;
-        vscodeExtensions = with pkgs.vscode-extensions; [
-          # Add declarative VSCodium extensions here.
-          # pkgs.vscode-extensions mirrors the VS Code marketplace, so most extensions
-          # that work in VS Code are available. Check with: nix search nixpkgs vscode-extensions
-        ];
-      })
-    ];
+    paths = [ pkgs.vscodium ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/codium --add-flags "--no-sandbox"
@@ -1417,7 +1408,9 @@ INSTALLS
   # programs.vscode only manages one editor, so settings live in xdg.configFile
   # and extensions are declared via pkgs.vscode-with-extensions in vscodiumPkg.
 
-  home.packages = [ vscodiumPkg ];
+  # lowPrio: VSCodium and VS Code share locale file paths under lib/vscode/locales/.
+  # Defer to VS Code on collisions so home.packages buildEnv resolves cleanly.
+  home.packages = [ (lib.lowPrio vscodiumPkg) ];
 
   xdg.configFile."VSCodium/User/settings.json" = {
     force = true;
