@@ -1364,6 +1364,13 @@ INSTALLS
       # user must trigger re-import explicitly. (other values: "automatic",
       # "interactive")
       "java.configuration.updateBuildConfiguration" = "disabled";
+      # Don't auto-import Gradle/Maven projects when the folder opens — wait
+      # for an explicit "Java: Import Project" / "Gradle: Refresh" command.
+      "java.import.gradle.enabled" = false;
+      "java.import.maven.enabled" = false;
+      # Stop the standalone Gradle for Java extension from auto-detecting and
+      # syncing build.gradle files on workspace open.
+      "gradle.autoDetect" = "off";
       "java.imports.gradle.wrapper.checksums" = [
         { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
       ];
