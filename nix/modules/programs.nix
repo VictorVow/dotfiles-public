@@ -1522,6 +1522,19 @@ INSTALLS
     };
   };
 
+  # KDE binds Meta+R to this desktop entry via ~/.config/kglobalshortcutsrc
+  # ([services][net.local.vault-launch.desktop] _launch=Meta+R). Without the
+  # .desktop file present, KWin has no target to dispatch the shortcut to.
+  xdg.desktopEntries."net.local.vault-launch" = {
+    name        = "Vault Launch";
+    comment     = "Rofi launcher for vault apps";
+    exec        = "vault-launch";
+    icon        = "system-run";
+    terminal    = false;
+    type        = "Application";
+    categories  = [ "Utility" ];
+  };
+
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
