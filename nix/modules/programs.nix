@@ -322,6 +322,11 @@ let
         icon = "${ffIcons}/pypi.ico";
         definedAliases = [ "@python" ];
       };
+      "NuGet" = {
+        urls = [{ template = "https://www.nuget.org/packages?q={searchTerms}"; }];
+        icon = "${ffIcons}/nuget.ico";
+        definedAliases = [ "@dotnet" "@nuget" "@csharp" ];
+      };
       # ── Social Media ─────────────────────────────────────────────────
       "Reddit - Google" = {
         urls = [{ template = "http://www.google.com/search?q={searchTerms}+site%3Areddit.com"; }];
