@@ -1718,6 +1718,19 @@ INSTALLS
     3. Suggest next steps based on current context.
   '';
 
+  home.file.".claude/skills/wl-copy/SKILL.md".text = ''
+    ---
+    description: Copy text from Claude Code's messages to the clipboard directly to eliminate formatting issues.
+    ---
+    1. A user selecting text to copy and paste from Claude Code's messages has indenting and new line issues.
+    2. Use `wl-copy` to copy your last message, it should look something like this:
+      - wl-copy << 'EOF'
+        Here's a bunch of text...
+        EOF
+        echo "Copied to clipboard"
+    3. Make sure to eliminate any formatting issues before copying text.
+  '';
+
   home.file.".claude/skills/yt-summary/SKILL.md".text = ''
     ---
     description: Summarise a YouTube video using yt-dlp subtitles.
