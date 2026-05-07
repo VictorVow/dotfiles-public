@@ -167,7 +167,10 @@
         if $DRY_RUN_CMD "$PODMAN" exec --user root arch bash -c '
           while [ -f /var/lib/pacman/db.lck ]; do sleep 3; done &&
 
-          pacman -S --noconfirm --needed base-devel git &&
+          # gtk3 is a runtime requirement: Avalonia.X11 uses GTK native file
+          # dialogs, and File > Open crashes with "Unable to initialize GTK on
+          # separate thread" if libgtk-3 is not present.
+          pacman -S --noconfirm --needed base-devel git gtk3 &&
           useradd -m aurbuild 2>/dev/null || true &&
 
           rm -rf /tmp/aur-rsiedit-bin &&
