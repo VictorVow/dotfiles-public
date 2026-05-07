@@ -4,7 +4,7 @@
 #
 # Two containers are managed here:
 #   1. "fedora" — fedora:latest    — Trivalent browser (hardened Chromium) from secureblue repo
-#   2. "arch"   — archlinux:latest — AUR packages (logitune)
+#   2. "arch"   — archlinux:latest — AUR packages (logitune, rsiedit-bin)
 #
 # Container creation and package installs are each gated by a sentinel file so
 # `home-manager switch` is a no-op on normal runs.
@@ -106,6 +106,10 @@
         $DRY_RUN_CMD touch "$SENTINEL_DIR/arch-created"
       fi
 
+      # Per-package sentinels live alongside the container sentinel so new AUR
+      # packages can be added without forcing a rebuild of already-installed ones.
+      # Delete the relevant arch-<pkg>-initialized sentinel to re-run a single package.
+
       # Install arch packages on first initialisation only.
       # Delete ~/.local/share/distrobox-hm-init/arch-initialized to re-run.
       if [ ! -f "$SENTINEL_DIR/arch-initialized" ]; then
@@ -153,6 +157,42 @@
           $DRY_RUN_CMD "$DISTROBOX_EXPORT" --app logitune --container arch 2>/dev/null || true
         else
           echo "WARNING: 'arch' container package install failed; will retry next switch."
+        fi
+      fi
+
+      # rsiedit-bin (AUR): C# GUI for editing SS14 RSI sprite files.
+      # Delete ~/.local/share/distrobox-hm-init/arch-rsiedit-initialized to re-run.
+      if [ ! -f "$SENTINEL_DIR/arch-rsiedit-initialized" ]; then
+        echo "Installing rsiedit-bin in 'arch' container (this may take a few minutes)..."
+        if $DRY_RUN_CMD "$PODMAN" exec --user root arch bash -c '
+          while [ -f /var/lib/pacman/db.lck ]; do sleep 3; done &&
+
+          pacman -S --noconfirm --needed base-devel git &&
+          useradd -m aurbuild 2>/dev/null || true &&
+
+          rm -rf /tmp/aur-rsiedit-bin &&
+          git clone https://aur.archlinux.org/rsiedit-bin.git /tmp/aur-rsiedit-bin &&
+          chown -R aurbuild /tmp/aur-rsiedit-bin &&
+
+          (cd /tmp/aur-rsiedit-bin &&
+            source ./PKGBUILD 2>/dev/null &&
+            ALL_DEPS=("''${depends[@]}" "''${makedepends[@]}") &&
+            [[ ''${#ALL_DEPS[@]} -gt 0 ]] &&
+            pacman -S --noconfirm --needed "''${ALL_DEPS[@]}") || true &&
+
+          runuser -s /bin/bash -c "cd /tmp/aur-rsiedit-bin && makepkg -d --noconfirm" aurbuild &&
+
+          pacman -U --noconfirm /tmp/aur-rsiedit-bin/*.pkg.tar.zst
+        '; then
+          $DRY_RUN_CMD touch "$SENTINEL_DIR/arch-rsiedit-initialized"
+
+          # Export RSIEdit to the host desktop. distrobox-export 1.8.2.2 has no
+          # --container flag (it bails with "Invalid flag"), so it must be run
+          # *inside* the container via distrobox-enter. The --app match is
+          # case-sensitive against the .desktop Name field ("RSIEdit").
+          $DRY_RUN_CMD "$DISTROBOX" enter --name arch -- distrobox-export --app RSIEdit 2>/dev/null || true
+        else
+          echo "WARNING: rsiedit-bin install failed; will retry next switch."
         fi
       fi
     '';
