@@ -1043,6 +1043,22 @@ INSTALLS
     Mounts/
   '';
 
+  # Global prettier defaults. Prettier walks up from the file being formatted, so
+  # anything under ~/ without a closer .prettierrc inherits this. MDX files get a
+  # very large printWidth so JSX inside MDX doesn't get reflowed onto multiple
+  # lines on save.
+  home.file.".prettierrc.json".text = builtins.toJSON {
+    overrides = [
+      {
+        files = "*.mdx";
+        options = {
+          printWidth = 9999;
+          proseWrap  = "preserve";
+        };
+      }
+    ];
+  };
+
   # ── Claude Code hook scripts ───────────────────────────────────────────────────
   # Managed here so they're version-controlled alongside the rest of the nix config.
   # Using home.file with executable = true (NOT programs.claude-code.hooks, which
@@ -1311,38 +1327,6 @@ INSTALLS
 
       # ── vscode-neovim ──────────────────────────────────────────────────────────
       "extensions.experimental.affinity" = { "asvetliakov.vscode-neovim" = 1; };
-
-      # ── Git Config User Profiles ────────────────────────────────────────────────
-      # (extension: onlyutkarsh.git-config-user-profiles)
-      "gitConfigUser.profiles" = [
-        {
-          label      = "Psuedononymous [VictorVow]";
-          email      = "12621257+VictorVow@users.noreply.github.com";
-          userName   = "VictorVow";
-          selected   = true;
-          id         = "f4feda82-9f84-40ed-ae25-45893e812650";
-          signingKey = "GPGKEY1";
-        }
-        {
-          label      = "Personal [USER2]";
-          email      = "22418751+USER2@users.noreply.github.com";
-          userName   = "USER2";
-          selected   = false;
-          id         = "80ec2d0d-bf53-4508-a832-380861ee3118";
-          signingKey = "GPGKEY2";
-        }
-        {
-          label      = "SS14 [USER3]";
-          email      = "11584262+USER3@users.noreply.github.com";
-          userName   = "USER3";
-          selected   = false;
-          id         = "76c2f45a-aaf8-4e49-a412-31f3785364c0";
-          signingKey = "GPGKEY3";
-        }
-      ];
-      "gitConfigUser.workspaceProfileSelections" = {
-        "/home/boss/Documents/ESSENTIALS/installs" = "80ec2d0d-bf53-4508-a832-380861ee3118";
-      };
 
       # ── Misc extension settings ─────────────────────────────────────────────────
       "dreammaker.autoUpdate"   = true;
