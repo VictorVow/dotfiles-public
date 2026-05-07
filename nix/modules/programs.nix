@@ -1167,190 +1167,89 @@ INSTALLS
 
   # ── IDE ───────────────────────────────────────────────────────────────────────
 
-  programs.vscode = {
-    enable = true;
-    # Nix store binaries can't have root-owned 4755 perms, so the SUID sandbox
-    # helper is always misconfigured. Wrap the binary to pass --no-sandbox.
-    package = pkgs.symlinkJoin {
-      name = "vscode";
-      inherit (pkgs.vscode) pname version meta;
-      paths = [ pkgs.vscode ];
-      buildInputs = [ pkgs.makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/code --add-flags "--no-sandbox"
-      '';
-    };
-    # mutableExtensionsDir allows marketplace / manual installs to coexist alongside
-    # Nix-managed extensions. Without this, HM would wipe any unlisted extension.
-    mutableExtensionsDir = true;
+  # VSCode binary itself is no longer Nix-managed — it's installed via
+  # custom-installers.yml from the Microsoft apt repo (packages.microsoft.com).
+  # Reasons: nixpkgs repackages each release as a heavy build, and
+  # ms-vscode.cpptools / ms-python.vscode-pylance are MS-licensed for *official*
+  # VSCode only. All extensions are now installed via the in-app marketplace.
+  #
+  # We continue to manage settings.json and keybindings.json declaratively,
+  # writing them to ~/.config/Code/User/ where official VSCode reads them.
 
-    profiles.default = {
-      # Share MCP servers from programs.mcp.servers with VS Code clients
-      # (Continue, Claude Code extension, etc.). Written to VSCode's userMcp config.
-      enableMcpIntegration = true;
+  xdg.configFile."Code/User/keybindings.json".source = jsonFormat.generate "vscode-keybindings" [
+    # Ctrl+; → Tasks: Run Task (open the task picker)
+    { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
+  ];
 
-      # Extensions available in pkgs.vscode-extensions (nixpkgs subset).
-      # Extensions NOT in nixpkgs are managed by VS Code's built-in sync / marketplace.
-      extensions = with pkgs.vscode-extensions; [
-        bbenoist.nix
-        dbaeumer.vscode-eslint
-        eamodio.gitlens
-        esbenp.prettier-vscode
-        ms-python.python
-        ms-python.vscode-pylance
-        ms-python.debugpy
-        ms-vscode.cpptools
-        oderwat.indent-rainbow
-        redhat.vscode-yaml
-        rust-lang.rust-analyzer
-        tamasfe.even-better-toml
-        usernamehw.errorlens
-      ];
+  xdg.configFile."Code/User/settings.json".source = jsonFormat.generate "vscode-settings" {
+    # ── Telemetry ──────────────────────────────────────────────────────────────
+    "telemetry.telemetryLevel"      = "off";
+    "redhat.telemetry.enabled"      = false;
 
-    # Full extension inventory (for documentation / future declarative migration).
-    # Extensions marked (*) are managed above via nixpkgs; the rest via VS Code sync.
-    # To move more to Nix: use pkgs.vscode-utils.extensionsFromVscodeMarketplace with sha256.
-    #
-    # (*) bbenoist.nix
-    # (*) dbaeumer.vscode-eslint
-    # (*) eamodio.gitlens
-    # (*) esbenp.prettier-vscode
-    # (*) ms-python.python
-    # (*) ms-python.vscode-pylance
-    # (*) ms-python.debugpy
-    # (*) ms-vscode.cpptools
-    # (*) oderwat.indent-rainbow
-    # (*) redhat.vscode-yaml
-    # (*) rust-lang.rust-analyzer
-    # (*) tamasfe.even-better-toml
-    # (*) usernamehw.errorlens
-    #     amazonwebservices.amazon-q-vscode
-    #     anthropic.claude-code
-    #     asvetliakov.vscode-neovim
-    #     ccimage.jsonviewer
-    #     christian-kohler.npm-intellisense
-    #     continue.continue
-    #     davidanson.vscode-markdownlint
-    #     docker.docker
-    #     donjayamanne.githistory
-    #     editorconfig.editorconfig
-    #     firefox-devtools.vscode-firefox-debug
-    #     formulahendry.code-runner
-    #     fuzionix.devtool-plus
-    #     gbasood.byond-dm-language-support
-    #     github.copilot-chat
-    #     github.vscode-github-actions
-    #     leizongmin.node-module-intellisense
-    #     ms-azuretools.vscode-containers
-    #     ms-dotnettools.csdevkit
-    #     ms-dotnettools.csharp
-    #     ms-dotnettools.vscode-dotnet-runtime
-    #     ms-python.vscode-python-envs
-    #     ms-toolsai.jupyter
-    #     ms-toolsai.jupyter-keymap
-    #     ms-toolsai.jupyter-renderers
-    #     ms-toolsai.vscode-jupyter-cell-tags
-    #     ms-toolsai.vscode-jupyter-slideshow
-    #     ms-vscode-remote.remote-containers
-    #     ms-vscode.cmake-tools
-    #     ms-vscode.cpp-devtools
-    #     ms-vscode.cpptools-extension-pack
-    #     ms-vscode.cpptools-themes
-    #     ms-vsliveshare.vsliveshare
-    #     nickdemayo.vscode-json-editor
-    #     ofhumanbondage.react-proptypes-intellisense
-    #     onlyutkarsh.git-config-user-profiles
-    #     platymuus.dm-langclient
-    #     redhat.java
-    #     ritwickdey.liveserver
-    #     saoudrizwan.claude-dev
-    #     sourcegraph.javascript-typescript
-    #     tauri-apps.tauri-vscode
-    #     twxs.cmake
-    #     vscjava.vscode-gradle
-    #     vscjava.vscode-java-debug
-    #     vscjava.vscode-java-dependency
-    #     vscjava.vscode-java-test
-    #     vscjava.vscode-maven
-    #     zainchen.json
+    # ── Editor ─────────────────────────────────────────────────────────────────
+    "editor.fontFamily"            = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
+    "editor.fontLigatures"         = true;
+    "editor.inlineSuggest.enabled" = true;
+    "editor.defaultFormatter"      = "esbenp.prettier-vscode";
+    "editor.formatOnSave"          = true;
 
-      keybindings = [
-        # Ctrl+; → Tasks: Run Task (open the task picker)
-        { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
-      ];
+    # ── Git ────────────────────────────────────────────────────────────────────
+    "git.autofetch"                     = true;
+    "git.openRepositoryInParentFolders" = "never";
 
-      userSettings = {
-      # ── Telemetry ──────────────────────────────────────────────────────────────
-      "telemetry.telemetryLevel"      = "off";
-      "redhat.telemetry.enabled"      = false;
+    # ── Explorer ───────────────────────────────────────────────────────────────
+    "explorer.confirmDelete" = false;
 
+    # ── Terminal ───────────────────────────────────────────────────────────────
+    "terminal.integrated.allowChords"  = false;
+    "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
 
-      # ── Editor ─────────────────────────────────────────────────────────────────
-      "editor.fontFamily"            = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
-      "editor.fontLigatures"         = true;
-      "editor.inlineSuggest.enabled" = true;
-      "editor.defaultFormatter"      = "esbenp.prettier-vscode";
-      "editor.formatOnSave"          = true;
-
-      # ── Git ────────────────────────────────────────────────────────────────────
-      "git.autofetch"                     = true;
-      "git.openRepositoryInParentFolders" = "never";
-
-      # ── Explorer ───────────────────────────────────────────────────────────────
-      "explorer.confirmDelete" = false;
-
-      # ── Terminal ───────────────────────────────────────────────────────────────
-      "terminal.integrated.allowChords"  = false;
-      "terminal.integrated.fontFamily"   = "JetBrainsMono Nerd Font";
-
-      # Pin the integrated terminal shell to bashInteractive. The nixpkgs VSCode
-      # wrapper resolves `bash` to the minimal (non-interactive) bash in its own
-      # closure, which is built without programmable completion or prompt-string
-      # decoding — so starship's \[...\] wrappers render literally and compgen is
-      # missing. bashInteractive is what Yakuake/programs.bash use.
-      "terminal.integrated.defaultProfile.linux" = "bash";
-      "terminal.integrated.profiles.linux" = {
-        bash = {
-          path = "${pkgs.bashInteractive}/bin/bash";
-        };
-      };
-
-      # ── Theme ──────────────────────────────────────────────────────────────────
-      "workbench.colorTheme" = "Default Dark Modern";
-
-      # ── Claude Code ────────────────────────────────────────────────────────────
-      "claudeCode.preferredLocation" = "panel";
-
-      # ── Continue ───────────────────────────────────────────────────────────────
-      # yaml.schemas intentionally omitted: version-specific Continue paths become
-      # stale on every extension update; Continue manages its own schema registration.
-
-      # ── vscode-neovim ──────────────────────────────────────────────────────────
-      "extensions.experimental.affinity" = { "asvetliakov.vscode-neovim" = 1; };
-
-      # ── Misc extension settings ─────────────────────────────────────────────────
-      "dreammaker.autoUpdate"   = true;
-      "dreammaker.tickOnCreate" = true;
-      "docker.extension.enableComposeLanguageServer" = false;
-      # Disable Red Hat Java extension auto-build on save / on open — builds
-      # are on-demand only (Command Palette → "Java: Rebuild Projects").
-      "java.autobuild.enabled"                       = false;
-      # Don't auto re-import the project when pom.xml / build.gradle change;
-      # user must trigger re-import explicitly. (other values: "automatic",
-      # "interactive")
-      "java.configuration.updateBuildConfiguration" = "disabled";
-      # Don't auto-import Gradle/Maven projects when the folder opens — wait
-      # for an explicit "Java: Import Project" / "Gradle: Refresh" command.
-      "java.import.gradle.enabled" = false;
-      "java.import.maven.enabled" = false;
-      # Stop the standalone Gradle for Java extension from auto-detecting and
-      # syncing build.gradle files on workspace open.
-      "gradle.autoDetect" = "off";
-      "java.imports.gradle.wrapper.checksums" = [
-        { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
-      ];
+    # Pin the integrated terminal shell to bashInteractive — the apt VSCode
+    # build resolves `bash` against the system PATH, but pinning to the same
+    # interactive bash that Yakuake / programs.bash use keeps starship and
+    # programmable completion behaving the same in both terminals.
+    "terminal.integrated.defaultProfile.linux" = "bash";
+    "terminal.integrated.profiles.linux" = {
+      bash = {
+        path = "${pkgs.bashInteractive}/bin/bash";
       };
     };
+
+    # ── Theme ──────────────────────────────────────────────────────────────────
+    "workbench.colorTheme" = "Default Dark Modern";
+    "window.titleBarStyle" = "native"; # Bug with Electron when using custom title bar is causing 1-2px at top to pass through clicks the window below
+
+    # ── Claude Code ────────────────────────────────────────────────────────────
+    "claudeCode.preferredLocation" = "panel";
+
+    # ── Continue ───────────────────────────────────────────────────────────────
+    # yaml.schemas intentionally omitted: version-specific Continue paths become
+    # stale on every extension update; Continue manages its own schema registration.
+
+    # ── vscode-neovim ──────────────────────────────────────────────────────────
+    "extensions.experimental.affinity" = { "asvetliakov.vscode-neovim" = 1; };
+
+    # ── Misc extension settings ─────────────────────────────────────────────────
+    "dreammaker.autoUpdate"   = true;
+    "dreammaker.tickOnCreate" = true;
+    "docker.extension.enableComposeLanguageServer" = false;
+    # Disable Red Hat Java extension auto-build on save / on open — builds
+    # are on-demand only (Command Palette → "Java: Rebuild Projects").
+    "java.autobuild.enabled"                       = false;
+    # Don't auto re-import the project when pom.xml / build.gradle change;
+    # user must trigger re-import explicitly. (other values: "automatic",
+    # "interactive")
+    "java.configuration.updateBuildConfiguration" = "disabled";
+    # Don't auto-import Gradle/Maven projects when the folder opens — wait
+    # for an explicit "Java: Import Project" / "Gradle: Refresh" command.
+    "java.import.gradle.enabled" = false;
+    "java.import.maven.enabled" = false;
+    # Stop the standalone Gradle for Java extension from auto-detecting and
+    # syncing build.gradle files on workspace open.
+    "gradle.autoDetect" = "off";
+    "java.imports.gradle.wrapper.checksums" = [
+      { sha256 = "f7566c1b7cd087d8395eb003f7c13d30ba2935f2071f08c6f275e79f63149d58"; allowed = true; }
+    ];
   };
 
   # ── Zed Editor settings ────────────────────────────────────────────────────────
@@ -1400,6 +1299,7 @@ INSTALLS
     force = true;
     source = jsonFormat.generate "vscodium-settings" {
       "diffEditor.ignoreTrimWhitespace" = false;
+      "window.titleBarStyle"            = "native"; # Bug with Electron when using custom title bar is causing 1-2px at top to pass through clicks the window below
       "editor.fontFamily"               = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
       "editor.fontLigatures"            = true;
       "markdown.preview.fontSize"       = 18;
@@ -1523,7 +1423,8 @@ INSTALLS
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
   #   - programs.codex       (via enableMcpIntegration = true → ~/.codex/.mcp.json)
-  #   - programs.vscode.profiles.default (via enableMcpIntegration = true → VSCode userMcp)
+  #   - VSCode (no longer auto-wired since programs.vscode was removed; configure
+  #     a marketplace MCP extension to read ~/.config/mcp/mcp.json if needed)
   #
   # Secret env vars (LOGSEQ_API_TOKEN, GITHUB_TOKEN) are intentionally NOT placed in
   # env blocks here — the env block overrides inherited shell values, so an empty string

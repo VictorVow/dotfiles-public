@@ -10,10 +10,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-desktop = {
-      url = "github:aaddrick/claude-desktop-debian";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # claude-desktop — removed; was github:aaddrick/claude-desktop-debian.
+    # The flake rebuilt a Debian .deb on every lock bump. Now installed via
+    # custom-installers.yml from the upstream .deb release.
 
     # AI coding tools — auto-updated daily, own binary cache at cache.numtide.com.
     # Intentionally NOT following nixpkgs so the pre-built packages in numtide's
@@ -26,14 +25,14 @@
     ie-r.url = "github:miaupaw/ie-r";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, claude-desktop, llm-agents, tuxManager, ie-r, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix ];
 
       extraSpecialArgs = {
-        inherit claude-desktop llm-agents tuxManager ie-r;
+        inherit llm-agents tuxManager ie-r;
         pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
       };
     };

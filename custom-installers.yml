@@ -155,15 +155,12 @@
       when: ansible_facts.packages['mullvad-vpn'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
-    # ANDROID STUDIO
-    # Primary: Nix (androidStudioPackages.stable via buildFHSEnv).
-    # PPA only runs when the Nix binary is absent.
+    # ANDROID STUDIO — ppa:maarten-fonville/android-studio
+    # The Nix path (androidStudioPackages.stable via buildFHSEnv) was reverted
+    # because the FHS rootfs rebuild on every lock bump dwarfed every other
+    # build in the closure. ANDROID_HOME (set in shell.nix) and the existing
+    # SDK in ~/Documents/Dev/Android/Sdk continue to work unchanged.
     # ════════════════════════════════════════════════════════════════════════
-
-    - name: Android Studio | check for Nix-managed binary
-      ansible.builtin.stat:
-        path: "/home/{{ ansible_user_id }}/.nix-profile/bin/android-studio"
-      register: android_studio_nix
 
     - name: Android Studio | check for PPA-managed installation
       ansible.builtin.stat:
@@ -177,7 +174,6 @@
         update_cache: yes
       become: yes
       when:
-        - not android_studio_nix.stat.exists
         - not android_studio_ppa.stat.exists
         - ansible_facts.packages['android-studio'] is not defined
 
@@ -187,7 +183,6 @@
         state: present
       become: yes
       when:
-        - not android_studio_nix.stat.exists
         - not android_studio_ppa.stat.exists
         - ansible_facts.packages['android-studio'] is not defined
 
@@ -392,3 +387,207 @@
         path: /tmp/fw-fanctrl
         state: absent
       when: not fw_fanctrl_bin.stat.exists
+
+    # ════════════════════════════════════════════════════════════════════════
+    # VSCODE — https://code.visualstudio.com/docs/setup/linux
+    # Replaces programs.vscode in nix/modules/programs.nix. The Nix repackaging
+    # rebuilt on every lock bump, and ms-vscode.cpptools / ms-python.vscode-pylance
+    # are MS-licensed for *official* VSCode only — apt is the right channel.
+    # Settings & keybindings are still managed declaratively (xdg.configFile).
+    # Extensions are installed via the in-app marketplace.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: VSCode | download Microsoft GPG key
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: /usr/share/keyrings/microsoft.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['code'] is not defined
+
+    - name: VSCode | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/microsoft.asc]
+          https://packages.microsoft.com/repos/code stable main
+        filename: vscode
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['code'] is not defined
+
+    - name: VSCode | install package
+      ansible.builtin.apt:
+        name: code
+        state: present
+      become: yes
+      when: ansible_facts.packages['code'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # CURSOR — https://cursor.com/
+    # AI-powered code editor (formerly via Nix's code-cursor). Distributed as
+    # an AppImage; downloaded once to ~/.local/bin and exposed with a desktop
+    # entry. Updates: re-run with cursor_force_update=true, or replace the
+    # binary manually.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Cursor | check if AppImage already present
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/bin/cursor.AppImage"
+      register: cursor_bin
+
+    - name: Cursor | resolve latest stable AppImage URL
+      ansible.builtin.uri:
+        url: https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+        return_content: yes
+        headers:
+          User-Agent: Mozilla/5.0
+      register: cursor_release
+      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
+
+    - name: Cursor | ensure ~/.local/bin exists
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.local/bin"
+        state: directory
+        mode: '0755'
+      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
+
+    - name: Cursor | download AppImage
+      ansible.builtin.get_url:
+        url: "{{ cursor_release.json.downloadUrl }}"
+        dest: "{{ ansible_env.HOME }}/.local/bin/cursor.AppImage"
+        mode: '0755'
+      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
+
+    - name: Cursor | install desktop entry
+      ansible.builtin.copy:
+        dest: "{{ ansible_env.HOME }}/.local/share/applications/cursor.desktop"
+        mode: '0644'
+        content: |
+          [Desktop Entry]
+          Name=Cursor
+          Exec={{ ansible_env.HOME }}/.local/bin/cursor.AppImage --no-sandbox %F
+          Terminal=false
+          Type=Application
+          Icon=cursor
+          Categories=Development;IDE;
+          MimeType=text/plain;inode/directory;
+          StartupWMClass=Cursor
+
+    # ════════════════════════════════════════════════════════════════════════
+    # CLAUDE DESKTOP — https://github.com/aaddrick/claude-desktop-debian
+    # Replaces the aaddrick claude-desktop flake input which rebuilt the .deb
+    # on every lock bump. Now installs the upstream prebuilt .deb directly.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Claude Desktop | fetch latest release metadata
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/aaddrick/claude-desktop-debian/releases/latest
+        return_content: yes
+      register: claude_desktop_release
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | resolve .deb download URL
+      ansible.builtin.set_fact:
+        claude_desktop_url: >-
+          {{ claude_desktop_release.json.assets
+             | selectattr('name', 'search', '_' + deb_arch + '\\.deb$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | download .deb
+      ansible.builtin.get_url:
+        url: "{{ claude_desktop_url }}"
+        dest: /tmp/claude-desktop.deb
+        mode: '0644'
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | install .deb
+      ansible.builtin.apt:
+        deb: /tmp/claude-desktop.deb
+      become: yes
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | clean up temp .deb
+      ansible.builtin.file:
+        path: /tmp/claude-desktop.deb
+        state: absent
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # MEGASYNC — https://help.mega.io/installs-apps/desktop/repository
+    # MEGA Cloud Drive sync client. nixpkgs builds it from source — official
+    # apt repo provides a prebuilt .deb that tracks releases automatically.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: MEGAsync | download Meganz GPG key
+      ansible.builtin.get_url:
+        url: https://mega.nz/linux/repo/Debian_12/Release.key
+        dest: /usr/share/keyrings/meganz.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['megasync'] is not defined
+
+    - name: MEGAsync | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/meganz.asc]
+          https://mega.nz/linux/repo/xUbuntu_{{ ansible_distribution_version }}/ ./
+        filename: megasync
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['megasync'] is not defined
+
+    - name: MEGAsync | install package
+      ansible.builtin.apt:
+        name: megasync
+        state: present
+      become: yes
+      when: ansible_facts.packages['megasync'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # RUSTDESK — https://github.com/rustdesk/rustdesk/releases
+    # Open-source remote desktop. nixpkgs builds it from source (Rust + the
+    # vendored libsciter crate); the upstream .deb is prebuilt.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: RustDesk | fetch latest release metadata
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/rustdesk/rustdesk/releases/latest
+        return_content: yes
+      register: rustdesk_release
+      when: ansible_facts.packages['rustdesk'] is not defined
+
+    - name: RustDesk | resolve .deb download URL
+      ansible.builtin.set_fact:
+        rustdesk_url: >-
+          {{ rustdesk_release.json.assets
+             | selectattr('name', 'search', '-x86_64\\.deb$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: ansible_facts.packages['rustdesk'] is not defined
+
+    - name: RustDesk | download .deb
+      ansible.builtin.get_url:
+        url: "{{ rustdesk_url }}"
+        dest: /tmp/rustdesk.deb
+        mode: '0644'
+      when: ansible_facts.packages['rustdesk'] is not defined
+
+    - name: RustDesk | install .deb
+      ansible.builtin.apt:
+        deb: /tmp/rustdesk.deb
+      become: yes
+      when: ansible_facts.packages['rustdesk'] is not defined
+
+    - name: RustDesk | clean up temp .deb
+      ansible.builtin.file:
+        path: /tmp/rustdesk.deb
+        state: absent
+      when: ansible_facts.packages['rustdesk'] is not defined

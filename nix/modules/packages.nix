@@ -30,8 +30,10 @@
              # internal game bwrap sandbox (both are needed)
     btop     # Better top - rich terminal system monitor
     htop     # Interactive process viewer
-    nvtopPackages.full
-             # GPU monitor (like htop for NVIDIA/AMD/Intel GPUs)
+    # nvtop — removed from Nix: nvtopPackages.full pulls the entire CUDA 12.8
+    # archive (libcublas/cusparse/cusolver/nvjitlink/nvrtc + cuda-merged,
+    # ~600 MiB DL / 2.7 GiB unpacked) on every lock bump. Install via apt
+    # if needed: `sudo apt install nvtop`.
     cpulimit # Limit CPU usage of a process; used in Yakuake for etesync-dav
              # Note: cgroups is a better-maintained alternative (different method)
     vnstat   # Network traffic monitor (user CLI; daemon stays in apt)
@@ -177,18 +179,21 @@
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
     # neovim   — managed by programs.neovim in programs.nix (installs it automatically)
-    # vscode   — managed by programs.vscode in programs.nix (installs it automatically)
+    # vscode   — installed via custom-installers.yml from packages.microsoft.com;
+    #            settings + keybindings are still managed declaratively via
+    #            xdg.configFile in programs.nix (see Code/User/{settings,keybindings}.json)
     # vscodium — managed by vscodiumPkg + home.packages in programs.nix
     kdePackages.kate          # KDE text editor with syntax highlighting and plugins
     kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
-    code-cursor # AI-powered code editor built on vscode
+    # code-cursor — removed from Nix; nixpkgs repackages each release as a
+    # heavy Electron build. Installed via custom-installers.yml from upstream
+    # AppImage / .deb instead.
 
-    androidStudioPackages.stable
-    # Official Android IDE (~3 GB on first build). Uses buildFHSEnv internally
-    # to handle prebuilt SDK binaries with hardcoded interpreter paths.
-    # Replaces the android-studio task in custom-installers.yml (PPA).
-    # ANDROID_HOME is set in shell.nix; no additional config needed.
-    # See docs/buildFHSEnv.md for details.
+    # androidStudioPackages.stable — removed from Nix; the buildFHSEnv wrapper
+    # rebuilds a multi-GB FHS rootfs every time the lock bumps. Reverted to
+    # the PPA fallback in custom-installers.yml (ppa:maarten-fonville/android-studio).
+    # ANDROID_HOME (set in shell.nix) still applies; existing SDK in
+    # ~/Documents/Dev/Android/Sdk continues to work unchanged.
 
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
@@ -371,7 +376,8 @@
              # Also configured via programs.starship in programs.nix
 
     # ── Syncing ───────────────────────────────────────────────────────────────
-    megasync  # MEGA Cloud Drive sync client
+    # megasync — removed from Nix; nixpkgs builds it from source. Installed via
+    # custom-installers.yml using mega.nz/linux/repo (official Debian repo).
     syncthing # Continuous file synchronisation (replaces apt install syncthing)
               # Start manually with: syncthing serve
     syncthingtray # Tray app for Syncthing (replaces pre-built binary)
@@ -381,8 +387,12 @@
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
-    rustdesk 
-    claude-desktop # Official Claude AI desktop app (via aaddrick/claude-desktop-debian)
+    # rustdesk — removed from Nix; the build pulls libsciter (Rust crate +
+    # vendored .so) and rebuilds whenever the rustdesk crate version moves.
+    # Installed via custom-installers.yml from official GitHub .deb release.
+    # claude-desktop — removed from Nix; the aaddrick flake input rebuilt the
+    # .deb on every lock bump. Installed via custom-installers.yml from the
+    # upstream aaddrick/claude-desktop-debian release .deb.
     jan # ChatBox-like desktop LLM chat app
     streamlink-twitch-gui-bin
     suwayomi-server
