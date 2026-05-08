@@ -1044,13 +1044,13 @@ INSTALLS
   '';
 
   # Global prettier defaults. Prettier walks up from the file being formatted, so
-  # anything under ~/ without a closer .prettierrc inherits this. MDX files get a
-  # very large printWidth so JSX inside MDX doesn't get reflowed onto multiple
-  # lines on save.
+  # anything under ~/ without a closer .prettierrc inherits this. MDX and Markdown
+  # files get a very large printWidth and proseWrap=preserve so prose lines aren't
+  # reflowed on save (and JSX inside MDX stays on one line).
   home.file.".prettierrc.json".text = builtins.toJSON {
     overrides = [
       {
-        files = "*.mdx";
+        files = [ "*.md" "*.mdx" ];
         options = {
           printWidth = 9999;
           proseWrap  = "preserve";
