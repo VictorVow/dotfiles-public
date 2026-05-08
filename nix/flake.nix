@@ -2,11 +2,23 @@
   description = "Home Manager configuration for boss's Kubuntu system";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinned to a commit at least PIN_AGE_DAYS days old on its upstream branch
+    # (see update.sh). The age-pin gives Hydra time to fully populate its
+    # binary cache, so home-manager switch downloads pre-built artifacts
+    # rather than compiling from source. The `# channel:` comment above each
+    # url records the upstream branch so update.sh can advance the pin on the
+    # next run; the SHA in the url is what nix flake update resolves into
+    # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
+
+    # channel: nixos-25.11
+    nixpkgs.url = "github:NixOS/nixpkgs/812b3986fd1568f7a858f97fcf425ad996ba7d25";
+
+    # channel: nixos-unstable
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/549bd84d6279f9852cae6225e372cc67fb91a4c1";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      # channel: release-25.11
+      url = "github:nix-community/home-manager/cc09c0f9b7eaa95c2d9827338a5eb03d32505ca5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -15,10 +27,15 @@
     # custom-installers.yml from the upstream .deb release.
 
     # AI coding tools — auto-updated daily, own binary cache at cache.numtide.com.
-    # Intentionally NOT following nixpkgs so the pre-built packages in numtide's
-    # cache (built against unstable) remain valid store paths — cache hits work.
+    # Intentionally NOT age-pinned: numtide rebuilds and re-publishes the cache
+    # daily for HEAD, so an old pin would just miss the cache. Also intentionally
+    # NOT following nixpkgs so the pre-built packages in numtide's cache (built
+    # against unstable) remain valid store paths — cache hits work.
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # Tiny single-purpose flakes — not age-pinned because they barely change
+    # and don't pull in the heavy nixpkgs rebuild surface that motivated the
+    # age pin in the first place.
     tuxManager.url = "github:benapetr/TuxManager/";
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 

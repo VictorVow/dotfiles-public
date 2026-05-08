@@ -32,6 +32,12 @@ CHECK_STABLE=true
 GC_NIX=true
 DRY_RUN=false
 
+# Minimum age (in days) of the upstream commit each pinned flake input is
+# advanced to. Older commits are reliably covered by Hydra's binary cache,
+# so home-manager switch downloads pre-built artifacts rather than compiling.
+# Override via env: PIN_AGE_DAYS=21 ./update.sh
+PIN_AGE_DAYS="${PIN_AGE_DAYS:-14}"
+
 for arg in "$@"; do
   case "$arg" in
     --no-nix)           UPDATE_NIX=false ;;
@@ -111,6 +117,94 @@ _latest_stable_release() {
     | tail -1
 }
 
+# Find the newest commit on <owner>/<repo>@<branch> that is at least <days>
+# old. Echoes the 40-char SHA on stdout; empty + non-zero on failure.
+# Uses `gh api --paginate` walking commits from newest backwards.
+_latest_commit_at_least_n_days_old() {
+  local owner="$1" repo="$2" branch="$3" days="$4"
+  local cutoff
+  cutoff=$(date -u -d "${days} days ago" +%s) || return 1
+
+  gh api "repos/${owner}/${repo}/commits?sha=${branch}&per_page=100" --paginate \
+    --jq '.[] | "\(.sha) \(.commit.committer.date)"' 2>/dev/null \
+    | while read -r sha date; do
+        local ts
+        ts=$(date -u -d "$date" +%s 2>/dev/null) || continue
+        if (( ts <= cutoff )); then
+          echo "$sha"
+          return 0
+        fi
+      done
+  return 1
+}
+
+# Read the upstream branch name recorded in the `# channel: <name>` comment
+# immediately preceding the given input's `.url = ...` line in flake.nix.
+# Args: <flake.nix path> <input name, e.g. nixpkgs>
+_channel_for_input() {
+  local flake="$1" input="$2"
+  awk -v key="$input" '
+    # Track the most recent `# channel: <name>` comment seen.
+    /^[[:space:]]*#[[:space:]]*channel:[[:space:]]*/ {
+      line = $0
+      sub(/^[[:space:]]*#[[:space:]]*channel:[[:space:]]*/, "", line)
+      ch = line
+      next
+    }
+    # Single-line form:  <key>.url = "github:...";
+    $0 ~ "^[[:space:]]*" key "\\.url[[:space:]]*=" { print ch; exit }
+    # Block form:        <key> = {  ...  url = "github:...";  ... };
+    $0 ~ "^[[:space:]]*" key "[[:space:]]*=[[:space:]]*\\{" { in_block = 1; next }
+    in_block && /^[[:space:]]*url[[:space:]]*=/ { print ch; exit }
+    in_block && /^[[:space:]]*\};/ { in_block = 0 }
+  ' "$flake"
+}
+
+# Replace the SHA inside the URL of the given input in flake.nix. Idempotent.
+# Args: <flake.nix path> <input name> <owner/repo path> <new sha>
+_pin_input_sha() {
+  local flake="$1" input="$2" repo_path="$3" sha="$4"
+  # Match: "github:<repo_path>/<old-sha-or-branch>"   on the input's url line.
+  # Anchor by `<input>.url = "github:<repo_path>/...` to avoid touching others.
+  python3 - "$flake" "$input" "$repo_path" "$sha" <<'PY'
+import re, sys
+flake, name, repo, sha = sys.argv[1:5]
+with open(flake) as f:
+    text = f.read()
+# Match either `<name>.url = "github:repo/X"` or `<name> = { ... url = "github:repo/X" ... }`.
+pat = re.compile(
+    r'(\b' + re.escape(name) + r'(?:\s*=\s*\{[^}]*?)?\s*\.?url\s*=\s*")github:'
+    + re.escape(repo) + r'/[^"]+(")',
+    re.DOTALL,
+)
+new, n = pat.subn(r'\1github:' + repo + '/' + sha + r'\2', text, count=1)
+if n != 1:
+    sys.stderr.write(f"_pin_input_sha: failed to match {name} -> github:{repo}/...\n")
+    sys.exit(2)
+with open(flake, "w") as f:
+    f.write(new)
+PY
+}
+
+# Read the currently-pinned SHA out of the input's URL in flake.nix.
+# Args: <flake.nix path> <input name> <owner/repo path>
+_current_input_sha() {
+  local flake="$1" input="$2" repo_path="$3"
+  python3 - "$flake" "$input" "$repo_path" <<'PY'
+import re, sys
+flake, name, repo = sys.argv[1:4]
+with open(flake) as f:
+    text = f.read()
+pat = re.compile(
+    r'\b' + re.escape(name) + r'(?:\s*=\s*\{[^}]*?)?\s*\.?url\s*=\s*"github:'
+    + re.escape(repo) + r'/([^"]+)"',
+    re.DOTALL,
+)
+m = pat.search(text)
+print(m.group(1) if m else "")
+PY
+}
+
 # ── Setup ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FLAKE_DIR="$SCRIPT_DIR/nix"
@@ -147,7 +241,11 @@ else
     # nixpkgs.url and home-manager.url in flake.nix before regenerating the lock.
     # llm-agents.nix is intentionally left untouched (no release versioning).
     if $CHECK_STABLE && command -v gh &>/dev/null; then
-      current_channel=$(grep -oP '(?<=NixOS/nixpkgs/)[^"]+' "$NIX_FLAKE_DIR/flake.nix" | head -1)
+      # Read the upstream channel name from the structured `# channel:`
+      # comment that precedes the nixpkgs input in flake.nix. The URL itself
+      # holds a 40-char SHA (the age-pin), so we can't recover the channel
+      # from there.
+      current_channel=$(_channel_for_input "$NIX_FLAKE_DIR/flake.nix" nixpkgs)
 
       if [[ "$current_channel" =~ ^nixos-[0-9]+\.[0-9]+$ ]]; then
         info "Checking for newer nixpkgs stable release (current: $current_channel)..."
@@ -178,14 +276,18 @@ else
           fi
 
           if $DO_UPGRADE; then
-            sed -i "s|NixOS/nixpkgs/${current_channel}|NixOS/nixpkgs/${latest_stable}|g" \
+            # Rewrite the `# channel:` comments only — the URLs hold SHAs and
+            # will be re-pinned to a ≥${PIN_AGE_DAYS}-day-old commit on the
+            # NEW channel by the age-pin step below in this same run.
+            sed -i \
+              -e "s|# channel: ${current_channel}\b|# channel: ${latest_stable}|" \
               "$NIX_FLAKE_DIR/flake.nix"
-            # Derive the matching home-manager release tag (nixos-25.11 → release-25.11)
+            # Matching home-manager release branch (nixos-25.11 → release-25.11).
             hm_new="release-${latest_stable#nixos-}"
             hm_old="release-${current_channel#nixos-}"
-            sed -i "s|home-manager/${hm_old}|home-manager/${hm_new}|g" \
+            sed -i "s|# channel: ${hm_old}\b|# channel: ${hm_new}|" \
               "$NIX_FLAKE_DIR/flake.nix"
-            success "flake.nix updated: $current_channel → $latest_stable"
+            success "flake.nix channel updated: $current_channel → $latest_stable"
             RESULTS["nixpkgs stable upgrade"]="✓ ${current_channel}→${latest_stable}"
           fi
         fi
@@ -199,9 +301,63 @@ else
       fi
     fi
 
-    # Update flake.lock to pull latest commits for the pinned inputs.
-    # This is what actually updates package versions — without this step,
-    # home-manager switch just re-applies the locked versions.
+    # ── Age-pin nixpkgs / home-manager to a ≥PIN_AGE_DAYS-old commit ────────
+    # Rewrite the SHAs embedded in flake.nix's input URLs to the newest
+    # upstream commit on each tracked branch that is at least PIN_AGE_DAYS
+    # old. By the time a commit is that old, Hydra has fully populated its
+    # binary cache for it, so home-manager switch downloads pre-built store
+    # paths instead of compiling from source. Subsequent same-day `hms` runs
+    # then reuse those cached paths from flake.lock without further work.
+    #
+    # The `nix flake update` afterwards reads the new SHAs out of flake.nix
+    # and writes them into flake.lock (and refreshes unpinned inputs like
+    # llm-agents to their HEAD, which has its own daily binary cache).
+    if command -v gh &>/dev/null; then
+      info "Age-pinning flake inputs to ≥${PIN_AGE_DAYS}-day-old commits..."
+      # Inputs to age-pin: <input-name> <github owner/repo>
+      pin_specs=(
+        "nixpkgs NixOS/nixpkgs"
+        "nixpkgs-unstable NixOS/nixpkgs"
+        "home-manager nix-community/home-manager"
+      )
+      for spec in "${pin_specs[@]}"; do
+        read -r in_name repo_path <<< "$spec"
+        owner="${repo_path%%/*}"
+        repo="${repo_path##*/}"
+        branch=$(_channel_for_input "$NIX_FLAKE_DIR/flake.nix" "$in_name")
+        if [[ -z "$branch" ]]; then
+          warn "  ${in_name}: no '# channel:' comment found in flake.nix — skipping age-pin."
+          RESULTS["age-pin ${in_name}"]="skipped (no channel comment)"
+          continue
+        fi
+        old_sha=$(_current_input_sha "$NIX_FLAKE_DIR/flake.nix" "$in_name" "$repo_path")
+        new_sha=$(_latest_commit_at_least_n_days_old "$owner" "$repo" "$branch" "$PIN_AGE_DAYS") || true
+        if [[ -z "$new_sha" ]]; then
+          warn "  ${in_name}: could not find a ≥${PIN_AGE_DAYS}d-old commit on ${branch}."
+          RESULTS["age-pin ${in_name}"]="✗ fetch failed"
+          continue
+        fi
+        if [[ "$new_sha" == "$old_sha" ]]; then
+          info "  ${in_name} (${branch}): up to date (${new_sha:0:7})."
+          RESULTS["age-pin ${in_name}"]="✓ up to date"
+          continue
+        fi
+        if $DRY_RUN; then
+          echo -e "  ${DIM}[dry-run] would pin ${in_name}: ${old_sha:0:7} → ${new_sha:0:7}${NC}"
+          RESULTS["age-pin ${in_name}"]="skipped (dry-run)"
+          continue
+        fi
+        _pin_input_sha "$NIX_FLAKE_DIR/flake.nix" "$in_name" "$repo_path" "$new_sha"
+        success "  ${in_name} (${branch}): ${old_sha:0:7} → ${new_sha:0:7}"
+        RESULTS["age-pin ${in_name}"]="✓ ${old_sha:0:7}→${new_sha:0:7}"
+      done
+    else
+      warn "gh not available — skipping age-pin step. flake.lock will not advance."
+      RESULTS["age-pin nixpkgs"]="skipped (no gh)"
+    fi
+
+    # Resolve the (possibly updated) flake.nix URLs into flake.lock. Also
+    # refreshes unpinned inputs (llm-agents, tuxManager, ie-r) to their HEAD.
     info "Updating flake.lock..."
     run_step "Nix flake update" nix flake update --flake "$NIX_FLAKE_DIR"
   else
@@ -212,9 +368,12 @@ else
   # Apply the (possibly updated) Home Manager configuration.
   # This installs new packages, updates changed ones, and runs activation scripts
   # (including distrobox container creation and npm AI CLI installation).
+  # --no-write-lock-file: only update.sh's flake update step is allowed to
+  # advance flake.lock; if home-manager switch wanted to write the lock here
+  # it would mean an input failed to resolve, which is a real error.
   info "Applying Home Manager configuration..."
   run_step "home-manager switch" \
-    home-manager switch --flake "$NIX_FLAKE_DIR#boss"
+    home-manager switch --flake "$NIX_FLAKE_DIR#boss" --no-write-lock-file
 
   success "Nix / Home Manager done."
 fi
@@ -375,7 +534,9 @@ echo ""
 echo -e "${BOLD}━━━ Update Summary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 printf "  %-30s %s\n" "Step" "Result"
 printf "  %-30s %s\n" "----" "------"
-for key in "nixpkgs stable upgrade" "Nix flake update" "home-manager switch" \
+for key in "nixpkgs stable upgrade" \
+           "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
+           "Nix flake update" "home-manager switch" \
            "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
