@@ -499,12 +499,41 @@ elif ! $UPDATE_DISTROBOX; then
   skipped "Skipping distrobox updates (--no-distrobox)."
   RESULTS["Distrobox"]="skipped (--no-distrobox)"
 else
-  # `distrobox upgrade` runs the container's native package manager upgrade
-  # (apt upgrade inside 'dev', dnf upgrade inside 'media').
-  # --all upgrades every container; skips containers that aren't running yet.
-  run_step "distrobox upgrade --all" \
-    distrobox upgrade --all
-  success "Distrobox containers done."
+  # Upgrade containers one-by-one (instead of `distrobox upgrade --all`) so the
+  # user gets per-container progress feedback — `--all` can sit silently for
+  # many minutes while apt/dnf churns inside a single container.
+  mapfile -t DBOX_CONTAINERS < <(distrobox list --no-color 2>/dev/null \
+    | awk -F'|' 'NR>1 {gsub(/^ +| +$/, "", $2); if ($2 != "") print $2}')
+
+  if [[ ${#DBOX_CONTAINERS[@]} -eq 0 ]]; then
+    skipped "No distrobox containers found."
+    RESULTS["Distrobox"]="skipped (none found)"
+  else
+    info "Found ${#DBOX_CONTAINERS[@]} container(s): ${DBOX_CONTAINERS[*]}"
+    DBOX_FAILED=()
+    DBOX_START=$(date +%s)
+    for i in "${!DBOX_CONTAINERS[@]}"; do
+      c="${DBOX_CONTAINERS[$i]}"
+      info "[$((i+1))/${#DBOX_CONTAINERS[@]}] Upgrading '$c' (apt/dnf inside container — may take several minutes)..."
+      c_start=$(date +%s)
+      if distrobox upgrade "$c" 2>&1; then
+        c_elapsed=$(( $(date +%s) - c_start ))
+        success "  '$c' upgraded in ${c_elapsed}s."
+      else
+        c_elapsed=$(( $(date +%s) - c_start ))
+        warn "  '$c' upgrade failed after ${c_elapsed}s — continuing."
+        DBOX_FAILED+=("$c")
+      fi
+    done
+    DBOX_ELAPSED=$(( $(date +%s) - DBOX_START ))
+    if [[ ${#DBOX_FAILED[@]} -eq 0 ]]; then
+      RESULTS["Distrobox"]="✓ ${DBOX_ELAPSED}s"
+      success "Distrobox containers done (${DBOX_ELAPSED}s total)."
+    else
+      RESULTS["Distrobox"]="✗ failed: ${DBOX_FAILED[*]}"
+      warn "Distrobox: ${#DBOX_FAILED[@]} container(s) failed: ${DBOX_FAILED[*]}"
+    fi
+  fi
 fi
 
 # ── 8. Nix garbage collection ────────────────────────────────────────────────
