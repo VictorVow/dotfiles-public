@@ -167,9 +167,25 @@
         path: /opt/android-studio
       register: android_studio_ppa
 
+    - name: Android Studio | download PPA signing key
+      ansible.builtin.get_url:
+        url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xB0B65046D9826D045FAFBA324EE97B1881326419&options=mr'
+        dest: /etc/apt/keyrings/maarten-fonville-android-studio.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when:
+        - not android_studio_ppa.stat.exists
+        - ansible_facts.packages['android-studio'] is not defined
+
     - name: Android Studio | add PPA
       ansible.builtin.apt_repository:
-        repo: 'ppa:maarten-fonville/android-studio'
+        repo: >-
+          deb [signed-by=/etc/apt/keyrings/maarten-fonville-android-studio.asc]
+          https://ppa.launchpadcontent.net/maarten-fonville/android-studio/ubuntu
+          {{ ansible_distribution_release }} main
+        filename: maarten-fonville-ubuntu-android-studio
         state: present
         update_cache: yes
       become: yes
@@ -192,9 +208,23 @@
     # PPA: ppa:cappelikan/ppa (upstream-recommended)
     # ════════════════════════════════════════════════════════════════════════
 
+    - name: Mainline | download PPA signing key
+      ansible.builtin.get_url:
+        url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3AE27527713D2479DCAFFD58A89D7C1B2F76304D&options=mr'
+        dest: /etc/apt/keyrings/cappelikan-ppa.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['mainline'] is not defined
+
     - name: Mainline | add PPA
       ansible.builtin.apt_repository:
-        repo: 'ppa:cappelikan/ppa'
+        repo: >-
+          deb [signed-by=/etc/apt/keyrings/cappelikan-ppa.asc]
+          https://ppa.launchpadcontent.net/cappelikan/ppa/ubuntu
+          {{ ansible_distribution_release }} main
+        filename: cappelikan-ubuntu-ppa
         state: present
         update_cache: yes
       become: yes
