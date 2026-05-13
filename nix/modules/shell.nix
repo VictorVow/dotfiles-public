@@ -154,6 +154,15 @@
       # 3. If nothing: switches immediately with max-jobs 0 (substitutes only).
       # 4. If something: shows a table of (derivation → top-level cause) and
       #    asks for Y/n confirmation before proceeding with a full switch.
+      #
+      # Every nix invocation below passes --no-write-lock-file. Only update.sh
+      # (run via `update-all`) is allowed to advance flake.lock — it age-pins
+      # inputs to a ≥PIN_AGE_DAYS-old commit so Hydra's binary cache has caught
+      # up. If `hms` were free to rewrite the lock it could pull fresh upstream
+      # commits and trigger from-source compiles of new package versions. A
+      # "refusing to write lock file" error from hms means flake.nix changed
+      # since the last update-all; re-run update-all rather than dropping the
+      # flag.
       hms() {
         local flake="$HOME/Documents/ESSENTIALS/installs/nix"
         local config="boss"
@@ -205,7 +214,7 @@
         # ── 1. evaluate flake ──────────────────────────────────────────────
         printf 'Evaluating flake...\r'
         local act_drv
-        act_drv=$(nix eval --raw \
+        act_drv=$(nix eval --raw --no-write-lock-file \
           "$flake#homeConfigurations.$config.activationPackage.drvPath" \
           2>&1 | grep '^/nix/store') || {
           printf '\033[31mERROR: flake evaluation failed\033[0m\n' >&2
@@ -241,7 +250,7 @@
         # ── 3. dry-run to check binary cache ───────────────────────────────
         printf 'Checking binary cache...\r'
         local dry
-        dry=$(nix build --dry-run \
+        dry=$(nix build --dry-run --no-write-lock-file \
           "$flake#homeConfigurations.$config.activationPackage" 2>&1) || {
           printf '%s\n' "$dry" >&2
           return 1
@@ -264,14 +273,14 @@
         # ── 4a. nothing to build at all: cache-only switch ─────────────────
         if [[ ''${#to_build_real[@]} -eq 0 && ''${#to_build_trivial[@]} -eq 0 ]]; then
           printf '                        \r'
-          home-manager switch --flake "$flake#$config" --option max-jobs 0
+          home-manager switch --flake "$flake#$config" --no-write-lock-file --option max-jobs 0
           return
         fi
 
         # ── 4b. only HM scaffolding: full switch, no prompt ────────────────
         if [[ ''${#to_build_real[@]} -eq 0 ]]; then
           printf '                        \r'
-          home-manager switch --flake "$flake#$config"
+          home-manager switch --flake "$flake#$config" --no-write-lock-file
           return
         fi
 
@@ -292,7 +301,7 @@
         read -r reply
         [[ "$reply" =~ ^[Yy]$ ]] || { printf 'Aborted.\n'; return 1; }
 
-        home-manager switch --flake "$flake#$config"
+        home-manager switch --flake "$flake#$config" --no-write-lock-file
       }
 
       # ── Nix shortcuts: nsh / nr ────────────────────────────────────────────
