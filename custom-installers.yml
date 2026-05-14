@@ -521,11 +521,7 @@
 
     - name: Claude Desktop | resolve .deb download URL
       ansible.builtin.set_fact:
-        claude_desktop_url: >-
-          {{ claude_desktop_release.json.assets
-             | selectattr('name', 'search', '_' + deb_arch + '\\.deb$')
-             | map(attribute='browser_download_url')
-             | first }}
+        claude_desktop_url: "{{ claude_desktop_release.json.assets | selectattr('name', 'search', '_' + deb_arch + '\\.deb$') | map(attribute='browser_download_url') | first }}"
       when: ansible_facts.packages['claude-desktop'] is not defined
 
     - name: Claude Desktop | download .deb
