@@ -43,6 +43,31 @@
   # to GTK apps (like Lutris) even if the packages are installed.
   fonts.fontconfig.enable = true;
 
+  # Pin the generic fontconfig families. KDE has no font config of its own in
+  # ~/.config/kdeglobals, so the value of `sans-serif` here is what shows up in
+  # the KDE chrome (Dolphin path bar, Yakuake tabs, Konsole menus, etc.).
+  # Without this, a nixpkgs roll-forward can swap the resolved font (or its
+  # build) and visibly shift the rendering. `binding="strong"` overrides the
+  # weak defaults baked into noto-fonts / fontconfig.
+  home.file.".config/fontconfig/conf.d/53-default-families.conf".text = ''
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+    <fontconfig>
+      <alias binding="strong">
+        <family>sans-serif</family>
+        <prefer><family>Noto Sans</family></prefer>
+      </alias>
+      <alias binding="strong">
+        <family>serif</family>
+        <prefer><family>Noto Serif</family></prefer>
+      </alias>
+      <alias binding="strong">
+        <family>monospace</family>
+        <prefer><family>Noto Sans Mono</family></prefer>
+      </alias>
+    </fontconfig>
+  '';
+
   # Let Home Manager manage itself. This generates the home-manager CLI
   # and enables automatic profile updates.
   programs.home-manager.enable = true;
