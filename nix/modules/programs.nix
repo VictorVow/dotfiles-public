@@ -1226,9 +1226,6 @@ INSTALLS
     # yaml.schemas intentionally omitted: version-specific Continue paths become
     # stale on every extension update; Continue manages its own schema registration.
 
-    # ── vscode-neovim ──────────────────────────────────────────────────────────
-    "extensions.experimental.affinity" = { "asvetliakov.vscode-neovim" = 1; };
-
     # ── Misc extension settings ─────────────────────────────────────────────────
     "dreammaker.autoUpdate"   = true;
     "dreammaker.tickOnCreate" = true;
