@@ -21,7 +21,7 @@
 #   ./update.sh --dry-run          # Print what would run without executing
 #
 # Cron example (daily at 10:00):
-#   0 10 * * * /home/boss/Documents/ESSENTIALS/installs/update.sh >> /tmp/update.log 2>&1
+#   0 10 * * * /home/boss/Projects/installs/update.sh >> /tmp/update.log 2>&1
 
 set -euo pipefail
 

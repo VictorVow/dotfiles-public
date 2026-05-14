@@ -133,7 +133,7 @@
           select-pane -t 2 \;
           split-window -h \;
           select-pane -t 0 \;
-          send-keys -t 1 'cd ~/Documents/ESSENTIALS/installs' Enter
+          send-keys -t 1 'cd ~/Projects/installs' Enter
         )
         if [ -n "$TMUX" ]; then
           tmux "''${splits[@]}"
@@ -164,7 +164,7 @@
       # since the last update-all; re-run update-all rather than dropping the
       # flag.
       hms() {
-        local flake="$HOME/Documents/ESSENTIALS/installs/nix"
+        local flake="$HOME/Projects/installs/nix"
         local config="boss"
 
         # Strip the nix store hash prefix and .drv suffix from a store path.
@@ -404,7 +404,7 @@
       # Use the full `home-manager switch --flake ...` command in those contexts.
       # hms is a function (defined in initExtra) not an alias — it runs a cache
       # preflight check before switching.
-      hmn   = "home-manager news --flake ~/Documents/ESSENTIALS/installs/nix#boss";
+      hmn   = "home-manager news --flake ~/Projects/installs/nix#boss";
 
       # Nix shortcuts
       #
@@ -422,7 +422,7 @@
       dbl   = "distrobox list";
 
       # System update shortcut — runs all package managers in one pass
-      update-all = "~/Documents/ESSENTIALS/installs/update.sh";
+      update-all = "~/Projects/installs/update.sh";
 
       # eza replaces uutils ls (Ubuntu 24.04 default) which has broken locale sorting
       ls  = "eza";
