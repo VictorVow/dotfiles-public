@@ -16,12 +16,12 @@ com.borgbase.Vorta
 com.calibre_ebook.calibre
 com.dec05eba.gpu_screen_recorder
 com.discordapp.Discord
+com.github.KRTirtho.Spotube
+com.github.PintaProject.Pinta
 com.github.ahrm.sioyek
 com.github.dynobo.normcap
 com.github.jeromerobert.pdfarranger
-com.github.KRTirtho.Spotube
 com.github.mtkennerly.ludusavi
-com.github.PintaProject.Pinta
 com.github.tchx84.Flatseal
 com.github.unrud.VideoDownloader
 com.github.wwmm.easyeffects
@@ -41,7 +41,6 @@ com.sigil_ebook.Sigil
 com.slack.Slack
 com.spacestation14.Launcher
 com.spotify.Client
-com.stremio.Service
 com.usebottles.bottles
 com.valvesoftware.Steam
 com.valvesoftware.SteamLink
@@ -53,7 +52,6 @@ eu.vcmi.VCMI
 fr.arnaudmichel.launcherstudio
 fr.handbrake.ghb
 im.riot.Riot
-info.febvre.Komikku
 io.anytype.anytype
 io.appflowy.AppFlowy
 io.dbeaver.DBeaverCommunity
@@ -79,6 +77,8 @@ io.github.pwr_solaar.solaar
 io.github.qwersyk.Newelle
 io.github.radiolamp.mangojuice
 io.github.seadve.Kooha
+io.github.seadve.Mousai
+io.github.shonebinu.Defuse
 io.github.shonubot.Spruce
 io.github.shundhammer.qdirstat
 io.github.sigmasd.stimulator
@@ -106,9 +106,9 @@ net.sapples.LiveCaptions
 net.sourceforge.squirrel_sql
 nl.hjdskes.gcolor3
 no.mifi.losslesscut
+org.DolphinEmu.dolphin-emu
 org.briarproject.Briar
 org.chromium.Chromium
-org.DolphinEmu.dolphin-emu
 org.electrum.electrum
 org.fcast.Receiver
 org.ferdium.Ferdium
@@ -120,6 +120,7 @@ org.gnome.Showtime
 org.gnome.Solanum
 org.gnucash.GnuCash
 org.kde.dragonplayer
+org.kde.drawy
 org.kde.elisa
 org.kde.itinerary
 org.kde.kamoso
@@ -134,8 +135,8 @@ org.kde.kommit
 org.kde.merkuro
 org.keepassxc.KeePassXC
 org.libreoffice.LibreOffice
-org.mozilla.firefox
 org.mozilla.Thunderbird
+org.mozilla.firefox
 org.nickvision.tubeconverter
 org.nicotine_plus.Nicotine
 org.onionshare.OnionShare
@@ -160,13 +161,13 @@ re.sonny.Eloquent
 re.sonny.Junction
 us.zoom.Zoom
 
-## Flathub Beta
-
-com.stremio.Stremio
-
 ## GeForce NOW
 
 com.nvidia.geforcenow
+
+## Flathub Beta
+
+com.stremio.Stremio
 
 ## grayjay1-origin
 

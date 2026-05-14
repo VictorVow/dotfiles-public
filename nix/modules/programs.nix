@@ -241,7 +241,7 @@ let
       "Firefox Add-ons" = {
         urls = [{ template = "https://addons.mozilla.org/en-GB/firefox/search/?q={searchTerms}"; }];
         icon = "${ffIcons}/firefox-addons.ico";
-        definedAliases = [ "@addons" ];
+        definedAliases = [ "@addons" "amo" "firefox" ];
       };
       "Mycroft Project" = {
         urls = [{ template = "https://mycroftproject.com/search-engines.html?name={searchTerms}"; }];
@@ -566,14 +566,15 @@ in
       "https://.claude.com"
       "https://.geforcenow.com"
       "https://accounts.google.com"
-
+      # Tailscale
+      "https://lord-ubuntu.tailee8f02.ts.net"
       # AWS
       "https://.amazon.com"
       "https://.aws.com"
       "https://.awspartner.com"
       "https://.skillbuilder.aws"
       "https://.signin.aws"
-      "https://.steampowered.com"    # "https://.steampowered.com" didn't work
+      "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
       "https://13-ttrss.example.com"  # "https://.example.com" didn't work
       "https://.ts.net"   # Tailscale
       "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
@@ -585,6 +586,7 @@ in
       "https://anilist.co"
       "https://app.addy.io"
       "https://app.element.io"
+      "https://app.trakt.tv"
       "https://apps.axahealth.co.uk"
       "https://auth.mozilla.auth0.com"
       "https://auth.openai.com" 

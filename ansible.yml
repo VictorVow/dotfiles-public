@@ -167,7 +167,7 @@
           # https://github.com/flameshot-org/flameshot/issues/1910#issuecomment-1001955046
           # Note: xdg-desktop-portal-kde + xdg-desktop-portal-gtk and
           # xdg-desktop-portal are installed by default on Kubuntu
-          - xdg-desktop-portal-gnome
+          # - xdg-desktop-portal-gnome
 
           # ── Ubuntu-specific GUI tools ─────────────────────────────────────
           - gdebi                          # Install .deb packages whilst handling dependencies
