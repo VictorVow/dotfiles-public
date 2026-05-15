@@ -1,4 +1,4 @@
-{ config, pkgs, lib, tuxManager, ie-r, ... }:
+{ config, pkgs, lib, pkgs-unstable, tuxManager, ie-r, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -197,7 +197,9 @@
 
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
-    zrok    # Peer-to-peer reverse proxy / tunnel (replaces brew install zrok)
+    pkgs-unstable.zrok  # Peer-to-peer reverse proxy / tunnel (replaces brew install zrok).
+                        # Pinned to unstable: stable nixpkgs lags on zrok 1.x;
+                        # unstable has 2.x (1.x dropped the --name-selection flag).
 
     (let
       appimagetool-bin = pkgs.runCommand "appimagetool-bin" {
