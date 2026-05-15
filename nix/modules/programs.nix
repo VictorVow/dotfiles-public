@@ -188,6 +188,7 @@ let
       "ProtonDB"
       "Scryfall"
       "IGDB game search"
+      "OpenCritic"
       "vndb.org"
       "Goodreads"
       "youtube"
@@ -195,6 +196,7 @@ let
       "Twitch"
       "AniList Anime"
       "TMDB"
+      "Rotten Tomatoes"
       "Trakt"
       "Wikitubia (en)"
       "Last.fm"
@@ -359,6 +361,12 @@ let
         urls = [{ template = "http://igdb.com/search?utf8=✓&q={searchTerms}&commit=search"; }];
         icon = "${ffIcons}/igdb.png";
       };
+      # Open-source algorithm
+      "OpenCritic" = {
+        urls = [{ template = "https://opencritic.com/search?q={searchTerms}"; }];
+        icon = "${ffIcons}/opencritic.png";
+        definedAliases = [ "@opencritic" ];
+      };
       "vndb.org" = {
         urls = [{ template = "https://vndb.org/v"; params = [{ name = "sq"; value = "{searchTerms}"; }]; }];
         icon = "${ffIcons}/vndb.ico";
@@ -392,11 +400,19 @@ let
         icon = "${ffIcons}/anilist.ico";
         definedAliases = [ "@anime" ];
       };
+      # Research indicated it's the best uncurated film and TV ratings aggregator
       "TMDB" = {
         urls = [{ template = "https://www.themoviedb.org/search?query={searchTerms}"; }];
         icon = "${ffIcons}/tmdb.ico";
         definedAliases = [ "@tmdb" ];
       };
+      # Research indicated it's the best curated/popular film and TV ratings aggregator
+      "Rotten Tomatoes" = {
+        urls = [{ template = "https://www.rottentomatoes.com/search?search={searchTerms}"; }];
+        icon = "${ffIcons}/rottentomatoes.png";
+        definedAliases = [ "@rt" ];
+      };
+      # Good for quickly finding trailers
       "Trakt" = {
         urls = [{ template = "http://trakt.tv/search?utf8=✓&query={searchTerms}"; }];
         icon = "${ffIcons}/trakt.ico";
@@ -657,6 +673,7 @@ in
       "https://sso.crunchyroll.com"
       "https://steamcommunity.com"
       "https://steamdb.info"
+      "https://store.epicgames.com"
       "https://streamable.com"
       "https://trakt.tv"
       "https://.stremio.com"
