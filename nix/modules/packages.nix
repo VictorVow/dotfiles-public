@@ -170,12 +170,26 @@
                  # (replaces pipx ipykernel; also provides the python3 interpreter)
 
     # ── Development: Node.js ──────────────────────────────────────────────────
-    nodejs       # Node.js LTS runtime — provides npm for global installs and
-                 # the home-manager activation script; fnm overrides per project
+    # Pinned to Node 24: ships npm >= 11.10, required for the `min-release-age`
+    # supply-chain cooldown set in the global ~/.npmrc (see programs.nix). Plain
+    # `nodejs` (Node 22) only has npm 10.x, where that key is silently ignored.
+    nodejs_24    # Node.js 24 runtime — provides npm >= 11.10 for global installs
+                 # and the home-manager activation script; fnm overrides per project
     fnm          # Fast Node Manager — install/switch Node versions per project
                  # Shell integration (auto-switch on cd) is set up in shell.nix
     typescript # TypeScript compiler
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
+    # pnpm / yarn for the global supply-chain hardening rc files written in
+    # programs.nix (~/.config/pnpm/rc, ~/.yarnrc.yml).
+    pnpm         # Tracks newest packaged pnpm. The age-pinned flake.lock is
+                 # currently pre-pnpm-11 (≈10.28): `minimum-release-age` (added
+                 # in 10.16) is active now; `block-exotic-subdeps` /
+                 # `strict-dep-builds` are pnpm-11 keys, ignored by 10.x and
+                 # auto-activating once update-all advances the pin to a
+                 # nixpkgs with pnpm 11 (where all three are also defaults).
+    yarn-berry_4 # Yarn Berry v4 (>= 4.10, currently 4.11) — provides
+                 # npmMinimalAgeGate, the release-age gate equivalent; classic
+                 # yarn v1 lacks all of this
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
     # neovim   — managed by programs.neovim in programs.nix (installs it automatically)

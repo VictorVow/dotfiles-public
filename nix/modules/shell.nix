@@ -356,15 +356,22 @@
     # HM activation runs in an isolated environment without standard system tools.
     # Prepend nodejs (for node/npm) and system paths (for tar, sh, etc. used by
     # npm postinstall scripts like @vscode/ripgrep's binary download).
-    export PATH="${pkgs.nodejs}/bin:/usr/bin:/bin:$PATH"
-    NPM="${pkgs.nodejs}/bin/npm"
+    export PATH="${pkgs.nodejs_24}/bin:/usr/bin:/bin:$PATH"
+    NPM="${pkgs.nodejs_24}/bin/npm"
     if ! [ -x "$NPM" ]; then
-      echo "WARNING: npm not found at ${pkgs.nodejs}/bin/npm, skipping AI CLI tool installation"
+      echo "WARNING: npm not found at ${pkgs.nodejs_24}/bin/npm, skipping AI CLI tool installation"
     else
       export NPM_CONFIG_PREFIX="$HOME/.npm-global"
       mkdir -p "$HOME/.npm-global"
 
-      # Helper: install an npm package globally if it's not already installed
+      # Helper: install an npm package globally if it's not already installed.
+      # The global ~/.npmrc (programs.nix) hardens every npm invocation with
+      # ignore-scripts=true and min-release-age=1. These AI CLIs are curated and
+      # trusted, and several need their postinstall scripts (e.g. native binary
+      # downloads), so this install path explicitly opts out:
+      #   --ignore-scripts=false   run postinstall (binaries would be missing otherwise)
+      #   --foreground-scripts     surface postinstall output in the activation log
+      #   --min-release-age=0      skip the cooldown so a fresh CLI release installs now
       _npm_global_install() {
         local pkg="$1"
         local bin="$2"  # binary name to check for (defaults to package name)
@@ -372,7 +379,8 @@
         if ! command -v "$bin" &>/dev/null && \
            [ ! -f "$HOME/.npm-global/bin/$bin" ]; then
           echo "Installing npm global package: $pkg"
-          $DRY_RUN_CMD "$NPM" install --global --prefix "$HOME/.npm-global" "$pkg"
+          $DRY_RUN_CMD "$NPM" install --global --prefix "$HOME/.npm-global" \
+            --ignore-scripts=false --foreground-scripts --min-release-age=0 "$pkg"
         fi
       }
 

@@ -228,10 +228,12 @@ let
       "Google (Verbatim, De-personalized)" = {
         urls = [{ template = "https://www.google.com/search?q={searchTerms}&tbs=li:1&pws=0"; }];
         icon = "${ffIcons}/google.ico";
+        definedAliases = [ "@google" ];
       };
       "Yandex" = {
         urls = [{ template = "https://yandex.com/search/?text={searchTerms}&from=os&clid=1836587"; }];
         icon = "${ffIcons}/yandex.ico";
+        definedAliases = [ "@yandex" ];
       };
       # ── Utilities ─────────────────────────────────────────────────
       "Thesaurus.com" = {
@@ -243,7 +245,7 @@ let
       "Firefox Add-ons" = {
         urls = [{ template = "https://addons.mozilla.org/en-GB/firefox/search/?q={searchTerms}"; }];
         icon = "${ffIcons}/firefox-addons.ico";
-        definedAliases = [ "@addons" "amo" "firefox" ];
+        definedAliases = [ "@addons" "@amo" "@firefox" ];
       };
       "Mycroft Project" = {
         urls = [{ template = "https://mycroftproject.com/search-engines.html?name={searchTerms}"; }];
@@ -360,6 +362,7 @@ let
       "IGDB game search" = {
         urls = [{ template = "http://igdb.com/search?utf8=✓&q={searchTerms}&commit=search"; }];
         icon = "${ffIcons}/igdb.png";
+        definedAliases = [ "@igdb" ];
       };
       # Open-source algorithm
       "OpenCritic" = {
@@ -383,7 +386,7 @@ let
         name = "YouTube";
         urls = [{ template = "https://www.youtube.com/results?search_query={searchTerms}&search=Search"; }];
         icon = "${ffIcons}/youtube.ico";
-        definedAliases = [ "@yt" ];
+        definedAliases = [ "@youtube" ];
       };
       "Rumble" = {
         urls = [{ template = "https://rumble.com/search/video?q={searchTerms}"; }];
@@ -1077,6 +1080,51 @@ INSTALLS
       }
     ];
   };
+
+  # ── Supply-chain hardening: global npm / yarn / pnpm config ────────────────────
+  # Mirrors pnpm v11's secure-by-default trio (install cooldown, no unreviewed
+  # dependency build scripts, no exotic transitive sources) across all three
+  # package managers, at user scope so every project inherits it. Per-invocation
+  # flags / per-project config can still override where a real need exists.
+
+  # npm (~/.npmrc, userconfig). Requires npm >= 11.10 for `min-release-age`
+  # (guaranteed by nodejs_24 in packages.nix). npm has NO equivalent to pnpm's
+  # blockExoticSubdeps / yarn's hardened mode — that third control is documented
+  # here as an accepted gap rather than silently dropped. Independent of the
+  # NPM_CONFIG_PREFIX env set in shell.nix (env vs rc are separate mechanisms).
+  # The npm activation installs in shell.nix intentionally opt out (see there).
+  home.file.".npmrc".text = ''
+    min-release-age=1
+    ignore-scripts=true
+    # GAP: npm cannot block exotic (git / tarball / non-registry) transitive
+    # deps. pnpm (block-exotic-subdeps) and yarn (enableHardenedMode) do; npm
+    # has no equivalent setting as of npm 11.x. Audit lockfiles manually.
+  '';
+
+  # Yarn Berry v4 (~/.yarnrc.yml, global). npmMinimalAgeGate is the release-age
+  # gate (default "3d"; pinned to 24h here). enableScripts:false is already the
+  # Berry default; enableHardenedMode validates the lockfile against the
+  # registry — the closest equivalent to blocking exotic subdeps. Pinned
+  # explicitly so the behaviour can't regress on a Yarn default change.
+  home.file.".yarnrc.yml".text = ''
+    npmMinimalAgeGate: "1d"
+    enableScripts: false
+    enableHardenedMode: true
+  '';
+
+  # pnpm global config (~/.config/pnpm/rc, npmrc/ini style → kebab-case keys).
+  # Version-aware: the age-pinned flake.lock currently ships pnpm ~10.28, where
+  # `minimum-release-age` (added in 10.16) is honoured and the two pnpm-11 keys
+  # below are simply ignored (pnpm warns on unknown keys, doesn't fail). Once
+  # update-all advances the pin to a nixpkgs with pnpm 11, all three become
+  # active — and are also pnpm-11 defaults, so this then just pins intent
+  # against a future default change. pnpm's authoritative location for these is
+  # per-project pnpm-workspace.yaml; `pnpm config list` shows what's in effect.
+  home.file.".config/pnpm/rc".text = ''
+    minimum-release-age=1440
+    block-exotic-subdeps=true
+    strict-dep-builds=true
+  '';
 
   # ── Claude Code hook scripts ───────────────────────────────────────────────────
   # Managed here so they're version-controlled alongside the rest of the nix config.
