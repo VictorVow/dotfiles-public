@@ -142,8 +142,17 @@
         fi
       }
 
-      # ── md/Markdown: open file(s) in MarkText Flatpak ──────────────────────────
+      # ── md/mds: open file(s) in MarkText ───────────────────────────────────────
+      # The ~/AppImages/marktext.appimage build is a local fork with multi-window
+      # support: the running instance's second-instance handler honours -n and
+      # opens a fresh window (shared process, shared settings — no temp profile).
+      #
+      #   md   — new window per invocation (even with no args → blank window).
+      #   mds  — files open as tabs in the existing window.
       md() {
+        ~/AppImages/marktext.appimage --no-sandbox -n "$@" & disown
+      }
+      mds() {
         ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
       }
 
