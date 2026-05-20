@@ -1812,9 +1812,12 @@ INSTALLS
     executable = true;
     text = ''
       #!/usr/bin/env python3
-      # Claude Code statusline: <model> • <cwd> • session N% (Xh Ym) • week N% (Day)
-      # Usage data cached in ~/.cache/claude-usage.json (15 min TTL).
-      import json, os, sys, time, urllib.request
+      # Claude Code statusline:
+      #   <model> | ⚖️ <effort> | ⏳ <ctx>% | 📁 <dir> | 🌿 <branch> | ⏰ N% (Xh Ym) | 📅 N% (Day)
+      # Reads session JSON from stdin (when invoked by Claude Code); when run from
+      # a terminal directly, falls back to defaults. Usage data cached in
+      # ~/.cache/claude-usage.json (15 min TTL).
+      import json, os, subprocess, sys, time, urllib.request
       from datetime import datetime, timezone
       from pathlib import Path
 
@@ -1824,20 +1827,48 @@ INSTALLS
       TTL = 15 * 60
       URL = "https://api.anthropic.com/api/oauth/usage"
 
-      try:
-          payload = json.load(sys.stdin)
-      except Exception:
-          payload = {}
+      payload = {}
+      if not sys.stdin.isatty():
+          try:
+              payload = json.load(sys.stdin)
+          except Exception:
+              pass
       model = (payload.get("model") or {}).get("display_name") \
               or (payload.get("model") or {}).get("id") or "claude"
       cwd = (payload.get("workspace") or {}).get("current_dir") or os.getcwd()
-      home_s = str(HOME)
-      if cwd == home_s:
-          cwd_disp = "~"
-      elif cwd.startswith(home_s + "/"):
-          cwd_disp = "~" + cwd[len(home_s):]
-      else:
-          cwd_disp = cwd
+      dir_name = os.path.basename(cwd.rstrip("/")) or "/"
+      ctx_pct = int((payload.get("context_window") or {}).get("used_percentage") or 0)
+
+      effort = payload.get("effortLevel") or payload.get("effort_level")
+      if not effort:
+          try:
+              effort = json.loads((HOME / ".claude" / "settings.json").read_text()).get("effortLevel")
+          except Exception:
+              effort = None
+
+      def _git(args):
+          return subprocess.check_output(
+              ["git", "-C", cwd] + args,
+              text=True, stderr=subprocess.DEVNULL, timeout=2,
+          ).strip()
+
+      branch, staged, modified = "", 0, 0
+      try:
+          _git(["rev-parse", "--git-dir"])
+          branch = _git(["branch", "--show-current"])
+          s = _git(["diff", "--cached", "--numstat"])
+          m = _git(["diff", "--numstat"])
+          staged = len(s.split("\n")) if s else 0
+          modified = len(m.split("\n")) if m else 0
+      except Exception:
+          pass
+
+      GREEN, YELLOW, RESET = "\033[32m", "\033[33m", "\033[0m"
+      git_extra = ""
+      if staged:
+          git_extra += f" {GREEN}+{staged}{RESET}"
+      if modified:
+          git_extra += f" {YELLOW}~{modified}{RESET}"
 
       def fetch():
           token = json.loads(CRED.read_text())["claudeAiOauth"]["accessToken"]
@@ -1879,12 +1910,94 @@ INSTALLS
           t = b.get("resets_at")
           if not t:
               return "?"
+          return datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone().strftime("%a %-I:%M %p")
+
+      parts = [model]
+      if effort:
+          parts.append(f"⚖️ {effort}")
+      parts.append(f"⏳ {ctx_pct}%")
+      parts.append(f"📁 {dir_name}")
+      if branch:
+          parts.append(f"🌿 {branch}{git_extra}")
+      if fh:
+          parts.append(f"⏰ {round(fh.get('utilization', 0))}% ({reset_rel(fh)})")
+      else:
+          parts.append("⏰ ?")
+      if sd:
+          parts.append(f"📅 {round(sd.get('utilization', 0))}% ({reset_day(sd)})")
+      else:
+          parts.append("📅 ?")
+
+      print(" | ".join(parts))
+    '';
+  };
+
+  home.file.".claude/statusline/statusline2.py" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env python3
+      # Loops forever, printing "session N% (Xh Ym) • week N% (Day)" every 5 minutes.
+      # Usage data cached in ~/.cache/claude-usage.json (15 min TTL).
+      import json, time, urllib.request
+      from datetime import datetime, timezone
+      from pathlib import Path
+
+      HOME = Path.home()
+      CRED = HOME / ".claude" / ".credentials.json"
+      CACHE = HOME / ".cache" / "claude-usage.json"
+      TTL = 15 * 60
+      URL = "https://api.anthropic.com/api/oauth/usage"
+
+      def fetch():
+          token = json.loads(CRED.read_text())["claudeAiOauth"]["accessToken"]
+          req = urllib.request.Request(URL, headers={"Authorization": f"Bearer {token}"})
+          with urllib.request.urlopen(req, timeout=5) as r:
+              return json.load(r)
+
+      def load_usage():
+          try:
+              st = CACHE.stat()
+              if time.time() - st.st_mtime < TTL:
+                  return json.loads(CACHE.read_text())
+          except FileNotFoundError:
+              pass
+          except Exception:
+              pass
+          try:
+              data = fetch()
+              CACHE.parent.mkdir(parents=True, exist_ok=True)
+              CACHE.write_text(json.dumps(data))
+              return data
+          except Exception:
+              return {}
+
+      def reset_rel(b, now):
+          t = b.get("resets_at")
+          if not t:
+              return "?"
+          dt = datetime.fromisoformat(t.replace("Z", "+00:00"))
+          secs = max(0, int((dt - now).total_seconds()))
+          return f"{secs // 3600}h{(secs % 3600) // 60}m"
+
+      def reset_day(b):
+          t = b.get("resets_at")
+          if not t:
+              return "?"
           return datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone().strftime("%a")
 
-      sess = f"session {round(fh.get('utilization', 0))}% ({reset_rel(fh)})" if fh else "session ?"
-      week = f"week {round(sd.get('utilization', 0))}% ({reset_day(sd)})" if sd else "week ?"
-
-      print(f"{model} • {cwd_disp} • {sess} • {week}")
+      INTERVAL = 5 * 60
+      try:
+          while True:
+              data = load_usage()
+              now = datetime.now(timezone.utc)
+              fh = data.get("five_hour") or {}
+              sd = data.get("seven_day") or {}
+              sess = f"session {round(fh.get('utilization', 0))}% ({reset_rel(fh, now)})" if fh else "session ?"
+              week = f"week {round(sd.get('utilization', 0))}% ({reset_day(sd)})" if sd else "week ?"
+              print(f"{sess} • {week}", flush=True)
+              time.sleep(INTERVAL)
+      except KeyboardInterrupt:
+          pass
     '';
   };
 
