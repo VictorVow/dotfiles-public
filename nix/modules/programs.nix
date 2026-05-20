@@ -1814,11 +1814,12 @@ INSTALLS
     text = ''
       #!/usr/bin/env python3
       # Claude Code statusline:
-      #   <model> | ⚖️ <effort> | ⏳ <ctx>% | 💰 $X.XX | 📁 <dir> | 🌿 <branch> | 🔗 <repo> | ⏰ N% (Xh Ym) | 📅 N% (Day HAM/PM)
+      #   <model> | 🌡️ <effort> | ⏳ <ctx>% | 💰 $X.XX | 📁 <dir> | 🌿 <branch> | 🔗 <repo> | ⏰ N% (Xh Ym) | 📅 N% (Day HAM/PM)
       # Reads session JSON from stdin (when invoked by Claude Code); when run from
       # a terminal directly, falls back to defaults. Usage data cached in
-      # ~/.cache/claude-usage.json (15 min TTL).
-      import json, os, re, subprocess, sys, time, urllib.request
+      # ~/.cache/claude-usage.json (15 min TTL). When the joined line exceeds the
+      # terminal width, parts are wrapped across multiple lines.
+      import json, os, re, shutil, subprocess, sys, time, urllib.request
       from datetime import datetime, timezone
       from pathlib import Path
 
@@ -1926,14 +1927,14 @@ INSTALLS
 
       parts = [model]
       if effort:
-          parts.append(f"⚖️ {effort}")
+          parts.append(f"🌡️ {effort}")
       parts.append(f"⏳ {ctx_pct}%")
       parts.append(f"💰 ''${cost_usd:.2f}")
       parts.append(f"📁 {dir_name}")
       if branch:
           parts.append(f"🌿 {branch}{git_extra}")
       if remote_url:
-          link = f"\033]8;;{remote_url}\a{repo_name}\033]8;;\a"
+          link = f"\033]8;;{remote_url}\033\\{repo_name}\033]8;;\033\\"
           parts.append(f"🔗 {link}")
       if fh:
           parts.append(f"⏰ {round(fh.get('utilization', 0))}% ({reset_rel(fh)})")
@@ -1944,7 +1945,35 @@ INSTALLS
       else:
           parts.append("📅 ?")
 
-      print(" | ".join(parts))
+      ANSI_RE = re.compile(r"\x1b\[[0-9;]*m|\x1b\]8;[^\x07\x1b]*(?:\x07|\x1b\\)")
+
+      def vlen(s):
+          # Visible width: strip ANSI/OSC-8 escapes, then count non-ASCII
+          # (mostly emoji) as 2 cols to approximate East-Asian wide width.
+          clean = ANSI_RE.sub("", s)
+          return len(clean) + sum(1 for c in clean if ord(c) > 127)
+
+      try:
+          width = shutil.get_terminal_size((120, 24)).columns
+      except Exception:
+          width = 120
+
+      SEP = " | "
+      lines, cur, cur_w = [], "", 0
+      for p in parts:
+          pw = vlen(p)
+          if not cur:
+              cur, cur_w = p, pw
+              continue
+          if cur_w + len(SEP) + pw <= width:
+              cur += SEP + p
+              cur_w += len(SEP) + pw
+          else:
+              lines.append(cur)
+              cur, cur_w = p, pw
+      if cur:
+          lines.append(cur)
+      print("\n".join(lines))
     '';
   };
 
