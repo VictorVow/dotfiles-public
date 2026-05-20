@@ -597,6 +597,7 @@ in
       "https://.awspartner.com"
       "https://.skillbuilder.aws"
       "https://.signin.aws"
+      "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
       "https://13-ttrss.example.com"  # "https://.example.com" didn't work
       "https://.ts.net"   # Tailscale
