@@ -1814,11 +1814,11 @@ INSTALLS
     text = ''
       #!/usr/bin/env python3
       # Claude Code statusline:
-      #   <model> | ⚖️ <effort> | ⏳ <ctx>% | 📁 <dir> | 🌿 <branch> | ⏰ N% (Xh Ym) | 📅 N% (Day)
+      #   <model> | ⚖️ <effort> | ⏳ <ctx>% | 💰 $X.XX | 📁 <dir> | 🌿 <branch> | 🔗 <repo> | ⏰ N% (Xh Ym) | 📅 N% (Day HAM/PM)
       # Reads session JSON from stdin (when invoked by Claude Code); when run from
       # a terminal directly, falls back to defaults. Usage data cached in
       # ~/.cache/claude-usage.json (15 min TTL).
-      import json, os, subprocess, sys, time, urllib.request
+      import json, os, re, subprocess, sys, time, urllib.request
       from datetime import datetime, timezone
       from pathlib import Path
 
@@ -1839,6 +1839,8 @@ INSTALLS
       cwd = (payload.get("workspace") or {}).get("current_dir") or os.getcwd()
       dir_name = os.path.basename(cwd.rstrip("/")) or "/"
       ctx_pct = int((payload.get("context_window") or {}).get("used_percentage") or 0)
+      cost_info = payload.get("cost") or {}
+      cost_usd = cost_info.get("total_cost_usd") or 0
 
       effort = payload.get("effortLevel") or payload.get("effort_level")
       if not effort:
@@ -1854,6 +1856,7 @@ INSTALLS
           ).strip()
 
       branch, staged, modified = "", 0, 0
+      remote_url, repo_name = "", ""
       try:
           _git(["rev-parse", "--git-dir"])
           branch = _git(["branch", "--show-current"])
@@ -1861,6 +1864,13 @@ INSTALLS
           m = _git(["diff", "--numstat"])
           staged = len(s.split("\n")) if s else 0
           modified = len(m.split("\n")) if m else 0
+          try:
+              remote_url = _git(["remote", "get-url", "origin"])
+              remote_url = re.sub(r"^git@github\.com:", "https://github.com/", remote_url)
+              remote_url = re.sub(r"\.git$", "", remote_url)
+              repo_name = os.path.basename(remote_url)
+          except Exception:
+              remote_url, repo_name = "", ""
       except Exception:
           pass
 
@@ -1911,15 +1921,20 @@ INSTALLS
           t = b.get("resets_at")
           if not t:
               return "?"
-          return datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone().strftime("%a %-I:%M %p")
+          dt = datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone()
+          return dt.strftime("%a %-I%p") if dt.minute == 0 else dt.strftime("%a %-I:%M%p")
 
       parts = [model]
       if effort:
           parts.append(f"⚖️ {effort}")
       parts.append(f"⏳ {ctx_pct}%")
+      parts.append(f"💰 ''${cost_usd:.2f}")
       parts.append(f"📁 {dir_name}")
       if branch:
           parts.append(f"🌿 {branch}{git_extra}")
+      if remote_url:
+          link = f"\033]8;;{remote_url}\a{repo_name}\033]8;;\a"
+          parts.append(f"🔗 {link}")
       if fh:
           parts.append(f"⏰ {round(fh.get('utilization', 0))}% ({reset_rel(fh)})")
       else:
