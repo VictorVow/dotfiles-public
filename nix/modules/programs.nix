@@ -36,6 +36,10 @@ let
       Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
       UserPromptSubmit = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";      }]; }];
     };
+    statusLine = {
+      type    = "command";
+      command = "python3 ~/.claude/statusline/statusline.py";
+    };
   });
 
   # ── Shared Firefox profile building blocks ──────────────────────────────
@@ -1801,6 +1805,86 @@ INSTALLS
       print(f"Current session: {pct(fh)} ({rel(fh)})")
       print(f"All models: {pct(sd)} ({absfmt(sd)})")
       print(f"Sonnet only: {pct(so)} ({absfmt(so)})")
+    '';
+  };
+
+  home.file.".claude/statusline/statusline.py" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env python3
+      # Claude Code statusline: <model> • <cwd> • session N% (Xh Ym) • week N% (Day)
+      # Usage data cached in ~/.cache/claude-usage.json (15 min TTL).
+      import json, os, sys, time, urllib.request
+      from datetime import datetime, timezone
+      from pathlib import Path
+
+      HOME = Path.home()
+      CRED = HOME / ".claude" / ".credentials.json"
+      CACHE = HOME / ".cache" / "claude-usage.json"
+      TTL = 15 * 60
+      URL = "https://api.anthropic.com/api/oauth/usage"
+
+      try:
+          payload = json.load(sys.stdin)
+      except Exception:
+          payload = {}
+      model = (payload.get("model") or {}).get("display_name") \
+              or (payload.get("model") or {}).get("id") or "claude"
+      cwd = (payload.get("workspace") or {}).get("current_dir") or os.getcwd()
+      home_s = str(HOME)
+      if cwd == home_s:
+          cwd_disp = "~"
+      elif cwd.startswith(home_s + "/"):
+          cwd_disp = "~" + cwd[len(home_s):]
+      else:
+          cwd_disp = cwd
+
+      def fetch():
+          token = json.loads(CRED.read_text())["claudeAiOauth"]["accessToken"]
+          req = urllib.request.Request(URL, headers={"Authorization": f"Bearer {token}"})
+          with urllib.request.urlopen(req, timeout=5) as r:
+              return json.load(r)
+
+      data = None
+      try:
+          st = CACHE.stat()
+          if time.time() - st.st_mtime < TTL:
+              data = json.loads(CACHE.read_text())
+      except FileNotFoundError:
+          pass
+      except Exception:
+          data = None
+
+      if data is None:
+          try:
+              data = fetch()
+              CACHE.parent.mkdir(parents=True, exist_ok=True)
+              CACHE.write_text(json.dumps(data))
+          except Exception:
+              data = {}
+
+      now = datetime.now(timezone.utc)
+      fh = data.get("five_hour") or {}
+      sd = data.get("seven_day") or {}
+
+      def reset_rel(b):
+          t = b.get("resets_at")
+          if not t:
+              return "?"
+          dt = datetime.fromisoformat(t.replace("Z", "+00:00"))
+          secs = max(0, int((dt - now).total_seconds()))
+          return f"{secs // 3600}h{(secs % 3600) // 60}m"
+
+      def reset_day(b):
+          t = b.get("resets_at")
+          if not t:
+              return "?"
+          return datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone().strftime("%a")
+
+      sess = f"session {round(fh.get('utilization', 0))}% ({reset_rel(fh)})" if fh else "session ?"
+      week = f"week {round(sd.get('utilization', 0))}% ({reset_day(sd)})" if sd else "week ?"
+
+      print(f"{model} • {cwd_disp} • {sess} • {week}")
     '';
   };
 
