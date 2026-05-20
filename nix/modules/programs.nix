@@ -417,7 +417,7 @@ let
       "Rotten Tomatoes" = {
         urls = [{ template = "https://www.rottentomatoes.com/search?search={searchTerms}"; }];
         icon = "${ffIcons}/rottentomatoes.png";
-        definedAliases = [ "@rt" ];
+        definedAliases = [ "@rt" "@rotten" ];
       };
       # Good for quickly finding trailers
       "Trakt" = {
