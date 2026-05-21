@@ -485,7 +485,20 @@ if ! command -v pipx &>/dev/null; then
 else
   # Upgrade all pipx-managed packages. Most tools have been migrated to Nix
   # (yt-dlp, poetry, uv, key-mon), but any remaining pipx installs are upgraded.
-  run_step "pipx upgrade-all" pipx upgrade-all
+  # If venvs reference a Python that no longer exists (e.g. after a system
+  # Python bump), reinstall-all rebuilds them against the current interpreter.
+  pipx_upgrade_all() {
+    if pipx upgrade-all; then
+      return 0
+    fi
+    if pipx list 2>&1 | grep -q 'invalid interpreter'; then
+      warn "pipx venvs reference a missing Python — running reinstall-all."
+      pipx reinstall-all && pipx upgrade-all
+    else
+      return 1
+    fi
+  }
+  run_step "pipx upgrade-all" pipx_upgrade_all
   success "pipx done."
 fi
 
