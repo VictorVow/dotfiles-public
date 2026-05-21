@@ -11,7 +11,7 @@ installs/
 ├── bootstrap.sh              # Install Nix + activate Home Manager on a fresh system
 ├── update.sh                 # Update all package managers in one pass
 ├── ansible.yml               # System-level packages (requires sudo)
-├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, etc.) — imported by ansible.yml
+├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)

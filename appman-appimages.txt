@@ -1,0 +1,12 @@
+# appman-appimages.txt — Declarative list of AppImages managed by AppMan (AM).
+#
+# Each line is the catalogue key from ivan-hc/AM (e.g. `obsidian`, `freetube`),
+# NOT the binary name shown after install. Run `appman -a | grep -i <name>`
+# (or `appman --apps`) to find the canonical key for an app.
+#
+# - Blank lines and lines starting with `#` are ignored.
+# - One app per line.
+# - Adding a name + re-running update.sh (or `ansible-playbook custom-installers.yml`)
+#   installs anything missing. Existing apps are left alone.
+# - Removing a name does NOT uninstall — run `appman -R <app>` manually.
+#   (See docs/system/appman.md for the optional Tier-2 sync behaviour.)

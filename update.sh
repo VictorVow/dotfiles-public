@@ -228,7 +228,7 @@ export NPM_CONFIG_PREFIX="$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.nix-profile/bin:$HOME/.cargo/bin:$PATH"
 
 # ── 1. Nix + Home Manager ────────────────────────────────────────────────────
-step "1/8  Nix + Home Manager"
+step "1/9  Nix + Home Manager"
 
 if ! command -v nix &>/dev/null; then
   warn "nix not found — skipping Nix updates. Run ./bootstrap.sh first."
@@ -379,7 +379,7 @@ else
 fi
 
 # ── 2. apt (system packages) ─────────────────────────────────────────────────
-step "2/8  apt (system packages)"
+step "2/9  apt (system packages)"
 
 if ! command -v apt-get &>/dev/null; then
   warn "apt-get not found — not an apt-based system?"
@@ -394,7 +394,7 @@ else
 fi
 
 # ── 3. Homebrew ───────────────────────────────────────────────────────────────
-step "3/8  Homebrew"
+step "3/9  Homebrew"
 
 if ! command -v brew &>/dev/null; then
   skipped "brew not found — skipping."
@@ -411,7 +411,7 @@ else
 fi
 
 # ── 4. npm global AI CLIs ─────────────────────────────────────────────────────
-step "4/8  npm global packages (AI CLIs)"
+step "4/9  npm global packages (AI CLIs)"
 
 if ! command -v npm &>/dev/null; then
   skipped "npm not found — skipping."
@@ -432,7 +432,7 @@ else
 fi
 
 # ── 5. Flatpak ────────────────────────────────────────────────────────────────
-step "5/8  Flatpak"
+step "5/9  Flatpak"
 
 if ! command -v flatpak &>/dev/null; then
   skipped "flatpak not found — skipping."
@@ -477,7 +477,7 @@ else
 fi
 
 # ── 6. pipx ───────────────────────────────────────────────────────────────────
-step "6/8  pipx"
+step "6/9  pipx"
 
 if ! command -v pipx &>/dev/null; then
   skipped "pipx not found — skipping."
@@ -489,8 +489,21 @@ else
   success "pipx done."
 fi
 
-# ── 7. Distrobox containers ───────────────────────────────────────────────────
-step "7/8  Distrobox containers"
+# ── 7. AppMan (AM) — AppImages ────────────────────────────────────────────────
+step "7/9  AppMan (AM) — AppImages"
+
+if ! command -v appman &>/dev/null; then
+  skipped "appman not found — skipping."
+  RESULTS["AppMan"]="skipped (not installed)"
+else
+  # `appman -u` self-updates AM and upgrades every managed AppImage. Runs
+  # non-interactively (no TTY prompts), matching the rest of update.sh.
+  run_step "appman update" appman -u
+  success "AppMan done."
+fi
+
+# ── 8. Distrobox containers ───────────────────────────────────────────────────
+step "8/9  Distrobox containers"
 
 if ! command -v distrobox &>/dev/null; then
   skipped "distrobox not found — skipping."
@@ -536,8 +549,8 @@ else
   fi
 fi
 
-# ── 8. Nix garbage collection ────────────────────────────────────────────────
-step "8/8  Nix garbage collection"
+# ── 9. Nix garbage collection ────────────────────────────────────────────────
+step "9/9  Nix garbage collection"
 
 if ! command -v nix-collect-garbage &>/dev/null; then
   skipped "nix-collect-garbage not found — skipping."
@@ -566,7 +579,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "Nix flake update" "home-manager switch" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "Distrobox" "Nix GC"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "AppMan" "appman update" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"

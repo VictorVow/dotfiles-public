@@ -618,3 +618,65 @@
         path: /tmp/rustdesk.deb
         state: absent
       when: ansible_facts.packages['rustdesk'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # APPMAN (AM) — https://github.com/ivan-hc/AM
+    # User-mode AppImage manager. Installs to ~/.local; no sudo needed.
+    # Auto-updates of managed AppImages are driven by `appman -u` from update.sh.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: AppMan | check if appman is already installed
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/bin/appman"
+      register: appman_bin
+
+    - name: AppMan | download AM-INSTALLER
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/ivan-hc/AM/main/AM-INSTALLER
+        dest: /tmp/AM-INSTALLER
+        mode: '0755'
+        force: yes
+      when: not appman_bin.stat.exists
+
+    - name: AppMan | run installer in user mode (menu option 2 = appman)
+      ansible.builtin.shell: |
+        echo 2 | /tmp/AM-INSTALLER
+      args:
+        creates: "{{ ansible_env.HOME }}/.local/bin/appman"
+      when: not appman_bin.stat.exists
+
+    - name: AppMan | remove installer
+      ansible.builtin.file:
+        path: /tmp/AM-INSTALLER
+        state: absent
+
+    # ── Declarative AppImage sync ──────────────────────────────────────────
+    # appman-appimages.txt is the canonical list. Anything listed there but not yet
+    # installed gets installed; existing apps are left alone. Removal is
+    # intentionally NOT automated — see docs/system/appman.md.
+
+    - name: AppMan | read declared AppImage list
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/appman-appimages.txt"
+      register: appimages_raw
+
+    - name: AppMan | parse list (skip blanks + comments)
+      ansible.builtin.set_fact:
+        appimages_declared: >-
+          {{ (appimages_raw.content | b64decode).splitlines()
+             | map('trim')
+             | reject('match', '^(#|$)')
+             | list }}
+
+    - name: AppMan | list currently installed AppImages
+      ansible.builtin.command: appman -f
+      register: appman_installed
+      changed_when: false
+      failed_when: false
+
+    - name: AppMan | install missing AppImages from appman-appimages.txt
+      ansible.builtin.command: "appman -i {{ item }}"
+      environment:
+        NO_COLOR: "1"
+      loop: "{{ appimages_declared }}"
+      when: item not in appman_installed.stdout
