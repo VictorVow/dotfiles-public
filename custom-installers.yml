@@ -457,55 +457,8 @@
       when: ansible_facts.packages['code'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
-    # CURSOR — https://cursor.com/
-    # AI-powered code editor (formerly via Nix's code-cursor). Distributed as
-    # an AppImage; downloaded once to ~/.local/bin and exposed with a desktop
-    # entry. Updates: re-run with cursor_force_update=true, or replace the
-    # binary manually.
+    # CURSOR is managed via AppMan — see appman-appimages.txt (key: cursor).
     # ════════════════════════════════════════════════════════════════════════
-
-    - name: Cursor | check if AppImage already present
-      ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/bin/cursor.AppImage"
-      register: cursor_bin
-
-    - name: Cursor | resolve latest stable AppImage URL
-      ansible.builtin.uri:
-        url: https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
-        return_content: yes
-        headers:
-          User-Agent: Mozilla/5.0
-      register: cursor_release
-      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
-
-    - name: Cursor | ensure ~/.local/bin exists
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.local/bin"
-        state: directory
-        mode: '0755'
-      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
-
-    - name: Cursor | download AppImage
-      ansible.builtin.get_url:
-        url: "{{ cursor_release.json.downloadUrl }}"
-        dest: "{{ ansible_env.HOME }}/.local/bin/cursor.AppImage"
-        mode: '0755'
-      when: not cursor_bin.stat.exists or cursor_force_update | default(false) | bool
-
-    - name: Cursor | install desktop entry
-      ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.local/share/applications/cursor.desktop"
-        mode: '0644'
-        content: |
-          [Desktop Entry]
-          Name=Cursor
-          Exec={{ ansible_env.HOME }}/.local/bin/cursor.AppImage --no-sandbox %F
-          Terminal=false
-          Type=Application
-          Icon=cursor
-          Categories=Development;IDE;
-          MimeType=text/plain;inode/directory;
-          StartupWMClass=Cursor
 
     # ════════════════════════════════════════════════════════════════════════
     # CLAUDE DESKTOP — https://github.com/aaddrick/claude-desktop-debian
@@ -650,6 +603,26 @@
         path: /tmp/AM-INSTALLER
         state: absent
 
+    # ── AppMan install directory ───────────────────────────────────────────
+    # AppMan defaults to ~/Applications. We redirect it to ~/AppImages/AppMan
+    # to keep AppImage payloads grouped under a single ~/AppImages root.
+    # Note: this only affects *future* installs — apps already extracted under
+    # ~/Applications stay there until manually migrated (`appman -R <app>` then
+    # reinstall, or move the directory and recreate the ~/.local/bin symlink
+    # plus the .desktop file's Exec/Icon paths).
+
+    - name: AppMan | ensure install directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/AppImages/AppMan"
+        state: directory
+        mode: '0755'
+
+    - name: AppMan | configure install directory
+      ansible.builtin.copy:
+        dest: "{{ ansible_env.HOME }}/.config/appman/appman-config"
+        content: "{{ ansible_env.HOME }}/AppImages/AppMan\n"
+        mode: '0644'
+
     # ── Declarative AppImage sync ──────────────────────────────────────────
     # appman-appimages.txt is the canonical list. Anything listed there but not yet
     # installed gets installed; existing apps are left alone. Removal is
@@ -680,3 +653,73 @@
         NO_COLOR: "1"
       loop: "{{ appimages_declared }}"
       when: item not in appman_installed.stdout
+
+    # ── AppArmor userns profile for AppImages ──────────────────────────────
+    #
+    # WHY THIS EXISTS
+    # ---------------
+    # Ubuntu 23.10+ (and by extension 24.04+) ships with
+    #   kernel.apparmor_restrict_unprivileged_userns=1
+    # which blocks unprivileged processes from creating user namespaces
+    # unless a matching AppArmor profile grants the `userns` capability.
+    # User namespaces are how modern sandboxes isolate themselves —
+    # Chrome/Chromium, Firefox, Electron, Flatpak/bwrap, and the internal
+    # sandboxes inside many AppImages all rely on them. Without the
+    # permission, AppImages either refuse to launch or fall back to
+    # running unsandboxed (which for Electron/Chromium apps is strictly
+    # worse than the kernel hardening itself).
+    #
+    # Distro packages (deb/snap/flatpak) ship AppArmor profiles via their
+    # packaging system, which is why Chrome, Firefox, etc. still work on
+    # hardened Ubuntu out of the box. AppImages deliberately have no
+    # system integration — that is the format's whole pitch — so nothing
+    # installs profiles on their behalf, and upstream (AppImage, AppMan,
+    # pkgforge) has not converged on a fix. AppMan's GUI just asks the
+    # user to flip the global sysctl off, which re-exposes the user-
+    # namespace kernel attack surface to *every* unprivileged binary on
+    # the system, not only the AppImages we trust enough to install.
+    #
+    # The middle path: keep the global hardening on, and grant `userns`
+    # narrowly to the AppImage paths we manage ourselves. AppMan extracts
+    # AppImages under ~/AppImages/AppMan/<app>/<app> (symlinked from
+    # ~/.local/bin/<app>); ad-hoc AppImages dropped at the top level of
+    # ~/AppImages/ are also covered. One profile file handles both.
+    #
+    # To undo: remove /etc/apparmor.d/appman-appimages and
+    # `sudo apparmor_parser -R` it, then reload AppArmor. The global
+    # restriction stays in place; only these specific paths lose their
+    # exemption.
+
+    - name: AppMan | install AppArmor userns profile for managed AppImages
+      ansible.builtin.copy:
+        dest: /etc/apparmor.d/appman-appimages
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          # Managed by installs/custom-installers.yml — do not edit by hand.
+          # Grants the `userns` capability to:
+          #   - AppImages installed via AppMan
+          #     (~/AppImages/AppMan/<app>/<app>, symlinked into ~/.local/bin)
+          #   - ad-hoc AppImages at the top level of ~/AppImages/
+          # Everything else on the system remains subject to the
+          # unprivileged-userns restriction.
+          abi <abi/4.0>,
+          include <tunables/global>
+
+          profile appman-appimages-appman /home/*/AppImages/AppMan/*/* flags=(unconfined) {
+            userns,
+            include if exists <local/appman-appimages>
+          }
+
+          profile appman-appimages-toplevel /home/*/AppImages/*.{AppImage,appimage} flags=(unconfined) {
+            userns,
+            include if exists <local/appman-appimages>
+          }
+      become: yes
+      register: appman_apparmor_profile
+
+    - name: AppMan | reload AppArmor profile
+      ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/appman-appimages
+      become: yes
+      when: appman_apparmor_profile.changed
