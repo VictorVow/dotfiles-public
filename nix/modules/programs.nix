@@ -996,9 +996,9 @@ INSTALLS
       set -g status-right         "#{?client_prefix,⌨️  PREFIX,}"
       set -g status-right-style   fg="#ffcc00",bold
 
-      # Inactive windows: dim text, no background
+      # Inactive windows: muted but legible text, no background
       set -g window-status-format        " #I:#W#{?window_flags,#{window_flags}, } "
-      set -g window-status-style         fg="#666688",bg=default
+      set -g window-status-style         fg="#bac2de",bg=default
 
       # Active window: cyan background, dark text, bold
       set -g window-status-current-format " #I:#W#{?window_flags,#{window_flags}, } "
