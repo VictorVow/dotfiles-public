@@ -197,8 +197,19 @@
         selection: hold
       loop:
         - { name: procps, comment: "pgrep, ps, kill — superseded by nix#procps" }
-        - { name: podman, comment: "OCI backend — superseded by nix#podman (5.8.1 vs apt 5.4.2)" }
         - { name: kate,   comment: "KDE text editor — superseded by nix#kdePackages.kate" }
+      become: yes
+
+    - name: Purge apt packages fully superseded by Nix
+      # podman: previously held to prevent reinstall, but having two podmans
+      # (apt 5.4.2 + nix 5.7.0) sharing ~/.local/share/containers caused lock
+      # contention and a stuck `distrobox upgrade`. Nix podman is the only one
+      # distrobox uses (PATH order), so purge the apt one and its systemd units.
+      ansible.builtin.apt:
+        name:
+          - podman
+        state: absent
+        purge: yes
       become: yes
 
     # Install Solaar's udev rules so it can access Logitech hidraw devices.

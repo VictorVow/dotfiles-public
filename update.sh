@@ -528,12 +528,25 @@ else
   # Upgrade containers one-by-one (instead of `distrobox upgrade --all`) so the
   # user gets per-container progress feedback — `--all` can sit silently for
   # many minutes while apt/dnf churns inside a single container.
-  mapfile -t DBOX_CONTAINERS < <(distrobox list --no-color 2>/dev/null \
-    | awk -F'|' 'NR>1 {gsub(/^ +| +$/, "", $2); if ($2 != "") print $2}')
+  # `distrobox list` shells out to podman; if a previous run left a wedged
+  # podman process holding the storage lock, this call hangs forever with no
+  # output. Cap it at 30s so the step fails loudly instead of freezing the
+  # whole script.
+  DBOX_LIST_OUTPUT=$(timeout 30 distrobox list --no-color 2>/dev/null)
+  if [[ $? -eq 124 ]]; then
+    warn "distrobox list timed out — podman may be wedged. Try: pgrep -fa podman ; then kill stuck PIDs and re-run."
+    RESULTS["Distrobox"]="✗ list timed out (podman wedged?)"
+    DBOX_CONTAINERS=()
+  else
+    mapfile -t DBOX_CONTAINERS < <(printf '%s\n' "$DBOX_LIST_OUTPUT" \
+      | awk -F'|' 'NR>1 {gsub(/^ +| +$/, "", $2); if ($2 != "") print $2}')
+  fi
 
-  if [[ ${#DBOX_CONTAINERS[@]} -eq 0 ]]; then
+  if [[ ${#DBOX_CONTAINERS[@]} -eq 0 ]] && [[ -z "${RESULTS["Distrobox"]:-}" ]]; then
     skipped "No distrobox containers found."
     RESULTS["Distrobox"]="skipped (none found)"
+  elif [[ ${#DBOX_CONTAINERS[@]} -eq 0 ]]; then
+    : # already set by timeout branch above
   else
     info "Found ${#DBOX_CONTAINERS[@]} container(s): ${DBOX_CONTAINERS[*]}"
     DBOX_FAILED=()
