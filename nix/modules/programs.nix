@@ -177,6 +177,7 @@ let
       "NUR"
       "NUR (code)"
       "flathub.org"
+      "Portable Linux Apps"
       "GitHub"
       "AlternativeTo"
       "brew.sh"
@@ -285,6 +286,13 @@ let
         urls = [{ template = "https://flathub.org/apps/search/{searchTerms}"; }];
         icon = "${ffIcons}/flathub.ico";
         definedAliases = [ "@flat" ];
+      };
+      # portable-linux-apps.github.io filters its catalogue client-side and
+      # has no `?q=` URL, so we route through Brave with a site: restriction.
+      "Portable Linux Apps" = {
+        urls = [{ template = "https://search.brave.com/search?q=site%3Aportable-linux-apps.github.io+{searchTerms}"; }];
+        icon = "${ffIcons}/github.ico";
+        definedAliases = [ "@appimage" "@appman" ];
       };
       "GitHub" = {
         urls = [{ template = "https://github.com/search?q={searchTerms}&ref=opensearch"; }];
