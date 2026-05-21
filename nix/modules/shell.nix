@@ -147,17 +147,21 @@
       }
 
       # ── md/mds: open file(s) in MarkText ───────────────────────────────────────
-      # The ~/AppImages/marktext.appimage build is a local fork with multi-window
-      # support: the running instance's second-instance handler honours -n and
-      # opens a fresh window (shared process, shared settings — no temp profile).
+      # The marktext.appimage fork's second-instance handler routes args
+      # into the running process. With `openFilesInNewWindow: false` set in
+      # ~/.config/marktext/preferences.json (the default), bare args land as
+      # tabs in the existing window. Passing `-n` forces a fresh window
+      # (shared process, shared settings — no temp profile). `--no-sandbox`
+      # is required because the AppImage's chrome-sandbox needs SUID root
+      # it can't get from $HOME.
       #
-      #   md   — new window per invocation (even with no args → blank window).
-      #   mds  — files open as tabs in the existing window.
+      #   md   — files open as tabs in the existing window (default flow).
+      #   mds  — new window per invocation (even with no args → blank window).
       md() {
-        ~/AppImages/marktext.appimage --no-sandbox -n "$@" & disown
+        ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
       }
       mds() {
-        ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
+        ~/AppImages/marktext.appimage --no-sandbox -n "$@" & disown
       }
 
       # ── hms: home-manager switch ───────────────────────────────────────────
