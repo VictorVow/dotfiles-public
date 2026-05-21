@@ -542,12 +542,21 @@ else
       c="${DBOX_CONTAINERS[$i]}"
       info "[$((i+1))/${#DBOX_CONTAINERS[@]}] Upgrading '$c' (apt/dnf inside container — may take several minutes)..."
       c_start=$(date +%s)
-      if distrobox upgrade "$c" 2>&1; then
+      # stdbuf -oL -eL: force line-buffered output so progress streams instead
+      # of hanging in pipe buffers. </dev/null: refuse interactive prompts so
+      # apt/dnf fails fast instead of waiting forever on stdin. timeout 45m:
+      # bound runaway upgrades so the script doesn't appear to freeze.
+      if timeout 45m stdbuf -oL -eL distrobox upgrade "$c" </dev/null 2>&1; then
         c_elapsed=$(( $(date +%s) - c_start ))
         success "  '$c' upgraded in ${c_elapsed}s."
       else
+        rc=$?
         c_elapsed=$(( $(date +%s) - c_start ))
-        warn "  '$c' upgrade failed after ${c_elapsed}s — continuing."
+        if [[ $rc -eq 124 ]]; then
+          warn "  '$c' upgrade timed out after ${c_elapsed}s — continuing."
+        else
+          warn "  '$c' upgrade failed (rc=$rc) after ${c_elapsed}s — continuing."
+        fi
         DBOX_FAILED+=("$c")
       fi
     done
