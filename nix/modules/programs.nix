@@ -962,6 +962,10 @@ INSTALLS
     # 256-colour terminal for better colour rendering in editors
     terminal = "screen-256color";
     extraConfig = ''
+      # Forward OSC 8 hyperlinks through tmux to the outer terminal (Konsole/Yakuake).
+      # Without this, tmux strips the escape sequence and only the link text is shown.
+      set -as terminal-features ",*:hyperlinks"
+
       # Pane splitting — h for horizontal (side-by-side), v for vertical (stacked)
       bind h split-window -h -c "#{pane_current_path}"
       bind v split-window -v -c "#{pane_current_path}"
