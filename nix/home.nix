@@ -18,7 +18,7 @@
   # Needed for: VS Code, Steam, and other proprietary software.
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
-    # Exposes pkgs.llm-agents.{claude-code,codex,gemini-cli,...} using
+    # Exposes pkgs.llm-agents.{claude-code,codex,antigravity,...} using
     # pre-built binaries from numtide's cache (cache.numtide.com).
     llm-agents.overlays.default
   ];

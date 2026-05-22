@@ -22,8 +22,8 @@ let
   # modify it at runtime — e.g. the /effort slash command rewrites this file.
   # Same content that programs.claude-code.settings would generate, but
   # deployed via home.activation (install -m 644) instead of home.file.
-  # See: home-manager#8654 (same issue that forced settings to be omitted for
-  # gemini-cli). Changes made at runtime are overwritten on the next `hms`.
+  # See: home-manager#8654 — Nix-store symlink blocks runtime writes.
+  # Changes made at runtime are overwritten on the next `hms`.
   claudeCodeSettings = pkgs.writeText "claude-code-settings.json" (builtins.toJSON {
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
@@ -1076,8 +1076,8 @@ INSTALLS
     };
   };
 
-  # Tell ripgrep (and tools that use it, like Claude Code and Gemini CLI) to skip
-  # the rclone FUSE mount — traversing it causes high CPU on the rclone mount process.
+  # Tell ripgrep (and tools that use it, like Claude Code) to skip the rclone
+  # FUSE mount — traversing it causes high CPU on the rclone mount process.
   home.file.".ignore".text = ''
     Mounts/
   '';
@@ -1996,20 +1996,6 @@ INSTALLS
     enable  = true;
     package = pkgs.llm-agents.codex;
     # enableMcpIntegration — not available until HM 26.05
-  };
-
-  # ── Gemini CLI ─────────────────────────────────────────────────────────────────
-  # enableMcpIntegration merges programs.mcp.servers → settings.mcpServers, which
-  # causes HM to write ~/.gemini/settings.json as a read-only Nix store symlink.
-  # OAuth tokens live in ~/.gemini/oauth_creds.json (unmanaged), so the symlink
-  # no longer blocks login (home-manager#8654). The auth selection is preserved
-  # here so gemini-cli doesn't re-prompt on launch.
-
-  programs.gemini-cli = {
-    enable   = true;
-    package  = pkgs.llm-agents.gemini-cli;
-    # enableMcpIntegration — not available until HM 26.05
-    settings.security.auth.selectedType = "oauth-personal";
   };
 
   # ── Claude Code settings (writable copy) ────────────────────────────────────

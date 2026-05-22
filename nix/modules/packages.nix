@@ -401,6 +401,16 @@
     # ── Cryptocurrency ───────────────────────────────────────────────────────────────
     ledger-live-desktop # Ledger Live desktop client
 
+    # ── AI / LLM CLIs ─────────────────────────────────────────────────────────
+    # Codex is wired up via programs.codex in programs.nix (HM module exists and
+    # can merge MCP/settings). Antigravity has no equivalent HM module for the
+    # CLI — Home Manager's programs.antigravity wraps the IDE build via
+    # mkVscodeModule, which manages ~/.antigravity IDE settings and doesn't
+    # apply to the CLI binary. So this entry installs just the CLI as a plain
+    # package. Same flake source as codex: pkgs.llm-agents.* overlay from
+    # numtide (cache.numtide.com).
+    llm-agents.antigravity  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
+
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
     # rustdesk — removed from Nix; the build pulls libsciter (Rust crate +
