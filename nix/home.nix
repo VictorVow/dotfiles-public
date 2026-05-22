@@ -141,5 +141,34 @@
       fi
       exec /usr/bin/xdg-open "$@"
     '')
+
+    # FreeTube "External Player" → mpv wrapper.
+    #
+    # FreeTube (run as an AppImage) launches the configured external player via
+    # a bare `spawn()` that inherits the AppImage's environment (it injects its
+    # own LD_LIBRARY_PATH) and discards stdout/stderr, so any failure is
+    # completely silent. Two things broke YouTube playback through it:
+    #
+    #   1. VLC can't descramble YouTube's `n` parameter → HTTP 403 → empty
+    #      window. mpv avoids this by delegating extraction to yt-dlp.
+    #   2. yt-dlp gets blocked by YouTube's "confirm you're not a bot" check on
+    #      many videos unless it presents real cookies.
+    #
+    # This wrapper pins mpv + yt-dlp to their Nix store paths (so it never
+    # depends on PATH or the AppImage's LD_LIBRARY_PATH) and feeds yt-dlp
+    # cookies from the Firefox "VERTEX" profile to pass the bot check.
+    #
+    # Like xdg-open above, it lands in ~/.nix-profile/bin (on the GUI PATH).
+    # Point FreeTube → Settings → External Player Settings:
+    #   External Player          = mpv
+    #   Custom Executable        = ~/.nix-profile/bin/ft-mpv  (or just: ft-mpv)
+    #   Custom Arguments         = (empty)
+    (pkgs.writeShellScriptBin "ft-mpv" ''
+      unset LD_LIBRARY_PATH
+      exec ${pkgs.mpv}/bin/mpv \
+        --script-opts=ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp \
+        --ytdl-raw-options=cookies-from-browser=firefox:VERTEX \
+        "$@"
+    '')
   ];
 }
