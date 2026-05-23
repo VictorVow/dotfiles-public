@@ -28,6 +28,14 @@ let
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
     effortLevel         = "medium";
+    # Force OSC 8 hyperlink emission. Claude Code's hyperlink-support detection
+    # returns false under TERM=screen-* (i.e. inside tmux), so it strips the OSC 8
+    # repo link from the statusline before rendering. FORCE_HYPERLINK=1 overrides
+    # that detection so the 🔗 segment renders as a clickable link. (tmux forwards
+    # the sequence to Konsole/Yakuake via terminal-features ,*:hyperlinks.)
+    env = {
+      FORCE_HYPERLINK = "1";
+    };
     permissions = {
       allow = [ "WebFetch" "WebSearch" ];
     };
