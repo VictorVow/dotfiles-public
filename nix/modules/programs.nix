@@ -1390,6 +1390,11 @@ INSTALLS
   xdg.configFile."Code/User/keybindings.json".source = jsonFormat.generate "vscode-keybindings" [
     # Ctrl+; → Tasks: Run Task (open the task picker)
     { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
+    # Ctrl+K D → diff the active file against what's on disk. Useful because
+    # settings.json is a read-only nix symlink: when VSCode/an extension auto-edits
+    # a setting it can't save, the editor stays dirty and this shows exactly which
+    # lines differ from the saved file. (No default keybinding for this command.)
+    { key = "ctrl+k d"; command = "workbench.files.action.compareWithSaved"; when = "editorTextFocus"; }
   ];
 
   xdg.configFile."Code/User/settings.json".source = jsonFormat.generate "vscode-settings" {
@@ -1427,8 +1432,17 @@ INSTALLS
     };
 
     # ── Theme ──────────────────────────────────────────────────────────────────
-    "workbench.colorTheme" = "Default Dark Modern";
+    # Theme *id* is "Dark Modern" in current VSCode (the theme-defaults extension
+    # dropped the old "Default " prefix it used in older builds). Using the stale
+    # "Default Dark Modern" id made VSCode normalize it to "Dark Modern" and try to
+    # rewrite settings.json on every launch — which fails against the read-only nix
+    # symlink, leaving a permanently dirty settings.json tab.
+    "workbench.colorTheme" = "Dark Modern";
     "window.titleBarStyle" = "native"; # Bug with Electron when using custom title bar is causing 1-2px at top to pass through clicks the window below
+    # Tint tabs with unsaved changes so a dirty editor (e.g. settings.json that
+    # VSCode tried to auto-edit but can't save to the read-only nix symlink) is
+    # obvious at a glance. Pair with Ctrl+K D to diff the buffer against disk.
+    "workbench.editor.highlightModifiedTabs" = true;
 
     # ── Claude Code ────────────────────────────────────────────────────────────
     "claudeCode.preferredLocation" = "panel";
