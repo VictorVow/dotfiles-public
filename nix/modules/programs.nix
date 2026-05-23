@@ -717,11 +717,18 @@ in
       "http://localhost:8080"
       "http://localhost:8384"
       "http://localhost:8193"
+      # Headscale
+      "https://lord-ubuntu.device.example.com"
+      # Tailscale
+      "https://lord-ubuntu.tailee8f02.ts.net"
+      # Own services
+      "https://13-ttrss.example.com"  # "https://.example.com" didn't work
+      "https://.ts.net"   # Tailscale
+      "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
+      # OTHER
       "https://.claude.com"
       "https://.geforcenow.com"
       "https://accounts.google.com"
-      # Tailscale
-      "https://lord-ubuntu.tailee8f02.ts.net"
       # AWS
       "https://.amazon.com"
       "https://.aws.com"
@@ -730,9 +737,6 @@ in
       "https://.signin.aws"
       "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
-      "https://13-ttrss.example.com"  # "https://.example.com" didn't work
-      "https://.ts.net"   # Tailscale
-      "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
       "https://account.booking.com"
       "https://account.nuffieldhealth.com"
       "https://accounts.firefox.com"
