@@ -2,6 +2,7 @@
 
 app.comaps.comaps
 app.grayjay.Grayjay
+art.fatdawlf.Piccolo
 au.stevetech.yafi
 br.com.wiselabs.simplexity
 chat.delta.desktop
@@ -16,12 +17,11 @@ com.borgbase.Vorta
 com.calibre_ebook.calibre
 com.dec05eba.gpu_screen_recorder
 com.discordapp.Discord
-com.github.KRTirtho.Spotube
-com.github.PintaProject.Pinta
 com.github.ahrm.sioyek
-com.github.dynobo.normcap
 com.github.jeromerobert.pdfarranger
+com.github.KRTirtho.Spotube
 com.github.mtkennerly.ludusavi
+com.github.PintaProject.Pinta
 com.github.tchx84.Flatseal
 com.github.unrud.VideoDownloader
 com.github.wwmm.easyeffects
@@ -57,7 +57,6 @@ io.appflowy.AppFlowy
 io.dbeaver.DBeaverCommunity
 io.frama.tractor.carburetor
 io.freetubeapp.FreeTube
-io.github.alainm23.planify
 io.github.astralvixen.geforce-infinity
 io.github.celluloid_player.Celluloid
 io.github.chidiwilliams.Buzz
@@ -106,9 +105,9 @@ net.sapples.LiveCaptions
 net.sourceforge.squirrel_sql
 nl.hjdskes.gcolor3
 no.mifi.losslesscut
-org.DolphinEmu.dolphin-emu
 org.briarproject.Briar
 org.chromium.Chromium
+org.DolphinEmu.dolphin-emu
 org.electrum.electrum
 org.fcast.Receiver
 org.ferdium.Ferdium
@@ -135,8 +134,8 @@ org.kde.kommit
 org.kde.merkuro
 org.keepassxc.KeePassXC
 org.libreoffice.LibreOffice
-org.mozilla.Thunderbird
 org.mozilla.firefox
+org.mozilla.Thunderbird
 org.nickvision.tubeconverter
 org.nicotine_plus.Nicotine
 org.onionshare.OnionShare
@@ -161,13 +160,13 @@ re.sonny.Eloquent
 re.sonny.Junction
 us.zoom.Zoom
 
-## GeForce NOW
-
-com.nvidia.geforcenow
-
 ## Flathub Beta
 
 com.stremio.Stremio
+
+## GeForce NOW
+
+com.nvidia.geforcenow
 
 ## grayjay1-origin
 
