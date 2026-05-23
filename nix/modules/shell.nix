@@ -135,9 +135,10 @@
           select-pane -t 2 \;
           split-window -h \;
           select-pane -t 0 \;
-          split-window -v -l 1 \;
-          send-keys -t 1 'python3 ~/.claude/statusline/statusline.py' Enter \;
+          split-window -h -l 1 \;
           send-keys -t 2 'cd ~/Projects/installs' Enter \;
+          send-keys -t 2 'clear' Enter \;
+          select-pane -t 0 \;
         )
         if [ -n "$TMUX" ]; then
           tmux "''${splits[@]}"
