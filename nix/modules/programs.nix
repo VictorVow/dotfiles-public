@@ -36,8 +36,123 @@ let
     env = {
       FORCE_HYPERLINK = "1";
     };
+    # Centrally-managed permission allowlist. These apply to EVERY repo (user-level
+    # settings merge under per-project settings), so common safe approvals no longer
+    # need a per-repo .claude/settings.local.json. Curated from recurring approvals.
+    # Deliberately excluded for safety: "Bash(git -C:*)" (would allow push from any
+    # dir) and "Bash(gh api:*)" (can POST/DELETE on GitHub) — add per-repo if needed.
     permissions = {
-      allow = [ "WebFetch" "WebSearch" ];
+      allow = [
+        # ── Web ──
+        "WebFetch"
+        "WebSearch"
+
+        # ── Read-only shell inspection ──
+        "Bash(grep:*)"
+        "Bash(rg:*)"
+        "Bash(find:*)"
+        "Bash(ls:*)"
+        "Bash(cat:*)"
+        "Bash(head:*)"
+        "Bash(tail:*)"
+        "Bash(wc:*)"
+        "Bash(echo:*)"
+        "Bash(env)"
+        "Bash(du:*)"
+        "Bash(df:*)"
+        "Bash(ps:*)"
+        "Bash(sort:*)"
+        "Bash(uniq:*)"
+        "Bash(which:*)"
+        "Bash(file:*)"
+        "Bash(stat:*)"
+        "Bash(tree:*)"
+        "Bash(xargs ls:*)"
+        "Bash(xargs cat:*)"
+        "Read(//tmp/**)"
+
+        # ── Git: read-only ──
+        "Bash(git status:*)"
+        "Bash(git log:*)"
+        "Bash(git diff:*)"
+        "Bash(git show:*)"
+        "Bash(git blame:*)"
+        "Bash(git ls-tree:*)"
+        "Bash(git ls-files:*)"
+        "Bash(git branch:*)"
+        "Bash(git remote:*)"
+        "Bash(git config:*)"
+
+        # ── Git: workflow mutations (push/reset still prompt) ──
+        "Bash(git add:*)"
+        "Bash(git commit:*)"
+        "Bash(git stash:*)"
+        "Bash(git checkout:*)"
+        "Bash(git switch:*)"
+        "Bash(git restore:*)"
+        "Bash(git fetch:*)"
+        "Bash(git submodule:*)"
+
+        # ── GitHub CLI (read) ──
+        "Bash(gh pr view:*)"
+        "Bash(gh pr diff:*)"
+        "Bash(gh pr list:*)"
+        "Bash(gh issue view:*)"
+        "Bash(gh issue list:*)"
+        "Bash(gh run view:*)"
+        "Bash(gh run list:*)"
+        "Bash(gh search:*)"
+
+        # ── Nix / Home Manager ──
+        "Bash(nix --version)"
+        "Bash(nix eval:*)"
+        "Bash(nix search:*)"
+        "Bash(nix flake:*)"
+        "Bash(nix develop:*)"
+        "Bash(nix run:*)"
+        "Bash(nix build:*)"
+        "Bash(nix profile:*)"
+        "Bash(home-manager option:*)"
+        "Bash(home-manager switch:*)"
+
+        # ── Build & dev tooling ──
+        "Bash(npm install:*)"
+        "Bash(npm ci:*)"
+        "Bash(npm run:*)"
+        "Bash(npm view:*)"
+        "Bash(npm test:*)"
+        "Bash(npx tsc:*)"
+        "Bash(pnpm install:*)"
+        "Bash(pnpm run:*)"
+        "Bash(pnpm build:*)"
+        "Bash(pnpm test:*)"
+        "Bash(python3:*)"
+        "Bash(./gradlew:*)"
+        "Bash(keytool:*)"
+        "Bash(java -version)"
+        "Bash(adb devices:*)"
+        "Bash(adb shell:*)"
+        "Bash(adb install:*)"
+        "Bash(adb logcat:*)"
+
+        # ── Network & system ──
+        "Bash(curl:*)"
+        "Bash(ping:*)"
+        "Bash(systemctl:*)"
+        "Bash(journalctl:*)"
+        "Bash(dpkg -l)"
+        "Bash(apt list:*)"
+        "Bash(flatpak list:*)"
+        "Bash(flatpak remotes:*)"
+        "Bash(flatpak info:*)"
+        "Bash(docker compose:*)"
+        "Bash(docker ps:*)"
+        "Bash(podman ps:*)"
+        "Bash(podman info:*)"
+        "Bash(wl-copy)"
+        "Bash(code:*)"
+        "Bash(fc-list)"
+      ];
     };
     hooks = {
       Stop             = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh stop";      }]; }];
@@ -616,7 +731,6 @@ in
       "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
       "https://13-ttrss.example.com"  # "https://.example.com" didn't work
-      "https://15-hs.example.com"
       "https://.ts.net"   # Tailscale
       "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
       "https://account.booking.com"
