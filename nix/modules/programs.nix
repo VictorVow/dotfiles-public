@@ -616,6 +616,7 @@ in
       "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
       "https://13-ttrss.example.com"  # "https://.example.com" didn't work
+      "https://15-hs.example.com"
       "https://.ts.net"   # Tailscale
       "https://9433uf4rgkf7.shares.zrok.io/"    # Calibre # "https://.zrok.io" didn't work
       "https://account.booking.com"
