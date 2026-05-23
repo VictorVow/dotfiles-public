@@ -120,6 +120,7 @@
 
     # ── Torrenting ────────────────────────────────────────────────────────────
     kdePackages.ktorrent # KDE BitTorrent client
+    qbittorrent # BitTorrent client; consumes Jackett below as a Torznab search plugin
     jackett  # Torrent indexer proxy; used as a qBittorrent search plugin
 
     # ── Disk / Storage ────────────────────────────────────────────────────────
