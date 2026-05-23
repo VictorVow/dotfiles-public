@@ -99,9 +99,16 @@
   # so we use the absolute system path rather than a Nix store reference.
   home.file.".config/autostart/tailscale-systray.desktop".text = ''
     [Desktop Entry]
-    Name=Tailscale
-    Exec=/usr/bin/tailscale systray
     Type=Application
+    Name=Tailscale System Tray
+    Comment=Tailscale system tray applet for managing Tailscale
+    Exec=/usr/bin/tailscale systray
+    TryExec=/usr/bin/tailscale
+    Icon=tailscale
+    Terminal=false
+    NoDisplay=true
+    StartupNotify=false
+    Categories=Network;System;
     X-KDE-autostart-after=panel
   '';
 
