@@ -1623,6 +1623,22 @@ INSTALLS
     categories  = [ "Utility" ];
   };
 
+  # Register Stremio as the handler for stremio:// links in ~/.config/mimeapps.list.
+  #
+  # Done via `xdg-mime` rather than the `xdg.mimeApps` HM option on purpose: that
+  # option replaces the whole mimeapps.list with a read-only store symlink, which
+  # would wipe the 150+ existing KDE-managed associations and stop KDE from ever
+  # updating them. `xdg-mime default` instead sets just this one entry under
+  # [Default Applications] in the mutable file, idempotently, on every `hms`.
+  #
+  # Why it's needed: GIO (used by Firefox/GTK) only honours a scheme handler that
+  # is listed explicitly under [Default Applications]. It will NOT derive one from
+  # a desktop file's MimeType= line the way KDE's xdg-mime query does — so without
+  # this, clicking a stremio:// link in Firefox silently does nothing.
+  home.activation.stremioSchemeHandler = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run ${pkgs.xdg-utils}/bin/xdg-mime default com.stremio.Stremio.desktop x-scheme-handler/stremio
+  '';
+
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)

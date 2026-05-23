@@ -162,6 +162,11 @@ us.zoom.Zoom
 
 ## Flathub Beta
 
+Stremio is pinned to the beta remote on purpose: `beta` (`1.0.0-beta.x`) is the
+newer-generation CEF-based rewrite, whereas stable Flathub only carries the older
+legacy Qt app (`4.4.x`). Beta is the more modern/maintained build despite the
+version number looking lower.
+
 com.stremio.Stremio
 
 ## GeForce NOW
