@@ -10,6 +10,17 @@
 #   installs anything missing. Existing apps are left alone.
 # - Removing a name does NOT uninstall — run `appman -R <app>` manually.
 #   (See docs/system/appman.md for the optional Tier-2 sync behaviour.)
+
+# AppMan GUI
 am-gui
+# VSCode fork with agentic AI integration
 cursor
+# GPU monitoring
 gpu-t
+# Simple AppImage Sandbox - for adding additional sandboxing (bwrap) to an AppImage installed via AM-GUI
+sas
+github-store
+# Piracy game launcher
+hydra
+# Misc
+appimagetool
