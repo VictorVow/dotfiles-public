@@ -1438,6 +1438,15 @@ INSTALLS
     # stale on every extension update; Continue manages its own schema registration.
 
     # ── Misc extension settings ─────────────────────────────────────────────────
+    # fabiospampinato.vscode-open-in-application: route .md through marktext-wrap.
+    # Must be duplicated here (not just in VSCodium settings) — the extension is
+    # installed in both editors but with no "md" mapping it falls back to
+    # `xdg-open`, which under the extension host's ELECTRON_RUN_AS_NODE=1 launches
+    # marktext's Electron in Node mode and dies silently. See the matching
+    # VSCodium block and the marktext-wrap wrapper below for the full rationale.
+    "openInApplication.applications" = {
+      "md" = "${config.home.homeDirectory}/.local/bin/marktext-wrap";
+    };
     "dreammaker.autoUpdate"   = true;
     "dreammaker.tickOnCreate" = true;
     "docker.extension.enableComposeLanguageServer" = false;
