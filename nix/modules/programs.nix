@@ -605,6 +605,41 @@ let
     };
   };
 
+  # MarkText UI readability fix, injected via preferences.json "customCss".
+  # MarkText's bundled CSS renders the TOC sidebar at var(--sideBarColor)
+  # (~60% opacity) and file-tab titles at var(--editorColor50) @ 12px — both
+  # too dim/thin/small to read comfortably. customCss is appended as the last
+  # <style> in <head>, so these rules win over the bundled UI styles. Using
+  # var(--editorColor) keeps the text colour correct in both light and dark
+  # themes. Applied by the marktextCustomCss activation script below (jq-merged
+  # into the mutable preferences.json so MarkText's other runtime-written
+  # settings are preserved).
+  marktextCss = pkgs.writeText "marktext-custom.css" ''
+    /* ── MarkText UI readability: brighter, bolder TOC + tab titles ── */
+
+    /* Table of Contents items */
+    .side-bar-toc .el-tree,
+    .side-bar-toc .el-tree-node__label,
+    .side-bar-toc > li {
+      color: var(--editorColor) !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+    }
+    /* TOC heading */
+    .side-bar-toc .title {
+      color: var(--editorColor) !important;
+      font-weight: 700 !important;
+    }
+
+    /* File tab titles */
+    .tabs-container > li {
+      color: var(--editorColor) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+    }
+    .tabs-container > li.active { font-weight: 700 !important; }
+  '';
+
 in
 
 # Home Manager program configurations.
@@ -1577,6 +1612,26 @@ INSTALLS
         "${config.home.homeDirectory}/AppImages/marktext.appimage" --no-sandbox "$@"
     '';
   };
+
+  # Set MarkText's customCss (see marktextCss in the let block) without taking
+  # over the whole preferences.json: MarkText writes theme, last-opened-folder,
+  # window state, etc. back to that file at runtime, so it can't be a read-only
+  # Nix symlink. Instead we jq-merge only the .customCss key, preserving every
+  # other field. Nix is now the source of truth for customCss — edits made via
+  # MarkText's Preferences UI are reverted on the next `hms`. If MarkText is
+  # running during the switch, restart it to pick up the change.
+  home.activation.marktextCustomCss = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.config/marktext/preferences.json"
+    tmp=$(mktemp)
+    if [ -f "$dest" ]; then
+      ${pkgs.jq}/bin/jq --rawfile css ${marktextCss} '.customCss = $css' "$dest" > "$tmp"
+    else
+      $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
+      ${pkgs.jq}/bin/jq -n --rawfile css ${marktextCss} '{customCss: $css}' > "$tmp"
+    fi
+    $DRY_RUN_CMD install -m 644 "$tmp" "$dest"
+    rm -f "$tmp"
+  '';
 
   # Point VSCodium at Microsoft's VS Code Marketplace instead of Open VSX.
   # VSCodium reads VSCODE_GALLERY_* env vars at launch (see resources/app/out/main.js).
