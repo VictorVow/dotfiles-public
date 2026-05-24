@@ -30,6 +30,7 @@
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
+    ./modules/claude-skill-logseq.nix # Large Logseq DB-query Claude skill (own module)
   ];
 
   # Tell Home Manager this is a non-NixOS Linux system.

@@ -18,10 +18,12 @@ installs/
 │   ├── home.nix              # Top-level Home Manager config, imports modules
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
-│   │   └── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
+│   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
+│   │   └── claude-skills/    # Large Claude Code skills sourced verbatim (e.g. logseq-db-queries)
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
-│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop, claude-code
+│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
+│       ├── claude-skill-logseq.nix # Large Logseq DB-query skill (kept out of programs.nix)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 └── docs/                     # All documentation
