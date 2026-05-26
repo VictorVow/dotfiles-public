@@ -2167,7 +2167,15 @@ INSTALLS
       if branch:
           parts.append(f"🌿 {branch}{git_extra}")
       if remote_url:
-          link = f"\033]8;;{remote_url}\033\\{repo_name}\033]8;;\033\\"
+          # Wrap the link text in SGR underline (\e[4m … \e[24m) so it gets the
+          # same visible "this is a link" cue as Claude Code's own PR badge
+          # (PrBadge sets <Text underline={true}>). Without it, the OSC 8 region
+          # is still clickable via Ctrl+Click in Konsole/Yakuake but renders
+          # indistinguishably from surrounding text — users have no idea it's
+          # there. Claude Code's f_ ANSI parser carries the underline prop into
+          # the rendered <Link><StyledText underline …>> so both the visual cue
+          # and the OSC 8 hyperlink survive the Ink round-trip.
+          link = f"\033]8;;{remote_url}\033\\\033[4m{repo_name}\033[24m\033]8;;\033\\"
           parts.append(f"🔗 {link}")
       if fh:
           parts.append(f"⏰ {round(fh.get('utilization', 0))}% ({reset_rel(fh)})")
