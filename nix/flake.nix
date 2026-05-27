@@ -51,6 +51,12 @@
       extraSpecialArgs = {
         inherit llm-agents tuxManager ie-r;
         pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+        hostProfile = {
+          hms = {
+            flakePath  = "$HOME/Projects/installs/nix";
+            configName = "boss";
+          };
+        };
       };
     };
   };

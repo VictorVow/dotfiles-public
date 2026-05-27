@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, hostProfile, ... }:
 
 # Shell environment configuration.
 # Manages PATH, environment variables, aliases, and Bash integration.
@@ -175,8 +175,8 @@
       # since the last update-all; re-run update-all rather than dropping the
       # flag.
       hms() {
-        local flake="$HOME/Projects/installs/nix"
-        local config="boss"
+        local flake="${hostProfile.hms.flakePath}"
+        local config="${hostProfile.hms.configName}"
         home-manager switch --flake "$flake#$config" --no-write-lock-file
       }
 
