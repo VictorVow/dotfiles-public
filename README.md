@@ -22,8 +22,9 @@ installs/
 │   │   └── claude-skills/    # Large Claude Code skills sourced verbatim (e.g. logseq-db-queries)
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
-│       ├── programs.nix      # programs.* configs: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
-│       ├── claude-skill-logseq.nix # Large Logseq DB-query skill (kept out of programs.nix)
+│       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
+│       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), zed-editor, rofi
+│       ├── claude-skill-logseq.nix # Large Logseq DB-query skill (kept out of shell-apps.nix)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 └── docs/                     # All documentation

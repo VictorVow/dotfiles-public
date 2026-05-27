@@ -25,7 +25,8 @@
 
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)
-    ./modules/programs.nix   # home.programs.* configurations
+    ./modules/shell-apps.nix # home.programs.* for shell/CLI apps
+    ./modules/gui-apps.nix   # home.programs.* for GUI apps (Firefox, Zed, Rofi)
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
