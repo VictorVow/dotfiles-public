@@ -1307,8 +1307,13 @@ in
           clean = ANSI_RE.sub("", s)
           return len(clean) + sum(1 for c in clean if ord(c) > 127)
 
+      # Claude Code spawns the statusline with no tty and piped stdio, so the
+      # only reliable width source is $COLUMNS, which Claude Code v2.1.153+
+      # sets before exec (anthropics/claude-code#22115, #5430). On older
+      # versions the wrap falls back to 120 and the host terminal clips lines.
       try:
-          width = shutil.get_terminal_size((120, 24)).columns
+          width = int(os.environ.get("COLUMNS") or 0) \
+                  or shutil.get_terminal_size((120, 24)).columns
       except Exception:
           width = 120
 
