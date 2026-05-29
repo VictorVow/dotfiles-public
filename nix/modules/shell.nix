@@ -340,7 +340,7 @@
     JAVA_HOME = "${pkgs.jdk21}";
 
     # Android SDK root — SDK tool paths are added to PATH in initExtra above
-    ANDROID_HOME = "$HOME/Documents/Dev/Android/Sdk";
+    ANDROID_HOME = "$HOME/Projects/Dev/Android/Sdk";
 
     # Disable GitHub CLI telemetry (enabled by default since gh ≥ 2.91.0)
     GH_TELEMETRY = "false";

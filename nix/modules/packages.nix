@@ -207,7 +207,7 @@
     # rebuilds a multi-GB FHS rootfs every time the lock bumps. Reverted to
     # the PPA fallback in custom-installers.yml (ppa:maarten-fonville/android-studio).
     # ANDROID_HOME (set in shell.nix) still applies; existing SDK in
-    # ~/Documents/Dev/Android/Sdk continues to work unchanged.
+    # ~/Projects/Dev/Android/Sdk continues to work unchanged.
 
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
