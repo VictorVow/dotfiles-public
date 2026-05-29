@@ -10,15 +10,15 @@
     # next run; the SHA in the url is what nix flake update resolves into
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
-    # channel: nixos-25.11
-    nixpkgs.url = "github:NixOS/nixpkgs/02fe5aa2f781d6a425879e4e31a4425770fa8d53";
+    # channel: nixos-26.05
+    nixpkgs.url = "github:NixOS/nixpkgs/618720a37be57c27e9f42c5baaf8af42ce9e0c81";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/b7e5f5bde592817aabb8b616d9debbc2dd499035";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/618720a37be57c27e9f42c5baaf8af42ce9e0c81";
 
     home-manager = {
-      # channel: release-25.11
-      url = "github:nix-community/home-manager/cc09c0f9b7eaa95c2d9827338a5eb03d32505ca5";
+      # channel: release-26.05
+      url = "github:nix-community/home-manager/c68d2a24376da3860ef161373d91348b1542356b";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
