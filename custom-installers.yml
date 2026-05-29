@@ -457,47 +457,6 @@
       when: ansible_facts.packages['code'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
-    # CURSOR is managed via AppMan — see appman-appimages.txt (key: cursor).
-    # ════════════════════════════════════════════════════════════════════════
-
-    # ════════════════════════════════════════════════════════════════════════
-    # CLAUDE DESKTOP — https://github.com/aaddrick/claude-desktop-debian
-    # Replaces the aaddrick claude-desktop flake input which rebuilt the .deb
-    # on every lock bump. Now installs the upstream prebuilt .deb directly.
-    # ════════════════════════════════════════════════════════════════════════
-
-    - name: Claude Desktop | fetch latest release metadata
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/aaddrick/claude-desktop-debian/releases/latest
-        return_content: yes
-      register: claude_desktop_release
-      when: ansible_facts.packages['claude-desktop'] is not defined
-
-    - name: Claude Desktop | resolve .deb download URL
-      ansible.builtin.set_fact:
-        claude_desktop_url: "{{ claude_desktop_release.json.assets | selectattr('name', 'search', '_' + deb_arch + '\\.deb$') | map(attribute='browser_download_url') | first }}"
-      when: ansible_facts.packages['claude-desktop'] is not defined
-
-    - name: Claude Desktop | download .deb
-      ansible.builtin.get_url:
-        url: "{{ claude_desktop_url }}"
-        dest: /tmp/claude-desktop.deb
-        mode: '0644'
-      when: ansible_facts.packages['claude-desktop'] is not defined
-
-    - name: Claude Desktop | install .deb
-      ansible.builtin.apt:
-        deb: /tmp/claude-desktop.deb
-      become: yes
-      when: ansible_facts.packages['claude-desktop'] is not defined
-
-    - name: Claude Desktop | clean up temp .deb
-      ansible.builtin.file:
-        path: /tmp/claude-desktop.deb
-        state: absent
-      when: ansible_facts.packages['claude-desktop'] is not defined
-
-    # ════════════════════════════════════════════════════════════════════════
     # MEGASYNC — https://help.mega.io/installs-apps/desktop/repository
     # MEGA Cloud Drive sync client. nixpkgs builds it from source — official
     # apt repo provides a prebuilt .deb that tracks releases automatically.
@@ -535,6 +494,7 @@
     # RUSTDESK — https://github.com/rustdesk/rustdesk/releases
     # Open-source remote desktop. nixpkgs builds it from source (Rust + the
     # vendored libsciter crate); the upstream .deb is prebuilt.
+    # It IS available via AppMan however since it uses a systemd service I don't want to risk it.
     # ════════════════════════════════════════════════════════════════════════
 
     - name: RustDesk | fetch latest release metadata

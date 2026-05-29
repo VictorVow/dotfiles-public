@@ -1,4 +1,4 @@
-# appman-appimages.txt — Declarative list of AppImages managed by AppMan (AM).
+# appman-appimages.txt — Declarative list of AppImages + portable Linux binaries managed by AppMan (AM).
 #
 # Each line is the catalogue key from ivan-hc/AM (e.g. `obsidian`, `freetube`),
 # NOT the binary name shown after install. Run `appman -a | grep -i <name>`
@@ -13,8 +13,14 @@
 
 # AppMan GUI
 am-gui
-# VSCode fork with agentic AI integration
+# Zed Editor (Rust-based, VSCode-like, agentic too)
+zed
+# Agent orchestrator and VSCode fork
 cursor
+# Claude Code desktop - unofficial Linux build https://github.com/aaddrick/claude-desktop-debian
+claude-desktop
+# T3 Code https://github.com/pingdotgg/t3code/
+t3code
 # GPU monitoring
 gpu-t
 # Simple AppImage Sandbox - for adding additional sandboxing (bwrap) to an AppImage installed via AM-GUI
