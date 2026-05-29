@@ -57,7 +57,6 @@
     gocryptfs # Encrypted overlay filesystem; required for KDE Plasma Vault
 
     # ── Terminal / Shell Tools ────────────────────────────────────────────────
-    screen  # Terminal multiplexer (classic)
     tmux    # Terminal multiplexer (modern) — also configured in programs.nix
     # micro — managed by programs.micro in programs.nix (installs it automatically)
     lynx    # Text-only web browser
