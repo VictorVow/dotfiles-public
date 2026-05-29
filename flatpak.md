@@ -10,7 +10,6 @@ codes.merritt.Nyrna
 codes.nora.gDiceRoller
 com.adamcake.Bolt
 com.authormore.penpotdesktop
-com.axosoft.GitKraken
 com.bilingify.readest
 com.bktus.gpgfrontend
 com.borgbase.Vorta
@@ -135,14 +134,13 @@ org.kde.merkuro
 org.keepassxc.KeePassXC
 org.libreoffice.LibreOffice
 org.mozilla.firefox
-org.mozilla.Thunderbird
+org.mozilla.thunderbird_esr
 org.nickvision.tubeconverter
 org.nicotine_plus.Nicotine
 org.onionshare.OnionShare
 org.openshot.OpenShot
 org.polymc.PolyMC
 org.prismlauncher.PrismLauncher
-org.qbittorrent.qBittorrent
 org.recoll.recoll
 org.sabnzbd.sabnzbd
 org.signal.Signal
@@ -161,11 +159,6 @@ re.sonny.Junction
 us.zoom.Zoom
 
 ## Flathub Beta
-
-Stremio is pinned to the beta remote on purpose: `beta` (`1.0.0-beta.x`) is the
-newer-generation CEF-based rewrite, whereas stable Flathub only carries the older
-legacy Qt app (`4.4.x`). Beta is the more modern/maintained build despite the
-version number looking lower.
 
 com.stremio.Stremio
 
