@@ -683,53 +683,53 @@ in
   };
 
   # ── VSCodium ──────────────────────────────────────────────────────────────────
-  # Binary via pkgs.vscodium (see vscodiumPkg let-binding at top of file).
-  # programs.vscode only manages one editor, so settings live in xdg.configFile
-  # and extensions are declared via pkgs.vscode-with-extensions in vscodiumPkg.
-
+  # Managed via programs.vscodium (HM module added 2026-03-02). Settings live in
+  # profiles.default.userSettings; the module writes them under ~/.config/VSCodium/User.
+  # Default mutableExtensionsDir = true (no extra profiles) preserves the in-app
+  # marketplace install flow into ~/.vscode-oss/extensions/.
+  #
   # lowPrio: VSCodium and VS Code share locale file paths under lib/vscode/locales/.
   # Defer to VS Code on collisions so home.packages buildEnv resolves cleanly.
-  home.packages = [ (lib.lowPrio vscodiumPkg) ];
+  programs.vscodium = {
+    enable = true;
+    package = lib.lowPrio vscodiumPkg;
 
-  xdg.configFile."VSCodium/User/settings.json" = {
-    force = true;
-    source = jsonFormat.generate "vscodium-settings" {
-      "diffEditor.ignoreTrimWhitespace" = false;
-      "window.titleBarStyle"            = "native"; # Bug with Electron when using custom title bar is causing 1-2px at top to pass through clicks the window below
-      "editor.fontFamily"               = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
-      "editor.fontLigatures"            = true;
-      "markdown.preview.fontSize"       = 18;
-      # NOTE: this setting currently has no effect — VSCodium's patch to remove the onboarding
-      # screen (PR #2804) left IOnboardingService unregistered, so workbench.contrib.startupPageRunner
-      # fails to instantiate and the welcome page never auto-opens. Workaround: Ctrl+Shift+P →
-      # "Help: Welcome" or "File: Open Recent…". Track fix at:
-      #   https://github.com/VSCodium/vscodium/issues/2816 (bug report)
-      #   https://github.com/VSCodium/vscodium/pull/2804  (regression source)
-      "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
-      # fabiospampinato.vscode-open-in-application: route .md through marktext-wrap.
-      # The extension host runs with ELECTRON_RUN_AS_NODE=1, which it propagates to
-      # any child process. Without scrubbing, marktext.appimage's Electron binary
-      # is forced into Node mode, rejects --no-sandbox, and tries to exec the .md
-      # as a JS file. The wrapper unsets the var and launches normally.
-      "openInApplication.applications" = {
-        "md" = "${config.home.homeDirectory}/.local/bin/marktext-wrap";
+    profiles.default = {
+      userSettings = {
+        "diffEditor.ignoreTrimWhitespace" = false;
+        "window.titleBarStyle"            = "native"; # Bug with Electron when using custom title bar is causing 1-2px at top to pass through clicks the window below
+        "editor.fontFamily"               = "JetBrains Mono"; # Chosen via https://www.codingfont.com/
+        "editor.fontLigatures"            = true;
+        "markdown.preview.fontSize"       = 18;
+        # NOTE: this setting currently has no effect — VSCodium's patch to remove the onboarding
+        # screen (PR #2804) left IOnboardingService unregistered, so workbench.contrib.startupPageRunner
+        # fails to instantiate and the welcome page never auto-opens. Workaround: Ctrl+Shift+P →
+        # "Help: Welcome" or "File: Open Recent…". Track fix at:
+        #   https://github.com/VSCodium/vscodium/issues/2816 (bug report)
+        #   https://github.com/VSCodium/vscodium/pull/2804  (regression source)
+        "workbench.startupEditor"         = "welcomePage";  # show recent folders/files on new window
+        # fabiospampinato.vscode-open-in-application: route .md through marktext-wrap.
+        # The extension host runs with ELECTRON_RUN_AS_NODE=1, which it propagates to
+        # any child process. Without scrubbing, marktext.appimage's Electron binary
+        # is forced into Node mode, rejects --no-sandbox, and tries to exec the .md
+        # as a JS file. The wrapper unsets the var and launches normally.
+        "openInApplication.applications" = {
+          "md" = "${config.home.homeDirectory}/.local/bin/marktext-wrap";
+        };
+        # Disable Red Hat Java extension auto-build on save / on open — builds
+        # are on-demand only (Command Palette → "Java: Rebuild Projects").
+        "java.autobuild.enabled" = false;
+        # Don't auto re-import the project when pom.xml / build.gradle change;
+        # user must trigger re-import explicitly. (other values: "automatic",
+        # "interactive")
+        "java.configuration.updateBuildConfiguration" = "disabled";
       };
-      # Disable Red Hat Java extension auto-build on save / on open — builds
-      # are on-demand only (Command Palette → "Java: Rebuild Projects").
-      "java.autobuild.enabled" = false;
-      # Don't auto re-import the project when pom.xml / build.gradle change;
-      # user must trigger re-import explicitly. (other values: "automatic",
-      # "interactive")
-      "java.configuration.updateBuildConfiguration" = "disabled";
-    };
-  };
 
-  xdg.configFile."VSCodium/User/keybindings.json" = {
-    force = true;
-    source = jsonFormat.generate "vscodium-keybindings" [
-      # Ctrl+; → Tasks: Run Task (open the task picker)
-      { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
-    ];
+      keybindings = [
+        # Ctrl+; → Tasks: Run Task (open the task picker)
+        { key = "ctrl+;"; command = "workbench.action.tasks.runTask"; }
+      ];
+    };
   };
 
   home.file.".local/bin/marktext-wrap" = {
