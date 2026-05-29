@@ -843,39 +843,6 @@ INSTALLS
     fi
   '';
 
-  # ── Zed Editor settings ────────────────────────────────────────────────────────
-  programs.zed-editor = {
-    enable = true;
-    # enableMcpIntegration = true;
-    # extensions = [ "swift" "nix" "xy-zed" ];
-    mutableUserKeymaps = false;
-    mutableUserSettings = false;
-    mutableUserTasks = false;
-    # userKeymapss =
-    #   [
-    #     {
-    #       context = "Workspace";
-    #       bindings = {
-    #         ctrl-shift-t = "workspace::NewTerminal";
-    #       };
-    #     };
-    #   ];
-
-    # userSettings =
-    #   {
-    #     features = {
-    #       copilot = false;
-    #     };
-    #     telemetry = {
-    #       metrics = false;
-    #     };
-    #     vim_mode = false;
-    #     ui_font_size = 16;
-    #     buffer_font_size = 16;
-    #   };
-
-  };
-
   # ── App Launcher ──────────────────────────────────────────────────────────────
 
   programs.rofi = {
