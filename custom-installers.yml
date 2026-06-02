@@ -159,7 +159,7 @@
     # The Nix path (androidStudioPackages.stable via buildFHSEnv) was reverted
     # because the FHS rootfs rebuild on every lock bump dwarfed every other
     # build in the closure. ANDROID_HOME (set in shell.nix) and the existing
-    # SDK in ~/Documents/Dev/Android/Sdk continue to work unchanged.
+    # SDK in ~/Projects/Dev/Android/Sdk continue to work unchanged.
     # ════════════════════════════════════════════════════════════════════════
 
     - name: Android Studio | check for PPA-managed installation
