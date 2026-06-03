@@ -106,6 +106,15 @@ let
     "network.prefetch-next"                   = false;  # prevent background downloading of linked pages, which leaks browsing intent and wastes bandwidth
     "network.http.speculative-parallel-limit" = 0;      # prevent Firefox from opening TCP connections to servers it predicts you'll visit (e.g. autocomplete hover)
     "network.trr.mode"                                   = 5;      # fully disable DNS-over-HTTPS (mode 5); system already uses a trusted resolver / local DNS filtering
+    # ── Local Network Access (Firefox 151+) ───────────────────────────────
+    # FF151 rolled LNA out to all users: it gates HTTPS pages from XHR/fetch to
+    # "local network" address spaces, and 100.x.x.x/10 (the tailnet CGNAT range)
+    # counts as local. Self-hosted apps on *.device.example.com (Calibre
+    # reader, Forgejo, Syncthing, …) then have most of their request bursts dropped
+    # by an open FF concurrency bug (bugzilla 2033408). Exempt the whole tailnet
+    # base domain so LNA stays on everywhere else. Format: comma-separated, `*.`
+    # prefix matches the base + all subdomains, hostname only (no scheme/port).
+    "network.lna.skip-domains"                = "*.device.example.com";
     # ── Live suggestions
     "browser.urlbar.quicksuggest.scenario"    = "history";  # disable Mozilla's cloud-based Firefox Suggest service; only suggest from local history
     "browser.urlbar.suggest.searches"           = false;  # prevent URL bar from querying the default search engine for live suggestions as you type
