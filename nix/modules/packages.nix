@@ -409,7 +409,7 @@
     # apply to the CLI binary. So this entry installs just the CLI as a plain
     # package. Same flake source as codex: pkgs.llm-agents.* overlay from
     # numtide (cache.numtide.com).
-    llm-agents.antigravity  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
+    llm-agents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
