@@ -469,6 +469,7 @@ in
     # know where to put it. The policies in programs.firefox.policies are just ignored.
     # Fix: write policies.json directly to your tarball Firefox's distribution/ directory via home.file.
     package = pkgs-unstable.firefox;
+    configPath = ".mozilla/firefox"; # new 2026 default: "${config.xdg.configHome}/mozilla/firefox";
     nativeMessagingHosts = [ pkgs.kdePackages.plasma-browser-integration ];
 
     # Cookie exceptions — populated from xsy8besa.PRIME permissions.sqlite.
