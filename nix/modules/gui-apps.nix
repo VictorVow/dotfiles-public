@@ -483,6 +483,7 @@ in
       "http://localhost:8384"
       "http://localhost:8193"
       # Headscale
+      "https://headscale.device.example.com"
       "https://lord-ubuntu.device.example.com"
       "https://calibre.device.example.com"
       "https://calibre-content.device.example.com"
