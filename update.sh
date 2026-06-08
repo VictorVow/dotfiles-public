@@ -205,6 +205,20 @@ print(m.group(1) if m else "")
 PY
 }
 
+# Echo the Nix-store path of the SUID sandbox helper that the Nix chromium
+# wrapper currently points at, e.g.
+#   /nix/store/…-ungoogled-chromium-148.0.7778.178-sandbox/bin/__chromium-suid-sandbox
+# The path encodes the chromium version, so a change across a home-manager
+# switch means chromium was bumped. Empty (and rc 0) if chromium isn't present.
+# See scripts/chromium-suid-sandbox.sh / custom-installers.yml for why the
+# helper must be reinstalled when this changes.
+_chromium_helper_path() {
+  local wrapper="$HOME/.nix-profile/bin/chromium"
+  [[ -x "$wrapper" ]] || return 0
+  grep -oE '/nix/store/[^"]*-sandbox/bin/__chromium-suid-sandbox' "$wrapper" 2>/dev/null \
+    | tail -1 || true
+}
+
 # ── Setup ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FLAKE_DIR="$SCRIPT_DIR/nix"
@@ -372,8 +386,29 @@ else
   # advance flake.lock; if home-manager switch wanted to write the lock here
   # it would mean an input failed to resolve, which is a real error.
   info "Applying Home Manager configuration..."
+  # Snapshot chromium's helper path before switching so we can tell afterwards
+  # whether the switch bumped chromium (see the restart block below).
+  CHROMIUM_HELPER_BEFORE="$(_chromium_helper_path)"
   run_step "home-manager switch" \
     home-manager switch --flake "$NIX_FLAKE_DIR#boss" --no-write-lock-file
+
+  # If the switch bumped Chromium, the version-specific SUID sandbox helper
+  # copied to /run/wrappers/bin is now stale and Chromium can refuse to launch
+  # until it's refreshed. Restart the installer service to reinstall a matching
+  # setuid helper — but only when the helper path actually changed (it encodes
+  # the chromium version), so unchanged installs don't touch sudo.
+  if [[ -f /etc/systemd/system/chromium-suid-sandbox.service ]]; then
+    CHROMIUM_HELPER_AFTER="$(_chromium_helper_path)"
+    if [[ -n "$CHROMIUM_HELPER_AFTER" \
+          && "$CHROMIUM_HELPER_AFTER" != "$CHROMIUM_HELPER_BEFORE" ]]; then
+      info "Chromium changed — refreshing SUID sandbox helper (needs sudo)."
+      run_step "chromium-suid-sandbox restart" \
+        sudo systemctl restart chromium-suid-sandbox.service
+    else
+      skipped "Chromium unchanged — SUID sandbox helper still current."
+      RESULTS["chromium-suid-sandbox restart"]="✓ unchanged"
+    fi
+  fi
 
   success "Nix / Home Manager done."
 fi
@@ -613,7 +648,7 @@ printf "  %-30s %s\n" "Step" "Result"
 printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
-           "Nix flake update" "home-manager switch" \
+           "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
            "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "AppMan" "appman update" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
