@@ -518,20 +518,24 @@ if ! command -v pipx &>/dev/null; then
   skipped "pipx not found — skipping."
   RESULTS["pipx"]="skipped (not installed)"
 else
-  # Upgrade all pipx-managed packages. Most tools have been migrated to Nix
-  # (yt-dlp, poetry, uv, key-mon), but any remaining pipx installs are upgraded.
+  # Upgrade all pipx-managed packages. Some tools have moved to Nix (yt-dlp,
+  # poetry, uv, ansible), but the rest (key-mon, fanficfare, git-filter-repo,
+  # claude-code-log) remain pipx-managed and are upgraded here.
+  #
   # If venvs reference a Python that no longer exists (e.g. after a system
-  # Python bump), reinstall-all rebuilds them against the current interpreter.
+  # Python bump), `pipx upgrade-all` crashes with a traceback. Detect that up
+  # front and rebuild against the current interpreter before upgrading.
+  # Note: `pipx list` exits non-zero when an interpreter is missing, so its
+  # output is captured before grepping — piping straight into grep would let
+  # that non-zero status trip `set -o pipefail` regardless of the match.
   pipx_upgrade_all() {
-    if pipx upgrade-all; then
-      return 0
-    fi
-    if pipx list 2>&1 | grep -q 'invalid interpreter'; then
+    local list_out
+    list_out=$(pipx list 2>&1) || true
+    if grep -q 'invalid interpreter' <<<"$list_out"; then
       warn "pipx venvs reference a missing Python — running reinstall-all."
-      pipx reinstall-all && pipx upgrade-all
-    else
-      return 1
+      pipx reinstall-all || return 1
     fi
+    pipx upgrade-all
   }
   run_step "pipx upgrade-all" pipx_upgrade_all
   success "pipx done."
