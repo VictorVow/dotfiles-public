@@ -440,7 +440,7 @@ else
   run_step "brew update + upgrade" bash -c "brew update && brew upgrade"
 
   # Sync declared state: install new entries, remove unlisted ones.
-  run_step "brew bundle sync" brew bundle install --cleanup --file="$SCRIPT_DIR/Brewfile"
+  run_step "brew bundle sync" brew bundle install --cleanup --force-cleanup --file="$SCRIPT_DIR/Brewfile"
 
   success "Homebrew done."
 fi
