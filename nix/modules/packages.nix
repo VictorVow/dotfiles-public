@@ -64,6 +64,7 @@
 
     # ── Security / Privacy ────────────────────────────────────────────────────
     gnupg   # GNU Privacy Guard — GPG encryption and signing
+    libsecret # Secret Service client library — needed for logseq-cli
     firejail # Sandboxing tool for running applications in restricted environments
     veracrypt # On-the-fly disk/file-container encryption (VeraCrypt GUI + CLI)
 
