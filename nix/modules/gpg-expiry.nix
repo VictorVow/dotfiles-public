@@ -55,6 +55,9 @@ Clear this warning:     systemctl --user start gpg-expiry-check.service"
 
       for fpr in "''${fprs[@]}"; do
         echo ">>> Extending $fpr by $EXPIRY"
+        # Two-arg form sets the primary key; '*' form sets all subkeys.
+        # Both are needed — '*' alone leaves the primary untouched.
+        gpg --quick-set-expire "$fpr" "$EXPIRY"
         gpg --quick-set-expire "$fpr" "$EXPIRY" '*'
       done
     '';
