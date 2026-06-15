@@ -1203,7 +1203,11 @@ in
       cost_info = payload.get("cost") or {}
       cost_usd = cost_info.get("total_cost_usd") or 0
 
-      effort = payload.get("effortLevel") or payload.get("effort_level")
+      # Live session effort is nested under effort.level in the statusline
+      # payload. /effort is session-only (never written to settings.json), so
+      # prefer the payload; only fall back to the persisted settings.json default.
+      effort = (payload.get("effort") or {}).get("level") \
+          or payload.get("effortLevel") or payload.get("effort_level")
       if not effort:
           try:
               effort = json.loads((HOME / ".claude" / "settings.json").read_text()).get("effortLevel")
