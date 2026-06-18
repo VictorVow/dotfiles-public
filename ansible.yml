@@ -19,8 +19,6 @@
   vars:
     test: yes # Random test vars
 
-
-
   tasks:
     - name: Gather the package facts
       ansible.builtin.package_facts:
@@ -47,8 +45,8 @@
           Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/boss/.nix-profile/bin:/nix/var/nix/profiles/default/bin"
         owner: root
         group: root
-        mode: '0440'
-        validate: 'visudo -cf %s'
+        mode: "0440"
+        validate: "visudo -cf %s"
       become: yes
 
     # ── Snap: remove and permanently block ──────────────────────────────
@@ -84,7 +82,7 @@
           Pin-Priority: -10
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       become: yes
 
     - name: Clean up leftover snap directories
@@ -110,39 +108,39 @@
           # ── KDE Essentials ───────────────────────────────────────────────
           # These are marked manual (apt-mark manual) to prevent autoremove
           # from stripping them when unrelated packages are removed.
-          - cryptsetup                    # The main command-line tool for LUKS encryption/decryption
-          - cryptsetup-initramfs          # Enables unlocking encrypted volumes at boot
-          - gocryptfs                     # For unlocking Plasma Vaults
-          - sddm                           # Kubuntu login screen (display manager)
-          - sddm-theme-breeze              # KDE Breeze login theme
-          - dolphin                        # KDE file manager
-          - ark                            # KDE archive manager
-          - plasma-runners-addons          # KRunner search plugins (calculator, bookmarks, etc.)
-          - kde-spectacle                  # Screenshot tool
-          - plasma-widgets-addons          # Weather, calculator, notes plasmoids
-          - plasma-dataengines-addons      # Data engines powering the widget add-ons
-          - plasma-wallpapers-addons       # Extra wallpapers and slideshow support
-          - plasma-calendar-addons         # Calendar widget integration
-          - grub-theme-breeze              # Breeze GRUB theme
-          - plymouth-theme-breeze          # Breeze boot splash
-          - usb-creator-kde               # USB startup disk creator
-          - alsa-base                      # ALSA driver configuration files
+          - cryptsetup # The main command-line tool for LUKS encryption/decryption
+          - cryptsetup-initramfs # Enables unlocking encrypted volumes at boot
+          - gocryptfs # For unlocking Plasma Vaults
+          - sddm # Kubuntu login screen (display manager)
+          - sddm-theme-breeze # KDE Breeze login theme
+          - dolphin # KDE file manager
+          - ark # KDE archive manager
+          - plasma-runners-addons # KRunner search plugins (calculator, bookmarks, etc.)
+          - kde-spectacle # Screenshot tool
+          - plasma-widgets-addons # Weather, calculator, notes plasmoids
+          - plasma-dataengines-addons # Data engines powering the widget add-ons
+          - plasma-wallpapers-addons # Extra wallpapers and slideshow support
+          - plasma-calendar-addons # Calendar widget integration
+          - grub-theme-breeze # Breeze GRUB theme
+          - plymouth-theme-breeze # Breeze boot splash
+          - usb-creator-kde # USB startup disk creator
+          - alsa-base # ALSA driver configuration files
 
           # ── KDE Plasma integration ────────────────────────────────────────
-          - kio-admin                      # Allows Dolphin file manager to run as root
-          - plasma-gamemode                # KDE Plasma integration for Feral's gamemode
+          - kio-admin # Allows Dolphin file manager to run as root
+          - plasma-gamemode # KDE Plasma integration for Feral's gamemode
           - plasma-discover-backend-flatpak # Flatpak backend for KDE Discover app store
 
           # ── Flatpak (system-level) ─────────────────────────────────────────
-          - flatpak                        # Flatpak runtime — system-wide integration
+          - flatpak # Flatpak runtime — system-wide integration
 
           # ── System services ───────────────────────────────────────────────
-          - earlyoom                       # Out-of-memory killer daemon (system service)
-          - logiops                        # Advanced Logitech mouse/keyboard customisation
-                                           # Requires system service + /etc/logiops.yml
-          - postfix                        # Mail Transfer Agent — cronjobs store errors here
-          - power-profiles-daemon          # Adjusts power management profiles (D-Bus service)
-          - vnstat                         # Network traffic monitor daemon
+          - earlyoom # Out-of-memory killer daemon (system service)
+          - logiops # Advanced Logitech mouse/keyboard customisation
+            # Requires system service + /etc/logiops.yml
+          - postfix # Mail Transfer Agent — cronjobs store errors here
+          - power-profiles-daemon # Adjusts power management profiles (D-Bus service)
+          - vnstat # Network traffic monitor daemon
 
           # ── System libraries (Shadow PC streaming) ────────────────────────
           # Needed for Shadow PC client GPU acceleration
@@ -159,8 +157,8 @@
           - lutris
 
           # ── System tray / indicator library ──────────────────────────────
-          - libayatana-appindicator3-1         # Tray icon support for Lutris (C library)
-          - gir1.2-ayatanaappindicator3-0.1    # GIR typelib needed by Python-GI to load AppIndicator
+          - libayatana-appindicator3-1 # Tray icon support for Lutris (C library)
+          - gir1.2-ayatanaappindicator3-0.1 # GIR typelib needed by Python-GI to load AppIndicator
 
           # ── XDG Desktop Portal ────────────────────────────────────────────
           # Needed for Flameshot + NormCap to work on Wayland
@@ -170,8 +168,8 @@
           # - xdg-desktop-portal-gnome
 
           # ── Ubuntu-specific GUI tools ─────────────────────────────────────
-          - gdebi                          # Install .deb packages whilst handling dependencies
-          - synaptic                       # GUI front-end for apt package manager
+          - gdebi # Install .deb packages whilst handling dependencies
+          - synaptic # GUI front-end for apt package manager
 
           # ── System Python tooling ─────────────────────────────────────────
           # Kept at system level for compatibility with system Python workflows.
@@ -180,10 +178,10 @@
           - pipx
 
           # ── apt infrastructure ────────────────────────────────────────────
-          - apt-transport-https            # HTTPS support for apt repositories
-          - software-properties-common     # add-apt-repository command
-          - wget                           # File downloader (used by 3rd-party scripts)
-          - gpg                            # GPG key import for apt repos (also in Nix for user use)
+          - apt-transport-https # HTTPS support for apt repositories
+          - software-properties-common # add-apt-repository command
+          - wget # File downloader (used by 3rd-party scripts)
+          - gpg # GPG key import for apt repos (also in Nix for user use)
 
         state: present
         update_cache: yes
@@ -196,8 +194,14 @@
         name: "{{ item.name }}"
         selection: hold
       loop:
-        - { name: procps, comment: "pgrep, ps, kill — superseded by nix#procps" }
-        - { name: kate,   comment: "KDE text editor — superseded by nix#kdePackages.kate" }
+        - {
+            name: procps,
+            comment: "pgrep, ps, kill — superseded by nix#procps",
+          }
+        - {
+            name: kate,
+            comment: "KDE text editor — superseded by nix#kdePackages.kate",
+          }
       become: yes
 
     - name: Purge apt packages fully superseded by Nix
@@ -259,7 +263,7 @@
         dest: /etc/apparmor.d/steam-srt-bwrap
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
         content: |
           abi <abi/4.0>,
           include <tunables/global>
@@ -336,7 +340,7 @@
           unix (receive, send) type=stream,
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       become: yes
 
     - name: Vorta | reload fusermount3 AppArmor profile
@@ -379,7 +383,7 @@
         EOF
       become: yes
       changed_when: false
-      failed_when: false  # non-fatal if hms hasn't run yet
+      failed_when: false # non-fatal if hms hasn't run yet
 
     - name: Install waydroid D-Bus policy from Nix store
       ansible.builtin.shell: |
@@ -391,7 +395,7 @@
         systemctl reload dbus
       become: yes
       changed_when: false
-      failed_when: false  # non-fatal if hms hasn't run yet
+      failed_when: false # non-fatal if hms hasn't run yet
 
     - name: Persist binder_linux kernel module for Waydroid
       ansible.builtin.copy:
@@ -399,7 +403,7 @@
         content: "binder_linux\n"
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       become: yes
 
     - name: Load binder_linux kernel module
@@ -407,7 +411,7 @@
         name: binder_linux
         state: present
       become: yes
-      failed_when: false  # non-fatal: module file absent until linux-modules-extra is installed
+      failed_when: false # non-fatal: module file absent until linux-modules-extra is installed
 
     - name: Enable and start waydroid-container service
       ansible.builtin.systemd:
@@ -416,7 +420,7 @@
         state: started
         daemon_reload: yes
       become: yes
-      failed_when: false  # non-fatal: service unit absent if hms hasn't run yet
+      failed_when: false # non-fatal: service unit absent if hms hasn't run yet
 
     # ── zswap ──────────────────────────────────────────────────────────────
     # Enable zswap (compressed swap cache in front of disk swap) with zstd
@@ -425,7 +429,7 @@
     - name: Enable zswap with zstd compression in GRUB
       ansible.builtin.lineinfile:
         path: /etc/default/grub
-        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+        regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
         line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd"'
       become: yes
       notify: Update GRUB
@@ -441,7 +445,7 @@
         state: directory
         owner: root
         group: root
-        mode: '0755'
+        mode: "0755"
       become: yes
 
     - name: Create systemd logind drop-in to ignore lid events
@@ -454,7 +458,7 @@
           HandleLidSwitchDocked=ignore
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       become: yes
       notify: Restart systemd-logind
 
@@ -464,7 +468,7 @@
         state: directory
         owner: root
         group: root
-        mode: '0755'
+        mode: "0755"
       become: yes
 
     - name: Create systemd freeze timeout drop-in
@@ -478,7 +482,7 @@
           DefaultTimeoutStopSec=90s
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       become: yes
       notify: Reload systemd daemon
 
