@@ -211,6 +211,18 @@ in
           password = s.secret_password.path;
           password2 = s.secret_password2.path;
         };
+        # Read-only FUSE mount of this node's encrypted backups, defined but NOT
+        # auto-started (autoMount = false). After `home-manager switch`, start it
+        # on demand with:
+        #   systemctl --user start 'rclone-mount:@crypt_BB2_rclone-lord-ubuntu'
+        # Key "" mounts the remote root (backups live under Rclone/); the mountPoint
+        # dir is auto-created by the unit's ExecStartPre — no mkdir needed.
+        mounts."" = {
+          enable = true;
+          autoMount = false;
+          mountPoint = "/home/boss/Mounts/crypt_BB2_rclone-lord-ubuntu";
+          options."read-only" = true;
+        };
       };
     };
   };
