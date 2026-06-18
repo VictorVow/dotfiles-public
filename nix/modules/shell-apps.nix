@@ -1380,9 +1380,9 @@ in
   programs.ssh = {
     enable = true;
     # Suppress deprecation warning — defaults will be removed in a future HM release;
-    # all desired settings are explicitly set in matchBlocks below.
+    # all desired settings are explicitly set in settings below.
     enableDefaultConfig = false;
-    matchBlocks."*" = {
+    settings."*" = {
       serverAliveInterval = 60;
       serverAliveCountMax = 10;
     };
