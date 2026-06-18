@@ -46,6 +46,7 @@ com.valvesoftware.SteamLink
 dev.bambosh.UnofficialHomestuckCollection
 dev.neovide.neovide
 dev.ters.LocalTranslate
+dev.vencord.Vesktop
 eu.betterbird.Betterbird
 eu.vcmi.VCMI
 fr.arnaudmichel.launcherstudio
@@ -97,7 +98,6 @@ net.kuribo64.melonDS
 net.lutris.Lutris
 net.mediaarea.MOVMetaEdit
 net.mkiol.SpeechNote
-net.mullvad.MullvadBrowser
 net.newpipe.NewPipe
 net.runelite.RuneLite
 net.sapples.LiveCaptions
@@ -105,7 +105,6 @@ net.sourceforge.squirrel_sql
 nl.hjdskes.gcolor3
 no.mifi.losslesscut
 org.briarproject.Briar
-org.chromium.Chromium
 org.DolphinEmu.dolphin-emu
 org.electrum.electrum
 org.fcast.Receiver
@@ -129,7 +128,6 @@ org.kde.kid3
 org.kde.kleopatra
 org.kde.koko
 org.kde.kolourpaint
-org.kde.kommit
 org.kde.merkuro
 org.keepassxc.KeePassXC
 org.libreoffice.LibreOffice
@@ -146,7 +144,6 @@ org.sabnzbd.sabnzbd
 org.signal.Signal
 org.strawberrymusicplayer.strawberry
 org.telegram.desktop
-org.torproject.torbrowser-launcher
 org.tribler.Tribler
 org.videolan.VLC
 org.zotero.Zotero
