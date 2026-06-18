@@ -52,9 +52,14 @@
                  # Note: libvirtd daemon is managed by the system (stays in apt/systemd)
 
     # ── File Management & Backup ──────────────────────────────────────────────
-    rclone   # Cloud storage sync (S3, Google Drive, etc.)
+    # rclone — installed by programs.rclone (modules/rclone.nix), which also
+    # declaratively manages ~/.config/rclone/rclone.conf and its remotes.
     recoll   # Full-text desktop search tool
     gocryptfs # Encrypted overlay filesystem; required for KDE Plasma Vault
+
+    # ── Secrets ───────────────────────────────────────────────────────────────
+    sops # Edit/rotate age-encrypted secrets (nix/secrets/*.yaml)
+    age  # age-keygen + age backend used by sops (keys.txt identity)
 
     # ── Terminal / Shell Tools ────────────────────────────────────────────────
     tmux    # Terminal multiplexer (modern) — also configured in programs.nix

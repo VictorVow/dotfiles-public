@@ -13,9 +13,12 @@ installs/
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
+├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
 ├── nix/                      # Home Manager flake — all user-space config
-│   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager)
+│   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
 │   ├── home.nix              # Top-level Home Manager config, imports modules
+│   ├── secrets/              # sops-encrypted (age) secrets, safe to commit
+│   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
 │   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
@@ -26,6 +29,7 @@ installs/
 │       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), zed-editor, rofi
 │       ├── claude-skill-logseq.nix # Large Logseq DB-query skill (kept out of shell-apps.nix)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
+│       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 └── docs/                     # All documentation
     ├── archive/              # Previously relevant, only kept for historical purposes
@@ -96,3 +100,4 @@ If you already have the old apt/brew/pipx/npm setup:
 - [Daily workflow](docs/daily-workflow.md) — adding packages, updating, rollbacks
 - [Migration guide](docs/migration.md) — migrating from apt/brew/pipx/npm
 - [Limitations](docs/limitations.md) — what can't go in Nix and alternatives
+- [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)

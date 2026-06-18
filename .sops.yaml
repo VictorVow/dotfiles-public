@@ -1,0 +1,12 @@
+# sops creation rules. The age recipient below is the PUBLIC half of the
+# identity stored (private) at ~/.config/sops/age/keys.txt — that private key
+# is never committed; it lives only on this machine. To add another machine,
+# generate an age key there, add its public key here, and run:
+#   sops updatekeys nix/secrets/rclone.yaml
+keys:
+  - &boss age10qg4dmewk0t3khmjmqlske6vn57rxezqn8xs0s8eu0fgz8ndkgmsy5u5qa
+creation_rules:
+  - path_regex: nix/secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *boss

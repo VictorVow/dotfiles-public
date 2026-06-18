@@ -29,6 +29,7 @@
     ./modules/gui-apps.nix   # home.programs.* for GUI apps (Firefox, Zed, Rofi)
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
+    ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
     ./modules/claude-skill-logseq.nix # Large Logseq DB-query Claude skill (own module)

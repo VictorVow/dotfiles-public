@@ -11,14 +11,21 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/e1353d7f24e91422a2951ce49afaf96e6ea27761";
+    nixpkgs.url = "github:NixOS/nixpkgs/be1ac3c60d481d283da6e428457056e5cdac7164";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/e1353d7f24e91422a2951ce49afaf96e6ea27761";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/23bd1a3ae7c239b611bcd7a3c97cef921872704f";
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/866412a19866b4a8e32d2306a118040afa2b840c";
+      url = "github:nix-community/home-manager/e28654b71096e08c019d4861ca26acb646f583d8";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Secrets management — decrypts age-encrypted secrets (nix/secrets/*.yaml)
+    # at activation. Used by modules/rclone.nix for rclone remote credentials.
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,11 +49,11 @@
     ie-r.url = "github:miaupaw/ie-r";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, sops-nix, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
-      modules = [ ./home.nix ];
+      modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
         inherit llm-agents tuxManager ie-r;
