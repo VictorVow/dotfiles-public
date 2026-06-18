@@ -130,6 +130,7 @@
           - kio-admin # Allows Dolphin file manager to run as root
           - plasma-gamemode # KDE Plasma integration for Feral's gamemode
           - plasma-discover-backend-flatpak # Flatpak backend for KDE Discover app store
+          - kunifiedpush # Unified Push distributor for Logseq plugin notifications
 
           # ── Flatpak (system-level) ─────────────────────────────────────────
           - flatpak # Flatpak runtime — system-wide integration
