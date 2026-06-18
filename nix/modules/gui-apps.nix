@@ -487,6 +487,9 @@ in
       "https://lord-ubuntu.device.example.com"
       "https://calibre.device.example.com"
       "https://calibre-content.device.example.com"
+      "https://git.device.example.com"
+      "https://rclone-lord-ubuntu.device.example.com"
+      "https://syncyomi.device.example.com"
       # Tailscale
       "https://lord-ubuntu.tailee8f02.ts.net"
       # Own services
@@ -521,6 +524,7 @@ in
       "https://auth.rumble.com"
       "https://backloggd.com"
       "https://bank.barclays.co.uk"
+      "https://www.bbc.co.uk" # iPlayer sign-in
       "https://bcol.barclaycard.co.uk"
       "https://bugs.kde.org"
       "https://bugzilla.mozilla.org"
@@ -547,6 +551,7 @@ in
       "https://github.com"
       "https://gitlab.com"
       "https://howlongtobeat.com"
+      "https://www.itv.com" # Football streams
       "https://login.coinbase.com"
       "https://login.live.com"
       "https://login.mailbox.org"
