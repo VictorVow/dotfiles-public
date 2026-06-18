@@ -202,7 +202,7 @@ in
         };
       };
 
-      secret = {
+      "crypt_BB2_rclone-lord-ubuntu" = {
         config = {
           type = "crypt";
           remote = "b2:rclone-lord-ubuntu/encrypted";
