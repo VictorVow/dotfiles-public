@@ -63,7 +63,13 @@
     font-weight: 600;
   }
   thead th:first-child, thead th:nth-child(2) { z-index: 2; }
-  .points-toolbar { margin: 0 0 0.75rem; }
+  .points-toolbar {
+    margin: 0 0 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
   .clear-points-btn {
     font: inherit;
     padding: 0.35rem 0.8rem;
@@ -73,6 +79,38 @@
     cursor: pointer;
   }
   .clear-points-btn:hover { background: #eaeef2; }
+  .weights-panel {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-top: 0.4rem;
+    padding: 0.75rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    box-sizing: border-box;
+  }
+  .weights-panel[hidden] { display: none; }
+  .weights-col-label { font-weight: 600; font-size: 0.8rem; margin-bottom: 0.3rem; }
+  .weights-inputs { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .weights-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 0.65rem;
+    color: #57606a;
+    gap: 0.1rem;
+  }
+  .weights-field input {
+    width: 3.4rem;
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.12rem 0.3rem;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    background: #fff;
+  }
   abbr[title] { text-decoration: underline dotted; cursor: help; }
   code {
     background: rgba(175,184,193,0.2);
@@ -89,6 +127,9 @@
     tbody tr:nth-child(even) { background: #0f141a; }
     .clear-points-btn { background: #161b22; border-color: #30363d; color: #c9d1d9; }
     .clear-points-btn:hover { background: #21262d; }
+    .weights-panel { background: #161b22; border-color: #30363d; }
+    .weights-field { color: #8b949e; }
+    .weights-field input { background: #0d1117; border-color: #30363d; color: #c9d1d9; }
     code { background: rgba(110,118,129,0.4); }
   }
 </style>
@@ -758,26 +799,43 @@
   });
 </script>
 <script>
-  // Inject an interactive "Points" column (client-side only — NOT in the
-  // Markdown). Left-click a data cell to +1 that row, right-click to -1.
-  // Hover a row's Points cell for a breakdown of how the total was reached.
-  // Tallies persist in localStorage (keyed by language name + column label);
-  // a "Clear Points" button above the table wipes them.
-  // Runs BEFORE the sort script so the injected column gets correct indices
-  // (and becomes sortable by total).
+  // Shared ordinal scales (low -> high), the single source of truth used by
+  // both the Points weighting and the column sorter. Each scale is an ordered
+  // list of bucket words; a column "belongs" to whichever scale contains all of
+  // its values.
+  window.PL_SCALES = [
+    ['very small', 'small', 'medium', 'large', 'very large'],
+    ['very slow', 'slow', 'medium', 'fast', 'very fast'],
+    ['very low', 'low', 'medium', 'high', 'very high'],
+    ['very easy', 'easy', 'medium', 'difficult', 'very difficult'],
+    ['none', 'minimal', 'good', 'first-class', 'pure'],
+    ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
+    ['bad', 'poor', 'average', 'good', 'excellent'],
+    ['no', 'partial', 'yes'],
+    ['dynamic', 'static'],
+    ['weak', 'strong']
+  ];
+</script>
+<script>
+  // Inject a "Points" column (client-side only — NOT in the Markdown) whose
+  // value for each row is computed from per-column, per-bucket weights set in a
+  // "Weights" panel above the table. Weights persist in localStorage
+  // (pl-weights-v1) and, on first run, are pre-seeded from any manual points
+  // saved by the earlier click-to-score feature (pl-points-v1) — the mean of
+  // the values the user gave each bucket. Runs BEFORE the sort script so the
+  // injected column gets correct indices (and is sortable by total).
   (function () {
-    var STORE_KEY = 'pl-points-v1';
+    var WEIGHTS_KEY = 'pl-weights-v1';
+    var MANUAL_KEY = 'pl-points-v1';
+    var SCALES = window.PL_SCALES || [];
 
-    function loadStore() {
-      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
-      catch (e) { return {}; }
+    function loadJSON(key) {
+      try { return JSON.parse(localStorage.getItem(key)) || null; }
+      catch (e) { return null; }
     }
-    function saveStore(obj) {
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+    function saveWeights(obj) {
+      try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(obj)); }
       catch (e) { /* private mode / file:// — persistence unavailable */ }
-    }
-    function clearStore() {
-      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
     }
 
     function headerLabel(headRow, idx) {
@@ -792,107 +850,214 @@
       var c = tr.cells[idx];
       return c ? (c.textContent || '').trim() : '';
     }
+    // Pick the scale that covers the most of a column's distinct values. A
+    // column is weightable if some scale covers >= 2 of its values and leaves at
+    // most one outlier (e.g. Assembly's "Untyped"/"None" don't disqualify the
+    // otherwise-binary Static/Dynamic and Strong/Weak columns; the outlier just
+    // gets no weight). Genuinely text columns cover 0 and stay excluded.
+    function scaleFor(values) {
+      var seen = {};
+      values.forEach(function (v) { v = v.toLowerCase(); if (v) seen[v] = true; });
+      var distinct = Object.keys(seen);
+      if (!distinct.length) return null;
+      var best = null, bestCover = 0;
+      SCALES.forEach(function (scale) {
+        var cover = distinct.filter(function (v) { return scale.indexOf(v) !== -1; }).length;
+        if (cover > bestCover) { bestCover = cover; best = scale; }
+      });
+      if (best && bestCover >= 2 && (distinct.length - bestCover) <= 1) return best;
+      return null;
+    }
 
     document.querySelectorAll('table').forEach(function (table) {
       if (!table.tHead || !table.tBodies.length) return;
       var headRow = table.tHead.rows[0];
       var tbody = table.tBodies[0];
 
-      // header cell
+      // inject Points header + body cells
       var th = document.createElement('th');
       th.className = 'points-col';
       th.textContent = 'Points';
-      th.title = 'Left-click a data cell to +1 this row, right-click to −1. ' +
+      th.title = 'Computed from the per-bucket weights set in the Weights panel. ' +
         "Hover a row's Points for the breakdown.";
       headRow.insertBefore(th, headRow.cells[0]);
 
-      // column label -> index, for persisting/restoring by name (robust to re-sorts)
-      var labelToIdx = {};
-      Array.prototype.forEach.call(headRow.cells, function (h, i) {
-        labelToIdx[headerLabel(headRow, i)] = i;
-      });
-
-      // body cells + per-row state (map of columnIndex -> net count),
-      // restoring any saved tallies for this language
-      var store = loadStore();
       var rows = Array.prototype.slice.call(tbody.rows);
       rows.forEach(function (tr) {
         var td = document.createElement('td');
         td.className = 'points-col';
         tr.insertBefore(td, tr.cells[0]);
-        tr._points = {};
-        var saved = store[cellText(tr, 1)];
-        if (saved) {
-          Object.keys(saved).forEach(function (label) {
-            var idx = labelToIdx[label];
-            if (idx != null) tr._points[idx] = saved[label];
-          });
-        }
-        update(tr);
       });
 
       // match the Language column's sticky offset to the real Points width
       table.style.setProperty('--points-w', th.offsetWidth + 'px');
 
-      // "Clear Points" button above the table
-      var toolbar = document.createElement('div');
-      toolbar.className = 'points-toolbar';
-      var clearBtn = document.createElement('button');
-      clearBtn.type = 'button';
-      clearBtn.className = 'clear-points-btn';
-      clearBtn.textContent = 'Clear Points';
-      clearBtn.addEventListener('click', function () {
-        if (!window.confirm('Clear all allocated points?')) return;
-        rows.forEach(function (tr) { tr._points = {}; update(tr); });
-        clearStore();
-      });
-      toolbar.appendChild(clearBtn);
-      var wrap = table.closest('.tablewrap') || table;
-      wrap.parentNode.insertBefore(toolbar, wrap);
-
-      function save() {
-        var obj = {};
+      // weightable (rating) columns: those whose values all fit one scale
+      // (skip Points col 0 and Language col 1). Capture each present bucket's
+      // display text too, for nice panel labels.
+      var ratingCols = [];
+      Array.prototype.forEach.call(headRow.cells, function (h, idx) {
+        if (idx <= 1) return;
+        var scale = scaleFor(rows.map(function (tr) { return cellText(tr, idx); }));
+        if (!scale) return;
+        var displayByLower = {};
         rows.forEach(function (tr) {
-          var keys = Object.keys(tr._points);
-          if (!keys.length) return;
-          var entries = {};
-          keys.forEach(function (idx) {
-            entries[headerLabel(headRow, Number(idx))] = tr._points[idx];
-          });
-          obj[cellText(tr, 1)] = entries;
+          var t = cellText(tr, idx);
+          if (t) displayByLower[t.toLowerCase()] = t;
         });
-        saveStore(obj);
+        ratingCols.push({
+          idx: idx,
+          label: headerLabel(headRow, idx),
+          scale: scale,
+          display: displayByLower
+        });
+      });
+      var colByLabel = {};
+      ratingCols.forEach(function (c) { colByLabel[c.label] = c; });
+
+      function weightFor(label, bucketLower) {
+        var col = weights[label];
+        if (!col) return 0;
+        var w = col[bucketLower];
+        return typeof w === 'number' && !isNaN(w) ? w : 0;
       }
 
-      function update(tr) {
-        var total = 0, lines = [];
-        Object.keys(tr._points).map(Number).sort(function (a, b) { return a - b; })
-          .forEach(function (idx) {
-            var n = tr._points[idx];
-            total += n;
-            lines.push((n > 0 ? '+' : '') + n + ' ' + cellText(tr, idx) +
-              ' (' + headerLabel(headRow, idx) + ')');
+      // pre-seed weights from existing manual points (mean per column+bucket)
+      function seedFromManual() {
+        var manual = loadJSON(MANUAL_KEY);
+        if (!manual) return null;
+        var langToRow = {};
+        rows.forEach(function (tr) { langToRow[cellText(tr, 1)] = tr; });
+        var acc = {}; // acc[label][bucketLower] = { sum, count }
+        Object.keys(manual).forEach(function (lang) {
+          var tr = langToRow[lang];
+          if (!tr) return;
+          var cols = manual[lang] || {};
+          Object.keys(cols).forEach(function (label) {
+            var c = colByLabel[label];
+            if (!c) return; // not a weightable column
+            var bucket = cellText(tr, c.idx).toLowerCase();
+            if (c.scale.indexOf(bucket) === -1) return; // value off-scale
+            var val = cols[label];
+            if (typeof val !== 'number' || !val) return;
+            if (!acc[label]) acc[label] = {};
+            if (!acc[label][bucket]) acc[label][bucket] = { sum: 0, count: 0 };
+            acc[label][bucket].sum += val;
+            acc[label][bucket].count += 1;
           });
+        });
+        var out = {};
+        Object.keys(acc).forEach(function (label) {
+          out[label] = {};
+          Object.keys(acc[label]).forEach(function (bucket) {
+            var a = acc[label][bucket];
+            out[label][bucket] = Math.round(a.sum / a.count);
+          });
+        });
+        return Object.keys(out).length ? out : null;
+      }
+
+      var weights = loadJSON(WEIGHTS_KEY);
+      var seeded = false;
+      if (!weights) {
+        var s = seedFromManual();
+        if (s) { weights = s; seeded = true; saveWeights(weights); }
+        else { weights = {}; }
+      }
+
+      function computeRow(tr) {
+        var total = 0, lines = [];
+        ratingCols.forEach(function (c) {
+          var bucket = cellText(tr, c.idx);
+          var w = weightFor(c.label, bucket.toLowerCase());
+          if (w) {
+            total += w;
+            lines.push((w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')');
+          }
+        });
         var pc = tr.cells[0];
         pc.textContent = String(total);
         pc.title = 'Points: ' + total +
-          (lines.length ? '\n' + lines.join('\n') : '\n(no clicks yet)');
+          (lines.length ? '\n' + lines.join('\n') : '\n(no weights set)');
       }
+      function computeAll() { rows.forEach(computeRow); }
 
-      function score(e, delta) {
-        var cell = e.target.closest('td');
-        if (!cell || cell.parentNode.parentNode !== tbody) return;
-        var idx = cell.cellIndex;
-        if (idx <= 1) return; // skip Points (0) and Language (1)
-        e.preventDefault();
-        var tr = cell.parentNode;
-        tr._points[idx] = (tr._points[idx] || 0) + delta;
-        if (tr._points[idx] === 0) delete tr._points[idx];
-        update(tr);
-        save();
+      // ---- toolbar: Weights toggle + Reset + the panel ----
+      var toolbar = document.createElement('div');
+      toolbar.className = 'points-toolbar';
+
+      var panel = document.createElement('div');
+      panel.className = 'weights-panel';
+
+      var toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'clear-points-btn';
+      function setCollapsed(collapsed) {
+        panel.hidden = collapsed;
+        toggleBtn.textContent = collapsed ? 'Weights ▸' : 'Weights ▾';
       }
-      tbody.addEventListener('click', function (e) { score(e, 1); });
-      tbody.addEventListener('contextmenu', function (e) { score(e, -1); });
+      toggleBtn.addEventListener('click', function () { setCollapsed(!panel.hidden); });
+
+      var resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'clear-points-btn';
+      resetBtn.textContent = 'Reset';
+      resetBtn.addEventListener('click', function () {
+        if (!window.confirm('Reset all bucket weights to 0?')) return;
+        weights = {};
+        saveWeights(weights);
+        Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
+          inp.value = '';
+        });
+        computeAll();
+      });
+
+      // one group per rating column, with a number input per present bucket
+      ratingCols.forEach(function (c) {
+        var group = document.createElement('div');
+        group.className = 'weights-col';
+        var lab = document.createElement('div');
+        lab.className = 'weights-col-label';
+        lab.textContent = c.label;
+        group.appendChild(lab);
+        var inputs = document.createElement('div');
+        inputs.className = 'weights-inputs';
+        c.scale.forEach(function (bucketLower) {
+          var disp = c.display[bucketLower];
+          if (!disp) return; // bucket not present in this column
+          var field = document.createElement('label');
+          field.className = 'weights-field';
+          var name = document.createElement('span');
+          name.textContent = disp;
+          var inp = document.createElement('input');
+          inp.type = 'number';
+          inp.step = '1';
+          var cur = weightFor(c.label, bucketLower);
+          inp.value = cur ? String(cur) : '';
+          inp.addEventListener('input', function () {
+            if (!weights[c.label]) weights[c.label] = {};
+            var v = parseFloat(inp.value);
+            if (isNaN(v) || v === 0) delete weights[c.label][bucketLower];
+            else weights[c.label][bucketLower] = v;
+            saveWeights(weights);
+            computeAll();
+          });
+          field.appendChild(name);
+          field.appendChild(inp);
+          inputs.appendChild(field);
+        });
+        group.appendChild(inputs);
+        panel.appendChild(group);
+      });
+
+      toolbar.appendChild(toggleBtn);
+      toolbar.appendChild(resetBtn);
+      toolbar.appendChild(panel);
+      var wrap = table.closest('.tablewrap') || table;
+      wrap.parentNode.insertBefore(toolbar, wrap);
+
+      setCollapsed(!seeded); // auto-expand on first-run seeding
+      computeAll();
     });
   })();
 </script>
@@ -900,21 +1065,7 @@
   // click-to-sort columns. Ordinal rating columns sort by their scale's order;
   // everything else sorts as (natural) text. Click toggles ascending / descending.
   (function () {
-    // Each scale is an ordered list (low -> high). A column is ranked by whichever
-    // scale contains all of its values, so words shared between scales (e.g. "Good"
-    // in both Functional support and Tooling/DX) resolve per-column, not globally.
-    var SCALES = [
-      ['very small', 'small', 'medium', 'large', 'very large'],
-      ['very slow', 'slow', 'medium', 'fast', 'very fast'],
-      ['very low', 'low', 'medium', 'high', 'very high'],
-      ['very easy', 'easy', 'medium', 'difficult', 'very difficult'],
-      ['none', 'minimal', 'good', 'first-class', 'pure'],
-      ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
-      ['bad', 'poor', 'average', 'good', 'excellent'],
-      ['no', 'partial', 'yes'],
-      ['dynamic', 'static'],
-      ['weak', 'strong']
-    ];
+    var SCALES = window.PL_SCALES || [];
     function text(td) { return (td.textContent || '').trim(); }
 
     // Pick the scale for a column from its non-empty values; null if none fits.
