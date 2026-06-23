@@ -111,7 +111,23 @@
     border-radius: 4px;
     background: #fff;
   }
-  abbr[title] { text-decoration: underline dotted; cursor: help; }
+  abbr[title], abbr[data-tip] { text-decoration: underline dotted; cursor: help; }
+  .pl-tooltip {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    max-width: 32rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 1.5rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    background: #1b1f23;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
   code {
     background: rgba(175,184,193,0.2);
     padding: 0.1em 0.3em;

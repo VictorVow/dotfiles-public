@@ -88,8 +88,8 @@
       var th = document.createElement('th');
       th.className = 'points-col';
       th.textContent = 'Points';
-      th.title = 'Computed from the per-bucket weights set in the Weights panel. ' +
-        "Hover a row's Points for the breakdown.";
+      th.setAttribute('data-tip', 'Computed from the per-bucket weights set in the Weights panel. ' +
+        "Hover a row's Points for the breakdown.");
       headRow.insertBefore(th, headRow.cells[0]);
 
       var rows = Array.prototype.slice.call(tbody.rows);
@@ -187,8 +187,8 @@
         });
         var pc = tr.cells[0];
         pc.textContent = String(total);
-        pc.title = 'Points: ' + total +
-          (lines.length ? '\n' + lines.join('\n') : '\n(no weights set)');
+        pc.setAttribute('data-tip', 'Points: ' + total +
+          (lines.length ? '\n' + lines.join('\n') : '\n(no weights set)'));
       }
       function computeAll() { rows.forEach(computeRow); }
 
@@ -327,6 +327,53 @@
       arrow.textContent = dir === 'asc' ? ' ▲' : ' ▼';
       th.appendChild(arrow);
     }
+  })();
+</script>
+<script>
+  // Custom hover tooltips: instant (no delay), larger font, and they stay open
+  // while the pointer moves between cells (the text just swaps) instead of the
+  // native title close/reopen. Driven by mouseover/mousemove, so — unlike native
+  // title tooltips — they also show when the browser window isn't focused.
+  // Text comes from data-tip, migrated from any title attribute so the native
+  // tooltip never competes.
+  (function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[title]'), function (el) {
+      el.setAttribute('data-tip', el.getAttribute('title'));
+      el.removeAttribute('title');
+    });
+
+    var tip = document.createElement('div');
+    tip.className = 'pl-tooltip';
+    document.body.appendChild(tip);
+    var shown = null;
+
+    function place(x, y) {
+      var pad = 14, r = tip.getBoundingClientRect();
+      var left = x + pad, top = y + pad + 4;
+      if (left + r.width + 4 > window.innerWidth) left = x - r.width - pad;
+      if (left < 4) left = 4;
+      if (top + r.height + 4 > window.innerHeight) top = y - r.height - pad;
+      if (top < 4) top = 4;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+    function showFrom(target, x, y) {
+      var el = target && target.closest ? target.closest('[data-tip]') : null;
+      var text = el ? el.getAttribute('data-tip') : null;
+      if (text) {
+        if (text !== shown) { tip.textContent = text; shown = text; }
+        tip.style.display = 'block';
+        place(x, y);
+      } else if (shown !== null) {
+        tip.style.display = 'none';
+        shown = null;
+      }
+    }
+    document.addEventListener('mouseover', function (e) { showFrom(e.target, e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener('mousemove', function (e) { showFrom(e.target, e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener('mouseout', function (e) {
+      if (!e.relatedTarget) { tip.style.display = 'none'; shown = null; }
+    });
   })();
 </script>
 </body>
