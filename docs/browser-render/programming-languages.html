@@ -181,6 +181,9 @@
 <th><abbr title="How much a single company controls the language's direction and governance, versus a community or standards body, rated Very Low (community-led) → Very High (one corporation). Hover a cell for who steers it.">Corporate-controlled</abbr></th>
 <th><abbr title="How well the language and its typical applications run and are supported on Linux, rated Very Low → Very High. Hover a cell for the specifics.">Linux support</abbr></th>
 <th><abbr title="Number of these six platforms the language can target — Web (browser), Linux, Windows, macOS, Android, iOS. Hover a cell for which ones.">Platforms supported</abbr></th>
+<th><abbr title="Roughly how widely the language is used today, rated Very Low → Very High (based on general adoption, surveys and rankings). Hover a cell for specifics.">Popularity</abbr></th>
+<th><abbr title="How long-established and stable the language is, rated Very Low (young, still changing) → Very High (decades-old and battle-tested). Hover a cell for specifics.">Maturity</abbr></th>
+<th><abbr title="How fast the language itself evolves, rated Very Low → Very High. Cadence-normalised: a big release every ~2 years counts about the same as small releases every ~6 months. Hover a cell for specifics.">Development velocity</abbr></th>
 </tr>
 </thead>
 <tbody>
@@ -207,6 +210,9 @@
 <td><abbr title="Standardised by ECMA TC39; heavily steered by browser vendors (Google, Apple, Mozilla, Microsoft) but owned by none">Medium</abbr></td>
 <td><abbr title="Node.js is first-class on Linux; most servers run Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Ubiquitous; the language of the web">Very High</abbr></td>
+<td><abbr title="Created 1995; decades of stability and ubiquity">Very High</abbr></td>
+<td><abbr title="Annual ECMAScript editions; steady evolution">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="JavaScript with optional static types, compiled away to plain JS">TypeScript</abbr></td>
@@ -231,6 +237,9 @@
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
 <td><abbr title="Same Node/Linux story as JavaScript">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Now dominant for new JS/web projects">Very High</abbr></td>
+<td><abbr title="Released 2012; mature and battle-tested">High</abbr></td>
+<td><abbr title="Frequent releases (~quarterly); very actively developed">Very High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Readable general-purpose language; dominant in scripting, data science and ML">Python</abbr></td>
@@ -255,6 +264,9 @@
 <td><abbr title="Community-led under the Python Software Foundation; corporate sponsors but no corporate owner">Low</abbr></td>
 <td><abbr title="Ships with virtually every Linux distro; first-class">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Among the most-used languages; data/ML, scripting, web">Very High</abbr></td>
+<td><abbr title="Created 1991; very mature">Very High</abbr></td>
+<td><abbr title="Annual releases with steady feature additions">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Dynamic, expressive scripting language; powers Ruby on Rails">Ruby</abbr></td>
@@ -279,6 +291,9 @@
 <td><abbr title="Community-led; guided by Matz and the Ruby core team">Low</abbr></td>
 <td><abbr title="First-class on Linux; standard for servers and tooling">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Past its Rails-era peak, but a solid base remains">Medium</abbr></td>
+<td><abbr title="Created 1995; very mature">Very High</abbr></td>
+<td><abbr title="Annual releases; moderate pace of change">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Veteran scripting language strong in text processing and sysadmin">Perl</abbr></td>
@@ -303,6 +318,9 @@
 <td><abbr title="Community-led; volunteer core team and the Perl Foundation">Very Low</abbr></td>
 <td><abbr title="Core to Unix/Linux; preinstalled on most distros">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Largely legacy now; declining use">Low</abbr></td>
+<td><abbr title="Created 1987; very mature, long-stable">Very High</abbr></td>
+<td><abbr title="Slow; Perl 5 evolves little and Perl 7 stalled">Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Server-side scripting language behind much of the web (WordPress, Laravel)">PHP</abbr></td>
@@ -327,6 +345,9 @@
 <td><abbr title="Community-led via the PHP Foundation, though Zend and commercial backers have long been influential">Medium</abbr></td>
 <td><abbr title="Predominantly deployed on Linux web servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Still powers a large share of the web (WordPress, Laravel)">High</abbr></td>
+<td><abbr title="Created 1995; very mature">Very High</abbr></td>
+<td><abbr title="Annual major releases; very active 8.x line">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Tiny, fast, embeddable scripting language popular in games">Lua</abbr></td>
@@ -351,6 +372,9 @@
 <td><abbr title="Developed by a small academic team at PUC-Rio (Brazil); no corporate owner">Very Low</abbr></td>
 <td><abbr title="Tiny and portable; builds and embeds cleanly on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Niche, but very widely embedded (games, Redis, Neovim)">Medium</abbr></td>
+<td><abbr title="Created 1993; small, stable and very mature">Very High</abbr></td>
+<td><abbr title="Deliberately slow; new versions are rare">Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Python-like scripting language built into the Godot game engine">GDScript</abbr></td>
@@ -375,6 +399,9 @@
 <td><abbr title="Open source under the non-profit Godot Foundation; community-led">Low</abbr></td>
 <td><abbr title="Godot runs on Linux and exports Linux builds well">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Popular within Godot, which is itself growing fast">Low</abbr></td>
+<td><abbr title="Tied to Godot (2014); GDScript 2.0 is relatively recent">Medium</abbr></td>
+<td><abbr title="Evolves rapidly alongside active Godot development">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Class-based OO workhorse on the JVM; enterprise back-ends and Android">Java</abbr></td>
@@ -399,6 +426,9 @@
 <td><abbr title="Stewarded by Oracle via OpenJDK and the Java Community Process, with broad vendor participation">High</abbr></td>
 <td><abbr title="JVM is first-class on Linux; dominant for Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, Android">4</abbr></td>
+<td><abbr title="One of the most-used languages; enterprise and Android">Very High</abbr></td>
+<td><abbr title="Released 1995; extremely mature">Very High</abbr></td>
+<td><abbr title="Six-month release cadence since Java 9; steady stream of features">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Modern, concise JVM language; Google's preferred language for Android">Kotlin</abbr></td>
@@ -423,6 +453,9 @@
 <td><abbr title="Designed and controlled by JetBrains (with the Kotlin Foundation alongside Google)">Very High</abbr></td>
 <td><abbr title="Runs on the JVM on Linux; Kotlin/Native targets Linux too">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Widely used, especially for Android">High</abbr></td>
+<td><abbr title="First release 2011, 1.0 in 2016; mature">High</abbr></td>
+<td><abbr title="Regular releases; actively evolving">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Hybrid OO/functional JVM language with a powerful type system">Scala</abbr></td>
@@ -447,6 +480,9 @@
 <td><abbr title="Created at EPFL; governed by the non-profit Scala Center with commercial contributors">Medium</abbr></td>
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Established in data/backend, but a niche audience">Medium</abbr></td>
+<td><abbr title="Released 2004; mature, with a major Scala 3 transition">High</abbr></td>
+<td><abbr title="Moderate; a big Scala 3 leap, otherwise measured">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="A modern Lisp on the JVM; functional and immutable-first">Clojure</abbr></td>
@@ -471,6 +507,9 @@
 <td><abbr title="Tightly directed by Rich Hickey and the core team (Nubank-backed); limited outside contribution">High</abbr></td>
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Small but dedicated following">Low</abbr></td>
+<td><abbr title="Released 2007; stable and mature">High</abbr></td>
+<td><abbr title="Deliberately slow and infrequent releases">Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Microsoft's multi-paradigm language for the .NET platform">C#</abbr></td>
@@ -495,6 +534,9 @@
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
 <td><abbr title="Server/CLI on .NET runs well on Linux, but desktop GUI stacks (WinForms/WPF) remain Windows-only">Medium</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Very widely used across enterprise, games (Unity) and web">Very High</abbr></td>
+<td><abbr title="Released 2000; extremely mature">Very High</abbr></td>
+<td><abbr title="Annual major versions in lockstep with .NET">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Functional-first .NET language from the ML family">F#</abbr></td>
@@ -519,6 +561,9 @@
 <td><abbr title="Created and driven by Microsoft, with the community-run F# Software Foundation">High</abbr></td>
 <td><abbr title="Runs on .NET on Linux for server/CLI; rarely tied to Windows-only GUI">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Niche within the .NET world">Low</abbr></td>
+<td><abbr title="Released 2005; mature">High</abbr></td>
+<td><abbr title="Evolves with .NET, but at a slower feature pace than C#">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Google's language for Flutter; compiles to native and JavaScript">Dart</abbr></td>
@@ -543,6 +588,9 @@
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
 <td><abbr title="CLI runs on Linux; Flutter targets Linux desktop (stable)">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Riding Flutter's popularity for cross-platform apps">High</abbr></td>
+<td><abbr title="Released 2011; mature, reshaped by Flutter">High</abbr></td>
+<td><abbr title="Active, frequent releases tied to Flutter">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="C with Smalltalk-style messaging; legacy Apple platform language">Objective-C</abbr></td>
@@ -567,6 +615,9 @@
 <td><abbr title="Controlled by Apple (originally NeXT/Stepstone)">High</abbr></td>
 <td><abbr title="Tied to Apple frameworks; only partial support on Linux via GNUstep">Low</abbr></td>
 <td><abbr title="Supports: macOS, iOS">2</abbr></td>
+<td><abbr title="Legacy Apple development; largely supplanted by Swift">Medium</abbr></td>
+<td><abbr title="Created 1984; very mature but now frozen">Very High</abbr></td>
+<td><abbr title="Effectively frozen; Apple's focus moved to Swift">Very Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Apple's modern, safe language for apps and systems, replacing Objective-C">Swift</abbr></td>
@@ -591,6 +642,9 @@
 <td><abbr title="Created and led by Apple; open source but Apple-directed">Very High</abbr></td>
 <td><abbr title="Official Linux toolchain exists (server-side Swift), but no Apple UI frameworks">Medium</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, iOS">4</abbr></td>
+<td><abbr title="Mainstream for Apple-platform development">High</abbr></td>
+<td><abbr title="Released 2014; now mature and stable">High</abbr></td>
+<td><abbr title="Very active; annual releases plus an open evolution process">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Google's simple, fast compiled language built for concurrent servers">Go</abbr></td>
@@ -615,6 +669,9 @@
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
 <td><abbr title="First-class on Linux; built at Google for Linux servers and cloud">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Widely adopted for cloud, backend and CLI tooling">High</abbr></td>
+<td><abbr title="Released 2009; mature and stable">High</abbr></td>
+<td><abbr title="Six-month release cadence; deliberately conservative feature additions">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="The foundational systems language; small, fast and everywhere">C</abbr></td>
@@ -639,6 +696,9 @@
 <td><abbr title="An ISO standard developed by committee; no corporate owner">Very Low</abbr></td>
 <td><abbr title="The Linux kernel and most of its userland are written in C">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Foundational and pervasive; consistently top-ranked">Very High</abbr></td>
+<td><abbr title="Created 1972; the archetype of a mature language">Very High</abbr></td>
+<td><abbr title="ISO revisions roughly every decade; changes very little">Very Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="C with objects, templates and abstractions for high-performance systems">C++</abbr></td>
@@ -663,6 +723,9 @@
 <td><abbr title="An ISO standard developed by committee with broad vendor participation; no single owner">Low</abbr></td>
 <td><abbr title="First-class on Linux; GCC/Clang and full tooling">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Extremely widely used in systems, games and HPC">Very High</abbr></td>
+<td><abbr title="Created 1985; extremely mature">Very High</abbr></td>
+<td><abbr title="ISO revisions every ~3 years (C++11/14/17/20/23)">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Memory-safe systems language with ownership and no garbage collector">Rust</abbr></td>
@@ -687,6 +750,9 @@
 <td><abbr title="Community-governed via RFCs under the Rust Foundation (backed by many companies, controlled by none)">Low</abbr></td>
 <td><abbr title="First-class on Linux; excellent toolchain">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Fast-rising; consistently the most-admired language">High</abbr></td>
+<td><abbr title="1.0 in 2015; now mature with strong stability guarantees">High</abbr></td>
+<td><abbr title="Six-week release train; very fast, steady evolution">Very High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Modern, explicit systems language aiming to be a better C">Zig</abbr></td>
@@ -711,6 +777,9 @@
 <td><abbr title="Community-led under the non-profit Zig Software Foundation">Very Low</abbr></td>
 <td><abbr title="First-class on Linux with excellent cross-compilation">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Small but growing systems-programming following">Low</abbr></td>
+<td><abbr title="Still pre-1.0; breaking changes expected">Low</abbr></td>
+<td><abbr title="Rapid, frequent (often breaking) changes pre-1.0">High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Python-like syntax compiling to C for native performance">Nim</abbr></td>
@@ -735,6 +804,9 @@
 <td><abbr title="Community-led; small volunteer core team">Very Low</abbr></td>
 <td><abbr title="Compiles via C; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Tiny user base">Very Low</abbr></td>
+<td><abbr title="Created 2008, 1.0 in 2019; moderately mature">Medium</abbr></td>
+<td><abbr title="Active but small team; moderate cadence">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Python-superset for AI and systems performance via MLIR/LLVM">Mojo</abbr></td>
@@ -759,6 +831,9 @@
 <td><abbr title="Built and owned by Modular; proprietary toolchain">Very High</abbr></td>
 <td><abbr title="Linux is a primary target (AI servers); was Linux/macOS-first">High</abbr></td>
 <td><abbr title="Supports: Linux, macOS">2</abbr></td>
+<td><abbr title="Very new; minimal adoption so far">Very Low</abbr></td>
+<td><abbr title="Announced 2023; pre-1.0 and rapidly changing">Very Low</abbr></td>
+<td><abbr title="Extremely rapid; the language is being built in the open">Very High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Safety-critical systems language used in aerospace, defense and rail">Ada</abbr></td>
@@ -783,6 +858,9 @@
 <td><abbr title="An ISO standard, but the GNAT toolchain is dominated by the commercial vendor AdaCore">Medium</abbr></td>
 <td><abbr title="GNAT/GCC gives solid Linux support">High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Niche, mostly defense/aerospace">Very Low</abbr></td>
+<td><abbr title="Created 1980; rigorously standardised, very mature">Very High</abbr></td>
+<td><abbr title="ISO revisions every several years (1995/2005/2012/2022)">Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Object Pascal with rapid native GUI app development">Delphi</abbr></td>
@@ -807,6 +885,9 @@
 <td><abbr title="A commercial, proprietary product owned by Embarcadero">Very High</abbr></td>
 <td><abbr title="Windows-first; Linux is server/console only (FMXLinux), no native Linux GUI">Low</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, Android, iOS">5</abbr></td>
+<td><abbr title="Declined from its 1990s peak; legacy desktop apps">Low</abbr></td>
+<td><abbr title="Released 1995 (Object Pascal older); very mature">Very High</abbr></td>
+<td><abbr title="Roughly annual commercial releases">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Human-written machine instructions with direct hardware control">Assembly</abbr></td>
@@ -831,6 +912,9 @@
 <td><abbr title="No single owner; assemblers are largely community/open (GAS, NASM), though the underlying ISAs are vendor-controlled (Intel, ARM)">Medium</abbr></td>
 <td><abbr title="Fully supported on Linux for x86/ARM via GAS/NASM and standard toolchains">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Niche but ever-present in low-level/embedded work">Medium</abbr></td>
+<td><abbr title="As old as computing; maximally mature">Very High</abbr></td>
+<td><abbr title="Barely changes; tracks slow ISA extensions">Very Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Purely functional, lazy language with an advanced type system">Haskell</abbr></td>
@@ -855,6 +939,9 @@
 <td><abbr title="Community-led; GHC maintained by the community and the Haskell Foundation">Low</abbr></td>
 <td><abbr title="GHC is first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Small but influential; mostly academia and FP enthusiasts">Low</abbr></td>
+<td><abbr title="Created 1990; mature, standard frozen at Haskell 2010">Very High</abbr></td>
+<td><abbr title="GHC ships regularly with new extensions; the standard is frozen">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Functional-first ML-family language with a fast native compiler">OCaml</abbr></td>
@@ -879,6 +966,9 @@
 <td><abbr title="Developed at INRIA (French research institute) with the community-run OCaml Software Foundation">Low</abbr></td>
 <td><abbr title="Unix-native heritage; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Niche; academia, finance, compiler tooling">Low</abbr></td>
+<td><abbr title="Created 1996; very mature">Very High</abbr></td>
+<td><abbr title="Regular releases; OCaml 5 brought multicore">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Homoiconic language family with code-as-data and powerful macros (Common Lisp)">Lisp</abbr></td>
@@ -903,6 +993,9 @@
 <td><abbr title="Common Lisp is an ANSI standard with many independent implementations; no corporate owner">Very Low</abbr></td>
 <td><abbr title="SBCL and other implementations run first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Small, long-tail community across dialects">Low</abbr></td>
+<td><abbr title="Created 1958; one of the oldest languages alive">Very High</abbr></td>
+<td><abbr title="ANSI standard frozen since 1994; implementations update, the language doesn't">Very Low</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Functional language on the BEAM for scalable, fault-tolerant systems">Elixir</abbr></td>
@@ -927,6 +1020,9 @@
 <td><abbr title="Led by creator José Valim and a core team; open community, no corporate owner">Medium</abbr></td>
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Growing steadily, especially for web/real-time">Medium</abbr></td>
+<td><abbr title="First release 2011, 1.0 in 2014; mature">High</abbr></td>
+<td><abbr title="Annual-ish releases; set-theoretic types in active development">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="BEAM language built for massively concurrent, fault-tolerant telecom systems">Erlang</abbr></td>
@@ -951,6 +1047,9 @@
 <td><abbr title="Created and still stewarded by Ericsson (the OTP team)">High</abbr></td>
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Niche; telecom and messaging backends">Low</abbr></td>
+<td><abbr title="Created 1986; battle-tested in telecom for decades">Very High</abbr></td>
+<td><abbr title="Annual OTP releases; steady">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Statically typed, friendly functional language for the BEAM">Gleam</abbr></td>
@@ -975,6 +1074,9 @@
 <td><abbr title="Community-led; created and maintained by Louis Pilfold, funded by sponsorship">Low</abbr></td>
 <td><abbr title="Compiles to BEAM/JS; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Very new; small but enthusiastic early adopters">Very Low</abbr></td>
+<td><abbr title="1.0 only in 2024; young">Low</abbr></td>
+<td><abbr title="Very active; rapid releases for a young language">Very High</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Pure functional language for reliable web front-ends, compiling to JavaScript">Elm</abbr></td>
@@ -999,10 +1101,13 @@
 <td><abbr title="Led by its creator as BDFL; not corporate-backed">Very Low</abbr></td>
 <td><abbr title="Compiler and tooling run well on Linux; output targets the browser">High</abbr></td>
 <td><abbr title="Supports: Web">1</abbr></td>
+<td><abbr title="Niche; a small and now shrinking front-end community">Very Low</abbr></td>
+<td><abbr title="Released 2012; stable but small, and stuck at 0.19">Medium</abbr></td>
+<td><abbr title="Effectively stalled; last release (0.19.1) was in 2019">Very Low</abbr></td>
 </tr>
 </tbody>
 </table>
-<p>Platform/paradigm groups</p>
+<h2>Platform/paradigm groups</h2>
 <ol>
 <li>Web / JS family — JavaScript, TypeScript</li>
 <li>Dynamic scripting — Python, Ruby, Perl, PHP</li>
@@ -1011,9 +1116,17 @@
 <li>.NET &amp; cross-platform app — C#, F#, Dart</li>
 <li>Apple platforms — Objective-C, Swift</li>
 <li>Systems / native — Go, C, C++, Rust, Zig, Nim, Mojo, Ada, Delphi, Assembly (ordered roughly high-level → lowest-level)</li>
-<li>Functional — Haskell, OCaml, Lisp</li>
+<li>Functional — Haskell, OCaml, Lisp, Elm</li>
 <li>BEAM / actor-model — Elixir, Erlang, Gleam</li>
 </ol>
+<h2>Conclusion 23/06/2026</h2>
+<ul>
+<li>TypeScript</li>
+<li>C#</li>
+<li>Python</li>
+<li>Kotlin</li>
+<li>OCaml</li>
+</ul>
 </div>
 <script>
   // wrap the wide table in a horizontal-scroll container
@@ -1060,23 +1173,9 @@
       try { return JSON.parse(localStorage.getItem(key)) || null; }
       catch (e) { return null; }
     }
-    var diskTimer = null;
     function saveWeights(obj) {
       try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(obj)); }
       catch (e) { /* private mode / file:// — persistence unavailable */ }
-      // Debounced write to disk via the live-preview server. No-op (silently
-      // caught) when opened from file:// or with the server down — localStorage
-      // still holds the value.
-      clearTimeout(diskTimer);
-      diskTimer = setTimeout(function () {
-        try {
-          fetch('/weights', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(obj)
-          }).catch(function () {});
-        } catch (e) { /* fetch unavailable */ }
-      }, 500);
     }
 
     function headerLabel(headRow, idx) {
@@ -1248,7 +1347,7 @@
       resetBtn.addEventListener('click', function () {
         if (!window.confirm('Reset all bucket weights to 0?')) return;
         weights = {};
-        saveWeights(weights);
+        persist(weights);
         Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
           inp.value = '';
         });
@@ -1275,8 +1374,8 @@
           var inp = document.createElement('input');
           inp.type = 'number';
           inp.step = '1';
-          inp.setAttribute('data-col', c.label);
-          inp.setAttribute('data-bucket', bucketLower);
+          inp.dataset.col = c.label;
+          inp.dataset.bucket = bucketLower;
           var cur = weightFor(c.label, bucketLower);
           inp.value = cur ? String(cur) : '';
           inp.addEventListener('input', function () {
@@ -1284,7 +1383,7 @@
             var v = parseFloat(inp.value);
             if (isNaN(v) || v === 0) delete weights[c.label][bucketLower];
             else weights[c.label][bucketLower] = v;
-            saveWeights(weights);
+            persist(weights);
             computeAll();
           });
           field.appendChild(name);
@@ -1301,32 +1400,47 @@
       var wrap = table.closest('.tablewrap') || table;
       wrap.parentNode.insertBefore(toolbar, wrap);
 
-      setCollapsed(!seeded); // auto-expand on first-run seeding
-      computeAll();
-
-      // Disk is the source of truth when the live-preview server is running:
-      // pull saved weights and apply them over the localStorage-seeded state.
-      // Setting input.value programmatically doesn't fire 'input', so this
-      // never echoes back as a save.
-      function applyWeightsToInputs() {
+      var serverAvailable = false;
+      function persist(obj) {
+        saveWeights(obj); // localStorage cache / standalone fallback
+        if (serverAvailable && typeof fetch === 'function') {
+          try {
+            fetch('/weights', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(obj)
+            });
+          } catch (e) { /* ignore network errors */ }
+        }
+      }
+      function refreshInputs() {
         Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
-          var w = weightFor(inp.getAttribute('data-col'), inp.getAttribute('data-bucket'));
+          var w = weightFor(inp.dataset.col, inp.dataset.bucket);
           inp.value = w ? String(w) : '';
         });
       }
-      try {
-        fetch('/weights')
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (disk) {
-            if (disk && typeof disk === 'object' && Object.keys(disk).length) {
-              weights = disk;
-              try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(weights)); } catch (e) {}
-              applyWeightsToInputs();
-              computeAll();
-            }
-          })
-          .catch(function () { /* server absent — localStorage state stands */ });
-      } catch (e) { /* fetch unavailable */ }
+
+      setCollapsed(!seeded); // auto-expand on first-run seeding
+      computeAll();
+
+      // When served by the live preview server, its on-disk weights file is the
+      // source of truth; opened as a static file (no server), localStorage is used.
+      if (typeof fetch === 'function') {
+        fetch('/weights', { cache: 'no-store' }).then(function (r) {
+          if (!r.ok) throw new Error('no server');
+          return r.json();
+        }).then(function (server) {
+          serverAvailable = true;
+          if (server && Object.keys(server).length) {
+            weights = server;          // server wins
+            saveWeights(weights);      // cache locally
+            refreshInputs();
+            computeAll();
+          } else if (Object.keys(weights).length) {
+            persist(weights);          // seed the empty server from local/seeded weights
+          }
+        }).catch(function () { /* standalone / no server: localStorage only */ });
+      }
     });
   })();
 </script>
