@@ -184,7 +184,7 @@
 </thead>
 <tbody>
 <tr>
-<td>JavaScript</td>
+<td><abbr title="The language of the web; dynamic and runs in every browser and Node.js">JavaScript</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Untyped; gradual typing only via TypeScript/Flow overlays or JSDoc">No</abbr></td>
 <td><abbr title="Weak; heavy implicit coercion (e.g. 1 + '1' === '11')">Weak</abbr></td>
@@ -207,7 +207,7 @@
 <td><abbr title="Node.js is first-class on Linux; most servers run Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>TypeScript</td>
+<td><abbr title="JavaScript with optional static types, compiled away to plain JS">TypeScript</abbr></td>
 <td><abbr title="Statically typed, with dynamic escape hatches (any, type assertions)">Static</abbr></td>
 <td><abbr title="The canonical gradual type system: optional annotations, `any`, freely mix typed and untyped code">Yes</abbr></td>
 <td><abbr title="TypeScript's types are fully erased at compile time, so at runtime you're running plain JavaScript with all its weak-coercion behavior. The strength lives only in the static checker, and even that is deliberately unsound (any, type assertions).">Strong</abbr></td>
@@ -230,7 +230,7 @@
 <td><abbr title="Same Node/Linux story as JavaScript">Very High</abbr></td>
 </tr>
 <tr>
-<td>Python</td>
+<td><abbr title="Readable general-purpose language; dominant in scripting, data science and ML">Python</abbr></td>
 <td><abbr title="Python is dynamic by default; static typing is opt-in via type hints plus an external checker (mypy, pyright). The interpreter itself ignores the hints.">Dynamic</abbr></td>
 <td><abbr title="Optional type hints (PEP 484); gradual and unenforced at runtime">Yes</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -253,7 +253,7 @@
 <td><abbr title="Ships with virtually every Linux distro; first-class">Very High</abbr></td>
 </tr>
 <tr>
-<td>Ruby</td>
+<td><abbr title="Dynamic, expressive scripting language; powers Ruby on Rails">Ruby</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic by default; optional typing via RBS with Sorbet/Steep">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -276,7 +276,7 @@
 <td><abbr title="First-class on Linux; standard for servers and tooling">Very High</abbr></td>
 </tr>
 <tr>
-<td>Perl</td>
+<td><abbr title="Veteran scripting language strong in text processing and sysadmin">Perl</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Untyped; no meaningful static typing">No</abbr></td>
 <td><abbr title="Weak; pervasive context-dependent coercion (scalar/list context, numeric/string)">Weak</abbr></td>
@@ -299,7 +299,7 @@
 <td><abbr title="Core to Unix/Linux; preinstalled on most distros">Very High</abbr></td>
 </tr>
 <tr>
-<td>PHP</td>
+<td><abbr title="Server-side scripting language behind much of the web (WordPress, Laravel)">PHP</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Optional type declarations added incrementally since PHP 7; external checkers (PHPStan, Psalm) add more">Partial</abbr></td>
 <td><abbr title="Weak; extensive type juggling and implicit coercion, though PHP 8 tightened comparisons">Weak</abbr></td>
@@ -322,7 +322,7 @@
 <td><abbr title="Predominantly deployed on Linux web servers">Very High</abbr></td>
 </tr>
 <tr>
-<td>Lua</td>
+<td><abbr title="Tiny, fast, embeddable scripting language popular in games">Lua</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Untyped core; optional static typing via dialects (Teal, Luau)">Partial</abbr></td>
 <td><abbr title="Weak; automatic string/number coercion in arithmetic (e.g. &quot;10&quot; + 1 == 11)">Weak</abbr></td>
@@ -345,7 +345,7 @@
 <td><abbr title="Tiny and portable; builds and embeds cleanly on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>GDScript</td>
+<td><abbr title="Python-like scripting language built into the Godot game engine">GDScript</abbr></td>
 <td><abbr title="Dynamic by default, with optional static typing (GDScript 2.0)">Dynamic</abbr></td>
 <td><abbr title="Optional static type hints you can add incrementally">Yes</abbr></td>
 <td><abbr title="Strongly typed at runtime; limited implicit conversion">Strong</abbr></td>
@@ -368,7 +368,7 @@
 <td><abbr title="Godot runs on Linux and exports Linux builds well">High</abbr></td>
 </tr>
 <tr>
-<td>Java</td>
+<td><abbr title="Class-based OO workhorse on the JVM; enterprise back-ends and Android">Java</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Mostly strong, with a few coercions (e.g. &quot;&quot; + 5)">Strong</abbr></td>
@@ -391,7 +391,7 @@
 <td><abbr title="JVM is first-class on Linux; dominant for Linux servers">Very High</abbr></td>
 </tr>
 <tr>
-<td>Kotlin</td>
+<td><abbr title="Modern, concise JVM language; Google's preferred language for Android">Kotlin</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; a `dynamic` type exists only for the JS target">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -414,7 +414,7 @@
 <td><abbr title="Runs on the JVM on Linux; Kotlin/Native targets Linux too">Very High</abbr></td>
 </tr>
 <tr>
-<td>Scala</td>
+<td><abbr title="Hybrid OO/functional JVM language with a powerful type system">Scala</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -437,7 +437,7 @@
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>Clojure</td>
+<td><abbr title="A modern Lisp on the JVM; functional and immutable-first">Clojure</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic by default; optional typing via clojure.spec or Typed Clojure">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -460,7 +460,7 @@
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>C#</td>
+<td><abbr title="Microsoft's multi-paradigm language for the .NET platform">C#</abbr></td>
 <td><abbr title="Statically typed; the `dynamic` keyword opts into runtime binding">Static</abbr></td>
 <td><abbr title="Static by default; the `dynamic` keyword enables runtime-bound typing where needed">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -483,7 +483,7 @@
 <td><abbr title="Server/CLI on .NET runs well on Linux, but desktop GUI stacks (WinForms/WPF) remain Windows-only">Medium</abbr></td>
 </tr>
 <tr>
-<td>F#</td>
+<td><abbr title="Functional-first .NET language from the ML family">F#</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -506,7 +506,7 @@
 <td><abbr title="Runs on .NET on Linux for server/CLI; rarely tied to Windows-only GUI">High</abbr></td>
 </tr>
 <tr>
-<td>Dart</td>
+<td><abbr title="Google's language for Flutter; compiles to native and JavaScript">Dart</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing since Dart 2; `dynamic` is an opt-out escape hatch, not gradual typing">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -529,7 +529,7 @@
 <td><abbr title="CLI runs on Linux; Flutter targets Linux desktop (stable)">High</abbr></td>
 </tr>
 <tr>
-<td>Objective-C</td>
+<td><abbr title="C with Smalltalk-style messaging; legacy Apple platform language">Objective-C</abbr></td>
 <td><abbr title="Statically typed objects layered over a dynamic message-passing runtime; `id` is dynamically typed">Static</abbr></td>
 <td><abbr title="Static object types are optional; `id` lets any object be messaged dynamically">Partial</abbr></td>
 <td><abbr title="Weak; C base plus dynamic messaging — you can message any object">Weak</abbr></td>
@@ -552,7 +552,7 @@
 <td><abbr title="Tied to Apple frameworks; only partial support on Linux via GNUstep">Low</abbr></td>
 </tr>
 <tr>
-<td>Swift</td>
+<td><abbr title="Apple's modern, safe language for apps and systems, replacing Objective-C">Swift</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; `Any` and dynamic Obj-C interop are escape hatches">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -575,7 +575,7 @@
 <td><abbr title="Official Linux toolchain exists (server-side Swift), but no Apple UI frameworks">Medium</abbr></td>
 </tr>
 <tr>
-<td>Go</td>
+<td><abbr title="Google's simple, fast compiled language built for concurrent servers">Go</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit numeric conversion">Strong</abbr></td>
@@ -598,7 +598,7 @@
 <td><abbr title="First-class on Linux; built at Google for Linux servers and cloud">Very High</abbr></td>
 </tr>
 <tr>
-<td>C</td>
+<td><abbr title="The foundational systems language; small, fast and everywhere">C</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Weak; free casts and implicit conversions">Weak</abbr></td>
@@ -621,7 +621,7 @@
 <td><abbr title="The Linux kernel and most of its userland are written in C">Very High</abbr></td>
 </tr>
 <tr>
-<td>C++</td>
+<td><abbr title="C with objects, templates and abstractions for high-performance systems">C++</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Weak-ish; inherits C's coercions, but stronger with classes and explicit conversions">Weak</abbr></td>
@@ -644,7 +644,7 @@
 <td><abbr title="First-class on Linux; GCC/Clang and full tooling">Very High</abbr></td>
 </tr>
 <tr>
-<td>Rust</td>
+<td><abbr title="Memory-safe systems language with ownership and no garbage collector">Rust</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -667,7 +667,7 @@
 <td><abbr title="First-class on Linux; excellent toolchain">Very High</abbr></td>
 </tr>
 <tr>
-<td>Zig</td>
+<td><abbr title="Modern, explicit systems language aiming to be a better C">Zig</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; explicit, with no hidden coercions">Strong</abbr></td>
@@ -690,7 +690,7 @@
 <td><abbr title="First-class on Linux with excellent cross-compilation">Very High</abbr></td>
 </tr>
 <tr>
-<td>Nim</td>
+<td><abbr title="Python-like syntax compiling to C for native performance">Nim</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -713,7 +713,7 @@
 <td><abbr title="Compiles via C; first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>Mojo</td>
+<td><abbr title="Python-superset for AI and systems performance via MLIR/LLVM">Mojo</abbr></td>
 <td><abbr title="Statically typed (typed `fn`/structs), with dynamic Python-compatible code">Static</abbr></td>
 <td><abbr title="Gradual by design; `def` is dynamic and Python-like, `fn` is strictly typed">Yes</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -736,7 +736,7 @@
 <td><abbr title="Linux is a primary target (AI servers); was Linux/macOS-first">High</abbr></td>
 </tr>
 <tr>
-<td>Ada</td>
+<td><abbr title="Safety-critical systems language used in aerospace, defense and rail">Ada</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Very strongly typed; strict, with explicit conversions and range/subtype checks">Strong</abbr></td>
@@ -759,7 +759,7 @@
 <td><abbr title="GNAT/GCC gives solid Linux support">High</abbr></td>
 </tr>
 <tr>
-<td>Delphi</td>
+<td><abbr title="Object Pascal with rapid native GUI app development">Delphi</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed Object Pascal; explicit conversions, though pointers are available">Strong</abbr></td>
@@ -782,7 +782,7 @@
 <td><abbr title="Windows-first; Linux is server/console only (FMXLinux), no native Linux GUI">Low</abbr></td>
 </tr>
 <tr>
-<td>Assembly</td>
+<td><abbr title="Human-written machine instructions with direct hardware control">Assembly</abbr></td>
 <td><abbr title="Untyped; operates on raw registers, bytes, and memory addresses">Untyped</abbr></td>
 <td><abbr title="No type system">No</abbr></td>
 <td><abbr title="No type system to enforce">None</abbr></td>
@@ -805,7 +805,7 @@
 <td><abbr title="Fully supported on Linux for x86/ARM via GAS/NASM and standard toolchains">Very High</abbr></td>
 </tr>
 <tr>
-<td>Haskell</td>
+<td><abbr title="Purely functional, lazy language with an advanced type system">Haskell</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -828,7 +828,7 @@
 <td><abbr title="GHC is first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>OCaml</td>
+<td><abbr title="Functional-first ML-family language with a fast native compiler">OCaml</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -851,7 +851,7 @@
 <td><abbr title="Unix-native heritage; first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>Lisp</td>
+<td><abbr title="Homoiconic language family with code-as-data and powerful macros (Common Lisp)">Lisp</abbr></td>
 <td><abbr title="Dynamically typed; optional type declarations mainly guide the optimizer">Dynamic</abbr></td>
 <td><abbr title="Optional type declarations; primarily compiler hints, some implementations check them">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -874,7 +874,7 @@
 <td><abbr title="SBCL and other implementations run first-class on Linux">Very High</abbr></td>
 </tr>
 <tr>
-<td>Elixir</td>
+<td><abbr title="Functional language on the BEAM for scalable, fault-tolerant systems">Elixir</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic; typespecs + Dialyzer, and gradual set-theoretic types landing (1.17+)">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -897,7 +897,7 @@
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 </tr>
 <tr>
-<td>Erlang</td>
+<td><abbr title="BEAM language built for massively concurrent, fault-tolerant telecom systems">Erlang</abbr></td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic; typespecs plus Dialyzer success typing">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -920,7 +920,7 @@
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 </tr>
 <tr>
-<td>Gleam</td>
+<td><abbr title="Statically typed, friendly functional language for the BEAM">Gleam</abbr></td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; the typed language of the BEAM">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
@@ -1134,15 +1134,17 @@
       }
 
       function computeRow(tr) {
-        var total = 0, lines = [];
+        var total = 0, parts = [];
         ratingCols.forEach(function (c) {
           var bucket = cellText(tr, c.idx);
           var w = weightFor(c.label, bucket.toLowerCase());
           if (w) {
             total += w;
-            lines.push((w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')');
+            parts.push({ w: w, text: (w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')' });
           }
         });
+        parts.sort(function (a, b) { return b.w - a.w; }); // most positive first
+        var lines = parts.map(function (p) { return p.text; });
         var pc = tr.cells[0];
         pc.textContent = String(total);
         pc.setAttribute('data-tip', 'Points: ' + total +
