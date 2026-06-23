@@ -89,8 +89,8 @@ io.gpt4all.gpt4all
 io.itch.itch
 io.missioncenter.MissionCenter
 io.neovim.nvim
-io.vikunja.Vikunja
 it.mijorus.gearlever
+me.iepure.devtoolbox
 net.ankiweb.Anki
 net.blumia.pineapple-steam-recording-exporter
 net.davidotek.pupgui2
@@ -106,6 +106,7 @@ nl.hjdskes.gcolor3
 no.mifi.losslesscut
 org.briarproject.Briar
 org.DolphinEmu.dolphin-emu
+org.electronjs.Electron2.BaseApp
 org.electrum.electrum
 org.fcast.Receiver
 org.ferdium.Ferdium
@@ -166,6 +167,10 @@ com.nvidia.geforcenow
 ## grayjay1-origin
 
 app.fork.Grayjay
+
+## hydra1-origin
+
+gg.hydralauncher.hydra
 
 ## launcher.moe
 
