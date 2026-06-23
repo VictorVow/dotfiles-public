@@ -483,6 +483,7 @@ in
       "http://localhost:8384"
       "http://localhost:8193"
       # Headscale
+      "https://aiometadata.device.example.com"
       "https://headscale.device.example.com"
       "https://lord-ubuntu.device.example.com"
       "https://calibre.device.example.com"
@@ -490,6 +491,7 @@ in
       "https://git.device.example.com"
       "https://rclone-lord-ubuntu.device.example.com"
       "https://syncyomi.device.example.com"
+      "https://yamtrack.device.example.com/"
       # Tailscale
       "https://lord-ubuntu.tailee8f02.ts.net"
       # Own services
@@ -585,6 +587,7 @@ in
       "https://redlib.pussthecat.org"
       "https://redlib.r4fo.com"
       "https://roadmap.sh"
+      "https://secure.backblaze.com"
       "https://slack.com"
       "https://sso.crunchyroll.com"
       "https://steamcommunity.com"
