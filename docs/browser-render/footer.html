@@ -176,15 +176,17 @@
       }
 
       function computeRow(tr) {
-        var total = 0, lines = [];
+        var total = 0, parts = [];
         ratingCols.forEach(function (c) {
           var bucket = cellText(tr, c.idx);
           var w = weightFor(c.label, bucket.toLowerCase());
           if (w) {
             total += w;
-            lines.push((w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')');
+            parts.push({ w: w, text: (w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')' });
           }
         });
+        parts.sort(function (a, b) { return b.w - a.w; }); // most positive first
+        var lines = parts.map(function (p) { return p.text; });
         var pc = tr.cells[0];
         pc.textContent = String(total);
         pc.setAttribute('data-tip', 'Points: ' + total +
