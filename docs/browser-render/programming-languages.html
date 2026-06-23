@@ -1060,9 +1060,23 @@
       try { return JSON.parse(localStorage.getItem(key)) || null; }
       catch (e) { return null; }
     }
+    var diskTimer = null;
     function saveWeights(obj) {
       try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(obj)); }
       catch (e) { /* private mode / file:// — persistence unavailable */ }
+      // Debounced write to disk via the live-preview server. No-op (silently
+      // caught) when opened from file:// or with the server down — localStorage
+      // still holds the value.
+      clearTimeout(diskTimer);
+      diskTimer = setTimeout(function () {
+        try {
+          fetch('/weights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(obj)
+          }).catch(function () {});
+        } catch (e) { /* fetch unavailable */ }
+      }, 500);
     }
 
     function headerLabel(headRow, idx) {
@@ -1261,6 +1275,8 @@
           var inp = document.createElement('input');
           inp.type = 'number';
           inp.step = '1';
+          inp.setAttribute('data-col', c.label);
+          inp.setAttribute('data-bucket', bucketLower);
           var cur = weightFor(c.label, bucketLower);
           inp.value = cur ? String(cur) : '';
           inp.addEventListener('input', function () {
@@ -1287,6 +1303,30 @@
 
       setCollapsed(!seeded); // auto-expand on first-run seeding
       computeAll();
+
+      // Disk is the source of truth when the live-preview server is running:
+      // pull saved weights and apply them over the localStorage-seeded state.
+      // Setting input.value programmatically doesn't fire 'input', so this
+      // never echoes back as a save.
+      function applyWeightsToInputs() {
+        Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
+          var w = weightFor(inp.getAttribute('data-col'), inp.getAttribute('data-bucket'));
+          inp.value = w ? String(w) : '';
+        });
+      }
+      try {
+        fetch('/weights')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (disk) {
+            if (disk && typeof disk === 'object' && Object.keys(disk).length) {
+              weights = disk;
+              try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(weights)); } catch (e) {}
+              applyWeightsToInputs();
+              computeAll();
+            }
+          })
+          .catch(function () { /* server absent — localStorage state stands */ });
+      } catch (e) { /* fetch unavailable */ }
     });
   })();
 </script>
