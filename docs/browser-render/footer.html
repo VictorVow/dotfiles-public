@@ -218,7 +218,7 @@
       resetBtn.addEventListener('click', function () {
         if (!window.confirm('Reset all bucket weights to 0?')) return;
         weights = {};
-        saveWeights(weights);
+        persist(weights);
         Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
           inp.value = '';
         });
@@ -245,6 +245,8 @@
           var inp = document.createElement('input');
           inp.type = 'number';
           inp.step = '1';
+          inp.dataset.col = c.label;
+          inp.dataset.bucket = bucketLower;
           var cur = weightFor(c.label, bucketLower);
           inp.value = cur ? String(cur) : '';
           inp.addEventListener('input', function () {
@@ -252,7 +254,7 @@
             var v = parseFloat(inp.value);
             if (isNaN(v) || v === 0) delete weights[c.label][bucketLower];
             else weights[c.label][bucketLower] = v;
-            saveWeights(weights);
+            persist(weights);
             computeAll();
           });
           field.appendChild(name);
@@ -269,8 +271,47 @@
       var wrap = table.closest('.tablewrap') || table;
       wrap.parentNode.insertBefore(toolbar, wrap);
 
+      var serverAvailable = false;
+      function persist(obj) {
+        saveWeights(obj); // localStorage cache / standalone fallback
+        if (serverAvailable && typeof fetch === 'function') {
+          try {
+            fetch('/weights', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(obj)
+            });
+          } catch (e) { /* ignore network errors */ }
+        }
+      }
+      function refreshInputs() {
+        Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
+          var w = weightFor(inp.dataset.col, inp.dataset.bucket);
+          inp.value = w ? String(w) : '';
+        });
+      }
+
       setCollapsed(!seeded); // auto-expand on first-run seeding
       computeAll();
+
+      // When served by the live preview server, its on-disk weights file is the
+      // source of truth; opened as a static file (no server), localStorage is used.
+      if (typeof fetch === 'function') {
+        fetch('/weights', { cache: 'no-store' }).then(function (r) {
+          if (!r.ok) throw new Error('no server');
+          return r.json();
+        }).then(function (server) {
+          serverAvailable = true;
+          if (server && Object.keys(server).length) {
+            weights = server;          // server wins
+            saveWeights(weights);      // cache locally
+            refreshInputs();
+            computeAll();
+          } else if (Object.keys(weights).length) {
+            persist(weights);          // seed the empty server from local/seeded weights
+          }
+        }).catch(function () { /* standalone / no server: localStorage only */ });
+      }
     });
   })();
 </script>
