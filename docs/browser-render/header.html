@@ -41,13 +41,28 @@
   thead th:hover { background: #eaeef2; }
   .sort-arrow { font-size: 0.8em; opacity: 0.7; }
   tbody tr:nth-child(even) { background: #fafbfc; }
-  /* first column sticks while scrolling sideways */
+  /* injected client-side Points column */
+  .points-col {
+    width: 56px;
+    min-width: 56px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  td.points-col { cursor: help; font-weight: 600; }
+  /* first two columns (Points, then Language) stick while scrolling sideways */
   th:first-child, td:first-child {
     position: sticky;
     left: 0;
     background: #f6f8fa;
     font-weight: 600;
   }
+  th:nth-child(2), td:nth-child(2) {
+    position: sticky;
+    left: var(--points-w, 56px);
+    background: #f6f8fa;
+    font-weight: 600;
+  }
+  thead th:first-child, thead th:nth-child(2) { z-index: 2; }
   abbr[title] { text-decoration: underline dotted; cursor: help; }
   code {
     background: rgba(175,184,193,0.2);
@@ -60,7 +75,7 @@
     blockquote { border-left-color: #30363d; color: #8b949e; }
     .tablewrap { border-color: #30363d; }
     th, td { border-color: #30363d; }
-    thead th, th:first-child, td:first-child { background: #161b22; }
+    thead th, th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { background: #161b22; }
     tbody tr:nth-child(even) { background: #0f141a; }
     code { background: rgba(110,118,129,0.4); }
   }

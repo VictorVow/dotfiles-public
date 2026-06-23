@@ -9,6 +9,82 @@
   });
 </script>
 <script>
+  // Inject an interactive "Points" column (client-side only — NOT in the
+  // Markdown). Left-click a data cell to +1 that row, right-click to -1.
+  // Hover a row's Points cell for a breakdown of how the total was reached.
+  // Runs BEFORE the sort script so the injected column gets correct indices
+  // (and becomes sortable by total).
+  (function () {
+    function headerLabel(headRow, idx) {
+      var h = headRow.cells[idx];
+      if (!h) return '';
+      var clone = h.cloneNode(true);
+      var a = clone.querySelector('.sort-arrow');
+      if (a) a.remove();
+      return (clone.textContent || '').trim();
+    }
+    function cellText(tr, idx) {
+      var c = tr.cells[idx];
+      return c ? (c.textContent || '').trim() : '';
+    }
+
+    document.querySelectorAll('table').forEach(function (table) {
+      if (!table.tHead || !table.tBodies.length) return;
+      var headRow = table.tHead.rows[0];
+      var tbody = table.tBodies[0];
+
+      // header cell
+      var th = document.createElement('th');
+      th.className = 'points-col';
+      th.textContent = 'Points';
+      th.title = 'Left-click a data cell to +1 this row, right-click to −1. ' +
+        "Hover a row's Points for the breakdown.";
+      headRow.insertBefore(th, headRow.cells[0]);
+
+      // body cells + per-row state (map of columnIndex -> net count)
+      Array.prototype.forEach.call(tbody.rows, function (tr) {
+        var td = document.createElement('td');
+        td.className = 'points-col';
+        tr.insertBefore(td, tr.cells[0]);
+        tr._points = {};
+        update(tr);
+      });
+
+      // match the Language column's sticky offset to the real Points width
+      table.style.setProperty('--points-w', th.offsetWidth + 'px');
+
+      function update(tr) {
+        var total = 0, lines = [];
+        Object.keys(tr._points).map(Number).sort(function (a, b) { return a - b; })
+          .forEach(function (idx) {
+            var n = tr._points[idx];
+            total += n;
+            lines.push((n > 0 ? '+' : '') + n + ' ' + cellText(tr, idx) +
+              ' (' + headerLabel(headRow, idx) + ')');
+          });
+        var pc = tr.cells[0];
+        pc.textContent = String(total);
+        pc.title = 'Points: ' + total +
+          (lines.length ? '\n' + lines.join('\n') : '\n(no clicks yet)');
+      }
+
+      function score(e, delta) {
+        var cell = e.target.closest('td');
+        if (!cell || cell.parentNode.parentNode !== tbody) return;
+        var idx = cell.cellIndex;
+        if (idx <= 1) return; // skip Points (0) and Language (1)
+        e.preventDefault();
+        var tr = cell.parentNode;
+        tr._points[idx] = (tr._points[idx] || 0) + delta;
+        if (tr._points[idx] === 0) delete tr._points[idx];
+        update(tr);
+      }
+      tbody.addEventListener('click', function (e) { score(e, 1); });
+      tbody.addEventListener('contextmenu', function (e) { score(e, -1); });
+    });
+  })();
+</script>
+<script>
   // click-to-sort columns. Ordinal rating columns sort by their scale's order;
   // everything else sorts as (natural) text. Click toggles ascending / descending.
   (function () {
@@ -23,7 +99,9 @@
       ['none', 'minimal', 'good', 'first-class', 'pure'],
       ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
       ['bad', 'poor', 'average', 'good', 'excellent'],
-      ['no', 'partial', 'yes']
+      ['no', 'partial', 'yes'],
+      ['dynamic', 'static'],
+      ['weak', 'strong']
     ];
     function text(td) { return (td.textContent || '').trim(); }
 
