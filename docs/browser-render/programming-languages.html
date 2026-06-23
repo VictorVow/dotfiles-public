@@ -109,7 +109,7 @@
 <th><abbr title="How type compatibility is decided: nominal = by the declared type name; structural = by the type's shape (its fields/methods).">Nominal/Structural</abbr></th>
 <th><abbr title="How much the compiler can deduce types on its own, so you don't have to write annotations everywhere.">Inference</abbr></th>
 <th><abbr title="How well the type system actually prevents type errors — soundness plus whether it's enforced at runtime — rated Very Low → Very High. Hover a cell for the specifics.">Type safety</abbr></th>
-<th><abbr title="How memory is allocated and reclaimed: manual, garbage collection (GC), or compiler-enforced ownership.">Memory</abbr></th>
+<th><abbr title="How much extra effort/verbosity is needed to avoid memory bugs, rated Very Easy → Very Difficult. Hover a cell for the language's actual memory model.">Memory</abbr></th>
 <th><abbr title="How fast the language builds/compiles, rated Very Slow → Very Fast. Hover a cell for what drives it.">Compilation</abbr></th>
 <th><abbr title="Typical runtime speed, rated Very Slow → Very Fast. Hover a cell for what drives it.">Performance</abbr></th>
 <th><abbr title="High-level runtime model: Compiled/Native (AOT to machine code), Managed/Execution Engine (bytecode on a VM with JIT + GC), or Interpreted/Dynamic (REPL). Hover a cell for the underlying mechanism.">Execution model</abbr></th>
@@ -132,7 +132,7 @@
 <td>Duck-typed at runtime</td>
 <td>N/A (no annotations)</td>
 <td><abbr title="No static types; type errors surface only at runtime">Very Low</abbr></td>
-<td>GC</td>
+<td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="No build step; parsed/JIT-compiled on load">Very Fast</abbr></td>
 <td><abbr title="JIT, fast for dynamic">Medium</abbr></td>
 <td><abbr title="JIT-compiled in a managed engine (V8); dynamic and REPL-driven by convention">Interpreted/Dynamic (REPL)</abbr></td>
@@ -153,7 +153,7 @@
 <td>Structural</td>
 <td>Strong local inference</td>
 <td><abbr title="Strong static checking, but deliberately unsound (any, assertions) and fully erased at runtime">High</abbr></td>
-<td>GC (as JS)</td>
+<td><abbr title="Garbage-collected (same runtime as JavaScript)">Very Easy</abbr></td>
 <td><abbr title="tsc transpilation; slows noticeably on large projects">Medium</abbr></td>
 <td><abbr title="Same as JS">Medium</abbr></td>
 <td><abbr title="Transpiled to JavaScript, then JIT-compiled in the engine (V8)">Interpreted/Dynamic (REPL)</abbr></td>
@@ -174,7 +174,7 @@
 <td>Duck-typed; nominal hints, structural via <code>Protocol</code></td>
 <td><abbr title="&quot;Checker-only&quot; inference means a tool like pyright infers types for tooling/error-checking, but nothing is inferred or enforced at runtime.">Checker-only</abbr></td>
 <td><abbr title="Strong at runtime, but typing is dynamic by default; hints are optional and unenforced">Low</abbr></td>
-<td>GC (refcount+cycles)</td>
+<td><abbr title="Reference counting plus a cycle collector">Very Easy</abbr></td>
 <td><abbr title="Compiles to bytecode (.pyc) on import; near-instant">Fast</abbr></td>
 <td><abbr title="Slow; leans on C exts">Slow</abbr></td>
 <td><abbr title="Interpreted bytecode (CPython); REPL-driven">Interpreted/Dynamic (REPL)</abbr></td>
@@ -195,7 +195,7 @@
 <td>Duck-typed</td>
 <td><abbr title="No runtime inference; checker-only via Sorbet">Checker-only</abbr></td>
 <td><abbr title="Strong at runtime but dynamic; types are optional and externally checked">Low</abbr></td>
-<td>GC</td>
+<td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Parsed to YARV bytecode; near-instant">Fast</abbr></td>
 <td><abbr title="Historically slow; improving with YJIT">Slow</abbr></td>
 <td><abbr title="Interpreted YARV bytecode with YJIT">Interpreted/Dynamic (REPL)</abbr></td>
@@ -216,7 +216,7 @@
 <td>Duck-typed</td>
 <td>N/A (no annotations)</td>
 <td><abbr title="No static types; weak coercion throughout">Very Low</abbr></td>
-<td><abbr title="GC; reference counting">GC</abbr></td>
+<td><abbr title="Reference counting; cyclic structures leak unless you manually weaken them">Easy</abbr></td>
 <td><abbr title="Compiled to an opcode tree at startup">Fast</abbr></td>
 <td><abbr title="Interpreted; slow for compute">Slow</abbr></td>
 <td><abbr title="Interpreted via an opcode tree">Interpreted/Dynamic</abbr></td>
@@ -237,7 +237,7 @@
 <td>Nominal</td>
 <td><abbr title="No runtime inference; checker-only via PHPStan/Psalm">Checker-only</abbr></td>
 <td><abbr title="Dynamic with weak coercion; declared types are checked but the language stays permissive">Low</abbr></td>
-<td><abbr title="GC; reference counting plus cycle collector">GC</abbr></td>
+<td><abbr title="Reference counting plus a cycle collector">Very Easy</abbr></td>
 <td><abbr title="Compiled to opcodes per request, cached by OPcache">Fast</abbr></td>
 <td><abbr title="Opcode VM with a JIT since PHP 8">Medium</abbr></td>
 <td><abbr title="Compiled to opcodes and run on the Zend VM; JIT in PHP 8">Interpreted/Dynamic</abbr></td>
@@ -258,7 +258,7 @@
 <td><abbr title="Duck-typed; everything composable is a table">Duck-typed</abbr></td>
 <td>N/A (no annotations)</td>
 <td><abbr title="No static types; coercion between strings and numbers">Low</abbr></td>
-<td><abbr title="Incremental mark-and-sweep GC">GC</abbr></td>
+<td><abbr title="Incremental mark-and-sweep garbage collection">Very Easy</abbr></td>
 <td><abbr title="Compiled to bytecode on load; near-instant">Fast</abbr></td>
 <td><abbr title="Fast for a scripting language; LuaJIT is much faster still">Medium</abbr></td>
 <td><abbr title="Register-based bytecode VM; LuaJIT adds a tracing JIT">Interpreted/Dynamic (REPL)</abbr></td>
@@ -279,7 +279,7 @@
 <td><abbr title="Nominal classes; duck-typed without annotations">Nominal</abbr></td>
 <td><abbr title="`:=` infers a local's type from its initializer">Local inference</abbr></td>
 <td><abbr title="Optional types checked at parse/runtime; dynamic by default">Low</abbr></td>
-<td><abbr title="Reference counting (RefCounted) plus manual free for Nodes">Ref counting / manual</abbr></td>
+<td><abbr title="Reference counting (RefCounted), but Nodes must be freed manually (queue_free)">Medium</abbr></td>
 <td><abbr title="Compiled to bytecode at load">Fast</abbr></td>
 <td><abbr title="Interpreted; slower than C# or GDExtension/C++">Slow</abbr></td>
 <td><abbr title="Interpreted on the Godot engine VM">Interpreted/Dynamic</abbr></td>
@@ -300,7 +300,7 @@
 <td>Nominal</td>
 <td>Limited (<code>var</code> for locals, J10+)</td>
 <td><abbr title="Static, strong, enforced at runtime by the JVM, but null and unchecked casts remain">High</abbr></td>
-<td>GC (G1, ZGC)</td>
+<td><abbr title="JVM garbage collectors (G1, ZGC)">Very Easy</abbr></td>
 <td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
 <td><abbr title="JIT, fast post-warmup">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
@@ -321,7 +321,7 @@
 <td>Nominal</td>
 <td>Strong local inference</td>
 <td><abbr title="Static, strong, with null safety in the type system; nullability holes remain at the Java interop boundary">High</abbr></td>
-<td>GC (JVM)</td>
+<td><abbr title="JVM garbage collection">Very Easy</abbr></td>
 <td><abbr title="kotlinc does more analysis than javac; builds are slower than Java's">Medium</abbr></td>
 <td><abbr title="JIT on the JVM, ~Java">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM; also Kotlin/Native (LLVM AOT) and Kotlin/JS">Managed/Execution Engine</abbr></td>
@@ -342,7 +342,7 @@
 <td><abbr title="Nominal, with structural types available">Nominal</abbr></td>
 <td><abbr title="Strong local inference; more than Java, less than full Hindley–Milner">Strong local inference</abbr></td>
 <td><abbr title="Advanced, expressive static types; JVM null holes (Scala 3 adds opt-in explicit nulls)">High</abbr></td>
-<td>GC (JVM)</td>
+<td><abbr title="JVM garbage collection">Very Easy</abbr></td>
 <td><abbr title="Notoriously slow; implicit resolution and a heavy type checker">Slow</abbr></td>
 <td><abbr title="JVM JIT, ~Java">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM; also Scala.js and Scala Native">Managed/Execution Engine</abbr></td>
@@ -363,7 +363,7 @@
 <td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed data; protocols</abbr></td>
 <td>N/A (dynamic)</td>
 <td><abbr title="Dynamic; optional runtime checks via Spec, nothing enforced statically">Low</abbr></td>
-<td><abbr title="JVM GC; immutable persistent data structures">GC (JVM)</abbr></td>
+<td><abbr title="JVM garbage collection; immutable persistent data structures">Very Easy</abbr></td>
 <td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
 <td><abbr title="JVM JIT; fast, though boxing and immutability add cost">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
@@ -384,7 +384,7 @@
 <td>Nominal</td>
 <td><abbr title="`var` and target-typed `new`; locals only">Strong local inference</abbr></td>
 <td><abbr title="Static and strong, enforced by the CLR; nullable reference types are opt-in, so null holes remain">High</abbr></td>
-<td>GC</td>
+<td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Roslyn compiles to IL quickly">Fast</abbr></td>
 <td><abbr title="RyuJIT on the CLR; Native AOT available">Fast</abbr></td>
 <td><abbr title="IL bytecode JIT-compiled on the CLR (managed runtime, GC); Native AOT option">Managed/Execution Engine</abbr></td>
@@ -405,7 +405,7 @@
 <td><abbr title="Nominal classes, but every class also defines an implicit interface">Nominal</abbr></td>
 <td>Strong local inference</td>
 <td><abbr title="Sound static type system with sound null safety since 2.12">High</abbr></td>
-<td>GC</td>
+<td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="JIT for fast dev/hot-reload, AOT for release">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native; JIT during development">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native (release) or JIT (dev); compiles to JS for web">Compiled/Native (AOT)</abbr></td>
@@ -426,7 +426,7 @@
 <td><abbr title="Nominal protocols, but runtime messaging is duck-typed">Nominal; duck-typed messaging</abbr></td>
 <td><abbr title="Minimal; C-style, with `__auto_type`">Minimal</abbr></td>
 <td><abbr title="Dynamic messaging; messaging nil is silently ignored rather than erroring">Low</abbr></td>
-<td><abbr title="Automatic Reference Counting (or manual retain/release)">ARC</abbr></td>
+<td><abbr title="Automatic Reference Counting (or manual retain/release); break retain cycles with weak/unowned">Easy</abbr></td>
 <td><abbr title="Clang compiler">Medium</abbr></td>
 <td><abbr title="Native, but dynamic dispatch adds overhead">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native with a dynamic Objective-C runtime">Compiled/Native</abbr></td>
@@ -447,7 +447,7 @@
 <td>Nominal</td>
 <td>Strong local inference</td>
 <td><abbr title="Strong static types with optionals (no implicit null) and value semantics; some runtime holes via Obj-C interop">High</abbr></td>
-<td><abbr title="Automatic Reference Counting; no tracing GC">ARC (ref counting)</abbr></td>
+<td><abbr title="Automatic Reference Counting; you must break retain cycles with weak/unowned">Easy</abbr></td>
 <td><abbr title="Whole-module type inference and optimization make builds notably slow">Slow</abbr></td>
 <td><abbr title="Native via LLVM">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native code via LLVM">Compiled/Native</abbr></td>
@@ -468,7 +468,7 @@
 <td><abbr title="This is Go's signature quirk: concrete types are matched nominally, but a type satisfies an interface purely by having the right methods, with no implements keyword. So Go is nominal and structural depending on which part you're looking at."><strong>Nominal types, structural interfaces</strong></abbr></td>
 <td>Local inference (<code>:=</code>)</td>
 <td><abbr title="Static and strong, enforced at runtime, but nil and empty-interface escape hatches">High</abbr></td>
-<td>GC (low-latency)</td>
+<td><abbr title="Low-latency garbage collector">Very Easy</abbr></td>
 <td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
 <td><abbr title="Native, fast">Fast</abbr></td>
 <td><abbr title="AOT-compiled to a static native binary">Compiled/Native</abbr></td>
@@ -489,7 +489,7 @@
 <td>Nominal (by tag)</td>
 <td>None (manifest)</td>
 <td><abbr title="Weak typing: free casts, implicit conversions, no runtime checks">Very Low</abbr></td>
-<td>Manual (malloc/free)</td>
+<td><abbr title="Fully manual malloc/free; no safety net">Very Difficult</abbr></td>
 <td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
 <td><abbr title="Native baseline">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
@@ -510,7 +510,7 @@
 <td><abbr title="C++ classes use nominal typing, but templates are effectively duck-typed at compile time: a template just requires that whatever type you pass supports the operations used in the body, regardless of its name or declared interface (pre-C++20 concepts).">Nominal; templates duck-typed</abbr></td>
 <td><code>auto</code>, template deduction (C++11+)</td>
 <td><abbr title="Stronger than C, but C-style casts and undefined behavior undermine guarantees">Medium</abbr></td>
-<td>Manual + RAII/smart ptrs</td>
+<td><abbr title="Manual, but RAII and smart pointers cut down errors; raw pointers and UB still possible">Difficult</abbr></td>
 <td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
 <td><abbr title="Native, ~C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
@@ -531,7 +531,7 @@
 <td>Nominal</td>
 <td><abbr title="Rust infers locals well but not function signatures — you must annotate parameters and return types. It's local inference, not whole-program Hindley–Milner like Haskell.">Strong local inference</abbr></td>
 <td><abbr title="Sound, strong static types enforced throughout; no null, no data races">Very High</abbr></td>
-<td>Ownership/borrow, no GC</td>
+<td><abbr title="Compile-time ownership/borrowing; guarantees safety but you must satisfy the borrow checker">Difficult</abbr></td>
 <td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
 <td><abbr title="Native, near C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to a single native binary">Compiled/Native</abbr></td>
@@ -552,7 +552,7 @@
 <td>Nominal</td>
 <td><abbr title="Local inference; types are comptime values">Local inference</abbr></td>
 <td><abbr title="No null (optionals), no hidden control flow, but manual memory and allowed unsafe operations">Medium</abbr></td>
-<td><abbr title="Manual via explicit allocators; no GC">Manual (allocators)</abbr></td>
+<td><abbr title="Manual via explicit allocators (with defer/errdefer); no GC">Difficult</abbr></td>
 <td><abbr title="Own fast backend and fast cross-compilation (LLVM optional)">Fast</abbr></td>
 <td><abbr title="Native, ~C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
@@ -573,7 +573,7 @@
 <td>Nominal</td>
 <td>Strong local inference</td>
 <td><abbr title="Static, strong static types throughout">High</abbr></td>
-<td><abbr title="GC by default (ARC/ORC); optional manual memory">GC (ARC/ORC)</abbr></td>
+<td><abbr title="Garbage-collected by default (ARC/ORC); optional manual memory">Very Easy</abbr></td>
 <td><abbr title="Compiles via C/C++/JS backends; fast">Fast</abbr></td>
 <td><abbr title="Compiles to C, ~C speed">Very Fast</abbr></td>
 <td><abbr title="Transpiles to C/C++/JS, then AOT-compiled to native">Compiled/Native</abbr></td>
@@ -594,7 +594,7 @@
 <td><abbr title="Nominal structs and traits">Nominal</abbr></td>
 <td>Strong local inference</td>
 <td><abbr title="Strong static types and an ownership/borrow model when using typed code">High</abbr></td>
-<td><abbr title="Ownership/borrow with value semantics; no GC">Ownership/borrow</abbr></td>
+<td><abbr title="Compile-time ownership/borrowing with value semantics; no GC">Difficult</abbr></td>
 <td><abbr title="MLIR-based toolchain; young">Medium</abbr></td>
 <td><abbr title="MLIR/LLVM; designed for AI/systems-level speed">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native via MLIR/LLVM">Compiled/Native</abbr></td>
@@ -614,8 +614,8 @@
 <td><abbr title="No type system to enforce">None</abbr></td>
 <td>N/A</td>
 <td>None (manifest)</td>
-<td><abbr title="No types at all; nothing prevents misinterpreting data">None</abbr></td>
-<td><abbr title="Manual; direct register and memory management">Manual</abbr></td>
+<td><abbr title="No type system at all — nothing prevents misinterpreting data; the absolute floor of type safety">Very Low</abbr></td>
+<td><abbr title="Fully manual: direct register and memory management, no safety net">Very Difficult</abbr></td>
 <td><abbr title="Assembled directly to machine code">Very Fast</abbr></td>
 <td><abbr title="Maximal control; the performance ceiling">Very Fast</abbr></td>
 <td><abbr title="Assembled directly to native machine code">Compiled/Native</abbr></td>
@@ -636,7 +636,7 @@
 <td>Nominal (typeclasses)</td>
 <td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Strong global inference</abbr></td>
 <td><abbr title="Sound and pure; no null, side effects tracked in types (IO)">Very High</abbr></td>
-<td><abbr title="GC; lazy evaluation means heavy allocation and possible space leaks">GC (lazy)</abbr></td>
+<td><abbr title="Garbage-collected, but lazy evaluation can cause space leaks that take effort to track down">Easy</abbr></td>
 <td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
 <td><abbr title="Native via GHC; fast, though laziness adds overhead">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native code via GHC">Compiled/Native</abbr></td>
@@ -657,7 +657,7 @@
 <td><abbr title="Nominal variants/records; structural objects and polymorphic variants">Nominal; structural objects</abbr></td>
 <td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
 <td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
-<td><abbr title="GC with a fast minor-heap allocator">GC</abbr></td>
+<td><abbr title="Garbage-collected with a fast minor-heap allocator">Very Easy</abbr></td>
 <td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
 <td><abbr title="Native compiler; close to C on many workloads">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native (or to bytecode)">Compiled/Native</abbr></td>
@@ -678,7 +678,7 @@
 <td><abbr title="Duck-typed; CLOS classes are nominal">Duck-typed; CLOS nominal</abbr></td>
 <td><abbr title="No required annotations; compilers like SBCL infer types for optimization">Checker-only</abbr></td>
 <td><abbr title="Dynamic; type errors surface at runtime">Low</abbr></td>
-<td>GC</td>
+<td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Incremental, image-based; SBCL compiles to native fast">Fast</abbr></td>
 <td><abbr title="SBCL compiles to native; can rival C with type declarations">Fast</abbr></td>
 <td><abbr title="Compiled to native (e.g. SBCL) in an image-based, REPL-driven workflow">Compiled/Native (REPL)</abbr></td>
@@ -699,7 +699,7 @@
 <td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
 <td><abbr title="Dynamic today; gradual set-theoretic types being added (1.17+)">N/A; typing in progress</abbr></td>
 <td><abbr title="Dynamic; gradual set-theoretic types being introduced (1.17+)">Low</abbr></td>
-<td><abbr title="Per-process GC on the BEAM; no global pauses">GC (per-process)</abbr></td>
+<td><abbr title="Per-process garbage collection on the BEAM; no global pauses">Very Easy</abbr></td>
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
 <td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
 <td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
@@ -720,7 +720,7 @@
 <td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
 <td><abbr title="No runtime inference; Dialyzer applies success typing">Checker-only</abbr></td>
 <td><abbr title="Dynamic; optional typespecs checked externally by Dialyzer">Low</abbr></td>
-<td><abbr title="Per-process GC on the BEAM; no global pauses">GC (per-process)</abbr></td>
+<td><abbr title="Per-process garbage collection on the BEAM; no global pauses">Very Easy</abbr></td>
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
 <td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
 <td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
@@ -735,6 +735,18 @@
 </tr>
 </tbody>
 </table>
+<p>Platform/paradigm groups</p>
+<ol>
+<li>Web / JS family — JavaScript, TypeScript</li>
+<li>Dynamic scripting — Python, Ruby, Perl, PHP</li>
+<li>Embedded / game scripting — Lua, GDScript</li>
+<li>JVM — Java, Kotlin, Scala, Clojure</li>
+<li>.NET &amp; cross-platform app — C#, Dart</li>
+<li>Apple platforms — Objective-C, Swift</li>
+<li>Systems / native — Go, C, C++, Rust, Zig, Nim, Mojo, Assembly (ordered roughly high-level → lowest-level)</li>
+<li>Functional — Haskell, OCaml, Lisp</li>
+<li>BEAM / actor-model — Elixir, Erlang</li>
+</ol>
 </div>
 <script>
   // wrap the wide table in a horizontal-scroll container
