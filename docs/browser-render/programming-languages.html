@@ -63,6 +63,16 @@
     font-weight: 600;
   }
   thead th:first-child, thead th:nth-child(2) { z-index: 2; }
+  .points-toolbar { margin: 0 0 0.75rem; }
+  .clear-points-btn {
+    font: inherit;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    cursor: pointer;
+  }
+  .clear-points-btn:hover { background: #eaeef2; }
   abbr[title] { text-decoration: underline dotted; cursor: help; }
   code {
     background: rgba(175,184,193,0.2);
@@ -77,6 +87,8 @@
     th, td { border-color: #30363d; }
     thead th, th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { background: #161b22; }
     tbody tr:nth-child(even) { background: #0f141a; }
+    .clear-points-btn { background: #161b22; border-color: #30363d; color: #c9d1d9; }
+    .clear-points-btn:hover { background: #21262d; }
     code { background: rgba(110,118,129,0.4); }
   }
 </style>
@@ -176,279 +188,6 @@
 <td>Servers, scripting, data/ML</td>
 </tr>
 <tr>
-<td>Rust</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Rust infers locals well but not function signatures — you must annotate parameters and return types. It's local inference, not whole-program Hindley–Milner like Haskell.">Strong local inference</abbr></td>
-<td><abbr title="Sound, strong static types enforced throughout; no null, no data races">Very High</abbr></td>
-<td>Ownership/borrow, no GC</td>
-<td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
-<td><abbr title="Native, near C">Very Fast</abbr></td>
-<td><abbr title="AOT-compiled to a single native binary">Compiled/Native</abbr></td>
-<td>Fearless; data-race-free</td>
-<td>Functional+imperative, traits</td>
-<td><abbr title="Closures, iterators, algebraic data types, pattern matching; imperative core, not pure">Good</abbr></td>
-<td><abbr title="Cargo/crates.io">Medium</abbr></td>
-<td><abbr title="Cargo, rust-analyzer, clippy; famously helpful compiler errors">Excellent</abbr></td>
-<td><abbr title="Explicit types, lifetimes, and error handling add ceremony">High</abbr></td>
-<td><abbr title="Steep (ownership)">Difficult</abbr></td>
-<td>Systems, embedded, WASM</td>
-</tr>
-<tr>
-<td>Go</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit numeric conversion">Strong</abbr></td>
-<td><abbr title="This is Go's signature quirk: concrete types are matched nominally, but a type satisfies an interface purely by having the right methods, with no implements keyword. So Go is nominal and structural depending on which part you're looking at."><strong>Nominal types, structural interfaces</strong></abbr></td>
-<td>Local inference (<code>:=</code>)</td>
-<td><abbr title="Static and strong, enforced at runtime, but nil and empty-interface escape hatches">High</abbr></td>
-<td>GC (low-latency)</td>
-<td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
-<td><abbr title="Native, fast">Fast</abbr></td>
-<td><abbr title="AOT-compiled to a static native binary">Compiled/Native</abbr></td>
-<td>Goroutines + channels (CSP)</td>
-<td>Procedural + light OO</td>
-<td><abbr title="First-class functions and closures, but no FP idioms or immutability">Minimal</abbr></td>
-<td><abbr title="go modules">Large</abbr></td>
-<td><abbr title="Integrated toolchain out of the box: build, test, fmt, vet, modules">Excellent</abbr></td>
-<td><abbr title="Terse syntax, but explicit `if err != nil` handling adds repetition">Medium</abbr></td>
-<td><abbr title="Easy, small lang">Easy</abbr></td>
-<td>Servers, CLI, cloud</td>
-</tr>
-<tr>
-<td>Java</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Mostly strong, with a few coercions (e.g. &quot;&quot; + 5)">Strong</abbr></td>
-<td>Nominal</td>
-<td>Limited (<code>var</code> for locals, J10+)</td>
-<td><abbr title="Static, strong, enforced at runtime by the JVM, but null and unchecked casts remain">High</abbr></td>
-<td>GC (G1, ZGC)</td>
-<td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
-<td><abbr title="JIT, fast post-warmup">Fast</abbr></td>
-<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
-<td>Threads; virtual threads (21)</td>
-<td>Class-based OO; functional since 8</td>
-<td><abbr title="Lambdas and Streams (8+), records and pattern matching (recent); OO-first">Good</abbr></td>
-<td><abbr title="Maven/Gradle">Very Large</abbr></td>
-<td><abbr title="Mature IDEs and profilers (IntelliJ, etc.), but heavyweight build tooling">Good</abbr></td>
-<td><abbr title="Lots of boilerplate; classes, getters/setters, ceremony">Very High</abbr></td>
-<td><abbr title="Moderate, verbose">Medium</abbr></td>
-<td>JVM anywhere; Android</td>
-</tr>
-<tr>
-<td>C</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Weak; free casts and implicit conversions">Weak</abbr></td>
-<td>Nominal (by tag)</td>
-<td>None (manifest)</td>
-<td><abbr title="Weak typing: free casts, implicit conversions, no runtime checks">Very Low</abbr></td>
-<td>Manual (malloc/free)</td>
-<td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
-<td><abbr title="Native baseline">Very Fast</abbr></td>
-<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
-<td>OS threads (pthreads)</td>
-<td>Procedural</td>
-<td><abbr title="No first-class functions — only function pointers">None</abbr></td>
-<td><abbr title="vcpkg/Conan (emerging)">Small</abbr></td>
-<td><abbr title="Mature compilers/debuggers (gcc, gdb), but no standard build or package tooling">Average</abbr></td>
-<td><abbr title="Small language, but manual memory/struct handling adds boilerplate">Medium</abbr></td>
-<td><abbr title="Small lang, hard to master">Difficult</abbr></td>
-<td>Everywhere (embedded→kernels)</td>
-</tr>
-<tr>
-<td>C++</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Weak-ish; inherits C's coercions, but stronger with classes and explicit conversions">Weak</abbr></td>
-<td><abbr title="C++ classes use nominal typing, but templates are effectively duck-typed at compile time: a template just requires that whatever type you pass supports the operations used in the body, regardless of its name or declared interface (pre-C++20 concepts).">Nominal; templates duck-typed</abbr></td>
-<td><code>auto</code>, template deduction (C++11+)</td>
-<td><abbr title="Stronger than C, but C-style casts and undefined behavior undermine guarantees">Medium</abbr></td>
-<td>Manual + RAII/smart ptrs</td>
-<td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
-<td><abbr title="Native, ~C">Very Fast</abbr></td>
-<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
-<td>std::thread, atomics, async</td>
-<td>Multi: procedural, OO, generic</td>
-<td><abbr title="Lambdas (C++11) and ranges/algorithms; manual, no immutability">Minimal</abbr></td>
-<td><abbr title="vcpkg, Conan (fragmented)">Medium</abbr></td>
-<td><abbr title="Powerful debuggers/IDEs but complex; fragmented build/package story, slow compiles">Average</abbr></td>
-<td><abbr title="Headers, templates, and manual resource patterns add bulk">High</abbr></td>
-<td><abbr title="Very steep">Very Difficult</abbr></td>
-<td>Systems, games, embedded</td>
-</tr>
-<tr>
-<td>Haskell</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal (typeclasses)</td>
-<td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Strong global inference</abbr></td>
-<td><abbr title="Sound and pure; no null, side effects tracked in types (IO)">Very High</abbr></td>
-<td><abbr title="GC; lazy evaluation means heavy allocation and possible space leaks">GC (lazy)</abbr></td>
-<td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
-<td><abbr title="Native via GHC; fast, though laziness adds overhead">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native code via GHC">Compiled/Native</abbr></td>
-<td><abbr title="Lightweight green threads + Software Transactional Memory">Green threads, STM</abbr></td>
-<td>Purely functional, lazy</td>
-<td><abbr title="Pure functional language — immutability and referential transparency by default">Pure</abbr></td>
-<td><abbr title="Cabal/Stack; Hackage">Small</abbr></td>
-<td><abbr title="HLS language server and GHCi REPL; much improved but historically rough">Average</abbr></td>
-<td><abbr title="Very concise and expressive; point-free style can obscure">Low</abbr></td>
-<td><abbr title="Monads, laziness, and an advanced type system">Very Difficult</abbr></td>
-<td>Servers, compilers, research</td>
-</tr>
-<tr>
-<td>OCaml</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal variants/records; structural objects and polymorphic variants">Nominal; structural objects</abbr></td>
-<td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
-<td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
-<td><abbr title="GC with a fast minor-heap allocator">GC</abbr></td>
-<td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
-<td><abbr title="Native compiler; close to C on many workloads">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native (or to bytecode)">Compiled/Native</abbr></td>
-<td><abbr title="Multicore domains (OCaml 5) and effect handlers">Domains (5.0), effects</abbr></td>
-<td>Functional + imperative, modules</td>
-<td><abbr title="Functional-first, with full imperative and object support">First-class</abbr></td>
-<td><abbr title="opam; smaller but solid">Small</abbr></td>
-<td><abbr title="Solid: dune build system, Merlin/LSP, utop REPL">Good</abbr></td>
-<td><abbr title="Concise, with a powerful module system">Low</abbr></td>
-<td><abbr title="Module system and FP concepts">Difficult</abbr></td>
-<td>Servers, compilers, finance</td>
-</tr>
-<tr>
-<td>Clojure</td>
-<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
-<td><abbr title="Dynamic by default; optional typing via clojure.spec or Typed Clojure">Partial</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed data; protocols</abbr></td>
-<td>N/A (dynamic)</td>
-<td><abbr title="Dynamic; optional runtime checks via Spec, nothing enforced statically">Low</abbr></td>
-<td><abbr title="JVM GC; immutable persistent data structures">GC (JVM)</abbr></td>
-<td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
-<td><abbr title="JVM JIT; fast, though boxing and immutability add cost">Fast</abbr></td>
-<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
-<td><abbr title="STM, atoms, agents; core.async channels (CSP)">STM/atoms, core.async</abbr></td>
-<td>Functional Lisp; immutable-first</td>
-<td><abbr title="Functional-first Lisp; immutable persistent data by default">First-class</abbr></td>
-<td><abbr title="Clojars plus full Java/Maven interop">Large</abbr></td>
-<td><abbr title="Outstanding REPL-driven workflow; Leiningen/tools.deps, but rougher onboarding">Good</abbr></td>
-<td><abbr title="Terse Lisp; minimal syntax">Very Low</abbr></td>
-<td><abbr title="Lisp syntax, FP, immutability, and the JVM">Medium</abbr></td>
-<td>JVM anywhere; ClojureScript→browser</td>
-</tr>
-<tr>
-<td>Elixir</td>
-<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
-<td><abbr title="Dynamic; typespecs + Dialyzer, and gradual set-theoretic types landing (1.17+)">Partial</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
-<td><abbr title="Dynamic today; gradual set-theoretic types being added (1.17+)">N/A; typing in progress</abbr></td>
-<td><abbr title="Dynamic; gradual set-theoretic types being introduced (1.17+)">Low</abbr></td>
-<td><abbr title="Per-process GC on the BEAM; no global pauses">GC (per-process)</abbr></td>
-<td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
-<td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
-<td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
-<td><abbr title="Actor model; millions of lightweight processes with supervisors">Actors (BEAM), massive scale</abbr></td>
-<td>Functional, actor-based</td>
-<td><abbr title="Functional language built on the actor model; immutable data">First-class</abbr></td>
-<td><abbr title="Hex/Mix; strong web stack (Phoenix)">Medium</abbr></td>
-<td><abbr title="Polished: Mix build tool, IEx REPL, built-in formatter and docs">Good</abbr></td>
-<td><abbr title="Clean Ruby-like syntax with pipelines">Low</abbr></td>
-<td><abbr title="FP plus the actor model; approachable syntax">Medium</abbr></td>
-<td>Servers, distributed, real-time</td>
-</tr>
-<tr>
-<td>Kotlin</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; a `dynamic` type exists only for the JS target">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
-<td><abbr title="Static, strong, with null safety in the type system; nullability holes remain at the Java interop boundary">High</abbr></td>
-<td>GC (JVM)</td>
-<td><abbr title="kotlinc does more analysis than javac; builds are slower than Java's">Medium</abbr></td>
-<td><abbr title="JIT on the JVM, ~Java">Fast</abbr></td>
-<td><abbr title="Bytecode JIT-compiled on the JVM; also Kotlin/Native (LLVM AOT) and Kotlin/JS">Managed/Execution Engine</abbr></td>
-<td>Coroutines (structured), JVM threads</td>
-<td>Multi: OO, functional</td>
-<td><abbr title="Lambdas, higher-order functions, immutability support; OO-first but FP-friendly">Good</abbr></td>
-<td><abbr title="Maven/Gradle plus full Java interop">Very Large</abbr></td>
-<td><abbr title="First-class JetBrains/IntelliJ support">Excellent</abbr></td>
-<td><abbr title="Concise; far less boilerplate than Java">Low</abbr></td>
-<td><abbr title="Approachable, especially from Java">Medium</abbr></td>
-<td>JVM, Android, Native, JS</td>
-</tr>
-<tr>
-<td>Dart</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing since Dart 2; `dynamic` is an opt-out escape hatch, not gradual typing">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal classes, but every class also defines an implicit interface">Nominal</abbr></td>
-<td>Strong local inference</td>
-<td><abbr title="Sound static type system with sound null safety since 2.12">High</abbr></td>
-<td>GC</td>
-<td><abbr title="JIT for fast dev/hot-reload, AOT for release">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native; JIT during development">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native (release) or JIT (dev); compiles to JS for web">Compiled/Native (AOT)</abbr></td>
-<td><abbr title="Isolates (no shared memory) + async/await">Isolates, async/await</abbr></td>
-<td>Multi: OO, functional</td>
-<td><abbr title="Closures, higher-order functions, collection operators; OO-first">Good</abbr></td>
-<td><abbr title="pub.dev; largely Flutter-driven">Large</abbr></td>
-<td><abbr title="Hot reload, DartPad, strong analyzer">Excellent</abbr></td>
-<td>Medium</td>
-<td><abbr title="Familiar C-style syntax, easy to pick up">Easy</abbr></td>
-<td>Mobile (Flutter), web, desktop, server</td>
-</tr>
-<tr>
-<td>PHP</td>
-<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
-<td><abbr title="Optional type declarations added incrementally since PHP 7; external checkers (PHPStan, Psalm) add more">Partial</abbr></td>
-<td><abbr title="Weak; extensive type juggling and implicit coercion, though PHP 8 tightened comparisons">Weak</abbr></td>
-<td>Nominal</td>
-<td><abbr title="No runtime inference; checker-only via PHPStan/Psalm">Checker-only</abbr></td>
-<td><abbr title="Dynamic with weak coercion; declared types are checked but the language stays permissive">Low</abbr></td>
-<td><abbr title="GC; reference counting plus cycle collector">GC</abbr></td>
-<td><abbr title="Compiled to opcodes per request, cached by OPcache">Fast</abbr></td>
-<td><abbr title="Opcode VM with a JIT since PHP 8">Medium</abbr></td>
-<td><abbr title="Compiled to opcodes and run on the Zend VM; JIT in PHP 8">Interpreted/Dynamic</abbr></td>
-<td><abbr title="Request/process-based; async via Fibers (8.1) and Swoole">Process-based; Fibers</abbr></td>
-<td>Multi: OO, procedural</td>
-<td><abbr title="First-class callables, closures, arrow functions">Good</abbr></td>
-<td><abbr title="Composer/Packagist">Very Large</abbr></td>
-<td><abbr title="PhpStorm, Composer, PHPStan; solid modern tooling">Good</abbr></td>
-<td>Medium</td>
-<td><abbr title="Easy to start; many historical inconsistencies">Easy</abbr></td>
-<td>Servers, web</td>
-</tr>
-<tr>
-<td>C#</td>
-<td><abbr title="Statically typed; the `dynamic` keyword opts into runtime binding">Static</abbr></td>
-<td><abbr title="Static by default; the `dynamic` keyword enables runtime-bound typing where needed">Partial</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="`var` and target-typed `new`; locals only">Strong local inference</abbr></td>
-<td><abbr title="Static and strong, enforced by the CLR; nullable reference types are opt-in, so null holes remain">High</abbr></td>
-<td>GC</td>
-<td><abbr title="Roslyn compiles to IL quickly">Fast</abbr></td>
-<td><abbr title="RyuJIT on the CLR; Native AOT available">Fast</abbr></td>
-<td><abbr title="IL bytecode JIT-compiled on the CLR (managed runtime, GC); Native AOT option">Managed/Execution Engine</abbr></td>
-<td>async/await (TPL), threads</td>
-<td>Multi: OO, functional, generic</td>
-<td><abbr title="LINQ, lambdas, records, pattern matching; OO-first but strong FP features">Good</abbr></td>
-<td><abbr title="NuGet">Very Large</abbr></td>
-<td><abbr title="Visual Studio and Rider; top-tier IDEs and debuggers">Excellent</abbr></td>
-<td>Medium</td>
-<td>Medium</td>
-<td><abbr title=".NET runs cross-platform; Windows/Linux/macOS, Unity">Cross-platform (.NET)</abbr></td>
-</tr>
-<tr>
 <td>Ruby</td>
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic by default; optional typing via RBS with Sorbet/Steep">Partial</abbr></td>
@@ -468,27 +207,6 @@
 <td><abbr title="Expressive and concise">Low</abbr></td>
 <td><abbr title="Very approachable, readable syntax">Easy</abbr></td>
 <td>Servers, scripting, web</td>
-</tr>
-<tr>
-<td>Swift</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; `Any` and dynamic Obj-C interop are escape hatches">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
-<td><abbr title="Strong static types with optionals (no implicit null) and value semantics; some runtime holes via Obj-C interop">High</abbr></td>
-<td><abbr title="Automatic Reference Counting; no tracing GC">ARC (ref counting)</abbr></td>
-<td><abbr title="Whole-module type inference and optimization make builds notably slow">Slow</abbr></td>
-<td><abbr title="Native via LLVM">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native code via LLVM">Compiled/Native</abbr></td>
-<td><abbr title="async/await with actors (structured concurrency)">async/await, actors</abbr></td>
-<td>Multi: protocol-oriented, OO, functional</td>
-<td><abbr title="Closures, map/filter/reduce, value types, enums with associated values">Good</abbr></td>
-<td><abbr title="Swift Package Manager; largely Apple-centric">Medium</abbr></td>
-<td><abbr title="Excellent on Apple platforms (Xcode); weaker elsewhere">Good</abbr></td>
-<td>Medium</td>
-<td>Medium</td>
-<td><abbr title="Apple platforms first; Linux and Windows support growing">Apple platforms; Linux/Windows</abbr></td>
 </tr>
 <tr>
 <td>Perl</td>
@@ -512,88 +230,25 @@
 <td>Servers, scripting, sysadmin</td>
 </tr>
 <tr>
-<td>Objective-C</td>
-<td><abbr title="Statically typed objects layered over a dynamic message-passing runtime; `id` is dynamically typed">Static</abbr></td>
-<td><abbr title="Static object types are optional; `id` lets any object be messaged dynamically">Partial</abbr></td>
-<td><abbr title="Weak; C base plus dynamic messaging — you can message any object">Weak</abbr></td>
-<td><abbr title="Nominal protocols, but runtime messaging is duck-typed">Nominal; duck-typed messaging</abbr></td>
-<td><abbr title="Minimal; C-style, with `__auto_type`">Minimal</abbr></td>
-<td><abbr title="Dynamic messaging; messaging nil is silently ignored rather than erroring">Low</abbr></td>
-<td><abbr title="Automatic Reference Counting (or manual retain/release)">ARC</abbr></td>
-<td><abbr title="Clang compiler">Medium</abbr></td>
-<td><abbr title="Native, but dynamic dispatch adds overhead">Fast</abbr></td>
-<td><abbr title="AOT-compiled to native with a dynamic Objective-C runtime">Compiled/Native</abbr></td>
-<td><abbr title="Grand Central Dispatch, threads">GCD, threads</abbr></td>
-<td>OO (Smalltalk-style messaging) + C procedural</td>
-<td><abbr title="Blocks (closures); otherwise imperative">Minimal</abbr></td>
-<td><abbr title="CocoaPods; mostly Apple legacy">Medium</abbr></td>
-<td><abbr title="Xcode; mature but aging">Good</abbr></td>
-<td><abbr title="Long method names, bracket message syntax, headers">High</abbr></td>
-<td><abbr title="C plus message passing and manual memory concepts">Difficult</abbr></td>
-<td>Apple platforms (legacy)</td>
-</tr>
-<tr>
-<td>Zig</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; explicit, with no hidden coercions">Strong</abbr></td>
+<td>PHP</td>
+<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
+<td><abbr title="Optional type declarations added incrementally since PHP 7; external checkers (PHPStan, Psalm) add more">Partial</abbr></td>
+<td><abbr title="Weak; extensive type juggling and implicit coercion, though PHP 8 tightened comparisons">Weak</abbr></td>
 <td>Nominal</td>
-<td><abbr title="Local inference; types are comptime values">Local inference</abbr></td>
-<td><abbr title="No null (optionals), no hidden control flow, but manual memory and allowed unsafe operations">Medium</abbr></td>
-<td><abbr title="Manual via explicit allocators; no GC">Manual (allocators)</abbr></td>
-<td><abbr title="Own fast backend and fast cross-compilation (LLVM optional)">Fast</abbr></td>
-<td><abbr title="Native, ~C">Very Fast</abbr></td>
-<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
-<td><abbr title="Threads; async is in flux">Threads, async</abbr></td>
-<td>Procedural, imperative; comptime metaprogramming</td>
-<td><abbr title="No first-class FP idioms; imperative">Minimal</abbr></td>
-<td><abbr title="Young; built-in package manager still maturing">Very Small</abbr></td>
-<td><abbr title="Improving; ZLS and an integrated build system written in Zig">Average</abbr></td>
+<td><abbr title="No runtime inference; checker-only via PHPStan/Psalm">Checker-only</abbr></td>
+<td><abbr title="Dynamic with weak coercion; declared types are checked but the language stays permissive">Low</abbr></td>
+<td><abbr title="GC; reference counting plus cycle collector">GC</abbr></td>
+<td><abbr title="Compiled to opcodes per request, cached by OPcache">Fast</abbr></td>
+<td><abbr title="Opcode VM with a JIT since PHP 8">Medium</abbr></td>
+<td><abbr title="Compiled to opcodes and run on the Zend VM; JIT in PHP 8">Interpreted/Dynamic</abbr></td>
+<td><abbr title="Request/process-based; async via Fibers (8.1) and Swoole">Process-based; Fibers</abbr></td>
+<td>Multi: OO, procedural</td>
+<td><abbr title="First-class callables, closures, arrow functions">Good</abbr></td>
+<td><abbr title="Composer/Packagist">Very Large</abbr></td>
+<td><abbr title="PhpStorm, Composer, PHPStan; solid modern tooling">Good</abbr></td>
 <td>Medium</td>
-<td><abbr title="Small language, but manual memory and comptime take effort">Difficult</abbr></td>
-<td><abbr title="Systems, embedded, WASM; excellent cross-compilation">Systems, embedded, WASM</abbr></td>
-</tr>
-<tr>
-<td>Nim</td>
-<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
-<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
-<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
-<td><abbr title="Static, strong static types throughout">High</abbr></td>
-<td><abbr title="GC by default (ARC/ORC); optional manual memory">GC (ARC/ORC)</abbr></td>
-<td><abbr title="Compiles via C/C++/JS backends; fast">Fast</abbr></td>
-<td><abbr title="Compiles to C, ~C speed">Very Fast</abbr></td>
-<td><abbr title="Transpiles to C/C++/JS, then AOT-compiled to native">Compiled/Native</abbr></td>
-<td><abbr title="async/await, threads, channels">async/await, threads</abbr></td>
-<td>Multi: procedural, OO, functional, macro metaprogramming</td>
-<td><abbr title="Closures, higher-order functions, iterators">Good</abbr></td>
-<td><abbr title="Nimble; small">Small</abbr></td>
-<td><abbr title="Functional but limited; smaller community">Average</abbr></td>
-<td><abbr title="Concise, Python-like indentation syntax">Low</abbr></td>
-<td>Medium</td>
-<td><abbr title="Systems, scripting, WASM, embedded">Systems, scripting, WASM</abbr></td>
-</tr>
-<tr>
-<td>Assembly</td>
-<td><abbr title="Untyped; operates on raw registers, bytes, and memory addresses">Untyped</abbr></td>
-<td><abbr title="No type system">No</abbr></td>
-<td><abbr title="No type system to enforce">None</abbr></td>
-<td>N/A</td>
-<td>None (manifest)</td>
-<td><abbr title="No types at all; nothing prevents misinterpreting data">None</abbr></td>
-<td><abbr title="Manual; direct register and memory management">Manual</abbr></td>
-<td><abbr title="Assembled directly to machine code">Very Fast</abbr></td>
-<td><abbr title="Maximal control; the performance ceiling">Very Fast</abbr></td>
-<td><abbr title="Assembled directly to native machine code">Compiled/Native</abbr></td>
-<td><abbr title="Manual; raw OS primitives, threads, interrupts">Manual</abbr></td>
-<td><abbr title="Imperative, unstructured low-level code">Imperative (low-level)</abbr></td>
-<td><abbr title="No functions as values; only jumps and calls">None</abbr></td>
-<td><abbr title="Architecture-specific; essentially no libraries">Very Small</abbr></td>
-<td><abbr title="Assemblers and debuggers; almost no abstraction">Average</abbr></td>
-<td><abbr title="Every operation written out explicitly">Very High</abbr></td>
-<td><abbr title="Steep; requires understanding the hardware">Very Difficult</abbr></td>
-<td><abbr title="Architecture-specific; not portable">Architecture-specific</abbr></td>
+<td><abbr title="Easy to start; many historical inconsistencies">Easy</abbr></td>
+<td>Servers, web</td>
 </tr>
 <tr>
 <td>Lua</td>
@@ -638,6 +293,48 @@
 <td>Godot engine (games), wherever Godot exports</td>
 </tr>
 <tr>
+<td>Java</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Mostly strong, with a few coercions (e.g. &quot;&quot; + 5)">Strong</abbr></td>
+<td>Nominal</td>
+<td>Limited (<code>var</code> for locals, J10+)</td>
+<td><abbr title="Static, strong, enforced at runtime by the JVM, but null and unchecked casts remain">High</abbr></td>
+<td>GC (G1, ZGC)</td>
+<td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
+<td><abbr title="JIT, fast post-warmup">Fast</abbr></td>
+<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td>Threads; virtual threads (21)</td>
+<td>Class-based OO; functional since 8</td>
+<td><abbr title="Lambdas and Streams (8+), records and pattern matching (recent); OO-first">Good</abbr></td>
+<td><abbr title="Maven/Gradle">Very Large</abbr></td>
+<td><abbr title="Mature IDEs and profilers (IntelliJ, etc.), but heavyweight build tooling">Good</abbr></td>
+<td><abbr title="Lots of boilerplate; classes, getters/setters, ceremony">Very High</abbr></td>
+<td><abbr title="Moderate, verbose">Medium</abbr></td>
+<td>JVM anywhere; Android</td>
+</tr>
+<tr>
+<td>Kotlin</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; a `dynamic` type exists only for the JS target">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal</td>
+<td>Strong local inference</td>
+<td><abbr title="Static, strong, with null safety in the type system; nullability holes remain at the Java interop boundary">High</abbr></td>
+<td>GC (JVM)</td>
+<td><abbr title="kotlinc does more analysis than javac; builds are slower than Java's">Medium</abbr></td>
+<td><abbr title="JIT on the JVM, ~Java">Fast</abbr></td>
+<td><abbr title="Bytecode JIT-compiled on the JVM; also Kotlin/Native (LLVM AOT) and Kotlin/JS">Managed/Execution Engine</abbr></td>
+<td>Coroutines (structured), JVM threads</td>
+<td>Multi: OO, functional</td>
+<td><abbr title="Lambdas, higher-order functions, immutability support; OO-first but FP-friendly">Good</abbr></td>
+<td><abbr title="Maven/Gradle plus full Java interop">Very Large</abbr></td>
+<td><abbr title="First-class JetBrains/IntelliJ support">Excellent</abbr></td>
+<td><abbr title="Concise; far less boilerplate than Java">Low</abbr></td>
+<td><abbr title="Approachable, especially from Java">Medium</abbr></td>
+<td>JVM, Android, Native, JS</td>
+</tr>
+<tr>
 <td>Scala</td>
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
@@ -657,6 +354,237 @@
 <td><abbr title="Concise, though advanced features can get dense">Medium</abbr></td>
 <td><abbr title="Large feature set; deep type system">Difficult</abbr></td>
 <td>JVM; Scala.js → browser, Scala Native</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
+<td><abbr title="Dynamic by default; optional typing via clojure.spec or Typed Clojure">Partial</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed data; protocols</abbr></td>
+<td>N/A (dynamic)</td>
+<td><abbr title="Dynamic; optional runtime checks via Spec, nothing enforced statically">Low</abbr></td>
+<td><abbr title="JVM GC; immutable persistent data structures">GC (JVM)</abbr></td>
+<td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
+<td><abbr title="JVM JIT; fast, though boxing and immutability add cost">Fast</abbr></td>
+<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td><abbr title="STM, atoms, agents; core.async channels (CSP)">STM/atoms, core.async</abbr></td>
+<td>Functional Lisp; immutable-first</td>
+<td><abbr title="Functional-first Lisp; immutable persistent data by default">First-class</abbr></td>
+<td><abbr title="Clojars plus full Java/Maven interop">Large</abbr></td>
+<td><abbr title="Outstanding REPL-driven workflow; Leiningen/tools.deps, but rougher onboarding">Good</abbr></td>
+<td><abbr title="Terse Lisp; minimal syntax">Very Low</abbr></td>
+<td><abbr title="Lisp syntax, FP, immutability, and the JVM">Medium</abbr></td>
+<td>JVM anywhere; ClojureScript→browser</td>
+</tr>
+<tr>
+<td>C#</td>
+<td><abbr title="Statically typed; the `dynamic` keyword opts into runtime binding">Static</abbr></td>
+<td><abbr title="Static by default; the `dynamic` keyword enables runtime-bound typing where needed">Partial</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal</td>
+<td><abbr title="`var` and target-typed `new`; locals only">Strong local inference</abbr></td>
+<td><abbr title="Static and strong, enforced by the CLR; nullable reference types are opt-in, so null holes remain">High</abbr></td>
+<td>GC</td>
+<td><abbr title="Roslyn compiles to IL quickly">Fast</abbr></td>
+<td><abbr title="RyuJIT on the CLR; Native AOT available">Fast</abbr></td>
+<td><abbr title="IL bytecode JIT-compiled on the CLR (managed runtime, GC); Native AOT option">Managed/Execution Engine</abbr></td>
+<td>async/await (TPL), threads</td>
+<td>Multi: OO, functional, generic</td>
+<td><abbr title="LINQ, lambdas, records, pattern matching; OO-first but strong FP features">Good</abbr></td>
+<td><abbr title="NuGet">Very Large</abbr></td>
+<td><abbr title="Visual Studio and Rider; top-tier IDEs and debuggers">Excellent</abbr></td>
+<td>Medium</td>
+<td>Medium</td>
+<td><abbr title=".NET runs cross-platform; Windows/Linux/macOS, Unity">Cross-platform (.NET)</abbr></td>
+</tr>
+<tr>
+<td>Dart</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing since Dart 2; `dynamic` is an opt-out escape hatch, not gradual typing">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="Nominal classes, but every class also defines an implicit interface">Nominal</abbr></td>
+<td>Strong local inference</td>
+<td><abbr title="Sound static type system with sound null safety since 2.12">High</abbr></td>
+<td>GC</td>
+<td><abbr title="JIT for fast dev/hot-reload, AOT for release">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native; JIT during development">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native (release) or JIT (dev); compiles to JS for web">Compiled/Native (AOT)</abbr></td>
+<td><abbr title="Isolates (no shared memory) + async/await">Isolates, async/await</abbr></td>
+<td>Multi: OO, functional</td>
+<td><abbr title="Closures, higher-order functions, collection operators; OO-first">Good</abbr></td>
+<td><abbr title="pub.dev; largely Flutter-driven">Large</abbr></td>
+<td><abbr title="Hot reload, DartPad, strong analyzer">Excellent</abbr></td>
+<td>Medium</td>
+<td><abbr title="Familiar C-style syntax, easy to pick up">Easy</abbr></td>
+<td>Mobile (Flutter), web, desktop, server</td>
+</tr>
+<tr>
+<td>Objective-C</td>
+<td><abbr title="Statically typed objects layered over a dynamic message-passing runtime; `id` is dynamically typed">Static</abbr></td>
+<td><abbr title="Static object types are optional; `id` lets any object be messaged dynamically">Partial</abbr></td>
+<td><abbr title="Weak; C base plus dynamic messaging — you can message any object">Weak</abbr></td>
+<td><abbr title="Nominal protocols, but runtime messaging is duck-typed">Nominal; duck-typed messaging</abbr></td>
+<td><abbr title="Minimal; C-style, with `__auto_type`">Minimal</abbr></td>
+<td><abbr title="Dynamic messaging; messaging nil is silently ignored rather than erroring">Low</abbr></td>
+<td><abbr title="Automatic Reference Counting (or manual retain/release)">ARC</abbr></td>
+<td><abbr title="Clang compiler">Medium</abbr></td>
+<td><abbr title="Native, but dynamic dispatch adds overhead">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native with a dynamic Objective-C runtime">Compiled/Native</abbr></td>
+<td><abbr title="Grand Central Dispatch, threads">GCD, threads</abbr></td>
+<td>OO (Smalltalk-style messaging) + C procedural</td>
+<td><abbr title="Blocks (closures); otherwise imperative">Minimal</abbr></td>
+<td><abbr title="CocoaPods; mostly Apple legacy">Medium</abbr></td>
+<td><abbr title="Xcode; mature but aging">Good</abbr></td>
+<td><abbr title="Long method names, bracket message syntax, headers">High</abbr></td>
+<td><abbr title="C plus message passing and manual memory concepts">Difficult</abbr></td>
+<td>Apple platforms (legacy)</td>
+</tr>
+<tr>
+<td>Swift</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; `Any` and dynamic Obj-C interop are escape hatches">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal</td>
+<td>Strong local inference</td>
+<td><abbr title="Strong static types with optionals (no implicit null) and value semantics; some runtime holes via Obj-C interop">High</abbr></td>
+<td><abbr title="Automatic Reference Counting; no tracing GC">ARC (ref counting)</abbr></td>
+<td><abbr title="Whole-module type inference and optimization make builds notably slow">Slow</abbr></td>
+<td><abbr title="Native via LLVM">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native code via LLVM">Compiled/Native</abbr></td>
+<td><abbr title="async/await with actors (structured concurrency)">async/await, actors</abbr></td>
+<td>Multi: protocol-oriented, OO, functional</td>
+<td><abbr title="Closures, map/filter/reduce, value types, enums with associated values">Good</abbr></td>
+<td><abbr title="Swift Package Manager; largely Apple-centric">Medium</abbr></td>
+<td><abbr title="Excellent on Apple platforms (Xcode); weaker elsewhere">Good</abbr></td>
+<td>Medium</td>
+<td>Medium</td>
+<td><abbr title="Apple platforms first; Linux and Windows support growing">Apple platforms; Linux/Windows</abbr></td>
+</tr>
+<tr>
+<td>Go</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit numeric conversion">Strong</abbr></td>
+<td><abbr title="This is Go's signature quirk: concrete types are matched nominally, but a type satisfies an interface purely by having the right methods, with no implements keyword. So Go is nominal and structural depending on which part you're looking at."><strong>Nominal types, structural interfaces</strong></abbr></td>
+<td>Local inference (<code>:=</code>)</td>
+<td><abbr title="Static and strong, enforced at runtime, but nil and empty-interface escape hatches">High</abbr></td>
+<td>GC (low-latency)</td>
+<td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
+<td><abbr title="Native, fast">Fast</abbr></td>
+<td><abbr title="AOT-compiled to a static native binary">Compiled/Native</abbr></td>
+<td>Goroutines + channels (CSP)</td>
+<td>Procedural + light OO</td>
+<td><abbr title="First-class functions and closures, but no FP idioms or immutability">Minimal</abbr></td>
+<td><abbr title="go modules">Large</abbr></td>
+<td><abbr title="Integrated toolchain out of the box: build, test, fmt, vet, modules">Excellent</abbr></td>
+<td><abbr title="Terse syntax, but explicit `if err != nil` handling adds repetition">Medium</abbr></td>
+<td><abbr title="Easy, small lang">Easy</abbr></td>
+<td>Servers, CLI, cloud</td>
+</tr>
+<tr>
+<td>C</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Weak; free casts and implicit conversions">Weak</abbr></td>
+<td>Nominal (by tag)</td>
+<td>None (manifest)</td>
+<td><abbr title="Weak typing: free casts, implicit conversions, no runtime checks">Very Low</abbr></td>
+<td>Manual (malloc/free)</td>
+<td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
+<td><abbr title="Native baseline">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td>OS threads (pthreads)</td>
+<td>Procedural</td>
+<td><abbr title="No first-class functions — only function pointers">None</abbr></td>
+<td><abbr title="vcpkg/Conan (emerging)">Small</abbr></td>
+<td><abbr title="Mature compilers/debuggers (gcc, gdb), but no standard build or package tooling">Average</abbr></td>
+<td><abbr title="Small language, but manual memory/struct handling adds boilerplate">Medium</abbr></td>
+<td><abbr title="Small lang, hard to master">Difficult</abbr></td>
+<td>Everywhere (embedded→kernels)</td>
+</tr>
+<tr>
+<td>C++</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Weak-ish; inherits C's coercions, but stronger with classes and explicit conversions">Weak</abbr></td>
+<td><abbr title="C++ classes use nominal typing, but templates are effectively duck-typed at compile time: a template just requires that whatever type you pass supports the operations used in the body, regardless of its name or declared interface (pre-C++20 concepts).">Nominal; templates duck-typed</abbr></td>
+<td><code>auto</code>, template deduction (C++11+)</td>
+<td><abbr title="Stronger than C, but C-style casts and undefined behavior undermine guarantees">Medium</abbr></td>
+<td>Manual + RAII/smart ptrs</td>
+<td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
+<td><abbr title="Native, ~C">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td>std::thread, atomics, async</td>
+<td>Multi: procedural, OO, generic</td>
+<td><abbr title="Lambdas (C++11) and ranges/algorithms; manual, no immutability">Minimal</abbr></td>
+<td><abbr title="vcpkg, Conan (fragmented)">Medium</abbr></td>
+<td><abbr title="Powerful debuggers/IDEs but complex; fragmented build/package story, slow compiles">Average</abbr></td>
+<td><abbr title="Headers, templates, and manual resource patterns add bulk">High</abbr></td>
+<td><abbr title="Very steep">Very Difficult</abbr></td>
+<td>Systems, games, embedded</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal</td>
+<td><abbr title="Rust infers locals well but not function signatures — you must annotate parameters and return types. It's local inference, not whole-program Hindley–Milner like Haskell.">Strong local inference</abbr></td>
+<td><abbr title="Sound, strong static types enforced throughout; no null, no data races">Very High</abbr></td>
+<td>Ownership/borrow, no GC</td>
+<td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
+<td><abbr title="Native, near C">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to a single native binary">Compiled/Native</abbr></td>
+<td>Fearless; data-race-free</td>
+<td>Functional+imperative, traits</td>
+<td><abbr title="Closures, iterators, algebraic data types, pattern matching; imperative core, not pure">Good</abbr></td>
+<td><abbr title="Cargo/crates.io">Medium</abbr></td>
+<td><abbr title="Cargo, rust-analyzer, clippy; famously helpful compiler errors">Excellent</abbr></td>
+<td><abbr title="Explicit types, lifetimes, and error handling add ceremony">High</abbr></td>
+<td><abbr title="Steep (ownership)">Difficult</abbr></td>
+<td>Systems, embedded, WASM</td>
+</tr>
+<tr>
+<td>Zig</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; explicit, with no hidden coercions">Strong</abbr></td>
+<td>Nominal</td>
+<td><abbr title="Local inference; types are comptime values">Local inference</abbr></td>
+<td><abbr title="No null (optionals), no hidden control flow, but manual memory and allowed unsafe operations">Medium</abbr></td>
+<td><abbr title="Manual via explicit allocators; no GC">Manual (allocators)</abbr></td>
+<td><abbr title="Own fast backend and fast cross-compilation (LLVM optional)">Fast</abbr></td>
+<td><abbr title="Native, ~C">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="Threads; async is in flux">Threads, async</abbr></td>
+<td>Procedural, imperative; comptime metaprogramming</td>
+<td><abbr title="No first-class FP idioms; imperative">Minimal</abbr></td>
+<td><abbr title="Young; built-in package manager still maturing">Very Small</abbr></td>
+<td><abbr title="Improving; ZLS and an integrated build system written in Zig">Average</abbr></td>
+<td>Medium</td>
+<td><abbr title="Small language, but manual memory and comptime take effort">Difficult</abbr></td>
+<td><abbr title="Systems, embedded, WASM; excellent cross-compilation">Systems, embedded, WASM</abbr></td>
+</tr>
+<tr>
+<td>Nim</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal</td>
+<td>Strong local inference</td>
+<td><abbr title="Static, strong static types throughout">High</abbr></td>
+<td><abbr title="GC by default (ARC/ORC); optional manual memory">GC (ARC/ORC)</abbr></td>
+<td><abbr title="Compiles via C/C++/JS backends; fast">Fast</abbr></td>
+<td><abbr title="Compiles to C, ~C speed">Very Fast</abbr></td>
+<td><abbr title="Transpiles to C/C++/JS, then AOT-compiled to native">Compiled/Native</abbr></td>
+<td><abbr title="async/await, threads, channels">async/await, threads</abbr></td>
+<td>Multi: procedural, OO, functional, macro metaprogramming</td>
+<td><abbr title="Closures, higher-order functions, iterators">Good</abbr></td>
+<td><abbr title="Nimble; small">Small</abbr></td>
+<td><abbr title="Functional but limited; smaller community">Average</abbr></td>
+<td><abbr title="Concise, Python-like indentation syntax">Low</abbr></td>
+<td>Medium</td>
+<td><abbr title="Systems, scripting, WASM, embedded">Systems, scripting, WASM</abbr></td>
 </tr>
 <tr>
 <td>Mojo</td>
@@ -680,6 +608,69 @@
 <td><abbr title="AI/ML and systems; CPUs and GPUs via Modular MAX">AI/ML, systems (CPU/GPU)</abbr></td>
 </tr>
 <tr>
+<td>Assembly</td>
+<td><abbr title="Untyped; operates on raw registers, bytes, and memory addresses">Untyped</abbr></td>
+<td><abbr title="No type system">No</abbr></td>
+<td><abbr title="No type system to enforce">None</abbr></td>
+<td>N/A</td>
+<td>None (manifest)</td>
+<td><abbr title="No types at all; nothing prevents misinterpreting data">None</abbr></td>
+<td><abbr title="Manual; direct register and memory management">Manual</abbr></td>
+<td><abbr title="Assembled directly to machine code">Very Fast</abbr></td>
+<td><abbr title="Maximal control; the performance ceiling">Very Fast</abbr></td>
+<td><abbr title="Assembled directly to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="Manual; raw OS primitives, threads, interrupts">Manual</abbr></td>
+<td><abbr title="Imperative, unstructured low-level code">Imperative (low-level)</abbr></td>
+<td><abbr title="No functions as values; only jumps and calls">None</abbr></td>
+<td><abbr title="Architecture-specific; essentially no libraries">Very Small</abbr></td>
+<td><abbr title="Assemblers and debuggers; almost no abstraction">Average</abbr></td>
+<td><abbr title="Every operation written out explicitly">Very High</abbr></td>
+<td><abbr title="Steep; requires understanding the hardware">Very Difficult</abbr></td>
+<td><abbr title="Architecture-specific; not portable">Architecture-specific</abbr></td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td>Nominal (typeclasses)</td>
+<td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Strong global inference</abbr></td>
+<td><abbr title="Sound and pure; no null, side effects tracked in types (IO)">Very High</abbr></td>
+<td><abbr title="GC; lazy evaluation means heavy allocation and possible space leaks">GC (lazy)</abbr></td>
+<td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
+<td><abbr title="Native via GHC; fast, though laziness adds overhead">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native code via GHC">Compiled/Native</abbr></td>
+<td><abbr title="Lightweight green threads + Software Transactional Memory">Green threads, STM</abbr></td>
+<td>Purely functional, lazy</td>
+<td><abbr title="Pure functional language — immutability and referential transparency by default">Pure</abbr></td>
+<td><abbr title="Cabal/Stack; Hackage">Small</abbr></td>
+<td><abbr title="HLS language server and GHCi REPL; much improved but historically rough">Average</abbr></td>
+<td><abbr title="Very concise and expressive; point-free style can obscure">Low</abbr></td>
+<td><abbr title="Monads, laziness, and an advanced type system">Very Difficult</abbr></td>
+<td>Servers, compilers, research</td>
+</tr>
+<tr>
+<td>OCaml</td>
+<td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="Nominal variants/records; structural objects and polymorphic variants">Nominal; structural objects</abbr></td>
+<td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
+<td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
+<td><abbr title="GC with a fast minor-heap allocator">GC</abbr></td>
+<td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
+<td><abbr title="Native compiler; close to C on many workloads">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native (or to bytecode)">Compiled/Native</abbr></td>
+<td><abbr title="Multicore domains (OCaml 5) and effect handlers">Domains (5.0), effects</abbr></td>
+<td>Functional + imperative, modules</td>
+<td><abbr title="Functional-first, with full imperative and object support">First-class</abbr></td>
+<td><abbr title="opam; smaller but solid">Small</abbr></td>
+<td><abbr title="Solid: dune build system, Merlin/LSP, utop REPL">Good</abbr></td>
+<td><abbr title="Concise, with a powerful module system">Low</abbr></td>
+<td><abbr title="Module system and FP concepts">Difficult</abbr></td>
+<td>Servers, compilers, finance</td>
+</tr>
+<tr>
 <td>Lisp</td>
 <td><abbr title="Dynamically typed; optional type declarations mainly guide the optimizer">Dynamic</abbr></td>
 <td><abbr title="Optional type declarations; primarily compiler hints, some implementations check them">Partial</abbr></td>
@@ -699,6 +690,27 @@
 <td><abbr title="S-expressions; macros remove boilerplate">Low</abbr></td>
 <td><abbr title="Parentheses and macro-based metaprogramming">Medium</abbr></td>
 <td>Servers, AI/research, scripting</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
+<td><abbr title="Dynamic; typespecs + Dialyzer, and gradual set-theoretic types landing (1.17+)">Partial</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
+<td><abbr title="Dynamic today; gradual set-theoretic types being added (1.17+)">N/A; typing in progress</abbr></td>
+<td><abbr title="Dynamic; gradual set-theoretic types being introduced (1.17+)">Low</abbr></td>
+<td><abbr title="Per-process GC on the BEAM; no global pauses">GC (per-process)</abbr></td>
+<td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
+<td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
+<td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
+<td><abbr title="Actor model; millions of lightweight processes with supervisors">Actors (BEAM), massive scale</abbr></td>
+<td>Functional, actor-based</td>
+<td><abbr title="Functional language built on the actor model; immutable data">First-class</abbr></td>
+<td><abbr title="Hex/Mix; strong web stack (Phoenix)">Medium</abbr></td>
+<td><abbr title="Polished: Mix build tool, IEx REPL, built-in formatter and docs">Good</abbr></td>
+<td><abbr title="Clean Ruby-like syntax with pipelines">Low</abbr></td>
+<td><abbr title="FP plus the actor model; approachable syntax">Medium</abbr></td>
+<td>Servers, distributed, real-time</td>
 </tr>
 <tr>
 <td>Erlang</td>
@@ -737,9 +749,25 @@
   // Inject an interactive "Points" column (client-side only — NOT in the
   // Markdown). Left-click a data cell to +1 that row, right-click to -1.
   // Hover a row's Points cell for a breakdown of how the total was reached.
+  // Tallies persist in localStorage (keyed by language name + column label);
+  // a "Clear Points" button above the table wipes them.
   // Runs BEFORE the sort script so the injected column gets correct indices
   // (and becomes sortable by total).
   (function () {
+    var STORE_KEY = 'pl-points-v1';
+
+    function loadStore() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function saveStore(obj) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+      catch (e) { /* private mode / file:// — persistence unavailable */ }
+    }
+    function clearStore() {
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    }
+
     function headerLabel(headRow, idx) {
       var h = headRow.cells[idx];
       if (!h) return '';
@@ -766,17 +794,63 @@
         "Hover a row's Points for the breakdown.";
       headRow.insertBefore(th, headRow.cells[0]);
 
-      // body cells + per-row state (map of columnIndex -> net count)
-      Array.prototype.forEach.call(tbody.rows, function (tr) {
+      // column label -> index, for persisting/restoring by name (robust to re-sorts)
+      var labelToIdx = {};
+      Array.prototype.forEach.call(headRow.cells, function (h, i) {
+        labelToIdx[headerLabel(headRow, i)] = i;
+      });
+
+      // body cells + per-row state (map of columnIndex -> net count),
+      // restoring any saved tallies for this language
+      var store = loadStore();
+      var rows = Array.prototype.slice.call(tbody.rows);
+      rows.forEach(function (tr) {
         var td = document.createElement('td');
         td.className = 'points-col';
         tr.insertBefore(td, tr.cells[0]);
         tr._points = {};
+        var saved = store[cellText(tr, 1)];
+        if (saved) {
+          Object.keys(saved).forEach(function (label) {
+            var idx = labelToIdx[label];
+            if (idx != null) tr._points[idx] = saved[label];
+          });
+        }
         update(tr);
       });
 
       // match the Language column's sticky offset to the real Points width
       table.style.setProperty('--points-w', th.offsetWidth + 'px');
+
+      // "Clear Points" button above the table
+      var toolbar = document.createElement('div');
+      toolbar.className = 'points-toolbar';
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'clear-points-btn';
+      clearBtn.textContent = 'Clear Points';
+      clearBtn.addEventListener('click', function () {
+        if (!window.confirm('Clear all allocated points?')) return;
+        rows.forEach(function (tr) { tr._points = {}; update(tr); });
+        clearStore();
+      });
+      toolbar.appendChild(clearBtn);
+      var wrap = table.closest('.tablewrap') || table;
+      wrap.parentNode.insertBefore(toolbar, wrap);
+
+      function save() {
+        var obj = {};
+        rows.forEach(function (tr) {
+          var keys = Object.keys(tr._points);
+          if (!keys.length) return;
+          var entries = {};
+          keys.forEach(function (idx) {
+            entries[headerLabel(headRow, Number(idx))] = tr._points[idx];
+          });
+          obj[cellText(tr, 1)] = entries;
+        });
+        saveStore(obj);
+      }
 
       function update(tr) {
         var total = 0, lines = [];
@@ -803,6 +877,7 @@
         tr._points[idx] = (tr._points[idx] || 0) + delta;
         if (tr._points[idx] === 0) delete tr._points[idx];
         update(tr);
+        save();
       }
       tbody.addEventListener('click', function (e) { score(e, 1); });
       tbody.addEventListener('contextmenu', function (e) { score(e, -1); });

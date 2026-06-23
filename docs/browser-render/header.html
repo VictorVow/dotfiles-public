@@ -63,6 +63,16 @@
     font-weight: 600;
   }
   thead th:first-child, thead th:nth-child(2) { z-index: 2; }
+  .points-toolbar { margin: 0 0 0.75rem; }
+  .clear-points-btn {
+    font: inherit;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    cursor: pointer;
+  }
+  .clear-points-btn:hover { background: #eaeef2; }
   abbr[title] { text-decoration: underline dotted; cursor: help; }
   code {
     background: rgba(175,184,193,0.2);
@@ -77,6 +87,8 @@
     th, td { border-color: #30363d; }
     thead th, th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { background: #161b22; }
     tbody tr:nth-child(even) { background: #0f141a; }
+    .clear-points-btn { background: #161b22; border-color: #30363d; color: #c9d1d9; }
+    .clear-points-btn:hover { background: #21262d; }
     code { background: rgba(110,118,129,0.4); }
   }
 </style>

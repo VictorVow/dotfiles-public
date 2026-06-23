@@ -12,9 +12,25 @@
   // Inject an interactive "Points" column (client-side only — NOT in the
   // Markdown). Left-click a data cell to +1 that row, right-click to -1.
   // Hover a row's Points cell for a breakdown of how the total was reached.
+  // Tallies persist in localStorage (keyed by language name + column label);
+  // a "Clear Points" button above the table wipes them.
   // Runs BEFORE the sort script so the injected column gets correct indices
   // (and becomes sortable by total).
   (function () {
+    var STORE_KEY = 'pl-points-v1';
+
+    function loadStore() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function saveStore(obj) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }
+      catch (e) { /* private mode / file:// — persistence unavailable */ }
+    }
+    function clearStore() {
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    }
+
     function headerLabel(headRow, idx) {
       var h = headRow.cells[idx];
       if (!h) return '';
@@ -41,17 +57,63 @@
         "Hover a row's Points for the breakdown.";
       headRow.insertBefore(th, headRow.cells[0]);
 
-      // body cells + per-row state (map of columnIndex -> net count)
-      Array.prototype.forEach.call(tbody.rows, function (tr) {
+      // column label -> index, for persisting/restoring by name (robust to re-sorts)
+      var labelToIdx = {};
+      Array.prototype.forEach.call(headRow.cells, function (h, i) {
+        labelToIdx[headerLabel(headRow, i)] = i;
+      });
+
+      // body cells + per-row state (map of columnIndex -> net count),
+      // restoring any saved tallies for this language
+      var store = loadStore();
+      var rows = Array.prototype.slice.call(tbody.rows);
+      rows.forEach(function (tr) {
         var td = document.createElement('td');
         td.className = 'points-col';
         tr.insertBefore(td, tr.cells[0]);
         tr._points = {};
+        var saved = store[cellText(tr, 1)];
+        if (saved) {
+          Object.keys(saved).forEach(function (label) {
+            var idx = labelToIdx[label];
+            if (idx != null) tr._points[idx] = saved[label];
+          });
+        }
         update(tr);
       });
 
       // match the Language column's sticky offset to the real Points width
       table.style.setProperty('--points-w', th.offsetWidth + 'px');
+
+      // "Clear Points" button above the table
+      var toolbar = document.createElement('div');
+      toolbar.className = 'points-toolbar';
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'clear-points-btn';
+      clearBtn.textContent = 'Clear Points';
+      clearBtn.addEventListener('click', function () {
+        if (!window.confirm('Clear all allocated points?')) return;
+        rows.forEach(function (tr) { tr._points = {}; update(tr); });
+        clearStore();
+      });
+      toolbar.appendChild(clearBtn);
+      var wrap = table.closest('.tablewrap') || table;
+      wrap.parentNode.insertBefore(toolbar, wrap);
+
+      function save() {
+        var obj = {};
+        rows.forEach(function (tr) {
+          var keys = Object.keys(tr._points);
+          if (!keys.length) return;
+          var entries = {};
+          keys.forEach(function (idx) {
+            entries[headerLabel(headRow, Number(idx))] = tr._points[idx];
+          });
+          obj[cellText(tr, 1)] = entries;
+        });
+        saveStore(obj);
+      }
 
       function update(tr) {
         var total = 0, lines = [];
@@ -78,6 +140,7 @@
         tr._points[idx] = (tr._points[idx] || 0) + delta;
         if (tr._points[idx] === 0) delete tr._points[idx];
         update(tr);
+        save();
       }
       tbody.addEventListener('click', function (e) { score(e, 1); });
       tbody.addEventListener('contextmenu', function (e) { score(e, -1); });
