@@ -1,0 +1,82 @@
+</div>
+<script>
+  // wrap the wide table in a horizontal-scroll container
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'tablewrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+</script>
+<script>
+  // click-to-sort columns. Ordinal rating columns sort by their scale's order;
+  // everything else sorts as (natural) text. Click toggles ascending / descending.
+  (function () {
+    // Each scale is an ordered list (low -> high). A column is ranked by whichever
+    // scale contains all of its values, so words shared between scales (e.g. "Good"
+    // in both Functional support and Tooling/DX) resolve per-column, not globally.
+    var SCALES = [
+      ['very small', 'small', 'medium', 'large', 'very large'],
+      ['very slow', 'slow', 'medium', 'fast', 'very fast'],
+      ['very low', 'low', 'medium', 'high', 'very high'],
+      ['very easy', 'easy', 'medium', 'difficult', 'very difficult'],
+      ['none', 'minimal', 'good', 'first-class', 'pure'],
+      ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
+      ['bad', 'poor', 'average', 'good', 'excellent'],
+      ['no', 'partial', 'yes']
+    ];
+    function text(td) { return (td.textContent || '').trim(); }
+
+    // Pick the scale for a column from its non-empty values; null if none fits.
+    function scaleFor(values) {
+      var vals = values.map(function (v) { return v.toLowerCase(); }).filter(Boolean);
+      if (!vals.length) return null;
+      return SCALES.find(function (scale) {
+        return vals.every(function (v) { return scale.indexOf(v) !== -1; });
+      }) || null;
+    }
+
+    document.querySelectorAll('table').forEach(function (table) {
+      if (!table.tHead || !table.tBodies.length) return;
+      var headRow = table.tHead.rows[0];
+      Array.prototype.forEach.call(headRow.cells, function (th, col) {
+        th.addEventListener('click', function () { sortBy(table, headRow, col, th); });
+      });
+    });
+
+    function sortBy(table, headRow, col, th) {
+      var tbody = table.tBodies[0];
+      var rows = Array.prototype.slice.call(tbody.rows);
+      var scale = scaleFor(rows.map(function (r) { return text(r.cells[col]); }));
+
+      var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
+      Array.prototype.forEach.call(headRow.cells, function (h) {
+        h.removeAttribute('data-dir');
+        var a = h.querySelector('.sort-arrow');
+        if (a) a.remove();
+      });
+      th.setAttribute('data-dir', dir);
+      var sign = dir === 'asc' ? 1 : -1;
+
+      rows.sort(function (a, b) {
+        var ta = text(a.cells[col]), tb = text(b.cells[col]);
+        var cmp;
+        if (scale) {
+          var ra = scale.indexOf(ta.toLowerCase()), rb = scale.indexOf(tb.toLowerCase());
+          cmp = (ra === -1 ? Infinity : ra) - (rb === -1 ? Infinity : rb);
+        } else {
+          cmp = ta.localeCompare(tb, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return cmp * sign;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
+
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+      th.appendChild(arrow);
+    }
+  })();
+</script>
+</body>
+</html>

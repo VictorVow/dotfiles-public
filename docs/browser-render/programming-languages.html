@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programming language comparison</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    color: #1b1f23;
+    background: #fff;
+  }
+  h2 { margin-top: 0; }
+  blockquote {
+    border-left: 4px solid #d0d7de;
+    margin: 1rem 0;
+    padding: 0.25rem 1rem;
+    color: #57606a;
+  }
+  .tablewrap { overflow-x: auto; border: 1px solid #d0d7de; border-radius: 6px; }
+  table { border-collapse: collapse; width: max-content; min-width: 100%; }
+  th, td {
+    border: 1px solid #d0d7de;
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #f6f8fa;
+    z-index: 1;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { background: #eaeef2; }
+  .sort-arrow { font-size: 0.8em; opacity: 0.7; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  /* first column sticks while scrolling sideways */
+  th:first-child, td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f6f8fa;
+    font-weight: 600;
+  }
+  abbr[title] { text-decoration: underline dotted; cursor: help; }
+  code {
+    background: rgba(175,184,193,0.2);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #c9d1d9; background: #0d1117; }
+    blockquote { border-left-color: #30363d; color: #8b949e; }
+    .tablewrap { border-color: #30363d; }
+    th, td { border-color: #30363d; }
+    thead th, th:first-child, td:first-child { background: #161b22; }
+    tbody tr:nth-child(even) { background: #0f141a; }
+    code { background: rgba(110,118,129,0.4); }
+  }
+</style>
+</head>
+<body>
+<div class="tablewrap-outer">
+<h2>Language comparison</h2>
+<blockquote>
+<p>Hover the <abbr title="Cells with a dotted underline have an explanatory tooltip — hover to read it.">dotted-underlined</abbr> cells and column headers to see explanatory comments.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th><abbr title="The programming language being compared.">Language</abbr></th>
+<th><abbr title="When types are checked: static = at compile time before running; dynamic = at runtime as code executes.">Static/Dynamic</abbr></th>
+<th><abbr title="Gradual typing — can you opt into static types incrementally, mixing typed and untyped code? No = typing is all-or-nothing; Partial = available via libraries/tools; Yes = built-in optional annotations.">Gradual</abbr></th>
+<th><abbr title="How strictly the language prevents mixing incompatible types. Strong = few implicit conversions; weak = lots of automatic coercion.">Strong/Weak</abbr></th>
+<th><abbr title="How type compatibility is decided: nominal = by the declared type name; structural = by the type's shape (its fields/methods).">Nominal/Structural</abbr></th>
+<th><abbr title="How much the compiler can deduce types on its own, so you don't have to write annotations everywhere.">Inference</abbr></th>
+<th><abbr title="How well the type system actually prevents type errors — soundness plus whether it's enforced at runtime — rated Very Low → Very High. Hover a cell for the specifics.">Type safety</abbr></th>
+<th><abbr title="How memory is allocated and reclaimed: manual, garbage collection (GC), or compiler-enforced ownership.">Memory</abbr></th>
+<th><abbr title="How fast the language builds/compiles, rated Very Slow → Very Fast. Hover a cell for what drives it.">Compilation</abbr></th>
+<th><abbr title="Typical runtime speed, rated Very Slow → Very Fast. Hover a cell for what drives it.">Performance</abbr></th>
+<th><abbr title="High-level runtime model: Compiled/Native (AOT to machine code), Managed/Execution Engine (bytecode on a VM with JIT + GC), or Interpreted/Dynamic (REPL). Hover a cell for the underlying mechanism.">Execution model</abbr></th>
+<th><abbr title="The language's model for doing multiple things at once — threads, async tasks, processes, or message passing.">Concurrency</abbr></th>
+<th><abbr title="The programming styles the language supports and encourages (object-oriented, functional, procedural, generic, …).">Paradigms</abbr></th>
+<th><abbr title="How strongly the language supports and encourages functional programming, rated None → Minimal → Good → First-class → Pure. Hover a cell for specifics.">Functional support</abbr></th>
+<th><abbr title="Relative breadth/maturity of available libraries, rated Very Small → Very Large. Hover a cell to see its package manager(s).">Ecosystem</abbr></th>
+<th><abbr title="Quality of developer tooling and overall developer experience: editors, debuggers, formatters, error messages, build speed.">Tooling/DX</abbr></th>
+<th><abbr title="How much code/boilerplate it takes to express things, rated Very Low → Very High. Hover a cell for the specifics.">Verbosity</abbr></th>
+<th><abbr title="How hard the language is to pick up and to master, rated Very Easy → Very Difficult. Hover a cell for the specifics.">Learning curve</abbr></th>
+<th><abbr title="Which platforms and environments the language can target and run on.">Portability</abbr></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JavaScript</td>
+<td>Dynamic</td>
+<td><abbr title="Untyped; gradual typing only via TypeScript/Flow overlays or JSDoc">No</abbr></td>
+<td>Weak (heavy coercion)</td>
+<td>Duck-typed at runtime</td>
+<td>N/A (no annotations)</td>
+<td><abbr title="No static types; type errors surface only at runtime">Very Low</abbr></td>
+<td>GC</td>
+<td><abbr title="No build step; parsed/JIT-compiled on load">Very Fast</abbr></td>
+<td><abbr title="JIT, fast for dynamic">Medium</abbr></td>
+<td><abbr title="JIT-compiled in a managed engine (V8); dynamic and REPL-driven by convention">Interpreted/Dynamic (REPL)</abbr></td>
+<td>Single-thread event loop, async/await</td>
+<td>Multi: proto-OO, functional</td>
+<td><abbr title="First-class functions, closures, map/filter/reduce; not enforced or pure">Good</abbr></td>
+<td><abbr title="npm (huge)">Very Large</abbr></td>
+<td><abbr title="Vast but fragmented tooling; huge choice, little consistency">Good</abbr></td>
+<td><abbr title="Concise; little ceremony or boilerplate">Low</abbr></td>
+<td><abbr title="Easy start, many footguns">Easy</abbr></td>
+<td>Browsers, servers</td>
+</tr>
+<tr>
+<td>TypeScript</td>
+<td>Static (dynamic escape hatches)</td>
+<td><abbr title="The canonical gradual type system: optional annotations, `any`, freely mix typed and untyped code">Yes</abbr></td>
+<td><abbr title="TypeScript's types are fully erased at compile time, so at runtime you're running plain JavaScript with all its weak-coercion behavior. The strength lives only in the static checker, and even that is deliberately unsound (any, type assertions).">Strong statically / weak at runtime</abbr></td>
+<td>Structural</td>
+<td>Strong local inference</td>
+<td><abbr title="Strong static checking, but deliberately unsound (any, assertions) and fully erased at runtime">High</abbr></td>
+<td>GC (as JS)</td>
+<td><abbr title="tsc transpilation; slows noticeably on large projects">Medium</abbr></td>
+<td><abbr title="Same as JS">Medium</abbr></td>
+<td><abbr title="Transpiled to JavaScript, then JIT-compiled in the engine (V8)">Interpreted/Dynamic (REPL)</abbr></td>
+<td>Same as JS</td>
+<td>JS + stronger OO</td>
+<td><abbr title="Same as JS, plus static types for functional patterns">Good</abbr></td>
+<td><abbr title="npm + @types">Very Large</abbr></td>
+<td><abbr title="Best-in-class editor support and inline type feedback; tsc">Excellent</abbr></td>
+<td><abbr title="Type annotations add some ceremony over plain JS">Medium</abbr></td>
+<td><abbr title="Adds complexity, aids maintainability">Medium</abbr></td>
+<td>Anywhere JS runs</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><abbr title="Python is dynamic by default; static typing is opt-in via type hints plus an external checker (mypy, pyright). The interpreter itself ignores the hints.">Dynamic (optional static)</abbr></td>
+<td><abbr title="Optional type hints (PEP 484); gradual and unenforced at runtime">Yes</abbr></td>
+<td>Strong</td>
+<td>Duck-typed; nominal hints, structural via <code>Protocol</code></td>
+<td><abbr title="&quot;Checker-only&quot; inference means a tool like pyright infers types for tooling/error-checking, but nothing is inferred or enforced at runtime.">Checker-only</abbr></td>
+<td><abbr title="Strong at runtime, but typing is dynamic by default; hints are optional and unenforced">Low</abbr></td>
+<td>GC (refcount+cycles)</td>
+<td><abbr title="Compiles to bytecode (.pyc) on import; near-instant">Fast</abbr></td>
+<td><abbr title="Slow; leans on C exts">Slow</abbr></td>
+<td><abbr title="Interpreted bytecode (CPython); REPL-driven">Interpreted/Dynamic (REPL)</abbr></td>
+<td>GIL threads, multiproc, asyncio</td>
+<td>Multi: OO, functional, procedural</td>
+<td><abbr title="First-class functions, comprehensions, generators; no TCO, statement-oriented">Good</abbr></td>
+<td><abbr title="pip/PyPI; uv, poetry">Very Large</abbr></td>
+<td><abbr title="Good all-round; great REPL, though packaging has long been fragmented">Good</abbr></td>
+<td><abbr title="Minimal syntax, whitespace blocks, very concise">Very Low</abbr></td>
+<td><abbr title="Very approachable">Very Easy</abbr></td>
+<td>Servers, scripting, data/ML</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Strong</td>
+<td>Nominal</td>
+<td><abbr title="Rust infers locals well but not function signatures — you must annotate parameters and return types. It's local inference, not whole-program Hindley–Milner like Haskell.">Strong local inference</abbr></td>
+<td><abbr title="Sound, strong static types enforced throughout; no null, no data races">Very High</abbr></td>
+<td>Ownership/borrow, no GC</td>
+<td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
+<td><abbr title="Native, near C">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to a single native binary">Compiled/Native</abbr></td>
+<td>Fearless; data-race-free</td>
+<td>Functional+imperative, traits</td>
+<td><abbr title="Closures, iterators, algebraic data types, pattern matching; imperative core, not pure">Good</abbr></td>
+<td><abbr title="Cargo/crates.io">Medium</abbr></td>
+<td><abbr title="Cargo, rust-analyzer, clippy; famously helpful compiler errors">Excellent</abbr></td>
+<td><abbr title="Explicit types, lifetimes, and error handling add ceremony">High</abbr></td>
+<td><abbr title="Steep (ownership)">Difficult</abbr></td>
+<td>Systems, embedded, WASM</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Strong (no implicit numeric conversion)</td>
+<td><abbr title="This is Go's signature quirk: concrete types are matched nominally, but a type satisfies an interface purely by having the right methods, with no implements keyword. So Go is nominal and structural depending on which part you're looking at."><strong>Nominal types, structural interfaces</strong></abbr></td>
+<td>Local inference (<code>:=</code>)</td>
+<td><abbr title="Static and strong, enforced at runtime, but nil and empty-interface escape hatches">High</abbr></td>
+<td>GC (low-latency)</td>
+<td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
+<td><abbr title="Native, fast">Fast</abbr></td>
+<td><abbr title="AOT-compiled to a static native binary">Compiled/Native</abbr></td>
+<td>Goroutines + channels (CSP)</td>
+<td>Procedural + light OO</td>
+<td><abbr title="First-class functions and closures, but no FP idioms or immutability">Minimal</abbr></td>
+<td><abbr title="go modules">Large</abbr></td>
+<td><abbr title="Integrated toolchain out of the box: build, test, fmt, vet, modules">Excellent</abbr></td>
+<td><abbr title="Terse syntax, but explicit `if err != nil` handling adds repetition">Medium</abbr></td>
+<td><abbr title="Easy, small lang">Easy</abbr></td>
+<td>Servers, CLI, cloud</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Strong-ish (some coercion, e.g. <code>&quot;&quot; + 5</code>)</td>
+<td>Nominal</td>
+<td>Limited (<code>var</code> for locals, J10+)</td>
+<td><abbr title="Static, strong, enforced at runtime by the JVM, but null and unchecked casts remain">High</abbr></td>
+<td>GC (G1, ZGC)</td>
+<td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
+<td><abbr title="JIT, fast post-warmup">Fast</abbr></td>
+<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td>Threads; virtual threads (21)</td>
+<td>Class-based OO; functional since 8</td>
+<td><abbr title="Lambdas and Streams (8+), records and pattern matching (recent); OO-first">Good</abbr></td>
+<td><abbr title="Maven/Gradle">Very Large</abbr></td>
+<td><abbr title="Mature IDEs and profilers (IntelliJ, etc.), but heavyweight build tooling">Good</abbr></td>
+<td><abbr title="Lots of boilerplate; classes, getters/setters, ceremony">Very High</abbr></td>
+<td><abbr title="Moderate, verbose">Medium</abbr></td>
+<td>JVM anywhere; Android</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Weak (free casts, implicit conversions)</td>
+<td>Nominal (by tag)</td>
+<td>None (manifest)</td>
+<td><abbr title="Weak typing: free casts, implicit conversions, no runtime checks">Very Low</abbr></td>
+<td>Manual (malloc/free)</td>
+<td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
+<td><abbr title="Native baseline">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td>OS threads (pthreads)</td>
+<td>Procedural</td>
+<td><abbr title="No first-class functions — only function pointers">None</abbr></td>
+<td><abbr title="vcpkg/Conan (emerging)">Small</abbr></td>
+<td><abbr title="Mature compilers/debuggers (gcc, gdb), but no standard build or package tooling">Average</abbr></td>
+<td><abbr title="Small language, but manual memory/struct handling adds boilerplate">Medium</abbr></td>
+<td><abbr title="Small lang, hard to master">Difficult</abbr></td>
+<td>Everywhere (embedded→kernels)</td>
+</tr>
+<tr>
+<td>C++</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Weak-ish (C coercions; stronger with classes)</td>
+<td><abbr title="C++ classes use nominal typing, but templates are effectively duck-typed at compile time: a template just requires that whatever type you pass supports the operations used in the body, regardless of its name or declared interface (pre-C++20 concepts).">Nominal; templates duck-typed</abbr></td>
+<td><code>auto</code>, template deduction (C++11+)</td>
+<td><abbr title="Stronger than C, but C-style casts and undefined behavior undermine guarantees">Medium</abbr></td>
+<td>Manual + RAII/smart ptrs</td>
+<td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
+<td><abbr title="Native, ~C">Very Fast</abbr></td>
+<td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td>std::thread, atomics, async</td>
+<td>Multi: procedural, OO, generic</td>
+<td><abbr title="Lambdas (C++11) and ranges/algorithms; manual, no immutability">Minimal</abbr></td>
+<td><abbr title="vcpkg, Conan (fragmented)">Medium</abbr></td>
+<td><abbr title="Powerful debuggers/IDEs but complex; fragmented build/package story, slow compiles">Average</abbr></td>
+<td><abbr title="Headers, templates, and manual resource patterns add bulk">High</abbr></td>
+<td><abbr title="Very steep">Very Difficult</abbr></td>
+<td>Systems, games, embedded</td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Strong</td>
+<td>Nominal (typeclasses)</td>
+<td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Strong global inference</abbr></td>
+<td><abbr title="Sound and pure; no null, side effects tracked in types (IO)">Very High</abbr></td>
+<td><abbr title="GC; lazy evaluation means heavy allocation and possible space leaks">GC (lazy)</abbr></td>
+<td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
+<td><abbr title="Native via GHC; fast, though laziness adds overhead">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native code via GHC">Compiled/Native</abbr></td>
+<td><abbr title="Lightweight green threads + Software Transactional Memory">Green threads, STM</abbr></td>
+<td>Purely functional, lazy</td>
+<td><abbr title="Pure functional language — immutability and referential transparency by default">Pure</abbr></td>
+<td><abbr title="Cabal/Stack; Hackage">Small</abbr></td>
+<td><abbr title="HLS language server and GHCi REPL; much improved but historically rough">Average</abbr></td>
+<td><abbr title="Very concise and expressive; point-free style can obscure">Low</abbr></td>
+<td><abbr title="Monads, laziness, and an advanced type system">Very Difficult</abbr></td>
+<td>Servers, compilers, research</td>
+</tr>
+<tr>
+<td>OCaml</td>
+<td>Static</td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td>Strong</td>
+<td><abbr title="Nominal variants/records; structural objects and polymorphic variants">Nominal; structural objects</abbr></td>
+<td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
+<td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
+<td><abbr title="GC with a fast minor-heap allocator">GC</abbr></td>
+<td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
+<td><abbr title="Native compiler; close to C on many workloads">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native (or to bytecode)">Compiled/Native</abbr></td>
+<td><abbr title="Multicore domains (OCaml 5) and effect handlers">Domains (5.0), effects</abbr></td>
+<td>Functional + imperative, modules</td>
+<td><abbr title="Functional-first, with full imperative and object support">First-class</abbr></td>
+<td><abbr title="opam; smaller but solid">Small</abbr></td>
+<td><abbr title="Solid: dune build system, Merlin/LSP, utop REPL">Good</abbr></td>
+<td><abbr title="Concise, with a powerful module system">Low</abbr></td>
+<td><abbr title="Module system and FP concepts">Difficult</abbr></td>
+<td>Servers, compilers, finance</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td>Dynamic</td>
+<td><abbr title="Dynamic by default; optional typing via clojure.spec or Typed Clojure">Partial</abbr></td>
+<td>Strong</td>
+<td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed data; protocols</abbr></td>
+<td>N/A (dynamic)</td>
+<td><abbr title="Dynamic; optional runtime checks via Spec, nothing enforced statically">Low</abbr></td>
+<td><abbr title="JVM GC; immutable persistent data structures">GC (JVM)</abbr></td>
+<td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
+<td><abbr title="JVM JIT; fast, though boxing and immutability add cost">Fast</abbr></td>
+<td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td><abbr title="STM, atoms, agents; core.async channels (CSP)">STM/atoms, core.async</abbr></td>
+<td>Functional Lisp; immutable-first</td>
+<td><abbr title="Functional-first Lisp; immutable persistent data by default">First-class</abbr></td>
+<td><abbr title="Clojars plus full Java/Maven interop">Large</abbr></td>
+<td><abbr title="Outstanding REPL-driven workflow; Leiningen/tools.deps, but rougher onboarding">Good</abbr></td>
+<td><abbr title="Terse Lisp; minimal syntax">Very Low</abbr></td>
+<td><abbr title="Lisp syntax, FP, immutability, and the JVM">Medium</abbr></td>
+<td>JVM anywhere; ClojureScript→browser</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td>Dynamic</td>
+<td><abbr title="Dynamic; typespecs + Dialyzer, and gradual set-theoretic types landing (1.17+)">Partial</abbr></td>
+<td>Strong</td>
+<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
+<td><abbr title="Dynamic today; gradual set-theoretic types being added (1.17+)">N/A; typing in progress</abbr></td>
+<td><abbr title="Dynamic; gradual set-theoretic types being introduced (1.17+)">Low</abbr></td>
+<td><abbr title="Per-process GC on the BEAM; no global pauses">GC (per-process)</abbr></td>
+<td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
+<td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
+<td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
+<td><abbr title="Actor model; millions of lightweight processes with supervisors">Actors (BEAM), massive scale</abbr></td>
+<td>Functional, actor-based</td>
+<td><abbr title="Functional language built on the actor model; immutable data">First-class</abbr></td>
+<td><abbr title="Hex/Mix; strong web stack (Phoenix)">Medium</abbr></td>
+<td><abbr title="Polished: Mix build tool, IEx REPL, built-in formatter and docs">Good</abbr></td>
+<td><abbr title="Clean Ruby-like syntax with pipelines">Low</abbr></td>
+<td><abbr title="FP plus the actor model; approachable syntax">Medium</abbr></td>
+<td>Servers, distributed, real-time</td>
+</tr>
+</tbody>
+</table>
+</div>
+<script>
+  // wrap the wide table in a horizontal-scroll container
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'tablewrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+</script>
+<script>
+  // click-to-sort columns. Ordinal rating columns sort by their scale's order;
+  // everything else sorts as (natural) text. Click toggles ascending / descending.
+  (function () {
+    // Each scale is an ordered list (low -> high). A column is ranked by whichever
+    // scale contains all of its values, so words shared between scales (e.g. "Good"
+    // in both Functional support and Tooling/DX) resolve per-column, not globally.
+    var SCALES = [
+      ['very small', 'small', 'medium', 'large', 'very large'],
+      ['very slow', 'slow', 'medium', 'fast', 'very fast'],
+      ['very low', 'low', 'medium', 'high', 'very high'],
+      ['very easy', 'easy', 'medium', 'difficult', 'very difficult'],
+      ['none', 'minimal', 'good', 'first-class', 'pure'],
+      ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
+      ['bad', 'poor', 'average', 'good', 'excellent'],
+      ['no', 'partial', 'yes']
+    ];
+    function text(td) { return (td.textContent || '').trim(); }
+
+    // Pick the scale for a column from its non-empty values; null if none fits.
+    function scaleFor(values) {
+      var vals = values.map(function (v) { return v.toLowerCase(); }).filter(Boolean);
+      if (!vals.length) return null;
+      return SCALES.find(function (scale) {
+        return vals.every(function (v) { return scale.indexOf(v) !== -1; });
+      }) || null;
+    }
+
+    document.querySelectorAll('table').forEach(function (table) {
+      if (!table.tHead || !table.tBodies.length) return;
+      var headRow = table.tHead.rows[0];
+      Array.prototype.forEach.call(headRow.cells, function (th, col) {
+        th.addEventListener('click', function () { sortBy(table, headRow, col, th); });
+      });
+    });
+
+    function sortBy(table, headRow, col, th) {
+      var tbody = table.tBodies[0];
+      var rows = Array.prototype.slice.call(tbody.rows);
+      var scale = scaleFor(rows.map(function (r) { return text(r.cells[col]); }));
+
+      var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
+      Array.prototype.forEach.call(headRow.cells, function (h) {
+        h.removeAttribute('data-dir');
+        var a = h.querySelector('.sort-arrow');
+        if (a) a.remove();
+      });
+      th.setAttribute('data-dir', dir);
+      var sign = dir === 'asc' ? 1 : -1;
+
+      rows.sort(function (a, b) {
+        var ta = text(a.cells[col]), tb = text(b.cells[col]);
+        var cmp;
+        if (scale) {
+          var ra = scale.indexOf(ta.toLowerCase()), rb = scale.indexOf(tb.toLowerCase());
+          cmp = (ra === -1 ? Infinity : ra) - (rb === -1 ? Infinity : rb);
+        } else {
+          cmp = ta.localeCompare(tb, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return cmp * sign;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
+
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+      th.appendChild(arrow);
+    }
+  })();
+</script>
+</body>
+</html>

@@ -36,11 +36,12 @@ installs/
     ├── system/               # Reference docs for this system's config (implemented, in use)
     │   ├── architecture.md   # How the layers fit together and why
     │   └── ...
-    └── research/             # Deep-dive research and comparison docs
-        ├── git-worktrees.md
-        ├── app-launchers.md
-        ├── mesh-networks.md
-        └── ...
+    ├── research/             # Deep-dive research and comparison docs
+    │   ├── git-worktrees.md
+    │   ├── app-launchers.md
+    │   ├── mesh-networks.md
+    │   └── ...
+    └── browser-render/       # Render Markdown docs as styled webpages (live-reload server + standalone HTML)
 
 ```
 
