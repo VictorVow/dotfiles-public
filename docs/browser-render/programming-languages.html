@@ -177,6 +177,8 @@
 <th><abbr title="Relative breadth/maturity of available libraries, rated Very Small → Very Large. Hover a cell to see its package manager(s).">Ecosystem</abbr></th>
 <th><abbr title="Quality of developer tooling and overall developer experience: editors, debuggers, formatters, error messages, build speed.">Tooling/DX</abbr></th>
 <th><abbr title="How much code/boilerplate it takes to express things, rated Very Low → Very High. Hover a cell for the specifics.">Verbosity</abbr></th>
+<th><abbr title="How closely the language's syntax resembles JavaScript's C-family style (braces, arrow/lambda functions, familiar operators), rated None → Faint → Moderate → Strong → Identical. Identical = JS itself or a syntactic superset; None = no resemblance (S-expressions, ML, begin/end). Hover a cell for specifics.">JS-like syntax</abbr></th>
+<th><abbr title="How easy the syntax is to read — clarity and low visual noise — rated Very Low → Very High. Distinct from Verbosity (amount of code) and Learning curve (difficulty to master). Hover a cell for specifics.">Readability</abbr></th>
 <th><abbr title="How hard the language is to pick up and to master, rated Very Easy → Very Difficult. Hover a cell for the specifics.">Learning curve</abbr></th>
 <th><abbr title="Number of these eight application domains the language is commonly used for — Web, Backend, Scripting, Data/AI, Systems, Embedded, Games, Apps (mobile/desktop). Hover a cell for which ones.">Domains</abbr></th>
 <th><abbr title="How much a single company controls the language's direction and governance, versus a community or standards body, rated Very Low (community-led) → Very High (one corporation). Hover a cell for who steers it.">Corporate-controlled</abbr></th>
@@ -208,6 +210,8 @@
 <td><abbr title="npm (huge)">Very Large</abbr></td>
 <td><abbr title="Vast but fragmented tooling; huge choice, little consistency">Good</abbr></td>
 <td><abbr title="Concise; little ceremony or boilerplate">Low</abbr></td>
+<td><abbr title="JavaScript itself — the reference syntax">Identical</abbr></td>
+<td><abbr title="Clean C-family syntax, but `this`, callbacks and hoisting can obscure intent">Medium</abbr></td>
 <td><abbr title="Easy start, many footguns">Easy</abbr></td>
 <td><abbr title="Used for: Web, Backend, Scripting, Apps">4</abbr></td>
 <td><abbr title="Standardised by ECMA TC39; heavily steered by browser vendors (Google, Apple, Mozilla, Microsoft) but owned by none">Medium</abbr></td>
@@ -237,6 +241,8 @@
 <td><abbr title="npm + @types">Very Large</abbr></td>
 <td><abbr title="Best-in-class editor support and inline type feedback; tsc">Excellent</abbr></td>
 <td><abbr title="Type annotations add some ceremony over plain JS">Medium</abbr></td>
+<td><abbr title="A syntactic superset of JavaScript (JS plus type annotations)">Identical</abbr></td>
+<td><abbr title="JS readability plus type annotations — clarifying but adds visual noise">Medium</abbr></td>
 <td><abbr title="Adds complexity, aids maintainability">Medium</abbr></td>
 <td><abbr title="Used for: Web, Backend, Scripting, Apps">4</abbr></td>
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
@@ -266,6 +272,8 @@
 <td><abbr title="pip/PyPI; uv, poetry">Very Large</abbr></td>
 <td><abbr title="Good all-round; great REPL, though packaging has long been fragmented">Good</abbr></td>
 <td><abbr title="Minimal syntax, whitespace blocks, very concise">Very Low</abbr></td>
+<td><abbr title="Shares C-style expressions, but indentation-based with no braces and `def`/`elif`">Faint</abbr></td>
+<td><abbr title="Famously readable: minimal punctuation, whitespace blocks, English-like">Very High</abbr></td>
 <td><abbr title="Very approachable">Very Easy</abbr></td>
 <td><abbr title="Used for: Backend, Scripting, Data/AI (data science, ML)">3</abbr></td>
 <td><abbr title="Community-led under the Python Software Foundation; corporate sponsors but no corporate owner">Low</abbr></td>
@@ -295,6 +303,8 @@
 <td><abbr title="RubyGems/Bundler">Large</abbr></td>
 <td><abbr title="irb/pry REPLs, Rails, RuboCop">Good</abbr></td>
 <td><abbr title="Expressive and concise">Low</abbr></td>
+<td><abbr title="C-style expressions, but `def...end` blocks and `@`-sigil variables">Faint</abbr></td>
+<td><abbr title="Designed for readability; reads almost like prose">Very High</abbr></td>
 <td><abbr title="Very approachable, readable syntax">Easy</abbr></td>
 <td><abbr title="Used for: Backend (web), Scripting">2</abbr></td>
 <td><abbr title="Community-led; guided by Matz and the Ruby core team">Low</abbr></td>
@@ -324,6 +334,8 @@
 <td><abbr title="CPAN; historically vast and mature">Large</abbr></td>
 <td><abbr title="CPAN is strong; modern editor tooling is dated">Average</abbr></td>
 <td><abbr title="Terse and sigil-heavy; can be write-only">Low</abbr></td>
+<td><abbr title="C-family braces and control flow, but heavy `$@%` sigils and context rules">Moderate</abbr></td>
+<td><abbr title="Terse, sigil-heavy and context-dependent — notoriously write-only">Very Low</abbr></td>
 <td><abbr title="Sigils and &quot;there's more than one way to do it&quot;">Medium</abbr></td>
 <td><abbr title="Used for: Backend, Scripting (sysadmin, text processing)">2</abbr></td>
 <td><abbr title="Community-led; volunteer core team and the Perl Foundation">Very Low</abbr></td>
@@ -353,6 +365,8 @@
 <td><abbr title="Composer/Packagist">Very Large</abbr></td>
 <td><abbr title="PhpStorm, Composer, PHPStan; solid modern tooling">Good</abbr></td>
 <td>Medium</td>
+<td><abbr title="C-family braces and control flow, but `$` sigils and `->` member access">Moderate</abbr></td>
+<td><abbr title="Readable C-family, but inconsistent standard-library naming and `$` sigils">Medium</abbr></td>
 <td><abbr title="Easy to start; many historical inconsistencies">Easy</abbr></td>
 <td><abbr title="Used for: Backend (web)">1</abbr></td>
 <td><abbr title="Community-led via the PHP Foundation, though Zend and commercial backers have long been influential">Medium</abbr></td>
@@ -382,6 +396,8 @@
 <td><abbr title="LuaRocks; small, often embedded">Small</abbr></td>
 <td><abbr title="Minimal; lightweight by design, modest editor tooling">Average</abbr></td>
 <td><abbr title="Tiny, clean syntax">Low</abbr></td>
+<td><abbr title="`function...end` blocks, `~=`/`..` operators, no braces">Faint</abbr></td>
+<td><abbr title="Tiny, clean, consistent syntax">High</abbr></td>
 <td><abbr title="Very small language, quick to learn">Easy</abbr></td>
 <td><abbr title="Used for: Scripting, Games, Embedded">3</abbr></td>
 <td><abbr title="Developed by a small academic team at PUC-Rio (Brazil); no corporate owner">Very Low</abbr></td>
@@ -411,6 +427,8 @@
 <td><abbr title="Godot Asset Library; engine-specific">Small</abbr></td>
 <td><abbr title="Tightly integrated Godot editor and debugger">Good</abbr></td>
 <td><abbr title="Concise, Python-like syntax">Low</abbr></td>
+<td><abbr title="Python-like: indentation, `func`, `:` — no braces">Faint</abbr></td>
+<td><abbr title="Clean Python-like syntax">High</abbr></td>
 <td><abbr title="Designed to be beginner-friendly">Easy</abbr></td>
 <td><abbr title="Used for: Games (Godot)">1</abbr></td>
 <td><abbr title="Open source under the non-profit Godot Foundation; community-led">Low</abbr></td>
@@ -440,6 +458,8 @@
 <td><abbr title="Maven/Gradle">Very Large</abbr></td>
 <td><abbr title="Mature IDEs and profilers (IntelliJ, etc.), but heavyweight build tooling">Good</abbr></td>
 <td><abbr title="Lots of boilerplate; classes, getters/setters, ceremony">Very High</abbr></td>
+<td><abbr title="Curly-brace C-family with classes and lambdas; familiar to a JS reader, if more verbose">Strong</abbr></td>
+<td><abbr title="Clear but ceremony-heavy; boilerplate dilutes intent">Medium</abbr></td>
 <td><abbr title="Moderate, verbose">Medium</abbr></td>
 <td><abbr title="Used for: Backend, Apps (Android, desktop), Data/AI (big data)">3</abbr></td>
 <td><abbr title="Stewarded by Oracle via OpenJDK and the Java Community Process, with broad vendor participation">High</abbr></td>
@@ -469,6 +489,8 @@
 <td><abbr title="Maven/Gradle plus full Java interop">Very Large</abbr></td>
 <td><abbr title="First-class JetBrains/IntelliJ support">Excellent</abbr></td>
 <td><abbr title="Concise; far less boilerplate than Java">Low</abbr></td>
+<td><abbr title="Modern curly-brace syntax with lambdas and `fun`; reads close to JS/TS">Strong</abbr></td>
+<td><abbr title="Concise and modern; much cleaner than Java">High</abbr></td>
 <td><abbr title="Approachable, especially from Java">Medium</abbr></td>
 <td><abbr title="Used for: Backend, Apps (Android)">2</abbr></td>
 <td><abbr title="Designed and controlled by JetBrains (with the Kotlin Foundation alongside Google)">Very High</abbr></td>
@@ -498,6 +520,8 @@
 <td><abbr title="sbt/Maven plus full Java interop">Large</abbr></td>
 <td><abbr title="Metals LSP and IntelliJ; improved but build is heavy">Good</abbr></td>
 <td><abbr title="Concise, though advanced features can get dense">Medium</abbr></td>
+<td><abbr title="Curly-brace C-family base, but dense with symbolic operators and type-after-colon">Moderate</abbr></td>
+<td><abbr title="Powerful but dense — implicits and symbolic operators can be cryptic">Low</abbr></td>
 <td><abbr title="Large feature set; deep type system">Difficult</abbr></td>
 <td><abbr title="Used for: Backend, Data/AI (Spark)">2</abbr></td>
 <td><abbr title="Created at EPFL; governed by the non-profit Scala Center with commercial contributors">Medium</abbr></td>
@@ -527,6 +551,8 @@
 <td><abbr title="Clojars plus full Java/Maven interop">Large</abbr></td>
 <td><abbr title="Outstanding REPL-driven workflow; Leiningen/tools.deps, but rougher onboarding">Good</abbr></td>
 <td><abbr title="Terse Lisp; minimal syntax">Very Low</abbr></td>
+<td><abbr title="Lisp S-expressions — parentheses-first prefix notation">None</abbr></td>
+<td><abbr title="Consistent S-expressions with data literals; clean once you read Lisp">Medium</abbr></td>
 <td><abbr title="Lisp syntax, FP, immutability, and the JVM">Medium</abbr></td>
 <td><abbr title="Used for: Backend, Web (ClojureScript)">2</abbr></td>
 <td><abbr title="Tightly directed by Rich Hickey and the core team (Nubank-backed); limited outside contribution">High</abbr></td>
@@ -556,6 +582,8 @@
 <td><abbr title="NuGet">Very Large</abbr></td>
 <td><abbr title="Visual Studio and Rider; top-tier IDEs and debuggers">Excellent</abbr></td>
 <td>Medium</td>
+<td><abbr title="Curly-brace C-family with `=>`, `async`/`await` and `var`; very JS/TS-like">Strong</abbr></td>
+<td><abbr title="Clear modern syntax, though enterprise code tends toward verbosity">Medium</abbr></td>
 <td>Medium</td>
 <td><abbr title="Used for: Backend, Apps (desktop, mobile), Games (Unity)">3</abbr></td>
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
@@ -585,6 +613,8 @@
 <td><abbr title="NuGet plus full .NET interop">Large</abbr></td>
 <td><abbr title="Ionide, Visual Studio, Rider">Good</abbr></td>
 <td><abbr title="Concise; light syntax, significant whitespace">Low</abbr></td>
+<td><abbr title="Lightweight ML: indentation, `let`, pipelines — little brace syntax">Faint</abbr></td>
+<td><abbr title="Lightweight, low-noise ML syntax">High</abbr></td>
 <td>Medium</td>
 <td><abbr title="Used for: Backend, Data/AI">2</abbr></td>
 <td><abbr title="Created and driven by Microsoft, with the community-run F# Software Foundation">High</abbr></td>
@@ -614,6 +644,8 @@
 <td><abbr title="pub.dev; largely Flutter-driven">Large</abbr></td>
 <td><abbr title="Hot reload, DartPad, strong analyzer">Excellent</abbr></td>
 <td>Medium</td>
+<td><abbr title="Designed JS-like for Flutter: classes, `=>`, `async`/`await`">Strong</abbr></td>
+<td><abbr title="Clean, familiar C-family syntax">High</abbr></td>
 <td><abbr title="Familiar C-style syntax, easy to pick up">Easy</abbr></td>
 <td><abbr title="Used for: Web, Apps (Flutter mobile/desktop)">2</abbr></td>
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
@@ -643,6 +675,8 @@
 <td><abbr title="CocoaPods; mostly Apple legacy">Medium</abbr></td>
 <td><abbr title="Xcode; mature but aging">Good</abbr></td>
 <td><abbr title="Long method names, bracket message syntax, headers">High</abbr></td>
+<td><abbr title="C underneath, but `[obj message:arg]` bracket messaging and `@` directives look alien">Faint</abbr></td>
+<td><abbr title="Verbose bracket messaging, long method names and headers">Low</abbr></td>
 <td><abbr title="C plus message passing and manual memory concepts">Difficult</abbr></td>
 <td><abbr title="Used for: Apps (Apple platforms)">1</abbr></td>
 <td><abbr title="Controlled by Apple (originally NeXT/Stepstone)">High</abbr></td>
@@ -672,6 +706,8 @@
 <td><abbr title="Swift Package Manager; largely Apple-centric">Medium</abbr></td>
 <td><abbr title="Excellent on Apple platforms (Xcode); weaker elsewhere">Good</abbr></td>
 <td>Medium</td>
+<td><abbr title="Curly-brace syntax with closures and `func`; reads close to modern JS">Strong</abbr></td>
+<td><abbr title="Clean and expressive; reads well">High</abbr></td>
 <td>Medium</td>
 <td><abbr title="Used for: Apps (Apple platforms), Backend">2</abbr></td>
 <td><abbr title="Created and led by Apple; open source but Apple-directed">Very High</abbr></td>
@@ -701,6 +737,8 @@
 <td><abbr title="go modules">Large</abbr></td>
 <td><abbr title="Integrated toolchain out of the box: build, test, fmt, vet, modules">Excellent</abbr></td>
 <td><abbr title="Terse syntax, but explicit `if err != nil` handling adds repetition">Medium</abbr></td>
+<td><abbr title="Clean curly-brace C-family with `func` and `:=`; easy for a JS reader">Strong</abbr></td>
+<td><abbr title="Deliberately small, explicit syntax; very easy to follow">High</abbr></td>
 <td><abbr title="Easy, small lang">Easy</abbr></td>
 <td><abbr title="Used for: Backend (cloud, networking), Systems (CLI tooling)">2</abbr></td>
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
@@ -730,6 +768,8 @@
 <td><abbr title="vcpkg/Conan (emerging)">Small</abbr></td>
 <td><abbr title="Mature compilers/debuggers (gcc, gdb), but no standard build or package tooling">Average</abbr></td>
 <td><abbr title="Small language, but manual memory/struct handling adds boilerplate">Medium</abbr></td>
+<td><abbr title="C-family braces and operators (JS's ancestor), but manual types and pointers">Moderate</abbr></td>
+<td><abbr title="Small syntax, but pointer and declaration syntax can be cryptic">Medium</abbr></td>
 <td><abbr title="Small lang, hard to master">Difficult</abbr></td>
 <td><abbr title="Used for: Systems (kernels, drivers), Embedded">2</abbr></td>
 <td><abbr title="An ISO standard developed by committee; no corporate owner">Very Low</abbr></td>
@@ -759,6 +799,8 @@
 <td><abbr title="vcpkg, Conan (fragmented)">Medium</abbr></td>
 <td><abbr title="Powerful debuggers/IDEs but complex; fragmented build/package story, slow compiles">Average</abbr></td>
 <td><abbr title="Headers, templates, and manual resource patterns add bulk">High</abbr></td>
+<td><abbr title="C-family braces, but `::`, templates `<>`, pointers and references add noise">Moderate</abbr></td>
+<td><abbr title="Templates, `::`, headers and overloads make code dense and noisy">Low</abbr></td>
 <td><abbr title="Very steep">Very Difficult</abbr></td>
 <td><abbr title="Used for: Systems, Games, Embedded, Apps (desktop)">4</abbr></td>
 <td><abbr title="An ISO standard developed by committee with broad vendor participation; no single owner">Low</abbr></td>
@@ -788,6 +830,8 @@
 <td><abbr title="Cargo/crates.io">Medium</abbr></td>
 <td><abbr title="Cargo, rust-analyzer, clippy; famously helpful compiler errors">Excellent</abbr></td>
 <td><abbr title="Explicit types, lifetimes, and error handling add ceremony">High</abbr></td>
+<td><abbr title="Curly-brace C-family, but `fn`, `let mut`, `&`, lifetimes `'a` and macros `!`">Moderate</abbr></td>
+<td><abbr title="Consistent and explicit, but lifetimes, `&` and macros add noise">Medium</abbr></td>
 <td><abbr title="Steep (ownership)">Difficult</abbr></td>
 <td><abbr title="Used for: Systems, Backend, Embedded">3</abbr></td>
 <td><abbr title="Community-governed via RFCs under the Rust Foundation (backed by many companies, controlled by none)">Low</abbr></td>
@@ -817,6 +861,8 @@
 <td><abbr title="Built-in package manager (build.zig.zon) matured 2024–2025 with stable dependency fetching; still young but a growing library base and notable production users (TigerBeetle, Ghostty)">Small</abbr></td>
 <td><abbr title="Improving; ZLS and an integrated build system written in Zig">Average</abbr></td>
 <td>Medium</td>
+<td><abbr title="Curly-brace C-family, but `fn`, `comptime`, `try` and explicit allocators">Moderate</abbr></td>
+<td><abbr title="Explicit with no hidden control flow, but systems-level concepts add density">Medium</abbr></td>
 <td><abbr title="Small language, but manual memory and comptime take effort">Difficult</abbr></td>
 <td><abbr title="Used for: Systems, Embedded">2</abbr></td>
 <td><abbr title="Community-led under the non-profit Zig Software Foundation">Very Low</abbr></td>
@@ -846,6 +892,8 @@
 <td><abbr title="Nimble; small">Small</abbr></td>
 <td><abbr title="Functional but limited; smaller community">Average</abbr></td>
 <td><abbr title="Concise, Python-like indentation syntax">Low</abbr></td>
+<td><abbr title="Python-like indentation (no braces), with `proc`/`func`">Faint</abbr></td>
+<td><abbr title="Clean Python-like syntax">High</abbr></td>
 <td>Medium</td>
 <td><abbr title="Used for: Systems, Scripting">2</abbr></td>
 <td><abbr title="Community-led; small volunteer core team">Very Low</abbr></td>
@@ -875,6 +923,8 @@
 <td><abbr title="Very new; tied to the Modular MAX platform">Very Small</abbr></td>
 <td><abbr title="Maturing Modular toolchain, LSP and 1.0-beta tooling (2026); improving but still young">Good</abbr></td>
 <td><abbr title="Concise, Python-like syntax">Low</abbr></td>
+<td><abbr title="A Python superset: indentation-based, `def`/`fn`">Faint</abbr></td>
+<td><abbr title="Readable Python base, but systems/ownership annotations add noise">Medium</abbr></td>
 <td>Medium</td>
 <td><abbr title="Used for: Data/AI (ML), Systems (CPU/GPU)">2</abbr></td>
 <td><abbr title="Built by Modular; standard library is open source (Apache 2.0) and the compiler is committed to open-source in fall 2026, but the language is still single-vendor controlled">High</abbr></td>
@@ -904,6 +954,8 @@
 <td><abbr title="Alire; small">Small</abbr></td>
 <td><abbr title="GNAT/GCC and GNAT Studio; niche but solid">Average</abbr></td>
 <td><abbr title="Explicit and ceremony-heavy by design">High</abbr></td>
+<td><abbr title="Pascal-style `begin...end` and verbose keywords — no resemblance to JS">None</abbr></td>
+<td><abbr title="Verbose but explicit and English-like; clarity at the cost of length">Medium</abbr></td>
 <td><abbr title="Large language with strict rules">Difficult</abbr></td>
 <td><abbr title="Used for: Embedded (aerospace/defense, real-time), Systems">2</abbr></td>
 <td><abbr title="An ISO standard, but the GNAT toolchain is dominated by the commercial vendor AdaCore">Medium</abbr></td>
@@ -933,6 +985,8 @@
 <td><abbr title="GetIt package manager; commercial ecosystem">Small</abbr></td>
 <td><abbr title="Mature RAD IDE with a visual form designer; commercial and aging">Good</abbr></td>
 <td><abbr title="Pascal begin/end blocks add some ceremony">Medium</abbr></td>
+<td><abbr title="Object Pascal `begin...end` blocks and `:=` — Pascal lineage, not C/JS">None</abbr></td>
+<td><abbr title="Pascal `begin...end` is clear but verbose">Medium</abbr></td>
 <td><abbr title="Pascal heritage; designed to be teachable">Easy</abbr></td>
 <td><abbr title="Used for: Apps (desktop GUI), Backend">2</abbr></td>
 <td><abbr title="A commercial, proprietary product owned by Embarcadero">Very High</abbr></td>
@@ -962,6 +1016,8 @@
 <td><abbr title="Architecture-specific; essentially no libraries">Very Small</abbr></td>
 <td><abbr title="Assemblers and debuggers; almost no abstraction">Average</abbr></td>
 <td><abbr title="Every operation written out explicitly">Very High</abbr></td>
+<td><abbr title="Mnemonic instructions and registers — no high-level syntax at all">None</abbr></td>
+<td><abbr title="Mnemonics and registers convey almost no intent">Very Low</abbr></td>
 <td><abbr title="Steep; requires understanding the hardware">Very Difficult</abbr></td>
 <td><abbr title="Used for: Systems, Embedded">2</abbr></td>
 <td><abbr title="No single owner; assemblers are largely community/open (GAS, NASM), though the underlying ISAs are vendor-controlled (Intel, ARM)">Medium</abbr></td>
@@ -991,6 +1047,8 @@
 <td><abbr title="Cabal/Stack; Hackage">Small</abbr></td>
 <td><abbr title="HLS language server and GHCi REPL; much improved but historically rough">Average</abbr></td>
 <td><abbr title="Very concise and expressive; point-free style can obscure">Low</abbr></td>
+<td><abbr title="Layout-based ML/functional syntax with operators; nothing like JS">None</abbr></td>
+<td><abbr title="Terse, operator-heavy, point-free style obscures intent for non-experts">Low</abbr></td>
 <td><abbr title="Monads, laziness, and an advanced type system">Very Difficult</abbr></td>
 <td><abbr title="Used for: Backend, Systems (compilers, research)">2</abbr></td>
 <td><abbr title="Community-led; GHC maintained by the community and the Haskell Foundation">Low</abbr></td>
@@ -1020,6 +1078,8 @@
 <td><abbr title="opam; smaller but solid">Small</abbr></td>
 <td><abbr title="Solid: dune build system, Merlin/LSP, utop REPL">Good</abbr></td>
 <td><abbr title="Concise, with a powerful module system">Low</abbr></td>
+<td><abbr title="ML syntax (`let`, `match`, modules); no braces or JS resemblance">None</abbr></td>
+<td><abbr title="Concise, though module/functor syntax and operators can get dense">Medium</abbr></td>
 <td><abbr title="Module system and FP concepts">Difficult</abbr></td>
 <td><abbr title="Used for: Backend, Systems (compilers, finance)">2</abbr></td>
 <td><abbr title="Developed at INRIA (French research institute) with the community-run OCaml Software Foundation">Low</abbr></td>
@@ -1029,6 +1089,68 @@
 <td><abbr title="Niche; academia, finance, compiler tooling">Low</abbr></td>
 <td><abbr title="Created 1996; very mature">Very High</abbr></td>
 <td><abbr title="Steady yearly 5.x releases (5.3 in 2025, 5.4 in late 2025) building out multicore/effects, plus Jane Street's OxCaml branch (modes, locality, unboxed types) open-sourced in 2025">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="An alternative, JavaScript-like syntax for OCaml (a.k.a. ReasonML); compiles to native via OCaml and to JS via Melange">Reason</abbr></td>
+<td><abbr title="Statically typed (OCaml's type system)">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="OCaml semantics: nominal variants/records, plus structural objects and polymorphic variants">Hybrid</abbr></td>
+<td><abbr title="Full Hindley–Milner type inference (OCaml's)">Global</abbr></td>
+<td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
+<td><abbr title="Garbage-collected (OCaml runtime, or the JS engine when compiled to JS)">Very Easy</abbr></td>
+<td><abbr title="Uses OCaml's fast native compiler (and fast JS output via Melange/BuckleScript)">Very Fast</abbr></td>
+<td><abbr title="OCaml-native speed when compiled to native; JS-engine speed when compiled to JS">Fast</abbr></td>
+<td><abbr title="AOT-compiled to native via OCaml, or to JavaScript via Melange/BuckleScript">Compiled/Native</abbr></td>
+<td><abbr title="rtop, a Reason-flavored OCaml toplevel (utop)">Built-in</abbr></td>
+<td><abbr title="JS event loop with async when targeting JS; OCaml's domains/effects when native">Good</abbr></td>
+<td><abbr title="Supports: Imperative, Functional, Generic, Metaprogramming">4</abbr></td>
+<td><abbr title="Functional-first ML (OCaml semantics): immutability, pattern matching, modules">First-class</abbr></td>
+<td><abbr title="OCaml's opam ecosystem, plus npm via Melange; small overall">Small</abbr></td>
+<td><abbr title="OCaml tooling (Merlin/LSP, dune) plus the refmt formatter; solid but niche">Good</abbr></td>
+<td><abbr title="Concise; OCaml semantics with a more JS/C-like syntax">Low</abbr></td>
+<td><abbr title="Deliberately a JavaScript-like syntax over OCaml: `let`, `=>`, `{ }`">Strong</abbr></td>
+<td><abbr title="Clean JS-like syntax over OCaml">High</abbr></td>
+<td><abbr title="OCaml's concepts (modules, FP), but a more approachable JS-like syntax">Medium</abbr></td>
+<td><abbr title="Used for: Web (browser front-end, ReasonReact)">1</abbr></td>
+<td><abbr title="Created at Facebook (Jordan Walke); now community-maintained, with Facebook stepping back">Medium</abbr></td>
+<td><abbr title="First-class on Linux via the OCaml toolchain">Very High</abbr></td>
+<td><abbr title="Supports: Web, Linux, Windows, macOS (native via OCaml; Web via Melange/js_of_ocaml)">4</abbr></td>
+<td><abbr title="OCaml-native targets need recompilation; JS output via Melange runs anywhere JS does">High</abbr></td>
+<td><abbr title="Very niche and declining; largely superseded by ReScript and plain OCaml">Very Low</abbr></td>
+<td><abbr title="Created 2017 (Facebook); stable, but development has largely shifted to ReScript and OCaml">Medium</abbr></td>
+<td><abbr title="Low; most momentum has moved to ReScript and Melange">Low</abbr></td>
+</tr>
+<tr>
+<td><abbr title="An OCaml-derived, strongly-typed language that compiles to fast, readable JavaScript">ReScript</abbr></td>
+<td><abbr title="Statically typed with a sound type system">Static</abbr></td>
+<td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
+<td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
+<td><abbr title="Nominal records and variants, plus structural polymorphic variants and object types for JS interop">Hybrid</abbr></td>
+<td><abbr title="Full Hindley–Milner-style inference">Global</abbr></td>
+<td><abbr title="Sound, strong static types; no null (option type) and no runtime type errors in pure code">Very High</abbr></td>
+<td><abbr title="Garbage-collected; runs on the JavaScript engine">Very Easy</abbr></td>
+<td><abbr title="Renowned for extremely fast compilation to JavaScript">Very Fast</abbr></td>
+<td><abbr title="Compiles to clean, optimized JavaScript; runs at JS-engine speed">Medium</abbr></td>
+<td><abbr title="Compiles to JavaScript, then JIT-compiled in the engine (V8)">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="No REPL; an online playground compiles snippets to JS">None</abbr></td>
+<td><abbr title="Single-threaded JS event loop with async/await (since v10.1); no shared-memory parallelism">Good</abbr></td>
+<td><abbr title="Supports: Imperative, Functional, Generic">3</abbr></td>
+<td><abbr title="Functional-first ML: immutability, pattern matching, variants; effects not tracked">First-class</abbr></td>
+<td><abbr title="Small native ecosystem, but full access to npm via bindings">Small</abbr></td>
+<td><abbr title="Fast compiler, solid editor tooling and a built-in formatter; focused DX">Good</abbr></td>
+<td><abbr title="Concise ML-style syntax">Low</abbr></td>
+<td><abbr title="JS-friendly syntax (OCaml-derived) aimed squarely at JavaScript developers">Strong</abbr></td>
+<td><abbr title="Clean, JS-friendly syntax">High</abbr></td>
+<td><abbr title="ML/FP concepts, but friendlier to JavaScript developers than OCaml">Medium</abbr></td>
+<td><abbr title="Used for: Web (browser front-end, rescript-react)">1</abbr></td>
+<td><abbr title="Community-led via the ReScript Association; born from Facebook/Bloomberg's BuckleScript, now independent">Low</abbr></td>
+<td><abbr title="Compiler runs on Linux; output is portable JavaScript">Very High</abbr></td>
+<td><abbr title="Supports: Web, Linux, Windows, macOS (browser + Node.js); React Native bindings exist but are largely unmaintained">4</abbr></td>
+<td><abbr title="Compiles to portable JavaScript; runs anywhere JS runs, no recompilation">Very High</abbr></td>
+<td><abbr title="Niche; a small but dedicated web front-end community">Very Low</abbr></td>
+<td><abbr title="Evolved from BuckleScript (2016); rebranded ReScript in 2020, now several major versions in">Medium</abbr></td>
+<td><abbr title="Steady major releases; actively developed by a small core team">Medium</abbr></td>
 </tr>
 <tr>
 <td><abbr title="Homoiconic language family with code-as-data and powerful macros (Common Lisp)">Lisp</abbr></td>
@@ -1049,6 +1171,8 @@
 <td><abbr title="Quicklisp; small">Small</abbr></td>
 <td><abbr title="SLIME/SLY and a powerful image-based REPL">Good</abbr></td>
 <td><abbr title="S-expressions; macros remove boilerplate">Low</abbr></td>
+<td><abbr title="S-expressions — fully parenthesized prefix notation">None</abbr></td>
+<td><abbr title="Readable to Lispers, but deep parenthesization is hard for others">Low</abbr></td>
 <td><abbr title="Parentheses and macro-based metaprogramming">Medium</abbr></td>
 <td><abbr title="Used for: Backend, Data/AI (AI, research)">2</abbr></td>
 <td><abbr title="Common Lisp is an ANSI standard with many independent implementations; no corporate owner">Very Low</abbr></td>
@@ -1078,6 +1202,8 @@
 <td><abbr title="Hex/Mix; strong web stack (Phoenix)">Medium</abbr></td>
 <td><abbr title="Polished: Mix build tool, IEx REPL, built-in formatter and docs">Good</abbr></td>
 <td><abbr title="Clean Ruby-like syntax with pipelines">Low</abbr></td>
+<td><abbr title="Ruby-influenced `do...end` blocks and pipelines; not C/JS-like">None</abbr></td>
+<td><abbr title="Clean Ruby-like syntax with readable pipelines">High</abbr></td>
 <td><abbr title="FP plus the actor model; approachable syntax">Medium</abbr></td>
 <td><abbr title="Used for: Backend (web, distributed, real-time)">1</abbr></td>
 <td><abbr title="Led by creator José Valim and a core team; open community, no corporate owner">Medium</abbr></td>
@@ -1107,6 +1233,8 @@
 <td><abbr title="Hex/rebar3; OTP libraries">Small</abbr></td>
 <td><abbr title="rebar3 and OTP; solid but less polished than Elixir's">Average</abbr></td>
 <td><abbr title="Prolog-influenced syntax; moderate ceremony">Medium</abbr></td>
+<td><abbr title="Prolog-influenced syntax with `,`/`;`/`.` clause terminators">None</abbr></td>
+<td><abbr title="Prolog-influenced punctuation and clause terminators trip up readers">Low</abbr></td>
 <td><abbr title="FP plus the actor model and OTP conventions">Medium</abbr></td>
 <td><abbr title="Used for: Backend (distributed, telecom, real-time)">1</abbr></td>
 <td><abbr title="Created and still stewarded by Ericsson (the OTP team)">High</abbr></td>
@@ -1136,6 +1264,8 @@
 <td><abbr title="Young but growing fast post-1.0; thousands of Hex packages plus Erlang/Elixir interop">Small</abbr></td>
 <td><abbr title="Built-in build tool, formatter and LSP; friendly compiler errors">Good</abbr></td>
 <td><abbr title="Small, explicit syntax">Low</abbr></td>
+<td><abbr title="Rust-like curly-brace syntax (`fn`, `pub`, `case`); familiar-ish to a JS reader">Moderate</abbr></td>
+<td><abbr title="Small, explicit, friendly syntax">High</abbr></td>
 <td><abbr title="Small, simple language">Easy</abbr></td>
 <td><abbr title="Used for: Web, Backend">2</abbr></td>
 <td><abbr title="Community-led; created and maintained by Louis Pilfold, funded by sponsorship">Low</abbr></td>
@@ -1165,6 +1295,8 @@
 <td><abbr title="elm package registry; small and curated">Small</abbr></td>
 <td><abbr title="Famously friendly compiler errors, elm-format and elm reactor; ecosystem is small">Good</abbr></td>
 <td><abbr title="Concise ML-style syntax">Low</abbr></td>
+<td><abbr title="Haskell-like ML syntax: layout-based, with arrows and pipes — no braces">None</abbr></td>
+<td><abbr title="Clean, consistent, beginner-friendly syntax">High</abbr></td>
 <td><abbr title="Small, consistent language, but assumes FP and The Elm Architecture concepts">Medium</abbr></td>
 <td><abbr title="Used for: Web (browser front-end)">1</abbr></td>
 <td><abbr title="Led by its creator as BDFL; not corporate-backed">Very Low</abbr></td>
@@ -1186,7 +1318,7 @@
 <li>.NET &amp; cross-platform app — C#, F#, Dart</li>
 <li>Apple platforms — Objective-C, Swift</li>
 <li>Systems / native — Go, C, C++, Rust, Zig, Nim, Mojo, Ada, Delphi, Assembly (ordered roughly high-level → lowest-level)</li>
-<li>Functional — Haskell, OCaml, Lisp, Elm</li>
+<li>Functional — Haskell, OCaml, Reason, ReScript, Lisp, Elm</li>
 <li>BEAM / actor-model — Elixir, Erlang, Gleam</li>
 </ol>
 <h2>Conclusion 23/06/2026</h2>
@@ -1225,6 +1357,7 @@
     ['minimal', 'basic', 'good', 'strong', 'first-class'],
     ['none', 'checker-only', 'minimal', 'local', 'strong local', 'global'],
     ['none', 'duck-typed', 'structural', 'hybrid', 'nominal'],
+    ['none', 'faint', 'moderate', 'strong', 'identical'],
     ['dynamic', 'static'],
     ['weak', 'strong'],
     ['1', '2', '3', '4', '5', '6']
