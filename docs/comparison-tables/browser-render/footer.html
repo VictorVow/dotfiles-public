@@ -476,6 +476,7 @@
             saveWeights(weights);      // cache locally
             refreshInputs();
             computeAll();
+            if (table._plResort) table._plResort(); // re-sort on new Points
           } else if (Object.keys(weights).length) {
             persist(weights);          // seed the empty server from local/seeded weights
           }
@@ -506,6 +507,27 @@
       Array.prototype.forEach.call(headRow.cells, function (th, col) {
         th.addEventListener('click', function () { sortBy(table, headRow, col, th); });
       });
+
+      // Re-apply whichever column is currently sorted, keeping its direction.
+      // Used after the async on-disk weights load recomputes Points, so the row
+      // order tracks the new values instead of going stale.
+      table._plResort = function () {
+        var active = headRow.querySelector('th[data-dir]');
+        if (!active) return;
+        var dir = active.getAttribute('data-dir');
+        var ci = active.dataset.colIndex != null
+          ? Number(active.dataset.colIndex)
+          : Array.prototype.indexOf.call(headRow.cells, active);
+        active.setAttribute('data-dir', dir === 'asc' ? 'desc' : 'asc'); // sortBy toggles back
+        sortBy(table, headRow, ci, active);
+      };
+
+      // On load, default-sort by the injected Points column, descending.
+      var pointsTh = headRow.cells[0];
+      if (pointsTh && pointsTh.classList.contains('points-col')) {
+        pointsTh.setAttribute('data-dir', 'asc'); // sortBy toggles asc -> desc
+        sortBy(table, headRow, 0, pointsTh);
+      }
     });
 
     function sortBy(table, headRow, col, th) {
