@@ -170,6 +170,7 @@
 <th><abbr title="How fast the language builds/compiles, rated Very Slow → Very Fast. Hover a cell for what drives it.">Compilation</abbr></th>
 <th><abbr title="Typical runtime speed, rated Very Slow → Very Fast. Hover a cell for what drives it.">Performance</abbr></th>
 <th><abbr title="High-level runtime model: Compiled/Native (AOT to machine code), Managed/Execution Engine (bytecode on a VM with JIT + GC), or Interpreted/Dynamic (REPL). Hover a cell for the underlying mechanism.">Execution model</abbr></th>
+<th><abbr title="REPL support — how good the interactive read-eval-print-loop experience is, rated None → Third-party → Built-in → First-class. None = no usable REPL; Third-party = only via external tools; Built-in = an official REPL ships with the toolchain; First-class = interactive REPL-driven development is core to the workflow. Hover a cell for specifics.">REPL</abbr></th>
 <th><abbr title="The language's model for doing multiple things at once — threads, async tasks, processes, or message passing.">Concurrency</abbr></th>
 <th><abbr title="The programming styles the language supports and encourages (object-oriented, functional, procedural, generic, …).">Paradigms</abbr></th>
 <th><abbr title="How strongly the language supports and encourages functional programming, rated None → Minimal → Good → First-class → Pure. Hover a cell for specifics.">Functional support</abbr></th>
@@ -199,6 +200,7 @@
 <td><abbr title="No build step; parsed/JIT-compiled on load">Very Fast</abbr></td>
 <td><abbr title="JIT, fast for dynamic">Medium</abbr></td>
 <td><abbr title="JIT-compiled in a managed engine (V8); dynamic and REPL-driven by convention">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="Node.js REPL and the browser dev-console; interactive but not the core dev workflow">Built-in</abbr></td>
 <td>Single-thread event loop, async/await</td>
 <td>Multi: proto-OO, functional</td>
 <td><abbr title="First-class functions, closures, map/filter/reduce; not enforced or pure">Good</abbr></td>
@@ -226,6 +228,7 @@
 <td><abbr title="tsc transpilation; slows noticeably on large projects">Medium</abbr></td>
 <td><abbr title="Same as JS">Medium</abbr></td>
 <td><abbr title="Transpiled to JavaScript, then JIT-compiled in the engine (V8)">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="No REPL in tsc itself; interactive TS via ts-node or the Deno REPL">Third-party</abbr></td>
 <td>Same as JS</td>
 <td>JS + stronger OO</td>
 <td><abbr title="Same as JS, plus static types for functional patterns">Good</abbr></td>
@@ -253,6 +256,7 @@
 <td><abbr title="Compiles to bytecode (.pyc) on import; near-instant">Fast</abbr></td>
 <td><abbr title="Slow; leans on C exts">Slow</abbr></td>
 <td><abbr title="Interpreted bytecode (CPython); REPL-driven">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="Built-in `python` REPL, plus IPython/Jupyter; interactive use is central, especially in data/ML">First-class</abbr></td>
 <td>GIL threads, multiproc, asyncio</td>
 <td>Multi: OO, functional, procedural</td>
 <td><abbr title="First-class functions, comprehensions, generators; no TCO, statement-oriented">Good</abbr></td>
@@ -280,6 +284,7 @@
 <td><abbr title="Parsed to YARV bytecode; near-instant">Fast</abbr></td>
 <td><abbr title="Historically slow; improving with YJIT">Slow</abbr></td>
 <td><abbr title="Interpreted YARV bytecode with YJIT">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="Ships with irb; pry adds rich REPL-driven debugging">Built-in</abbr></td>
 <td><abbr title="GIL threads, Fibers, Ractors (3.0)">GIL threads, Ractors</abbr></td>
 <td>Pure OO, functional, procedural</td>
 <td><abbr title="Blocks, procs, lambdas, rich Enumerable; everything is an object">Good</abbr></td>
@@ -307,6 +312,7 @@
 <td><abbr title="Compiled to an opcode tree at startup">Fast</abbr></td>
 <td><abbr title="Interpreted; slow for compute">Slow</abbr></td>
 <td><abbr title="Interpreted via an opcode tree">Interpreted/Dynamic</abbr></td>
+<td><abbr title="No dedicated REPL; the `perl -d` debugger or Devel::REPL/reply fill in">Third-party</abbr></td>
 <td><abbr title="ithreads, fork, event loops">ithreads, fork</abbr></td>
 <td>Multi: procedural, OO, functional</td>
 <td><abbr title="Closures, first-class subs, map/grep/sort">Good</abbr></td>
@@ -334,6 +340,7 @@
 <td><abbr title="Compiled to opcodes per request, cached by OPcache">Fast</abbr></td>
 <td><abbr title="Opcode VM with a JIT since PHP 8">Medium</abbr></td>
 <td><abbr title="Compiled to opcodes and run on the Zend VM; JIT in PHP 8">Interpreted/Dynamic</abbr></td>
+<td><abbr title="Official `php -a` interactive shell (limited); psysh is a richer third-party REPL">Built-in</abbr></td>
 <td><abbr title="Request/process-based; async via Fibers (8.1) and Swoole">Process-based; Fibers</abbr></td>
 <td>Multi: OO, procedural</td>
 <td><abbr title="First-class callables, closures, arrow functions">Good</abbr></td>
@@ -361,6 +368,7 @@
 <td><abbr title="Compiled to bytecode on load; near-instant">Fast</abbr></td>
 <td><abbr title="Fast for a scripting language; LuaJIT is much faster still">Medium</abbr></td>
 <td><abbr title="Register-based bytecode VM; LuaJIT adds a tracing JIT">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="Standard `lua` interactive interpreter">Built-in</abbr></td>
 <td><abbr title="Cooperative coroutines; no native threads">Coroutines</abbr></td>
 <td>Procedural, functional, OO via metatables</td>
 <td><abbr title="First-class functions, closures, proper tail calls">Good</abbr></td>
@@ -388,6 +396,7 @@
 <td><abbr title="Compiled to bytecode at load">Fast</abbr></td>
 <td><abbr title="Interpreted; slower than C# or GDExtension/C++">Slow</abbr></td>
 <td><abbr title="Interpreted on the Godot engine VM">Interpreted/Dynamic</abbr></td>
+<td><abbr title="No REPL; GDScript only runs inside the Godot engine">None</abbr></td>
 <td><abbr title="Coroutines (await), plus threads">Coroutines, threads</abbr></td>
 <td>OO, procedural</td>
 <td><abbr title="Lambdas (2.0) and first-class callables; otherwise imperative">Minimal</abbr></td>
@@ -415,6 +424,7 @@
 <td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
 <td><abbr title="JIT, fast post-warmup">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td><abbr title="Official jshell REPL since Java 9">Built-in</abbr></td>
 <td>Threads; virtual threads (21)</td>
 <td>Class-based OO; functional since 8</td>
 <td><abbr title="Lambdas and Streams (8+), records and pattern matching (recent); OO-first">Good</abbr></td>
@@ -442,6 +452,7 @@
 <td><abbr title="kotlinc does more analysis than javac; builds are slower than Java's">Medium</abbr></td>
 <td><abbr title="JIT on the JVM, ~Java">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM; also Kotlin/Native (LLVM AOT) and Kotlin/JS">Managed/Execution Engine</abbr></td>
+<td><abbr title="Official kotlinc REPL">Built-in</abbr></td>
 <td>Coroutines (structured), JVM threads</td>
 <td>Multi: OO, functional</td>
 <td><abbr title="Lambdas, higher-order functions, immutability support; OO-first but FP-friendly">Good</abbr></td>
@@ -469,6 +480,7 @@
 <td><abbr title="Notoriously slow; implicit resolution and a heavy type checker">Slow</abbr></td>
 <td><abbr title="JVM JIT, ~Java">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM; also Scala.js and Scala Native">Managed/Execution Engine</abbr></td>
+<td><abbr title="Bundled Scala REPL (and sbt console); widely used for exploration">Built-in</abbr></td>
 <td><abbr title="Futures, Akka actors, ZIO/Cats Effect">Futures, actors, effects</abbr></td>
 <td>Hybrid OO + functional</td>
 <td><abbr title="Immutability, pattern matching, ADTs, higher-kinded types and typeclasses">First-class</abbr></td>
@@ -496,6 +508,7 @@
 <td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
 <td><abbr title="JVM JIT; fast, though boxing and immutability add cost">Fast</abbr></td>
 <td><abbr title="Bytecode JIT-compiled on the JVM (managed runtime, GC)">Managed/Execution Engine</abbr></td>
+<td><abbr title="REPL-driven development is the core workflow; live, connected REPLs">First-class</abbr></td>
 <td><abbr title="STM, atoms, agents; core.async channels (CSP)">STM/atoms, core.async</abbr></td>
 <td>Functional Lisp; immutable-first</td>
 <td><abbr title="Functional-first Lisp; immutable persistent data by default">First-class</abbr></td>
@@ -523,6 +536,7 @@
 <td><abbr title="Roslyn compiles to IL quickly">Fast</abbr></td>
 <td><abbr title="RyuJIT on the CLR; Native AOT available">Fast</abbr></td>
 <td><abbr title="IL bytecode JIT-compiled on the CLR (managed runtime, GC); Native AOT option">Managed/Execution Engine</abbr></td>
+<td><abbr title="C# Interactive / csi (Roslyn) ships with the toolchain">Built-in</abbr></td>
 <td>async/await (TPL), threads</td>
 <td>Multi: OO, functional, generic</td>
 <td><abbr title="LINQ, lambdas, records, pattern matching; OO-first but strong FP features">Good</abbr></td>
@@ -550,6 +564,7 @@
 <td><abbr title="Slower than C#; type inference and strict file ordering add work">Medium</abbr></td>
 <td><abbr title="RyuJIT on the CLR, ~C#">Fast</abbr></td>
 <td><abbr title="IL bytecode JIT-compiled on the CLR (managed runtime, GC); Fable compiles to JS">Managed/Execution Engine</abbr></td>
+<td><abbr title="Official F# Interactive (dotnet fsi); scripting and REPL use is idiomatic">Built-in</abbr></td>
 <td><abbr title="async workflows/tasks, plus MailboxProcessor actors">async, MailboxProcessor</abbr></td>
 <td>Functional-first, OO, imperative</td>
 <td><abbr title="Functional-first ML: immutability, pattern matching, discriminated unions, pipelines">First-class</abbr></td>
@@ -577,6 +592,7 @@
 <td><abbr title="JIT for fast dev/hot-reload, AOT for release">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native; JIT during development">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native (release) or JIT (dev); compiles to JS for web">Compiled/Native (AOT)</abbr></td>
+<td><abbr title="No official REPL; DartPad is a web editor, not a REPL">None</abbr></td>
 <td><abbr title="Isolates (no shared memory) + async/await">Isolates, async/await</abbr></td>
 <td>Multi: OO, functional</td>
 <td><abbr title="Closures, higher-order functions, collection operators; OO-first">Good</abbr></td>
@@ -604,6 +620,7 @@
 <td><abbr title="Clang compiler">Medium</abbr></td>
 <td><abbr title="Native, but dynamic dispatch adds overhead">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native with a dynamic Objective-C runtime">Compiled/Native</abbr></td>
+<td><abbr title="No standalone REPL; expression evaluation via the LLDB debugger">Third-party</abbr></td>
 <td><abbr title="Grand Central Dispatch, threads">GCD, threads</abbr></td>
 <td>OO (Smalltalk-style messaging) + C procedural</td>
 <td><abbr title="Blocks (closures); otherwise imperative">Minimal</abbr></td>
@@ -631,6 +648,7 @@
 <td><abbr title="Whole-module type inference and optimization make builds notably slow">Slow</abbr></td>
 <td><abbr title="Native via LLVM">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native code via LLVM">Compiled/Native</abbr></td>
+<td><abbr title="Official `swift` REPL (built on LLDB)">Built-in</abbr></td>
 <td><abbr title="async/await with actors (structured concurrency)">async/await, actors</abbr></td>
 <td>Multi: protocol-oriented, OO, functional</td>
 <td><abbr title="Closures, map/filter/reduce, value types, enums with associated values">Good</abbr></td>
@@ -658,6 +676,7 @@
 <td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
 <td><abbr title="Native, fast">Fast</abbr></td>
 <td><abbr title="AOT-compiled to a static native binary">Compiled/Native</abbr></td>
+<td><abbr title="No official REPL; community tools like gore or yaegi">Third-party</abbr></td>
 <td>Goroutines + channels (CSP)</td>
 <td>Procedural + light OO</td>
 <td><abbr title="First-class functions and closures, but no FP idioms or immutability">Minimal</abbr></td>
@@ -685,6 +704,7 @@
 <td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
 <td><abbr title="Native baseline">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="No native REPL; Cling interprets C/C++ interactively">Third-party</abbr></td>
 <td>OS threads (pthreads)</td>
 <td>Procedural</td>
 <td><abbr title="No first-class functions — only function pointers">None</abbr></td>
@@ -712,6 +732,7 @@
 <td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
 <td><abbr title="Native, ~C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="No native REPL; Cling (LLVM) provides interactive C++">Third-party</abbr></td>
 <td>std::thread, atomics, async</td>
 <td>Multi: procedural, OO, generic</td>
 <td><abbr title="Lambdas (C++11) and ranges/algorithms; manual, no immutability">Minimal</abbr></td>
@@ -739,6 +760,7 @@
 <td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
 <td><abbr title="Native, near C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to a single native binary">Compiled/Native</abbr></td>
+<td><abbr title="No official REPL; evcxr provides one (also used in Jupyter)">Third-party</abbr></td>
 <td>Fearless; data-race-free</td>
 <td>Functional+imperative, traits</td>
 <td><abbr title="Closures, iterators, algebraic data types, pattern matching; imperative core, not pure">Good</abbr></td>
@@ -766,6 +788,7 @@
 <td><abbr title="Own fast backend and fast cross-compilation (LLVM optional)">Fast</abbr></td>
 <td><abbr title="Native, ~C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="No REPL; Zig is purely ahead-of-time compiled">None</abbr></td>
 <td><abbr title="Threads; async is in flux">Threads, async</abbr></td>
 <td>Procedural, imperative; comptime metaprogramming</td>
 <td><abbr title="No first-class FP idioms; imperative">Minimal</abbr></td>
@@ -793,6 +816,7 @@
 <td><abbr title="Compiles via C/C++/JS backends; fast">Fast</abbr></td>
 <td><abbr title="Compiles to C, ~C speed">Very Fast</abbr></td>
 <td><abbr title="Transpiles to C/C++/JS, then AOT-compiled to native">Compiled/Native</abbr></td>
+<td><abbr title="No official REPL; inim provides one (the old `nim secret` mode was removed)">Third-party</abbr></td>
 <td><abbr title="async/await, threads, channels">async/await, threads</abbr></td>
 <td>Multi: procedural, OO, functional, macro metaprogramming</td>
 <td><abbr title="Closures, higher-order functions, iterators">Good</abbr></td>
@@ -820,6 +844,7 @@
 <td><abbr title="MLIR-based toolchain; young">Medium</abbr></td>
 <td><abbr title="MLIR/LLVM; designed for AI/systems-level speed">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native via MLIR/LLVM">Compiled/Native</abbr></td>
+<td><abbr title="No REPL in current releases; the early bundled one was deprecated">None</abbr></td>
 <td><abbr title="async plus parallelism aimed at AI/accelerator workloads">async, parallelism</abbr></td>
 <td>Multi: systems, Python-style, functional</td>
 <td><abbr title="Higher-order functions and value semantics; systems-oriented">Good</abbr></td>
@@ -847,6 +872,7 @@
 <td><abbr title="Heavy compile-time checking makes builds slow">Slow</abbr></td>
 <td><abbr title="Native, ~C">Very Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code (GNAT/GCC)">Compiled/Native</abbr></td>
+<td><abbr title="No REPL; Ada is ahead-of-time compiled">None</abbr></td>
 <td><abbr title="Built-in tasking: rendezvous and protected objects">Tasks, rendezvous</abbr></td>
 <td>Multi: procedural, OO, concurrent, generic</td>
 <td><abbr title="Imperative core; minimal functional idioms">Minimal</abbr></td>
@@ -874,6 +900,7 @@
 <td><abbr title="Famously fast single-pass compiler">Very Fast</abbr></td>
 <td><abbr title="Native code">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="No REPL; Object Pascal is AOT-compiled">None</abbr></td>
 <td><abbr title="TThread and the Parallel Programming Library">Threads</abbr></td>
 <td>OO, procedural</td>
 <td><abbr title="Anonymous methods/closures; otherwise imperative">Minimal</abbr></td>
@@ -901,6 +928,7 @@
 <td><abbr title="Assembled directly to machine code">Very Fast</abbr></td>
 <td><abbr title="Maximal control; the performance ceiling">Very Fast</abbr></td>
 <td><abbr title="Assembled directly to native machine code">Compiled/Native</abbr></td>
+<td><abbr title="No REPL; interactive exploration only via a debugger">None</abbr></td>
 <td><abbr title="Manual; raw OS primitives, threads, interrupts">Manual</abbr></td>
 <td><abbr title="Imperative, unstructured low-level code">Imperative (low-level)</abbr></td>
 <td><abbr title="No functions as values; only jumps and calls">None</abbr></td>
@@ -928,6 +956,7 @@
 <td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
 <td><abbr title="Native via GHC; fast, though laziness adds overhead">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native code via GHC">Compiled/Native</abbr></td>
+<td><abbr title="GHCi is central to the workflow; interactive, reload-driven development">First-class</abbr></td>
 <td><abbr title="Lightweight green threads + Software Transactional Memory">Green threads, STM</abbr></td>
 <td>Purely functional, lazy</td>
 <td><abbr title="Pure functional language — immutability and referential transparency by default">Pure</abbr></td>
@@ -955,6 +984,7 @@
 <td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
 <td><abbr title="Native compiler; close to C on many workloads">Fast</abbr></td>
 <td><abbr title="AOT-compiled to native (or to bytecode)">Compiled/Native</abbr></td>
+<td><abbr title="The OCaml toplevel and utop; REPL use is idiomatic">First-class</abbr></td>
 <td><abbr title="Multicore domains (OCaml 5) and effect handlers">Domains (5.0), effects</abbr></td>
 <td>Functional + imperative, modules</td>
 <td><abbr title="Functional-first, with full imperative and object support">First-class</abbr></td>
@@ -982,6 +1012,7 @@
 <td><abbr title="Incremental, image-based; SBCL compiles to native fast">Fast</abbr></td>
 <td><abbr title="SBCL compiles to native; can rival C with type declarations">Fast</abbr></td>
 <td><abbr title="Compiled to native (e.g. SBCL) in an image-based, REPL-driven workflow">Compiled/Native (REPL)</abbr></td>
+<td><abbr title="Image-based, REPL-driven development — the archetypal interactive workflow">First-class</abbr></td>
 <td><abbr title="Implementation-specific native threads (e.g. bordeaux-threads)">Threads (impl-specific)</abbr></td>
 <td>Multi: functional, OO (CLOS), procedural, macros</td>
 <td><abbr title="Functional heritage; multi-paradigm and mutable, not pure">First-class</abbr></td>
@@ -1009,6 +1040,7 @@
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
 <td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
 <td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
+<td><abbr title="IEx is central; connect to and inspect live running systems">First-class</abbr></td>
 <td><abbr title="Actor model; millions of lightweight processes with supervisors">Actors (BEAM), massive scale</abbr></td>
 <td>Functional, actor-based</td>
 <td><abbr title="Functional language built on the actor model; immutable data">First-class</abbr></td>
@@ -1036,6 +1068,7 @@
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
 <td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
 <td><abbr title="Bytecode on the BEAM virtual machine (managed runtime)">Managed/Execution Engine</abbr></td>
+<td><abbr title="The erl shell is core to OTP; attach to live nodes">First-class</abbr></td>
 <td><abbr title="Actor model; millions of lightweight processes with supervisors">Actors (BEAM), massive scale</abbr></td>
 <td>Functional, actor-based, concurrent</td>
 <td><abbr title="Functional and immutable by default">First-class</abbr></td>
@@ -1063,6 +1096,7 @@
 <td><abbr title="Compiles to Erlang/BEAM (and to JavaScript); fast">Fast</abbr></td>
 <td><abbr title="BEAM VM: not raw-fast, but excels at concurrent throughput and low latency">Medium</abbr></td>
 <td><abbr title="Compiles to BEAM bytecode (or to JavaScript)">Managed/Execution Engine</abbr></td>
+<td><abbr title="No REPL yet; a compile-and-run workflow">None</abbr></td>
 <td><abbr title="Actor model on the BEAM with OTP">Actors (BEAM)</abbr></td>
 <td>Functional</td>
 <td><abbr title="Functional language: immutability, pattern matching, no side-effect tracking">First-class</abbr></td>
@@ -1090,6 +1124,7 @@
 <td><abbr title="Fast compiler known for friendly error messages">Fast</abbr></td>
 <td><abbr title="Compiles to JavaScript; runs in the browser at JS speed with fast virtual-DOM rendering">Medium</abbr></td>
 <td><abbr title="Compiles to JavaScript, then JIT-compiled in the browser engine (V8)">Interpreted/Dynamic (REPL)</abbr></td>
+<td><abbr title="Official `elm repl` for evaluating expressions">Built-in</abbr></td>
 <td><abbr title="No threads; managed effects via commands/subscriptions in The Elm Architecture">Managed effects (TEA)</abbr></td>
 <td>Purely functional, reactive front-end</td>
 <td><abbr title="Pure functional; immutable data and side-effect-free code (effects are managed by the runtime)">Pure</abbr></td>
@@ -1151,6 +1186,7 @@
     ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
     ['bad', 'poor', 'average', 'good', 'excellent'],
     ['no', 'partial', 'yes'],
+    ['none', 'third-party', 'built-in', 'first-class'],
     ['dynamic', 'static'],
     ['weak', 'strong'],
     ['1', '2', '3', '4', '5', '6']
