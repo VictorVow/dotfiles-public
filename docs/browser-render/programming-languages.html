@@ -164,7 +164,7 @@
 </head>
 <body>
 <div class="tablewrap-outer">
-<h2>Language comparison</h2>
+<h1>Programming languages comparison</h1>
 <blockquote>
 <p>Hover the <abbr title="Cells with a dotted underline have an explanatory tooltip — hover to read it.">dotted-underlined</abbr> cells and column headers to see explanatory comments.</p>
 </blockquote>
@@ -1342,6 +1342,15 @@
 <li>OCaml</li>
 </ul>
 </div>
+<script>
+  // Use the document's first Markdown heading as the browser tab title,
+  // overriding the static <title> in header.html.
+  (function () {
+    var h = document.querySelector('h1, h2, h3, h4, h5, h6');
+    var t = h && (h.textContent || '').trim();
+    if (t) document.title = t;
+  })();
+</script>
 <script>
   // wrap the wide table in a horizontal-scroll container
   document.querySelectorAll('table').forEach(function (t) {

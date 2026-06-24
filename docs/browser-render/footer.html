@@ -1,5 +1,14 @@
 </div>
 <script>
+  // Use the document's first Markdown heading as the browser tab title,
+  // overriding the static <title> in header.html.
+  (function () {
+    var h = document.querySelector('h1, h2, h3, h4, h5, h6');
+    var t = h && (h.textContent || '').trim();
+    if (t) document.title = t;
+  })();
+</script>
+<script>
   // wrap the wide table in a horizontal-scroll container
   document.querySelectorAll('table').forEach(function (t) {
     var w = document.createElement('div');
