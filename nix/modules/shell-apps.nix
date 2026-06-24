@@ -825,6 +825,23 @@ in
     run ${pkgs.xdg-utils}/bin/xdg-mime default com.stremio.Stremio.desktop x-scheme-handler/stremio
   '';
 
+  # Force Stremio's WebKitGTK off the DMA-BUF/GBM renderer.
+  #
+  # This AMD 780M (Phoenix1) machine has a broken GBM EGL platform: WebKit's GPU
+  # process builds its GBM device on the auth-gated primary node, the amdgpu INFO
+  # ioctl returns EACCES (DRM-master is held by KWin), and Mesa falls back to
+  # llvmpipe — so the webview renders a black screen. The GNOME-runtime WebKit in
+  # this Flatpak is recent enough to honour WEBKIT_DISABLE_DMABUF_RENDERER, which
+  # avoids the GBM path entirely. A --user flatpak override applies to every launch
+  # method (KRunner/Alt+F2 included), unlike editing the .desktop Exec.
+  # `flatpak override` is idempotent, so this re-applies cleanly on every `hms`.
+  home.activation.stremioWebkitRenderer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if command -v flatpak &>/dev/null; then
+      $DRY_RUN_CMD flatpak override --user \
+        --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 com.stremio.Stremio 2>/dev/null || true
+    fi
+  '';
+
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
   #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
