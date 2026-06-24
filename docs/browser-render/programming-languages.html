@@ -1655,15 +1655,23 @@
       // Columns (idx >= 2; Points + Language stay pinned left) whose value is
       // identical across every selected row move to the right, with a divider
       // before the first such column.
+      function distinctCount(sel, idx) {
+        var seen = {};
+        sel.forEach(function (tr) { seen[valueAt(tr, idx)] = true; });
+        return Object.keys(seen).length;
+      }
       function reorderColumns() {
         var sel = rows.filter(function (tr) { return isSelected(langOf(tr)); });
         var differ = [], match = [];
         // iterate by stable colIndex, not DOM position (columns may be reordered)
         for (var idx = 2; idx < headRow.cells.length; idx++) {
-          var first = valueAt(sel[0], idx);
-          var same = sel.every(function (tr) { return valueAt(tr, idx) === first; });
-          (same ? match : differ).push(idx);
+          var n = distinctCount(sel, idx);
+          (n <= 1 ? match : differ).push(idx);
         }
+        // most-differing columns first (e.g. all-distinct before nearly-uniform)
+        differ.sort(function (a, b) {
+          return distinctCount(sel, b) - distinctCount(sel, a) || a - b;
+        });
         applyOrder([0, 1].concat(differ, match));
         clearDivider();
         if (match.length && differ.length) {
@@ -1831,7 +1839,12 @@
     function sortBy(table, headRow, col, th) {
       var tbody = table.tBodies[0];
       var rows = Array.prototype.slice.call(tbody.rows);
-      var scale = scaleFor(rows.map(function (r) { return text(r.cells[col]); }));
+      // Resolve cells by the stable data-col-index stamp (set by the Points/
+      // Compare script), so sorting stays correct after Compare reorders the
+      // columns. Falls back to the positional index when unstamped.
+      var ci = th.dataset.colIndex != null ? Number(th.dataset.colIndex) : col;
+      function cell(r) { return r.querySelector('[data-col-index="' + ci + '"]') || r.cells[col]; }
+      var scale = scaleFor(rows.map(function (r) { return text(cell(r)); }));
 
       var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
       Array.prototype.forEach.call(headRow.cells, function (h) {
@@ -1843,7 +1856,7 @@
       var sign = dir === 'asc' ? 1 : -1;
 
       rows.sort(function (a, b) {
-        var ta = text(a.cells[col]), tb = text(b.cells[col]);
+        var ta = text(cell(a)), tb = text(cell(b));
         var cmp;
         if (scale) {
           var ra = scale.indexOf(ta.toLowerCase()), rb = scale.indexOf(tb.toLowerCase());
