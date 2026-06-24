@@ -15,6 +15,11 @@ const FOOTER = path.join(__dirname, 'footer.html');
 // Sidecar for browser-set Points weights, alongside the source .md. Named so it
 // does NOT match basename(MD), so writing it never trips the reload watcher.
 const WEIGHTS = path.join(path.dirname(MD), path.basename(MD).replace(/\.md$/, '') + '.weights.json');
+// Stable per-document identifier (the source filename), injected into the page
+// so the browser can namespace its localStorage (Compare selection, Points
+// weights cache) per doc — otherwise two docs served on the same origin share
+// state. See footer.html.
+const DOC_KEY = path.basename(MD).replace(/\.md$/, '');
 
 const MarkdownIt = require(path.join(__dirname, 'node_modules', 'markdown-it'));
 const md = new MarkdownIt({ html: true, linkify: true });
@@ -35,7 +40,8 @@ function render() {
   const header = fs.readFileSync(HEADER, 'utf8');
   const footer = fs.readFileSync(FOOTER, 'utf8');
   const body = md.render(fs.readFileSync(MD, 'utf8'));
-  return header + body + LIVE_RELOAD + footer;
+  const docGlobal = `<script>window.PL_DOC_KEY = ${JSON.stringify(DOC_KEY)};</script>\n`;
+  return header + docGlobal + body + LIVE_RELOAD + footer;
 }
 
 const server = http.createServer((req, res) => {
