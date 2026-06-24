@@ -1349,6 +1349,10 @@
     var h = document.querySelector('h1, h2, h3, h4, h5, h6');
     var t = h && (h.textContent || '').trim();
     if (t) document.title = t;
+    // Per-document key for namespacing localStorage. The server injects
+    // PL_DOC_KEY (the source filename); standalone HTML falls back to the
+    // first heading so distinct docs don't share Compare/weights state.
+    window.PL_DOC_KEY = window.PL_DOC_KEY || t || 'default';
   })();
 </script>
 <script>
@@ -1381,6 +1385,7 @@
     ['none', 'faint', 'moderate', 'strong', 'identical'],
     ['dynamic', 'static'],
     ['weak', 'strong'],
+    ['immediate', 'retained', 'declarative'],
     ['1', '2', '3', '4', '5', '6']
   ];
 </script>
@@ -1393,8 +1398,9 @@
   // the values the user gave each bucket. Runs BEFORE the sort script so the
   // injected column gets correct indices (and is sortable by total).
   (function () {
-    var WEIGHTS_KEY = 'pl-weights-v1';
-    var MANUAL_KEY = 'pl-points-v1';
+    var DOC = window.PL_DOC_KEY || 'default';
+    var WEIGHTS_KEY = 'pl-weights-v1:' + DOC;
+    var MANUAL_KEY = 'pl-points-v1:' + DOC;
     var SCALES = window.PL_SCALES || [];
 
     function loadJSON(key) {
@@ -1586,7 +1592,7 @@
       });
 
       // ---- Compare: pick languages, then filter to them + group matching cols ----
-      var COMPARE_KEY = 'pl-compare-v1';
+      var COMPARE_KEY = 'pl-compare-v1:' + (window.PL_DOC_KEY || 'default');
       function loadCompare() {
         try { var a = JSON.parse(localStorage.getItem(COMPARE_KEY)); return Array.isArray(a) ? a : []; }
         catch (e) { return []; }
