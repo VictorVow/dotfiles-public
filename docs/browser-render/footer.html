@@ -184,7 +184,10 @@
       function computeRow(tr) {
         var total = 0, parts = [];
         ratingCols.forEach(function (c) {
-          var bucket = cellText(tr, c.idx);
+          // read by stable column index so Points stays correct after Compare
+          // reorders columns; falls back to positional before cells are stamped.
+          var cell = tr.querySelector('[data-col-index="' + c.idx + '"]') || tr.cells[c.idx];
+          var bucket = cell ? (cell.textContent || '').trim() : '';
           var w = weightFor(c.label, bucket.toLowerCase());
           if (w) {
             total += w;
@@ -230,6 +233,141 @@
         computeAll();
       });
 
+      // ---- Compare: pick languages, then filter to them + group matching cols ----
+      var COMPARE_KEY = 'pl-compare-v1';
+      function loadCompare() {
+        try { var a = JSON.parse(localStorage.getItem(COMPARE_KEY)); return Array.isArray(a) ? a : []; }
+        catch (e) { return []; }
+      }
+      function saveCompare() {
+        try { localStorage.setItem(COMPARE_KEY, JSON.stringify(selectedNames)); }
+        catch (e) { /* private mode / file:// — persistence unavailable */ }
+      }
+      var selectedNames = loadCompare();
+      var compareMode = false; // selection mode: hover-highlight + click-to-pick
+      var comparing = false;   // "Compare Now" filter + column grouping applied
+
+      // Stamp each cell with its stable original column index (Points already
+      // injected at 0) so column reordering can always be undone.
+      Array.prototype.forEach.call(headRow.cells, function (c, i) { c.dataset.colIndex = i; });
+      rows.forEach(function (tr) {
+        Array.prototype.forEach.call(tr.cells, function (c, i) { c.dataset.colIndex = i; });
+      });
+
+      var compareBtn = document.createElement('button');
+      compareBtn.type = 'button';
+      compareBtn.className = 'clear-points-btn';
+      compareBtn.textContent = 'Compare';
+
+      var compareNowBtn = document.createElement('button');
+      compareNowBtn.type = 'button';
+      compareNowBtn.className = 'clear-points-btn';
+      compareNowBtn.textContent = 'Compare Now';
+      compareNowBtn.hidden = true;
+
+      var namesSpan = document.createElement('span');
+      namesSpan.className = 'compare-names';
+
+      function cellByIndex(tr, idx) { return tr.querySelector('[data-col-index="' + idx + '"]'); }
+      // Position-independent value read — survives column reordering (unlike the
+      // positional cellText helper above).
+      function valueAt(tr, idx) { var c = cellByIndex(tr, idx); return c ? (c.textContent || '').trim() : ''; }
+      function langOf(tr) { return valueAt(tr, 1); }
+      function isSelected(name) { return selectedNames.indexOf(name) !== -1; }
+
+      function markRows() {
+        rows.forEach(function (tr) {
+          tr.classList.toggle('compare-selected', isSelected(langOf(tr)));
+        });
+      }
+      function renderNames() {
+        namesSpan.textContent = selectedNames.join(', ');
+        var enough = selectedNames.length >= 2;
+        compareNowBtn.hidden = !enough;
+        if (!enough && comparing) clearCompare(); // dropped below 2 → undo
+      }
+      function toggleSelect(name) {
+        var i = selectedNames.indexOf(name);
+        if (i === -1) selectedNames.push(name); else selectedNames.splice(i, 1);
+        saveCompare();
+        markRows();
+        renderNames();
+        if (comparing) applyCompare(); // keep filter/grouping in sync
+      }
+
+      // appendChild moves a node, so re-appending cells in `order` reorders them
+      function applyOrder(order) {
+        [headRow].concat(rows).forEach(function (tr) {
+          order.forEach(function (idx) {
+            var c = cellByIndex(tr, idx);
+            if (c) tr.appendChild(c);
+          });
+        });
+      }
+      function clearDivider() {
+        Array.prototype.forEach.call(table.querySelectorAll('.compare-divider'), function (c) {
+          c.classList.remove('compare-divider');
+        });
+      }
+      // Columns (idx >= 2; Points + Language stay pinned left) whose value is
+      // identical across every selected row move to the right, with a divider
+      // before the first such column.
+      function reorderColumns() {
+        var sel = rows.filter(function (tr) { return isSelected(langOf(tr)); });
+        var differ = [], match = [];
+        // iterate by stable colIndex, not DOM position (columns may be reordered)
+        for (var idx = 2; idx < headRow.cells.length; idx++) {
+          var first = valueAt(sel[0], idx);
+          var same = sel.every(function (tr) { return valueAt(tr, idx) === first; });
+          (same ? match : differ).push(idx);
+        }
+        applyOrder([0, 1].concat(differ, match));
+        clearDivider();
+        if (match.length && differ.length) {
+          [headRow].concat(rows).forEach(function (tr) {
+            var c = cellByIndex(tr, match[0]);
+            if (c) c.classList.add('compare-divider');
+          });
+        }
+      }
+      function restoreColumns() {
+        var asc = [];
+        for (var i = 0; i < headRow.cells.length; i++) asc.push(i);
+        applyOrder(asc);
+        clearDivider();
+      }
+
+      function applyCompare() {
+        comparing = true;
+        compareNowBtn.classList.add('active');
+        rows.forEach(function (tr) { tr.hidden = !isSelected(langOf(tr)); });
+        reorderColumns();
+      }
+      function clearCompare() {
+        comparing = false;
+        compareNowBtn.classList.remove('active');
+        rows.forEach(function (tr) { tr.hidden = false; });
+        restoreColumns();
+      }
+
+      compareBtn.addEventListener('click', function () {
+        compareMode = !compareMode;
+        compareBtn.classList.toggle('active', compareMode);
+        table.classList.toggle('compare-hover', compareMode);
+      });
+      compareNowBtn.addEventListener('click', function () {
+        if (comparing) clearCompare(); else applyCompare();
+      });
+      tbody.addEventListener('click', function (e) {
+        if (!compareMode) return;
+        var tr = e.target.closest ? e.target.closest('tr') : null;
+        if (!tr || tr.parentNode !== tbody) return;
+        toggleSelect(langOf(tr));
+      });
+
+      markRows();
+      renderNames();
+
       // one group per rating column, with a number input per present bucket
       ratingCols.forEach(function (c) {
         var group = document.createElement('div');
@@ -272,6 +410,9 @@
 
       toolbar.appendChild(toggleBtn);
       toolbar.appendChild(resetBtn);
+      toolbar.appendChild(compareBtn);
+      toolbar.appendChild(compareNowBtn);
+      toolbar.appendChild(namesSpan);
       toolbar.appendChild(panel);
       var wrap = table.closest('.tablewrap') || table;
       wrap.parentNode.insertBefore(toolbar, wrap);

@@ -79,6 +79,13 @@
     cursor: pointer;
   }
   .clear-points-btn:hover { background: #eaeef2; }
+  /* Compare feature: active button, selected-language list, row hover + selection, column divider */
+  .clear-points-btn.active { background: #ddf4ff; border-color: #54aeff; color: #0969da; font-weight: 600; }
+  .compare-names { font-size: 0.85rem; color: #57606a; }
+  table.compare-hover tbody tr { cursor: pointer; }
+  table.compare-hover tbody tr:hover td { background: #fff8c5; }
+  tbody tr.compare-selected td { background: #fff3cd; }
+  th.compare-divider, td.compare-divider { border-left: 3px solid #fd8c73; }
   .weights-panel {
     flex-basis: 100%;
     display: flex;
@@ -143,6 +150,11 @@
     tbody tr:nth-child(even) { background: #0f141a; }
     .clear-points-btn { background: #161b22; border-color: #30363d; color: #c9d1d9; }
     .clear-points-btn:hover { background: #21262d; }
+    .clear-points-btn.active { background: #121d2f; border-color: #1f6feb; color: #58a6ff; }
+    .compare-names { color: #8b949e; }
+    table.compare-hover tbody tr:hover td { background: #2d2a1a; }
+    tbody tr.compare-selected td { background: #2a2613; }
+    th.compare-divider, td.compare-divider { border-left-color: #f0883e; }
     .weights-panel { background: #161b22; border-color: #30363d; }
     .weights-field { color: #8b949e; }
     .weights-field input { background: #0d1117; border-color: #30363d; color: #c9d1d9; }
