@@ -163,8 +163,8 @@
 <th><abbr title="When types are checked: static = at compile time before running; dynamic = at runtime as code executes.">Static/Dynamic</abbr></th>
 <th><abbr title="Gradual typing — can you opt into static types incrementally, mixing typed and untyped code? No = typing is all-or-nothing; Partial = available via libraries/tools; Yes = built-in optional annotations.">Gradual</abbr></th>
 <th><abbr title="How strictly the language prevents mixing incompatible types. Strong = few implicit conversions; weak = lots of automatic coercion.">Strong/Weak</abbr></th>
-<th><abbr title="How type compatibility is decided: nominal = by the declared type name; structural = by the type's shape (its fields/methods).">Nominal/Structural</abbr></th>
-<th><abbr title="How much the compiler can deduce types on its own, so you don't have to write annotations everywhere.">Inference</abbr></th>
+<th><abbr title="How type compatibility is decided, bucketed None → Duck-typed → Structural → Hybrid → Nominal. None = no type system; Duck-typed = by runtime shape (dynamic languages); Structural = by static shape (fields/methods), names irrelevant; Hybrid = meaningfully combines mechanisms (e.g. nominal types with structural interfaces); Nominal = by the declared type name. Hover a cell for specifics.">Nominal/Structural</abbr></th>
+<th><abbr title="How much the language's own compiler infers types, rated None → Checker-only → Minimal → Local → Strong local → Global. None = manifest types or untyped; Checker-only = the compiler infers nothing but an external static checker does; Minimal = a little built-in inference; Local = local-variable inference (var/:=/auto); Strong local = powerful local inference that stops at function signatures; Global = whole-program Hindley–Milner inference of most signatures. Hover a cell for specifics.">Inference</abbr></th>
 <th><abbr title="How well the type system actually prevents type errors — soundness plus whether it's enforced at runtime — rated Very Low → Very High. Hover a cell for the specifics.">Type safety</abbr></th>
 <th><abbr title="How much extra effort/verbosity is needed to avoid memory bugs, rated Very Easy → Very Difficult. Hover a cell for the language's actual memory model.">Memory</abbr></th>
 <th><abbr title="How fast the language builds/compiles, rated Very Slow → Very Fast. Hover a cell for what drives it.">Compilation</abbr></th>
@@ -178,10 +178,11 @@
 <th><abbr title="Quality of developer tooling and overall developer experience: editors, debuggers, formatters, error messages, build speed.">Tooling/DX</abbr></th>
 <th><abbr title="How much code/boilerplate it takes to express things, rated Very Low → Very High. Hover a cell for the specifics.">Verbosity</abbr></th>
 <th><abbr title="How hard the language is to pick up and to master, rated Very Easy → Very Difficult. Hover a cell for the specifics.">Learning curve</abbr></th>
-<th><abbr title="Which platforms and environments the language can target and run on.">Portability</abbr></th>
+<th><abbr title="Number of these eight application domains the language is commonly used for — Web, Backend, Scripting, Data/AI, Systems, Embedded, Games, Apps (mobile/desktop). Hover a cell for which ones.">Domains</abbr></th>
 <th><abbr title="How much a single company controls the language's direction and governance, versus a community or standards body, rated Very Low (community-led) → Very High (one corporation). Hover a cell for who steers it.">Corporate-controlled</abbr></th>
 <th><abbr title="How well the language and its typical applications run and are supported on Linux, rated Very Low → Very High. Hover a cell for the specifics.">Linux support</abbr></th>
 <th><abbr title="Number of these six platforms the language can target — Web (browser), Linux, Windows, macOS, Android, iOS. Hover a cell for which ones.">Platforms supported</abbr></th>
+<th><abbr title="How painlessly the same code runs across platforms/OSes without per-platform changes, rated Very Low → Very High — distinct from Platforms supported, which counts how many targets. Hover a cell for specifics.">Portability</abbr></th>
 <th><abbr title="Roughly how widely the language is used today, rated Very Low → Very High (based on general adoption, surveys and rankings). Hover a cell for specifics.">Popularity</abbr></th>
 <th><abbr title="How long-established and stable the language is, rated Very Low (young, still changing) → Very High (decades-old and battle-tested). Hover a cell for specifics.">Maturity</abbr></th>
 <th><abbr title="How fast the language itself evolves, rated Very Low → Very High. Cadence-normalised: a big release every ~2 years counts about the same as small releases every ~6 months. Hover a cell for specifics.">Development velocity</abbr></th>
@@ -193,8 +194,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Untyped; gradual typing only via TypeScript/Flow overlays or JSDoc">No</abbr></td>
 <td><abbr title="Weak; heavy implicit coercion (e.g. 1 + '1' === '11')">Weak</abbr></td>
-<td>Duck-typed at runtime</td>
-<td>N/A (no annotations)</td>
+<td><abbr title="Duck-typed at runtime; no static type identity">Duck-typed</abbr></td>
+<td><abbr title="Untyped; no annotations to infer (static inference comes only from the separate TypeScript/Flow tooling)">None</abbr></td>
 <td><abbr title="No static types; type errors surface only at runtime">Very Low</abbr></td>
 <td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="No build step; parsed/JIT-compiled on load">Very Fast</abbr></td>
@@ -208,10 +209,11 @@
 <td><abbr title="Vast but fragmented tooling; huge choice, little consistency">Good</abbr></td>
 <td><abbr title="Concise; little ceremony or boilerplate">Low</abbr></td>
 <td><abbr title="Easy start, many footguns">Easy</abbr></td>
-<td>Browsers, servers</td>
+<td><abbr title="Used for: Web, Backend, Scripting, Apps">4</abbr></td>
 <td><abbr title="Standardised by ECMA TC39; heavily steered by browser vendors (Google, Apple, Mozilla, Microsoft) but owned by none">Medium</abbr></td>
 <td><abbr title="Node.js is first-class on Linux; most servers run Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Runs unchanged anywhere with a browser or Node.js; no recompilation">Very High</abbr></td>
 <td><abbr title="Ubiquitous; the language of the web">Very High</abbr></td>
 <td><abbr title="Created 1995; decades of stability and ubiquity">Very High</abbr></td>
 <td><abbr title="Annual ECMAScript editions; steady evolution">High</abbr></td>
@@ -221,8 +223,8 @@
 <td><abbr title="Statically typed, with dynamic escape hatches (any, type assertions)">Static</abbr></td>
 <td><abbr title="The canonical gradual type system: optional annotations, `any`, freely mix typed and untyped code">Yes</abbr></td>
 <td><abbr title="TypeScript's types are fully erased at compile time, so at runtime you're running plain JavaScript with all its weak-coercion behavior. The strength lives only in the static checker, and even that is deliberately unsound (any, type assertions).">Strong</abbr></td>
-<td>Structural</td>
-<td>Strong local inference</td>
+<td><abbr title="Purely structural: compatibility by shape (fields/methods), names irrelevant">Structural</abbr></td>
+<td><abbr title="Strong local inference of variables and expressions, but not full function signatures">Strong local</abbr></td>
 <td><abbr title="Strong static checking, but deliberately unsound (any, assertions) and fully erased at runtime">High</abbr></td>
 <td><abbr title="Garbage-collected (same runtime as JavaScript)">Very Easy</abbr></td>
 <td><abbr title="Native Go compiler (TypeScript 7 / Project Corsa, 'tsgo') lands 2026, ~10x faster than the old JS-based tsc (e.g. VS Code's 1.5M-line build 77.8s→7.5s)">Fast</abbr></td>
@@ -236,10 +238,11 @@
 <td><abbr title="Best-in-class editor support and inline type feedback; tsc">Excellent</abbr></td>
 <td><abbr title="Type annotations add some ceremony over plain JS">Medium</abbr></td>
 <td><abbr title="Adds complexity, aids maintainability">Medium</abbr></td>
-<td>Anywhere JS runs</td>
+<td><abbr title="Used for: Web, Backend, Scripting, Apps">4</abbr></td>
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
 <td><abbr title="Same Node/Linux story as JavaScript">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Compiles to JS; runs anywhere JS runs, no recompilation">Very High</abbr></td>
 <td><abbr title="Now dominant for new JS/web projects">Very High</abbr></td>
 <td><abbr title="Released 2012; mature and battle-tested">High</abbr></td>
 <td><abbr title="Frequent releases (~quarterly); very actively developed">Very High</abbr></td>
@@ -249,8 +252,8 @@
 <td><abbr title="Python is dynamic by default; static typing is opt-in via type hints plus an external checker (mypy, pyright). The interpreter itself ignores the hints.">Dynamic</abbr></td>
 <td><abbr title="Optional type hints (PEP 484); gradual and unenforced at runtime">Yes</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Duck-typed; nominal hints, structural via <code>Protocol</code></td>
-<td><abbr title="&quot;Checker-only&quot; inference means a tool like pyright infers types for tooling/error-checking, but nothing is inferred or enforced at runtime.">Checker-only</abbr></td>
+<td><abbr title="Primarily duck-typed at runtime, with nominal type hints and structural typing via `Protocol`">Hybrid</abbr></td>
+<td><abbr title="No compiler inference; an external checker (pyright/mypy) infers types for tooling, nothing at runtime">Checker-only</abbr></td>
 <td><abbr title="Strong at runtime, but typing is dynamic by default; hints are optional and unenforced">Low</abbr></td>
 <td><abbr title="Reference counting plus a cycle collector">Very Easy</abbr></td>
 <td><abbr title="Compiles to bytecode (.pyc) on import; near-instant">Fast</abbr></td>
@@ -264,10 +267,11 @@
 <td><abbr title="Good all-round; great REPL, though packaging has long been fragmented">Good</abbr></td>
 <td><abbr title="Minimal syntax, whitespace blocks, very concise">Very Low</abbr></td>
 <td><abbr title="Very approachable">Very Easy</abbr></td>
-<td>Servers, scripting, data/ML</td>
+<td><abbr title="Used for: Backend, Scripting, Data/AI (data science, ML)">3</abbr></td>
 <td><abbr title="Community-led under the Python Software Foundation; corporate sponsors but no corporate owner">Low</abbr></td>
 <td><abbr title="Ships with virtually every Linux distro; first-class">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Interpreted; the same source runs anywhere CPython is installed">Very High</abbr></td>
 <td><abbr title="Among the most-used languages; data/ML, scripting, web">Very High</abbr></td>
 <td><abbr title="Created 1991; very mature">Very High</abbr></td>
 <td><abbr title="Annual releases with steady feature additions">High</abbr></td>
@@ -277,8 +281,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic by default; optional typing via RBS with Sorbet/Steep">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Duck-typed</td>
-<td><abbr title="No runtime inference; checker-only via Sorbet">Checker-only</abbr></td>
+<td><abbr title="Duck-typed at runtime">Duck-typed</abbr></td>
+<td><abbr title="No compiler inference; checker-only via Sorbet">Checker-only</abbr></td>
 <td><abbr title="Strong at runtime but dynamic; types are optional and externally checked">Low</abbr></td>
 <td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Parsed to YARV bytecode; near-instant">Fast</abbr></td>
@@ -292,10 +296,11 @@
 <td><abbr title="irb/pry REPLs, Rails, RuboCop">Good</abbr></td>
 <td><abbr title="Expressive and concise">Low</abbr></td>
 <td><abbr title="Very approachable, readable syntax">Easy</abbr></td>
-<td>Servers, scripting, web</td>
+<td><abbr title="Used for: Backend (web), Scripting">2</abbr></td>
 <td><abbr title="Community-led; guided by Matz and the Ruby core team">Low</abbr></td>
 <td><abbr title="First-class on Linux; standard for servers and tooling">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Interpreted; runs anywhere the interpreter is installed">Very High</abbr></td>
 <td><abbr title="Past its Rails-era peak, but a solid base remains">Medium</abbr></td>
 <td><abbr title="Created 1995; very mature">Very High</abbr></td>
 <td><abbr title="Annual releases; moderate pace of change">Medium</abbr></td>
@@ -305,8 +310,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Untyped; no meaningful static typing">No</abbr></td>
 <td><abbr title="Weak; pervasive context-dependent coercion (scalar/list context, numeric/string)">Weak</abbr></td>
-<td>Duck-typed</td>
-<td>N/A (no annotations)</td>
+<td><abbr title="Duck-typed at runtime">Duck-typed</abbr></td>
+<td><abbr title="Untyped; no annotations and no inferring checker">None</abbr></td>
 <td><abbr title="No static types; weak coercion throughout">Very Low</abbr></td>
 <td><abbr title="Reference counting; cyclic structures leak unless you manually weaken them">Easy</abbr></td>
 <td><abbr title="Compiled to an opcode tree at startup">Fast</abbr></td>
@@ -320,10 +325,11 @@
 <td><abbr title="CPAN is strong; modern editor tooling is dated">Average</abbr></td>
 <td><abbr title="Terse and sigil-heavy; can be write-only">Low</abbr></td>
 <td><abbr title="Sigils and &quot;there's more than one way to do it&quot;">Medium</abbr></td>
-<td>Servers, scripting, sysadmin</td>
+<td><abbr title="Used for: Backend, Scripting (sysadmin, text processing)">2</abbr></td>
 <td><abbr title="Community-led; volunteer core team and the Perl Foundation">Very Low</abbr></td>
 <td><abbr title="Core to Unix/Linux; preinstalled on most distros">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Interpreted; runs anywhere Perl is installed">Very High</abbr></td>
 <td><abbr title="Largely legacy now; declining use">Low</abbr></td>
 <td><abbr title="Created 1987; very mature, long-stable">Very High</abbr></td>
 <td><abbr title="Slow; Perl 5 evolves little and Perl 7 stalled">Low</abbr></td>
@@ -333,8 +339,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Optional type declarations added incrementally since PHP 7; external checkers (PHPStan, Psalm) add more">Partial</abbr></td>
 <td><abbr title="Weak; extensive type juggling and implicit coercion, though PHP 8 tightened comparisons">Weak</abbr></td>
-<td>Nominal</td>
-<td><abbr title="No runtime inference; checker-only via PHPStan/Psalm">Checker-only</abbr></td>
+<td><abbr title="Nominal: compatibility by declared class/interface name">Nominal</abbr></td>
+<td><abbr title="No compiler inference; checker-only via PHPStan/Psalm">Checker-only</abbr></td>
 <td><abbr title="Dynamic with weak coercion; declared types are checked but the language stays permissive">Low</abbr></td>
 <td><abbr title="Reference counting plus a cycle collector">Very Easy</abbr></td>
 <td><abbr title="Compiled to opcodes per request, cached by OPcache">Fast</abbr></td>
@@ -348,10 +354,11 @@
 <td><abbr title="PhpStorm, Composer, PHPStan; solid modern tooling">Good</abbr></td>
 <td>Medium</td>
 <td><abbr title="Easy to start; many historical inconsistencies">Easy</abbr></td>
-<td>Servers, web</td>
+<td><abbr title="Used for: Backend (web)">1</abbr></td>
 <td><abbr title="Community-led via the PHP Foundation, though Zend and commercial backers have long been influential">Medium</abbr></td>
 <td><abbr title="Predominantly deployed on Linux web servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Interpreted; runs anywhere the PHP runtime is installed">Very High</abbr></td>
 <td><abbr title="Still powers a large share of the web (WordPress, Laravel)">High</abbr></td>
 <td><abbr title="Created 1995; very mature">Very High</abbr></td>
 <td><abbr title="Annual major releases; very active 8.x line">High</abbr></td>
@@ -362,7 +369,7 @@
 <td><abbr title="Untyped core; optional static typing via dialects (Teal, Luau)">Partial</abbr></td>
 <td><abbr title="Weak; automatic string/number coercion in arithmetic (e.g. &quot;10&quot; + 1 == 11)">Weak</abbr></td>
 <td><abbr title="Duck-typed; everything composable is a table">Duck-typed</abbr></td>
-<td>N/A (no annotations)</td>
+<td><abbr title="Untyped; no annotations to infer">None</abbr></td>
 <td><abbr title="No static types; coercion between strings and numbers">Low</abbr></td>
 <td><abbr title="Incremental mark-and-sweep garbage collection">Very Easy</abbr></td>
 <td><abbr title="Compiled to bytecode on load; near-instant">Fast</abbr></td>
@@ -376,10 +383,11 @@
 <td><abbr title="Minimal; lightweight by design, modest editor tooling">Average</abbr></td>
 <td><abbr title="Tiny, clean syntax">Low</abbr></td>
 <td><abbr title="Very small language, quick to learn">Easy</abbr></td>
-<td>Embedded/scripting, games</td>
+<td><abbr title="Used for: Scripting, Games, Embedded">3</abbr></td>
 <td><abbr title="Developed by a small academic team at PUC-Rio (Brazil); no corporate owner">Very Low</abbr></td>
 <td><abbr title="Tiny and portable; builds and embeds cleanly on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Tiny, highly portable interpreter; embeds and runs almost anywhere">Very High</abbr></td>
 <td><abbr title="Niche, but very widely embedded (games, Redis, Neovim)">Medium</abbr></td>
 <td><abbr title="Created 1993; small, stable and very mature">Very High</abbr></td>
 <td><abbr title="Deliberately slow; new versions are rare">Low</abbr></td>
@@ -389,8 +397,8 @@
 <td><abbr title="Dynamic by default, with optional static typing (GDScript 2.0)">Dynamic</abbr></td>
 <td><abbr title="Optional static type hints you can add incrementally">Yes</abbr></td>
 <td><abbr title="Strongly typed at runtime; limited implicit conversion">Strong</abbr></td>
-<td><abbr title="Nominal classes; duck-typed without annotations">Nominal</abbr></td>
-<td><abbr title="`:=` infers a local's type from its initializer">Local inference</abbr></td>
+<td><abbr title="Nominal classes; duck-typed when untyped">Nominal</abbr></td>
+<td><abbr title="`:=` infers a local's type from its initializer">Local</abbr></td>
 <td><abbr title="Optional types checked at parse/runtime; dynamic by default">Low</abbr></td>
 <td><abbr title="Reference counting (RefCounted), but Nodes must be freed manually (queue_free)">Medium</abbr></td>
 <td><abbr title="Compiled to bytecode at load">Fast</abbr></td>
@@ -404,10 +412,11 @@
 <td><abbr title="Tightly integrated Godot editor and debugger">Good</abbr></td>
 <td><abbr title="Concise, Python-like syntax">Low</abbr></td>
 <td><abbr title="Designed to be beginner-friendly">Easy</abbr></td>
-<td>Godot engine (games), wherever Godot exports</td>
+<td><abbr title="Used for: Games (Godot)">1</abbr></td>
 <td><abbr title="Open source under the non-profit Godot Foundation; community-led">Low</abbr></td>
 <td><abbr title="Godot runs on Linux and exports Linux builds well">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Tied to the Godot engine; runs only where Godot does">Low</abbr></td>
 <td><abbr title="Rising fast with Godot, whose Steam-shipped games roughly tripled by 2026; still tied to one engine">Medium</abbr></td>
 <td><abbr title="Tied to Godot (2014); GDScript 2.0 is relatively recent">Medium</abbr></td>
 <td><abbr title="Evolves rapidly alongside active Godot development">High</abbr></td>
@@ -417,8 +426,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Mostly strong, with a few coercions (e.g. &quot;&quot; + 5)">Strong</abbr></td>
-<td>Nominal</td>
-<td>Limited (<code>var</code> for locals, J10+)</td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Limited local inference: `var` for local variables (Java 10+); fields, params and returns stay explicit">Local</abbr></td>
 <td><abbr title="Static, strong, enforced at runtime by the JVM, but null and unchecked casts remain">High</abbr></td>
 <td><abbr title="JVM garbage collectors (G1, ZGC)">Very Easy</abbr></td>
 <td><abbr title="javac to bytecode; quick incremental builds">Fast</abbr></td>
@@ -432,10 +441,11 @@
 <td><abbr title="Mature IDEs and profilers (IntelliJ, etc.), but heavyweight build tooling">Good</abbr></td>
 <td><abbr title="Lots of boilerplate; classes, getters/setters, ceremony">Very High</abbr></td>
 <td><abbr title="Moderate, verbose">Medium</abbr></td>
-<td>JVM anywhere; Android</td>
+<td><abbr title="Used for: Backend, Apps (Android, desktop), Data/AI (big data)">3</abbr></td>
 <td><abbr title="Stewarded by Oracle via OpenJDK and the Java Community Process, with broad vendor participation">High</abbr></td>
 <td><abbr title="JVM is first-class on Linux; dominant for Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, Android">4</abbr></td>
+<td><abbr title="Compile-once bytecode runs on any JVM (write once, run anywhere)">Very High</abbr></td>
 <td><abbr title="One of the most-used languages; enterprise and Android">Very High</abbr></td>
 <td><abbr title="Released 1995; extremely mature">Very High</abbr></td>
 <td><abbr title="Six-month release cadence since Java 9; steady stream of features">High</abbr></td>
@@ -445,8 +455,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; a `dynamic` type exists only for the JS target">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Strong local inference">Strong local</abbr></td>
 <td><abbr title="Static, strong, with null safety in the type system; nullability holes remain at the Java interop boundary">High</abbr></td>
 <td><abbr title="JVM garbage collection">Very Easy</abbr></td>
 <td><abbr title="The K2 compiler (Stable in Kotlin 2.0, May 2024) compiles roughly twice as fast as the old frontend, closing most of the historical build-speed gap with javac">Fast</abbr></td>
@@ -460,10 +470,11 @@
 <td><abbr title="First-class JetBrains/IntelliJ support">Excellent</abbr></td>
 <td><abbr title="Concise; far less boilerplate than Java">Low</abbr></td>
 <td><abbr title="Approachable, especially from Java">Medium</abbr></td>
-<td>JVM, Android, Native, JS</td>
+<td><abbr title="Used for: Backend, Apps (Android)">2</abbr></td>
 <td><abbr title="Designed and controlled by JetBrains (with the Kotlin Foundation alongside Google)">Very High</abbr></td>
 <td><abbr title="Runs on the JVM on Linux; Kotlin/Native targets Linux too">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="JVM bytecode runs on any JVM; same portability as Java">Very High</abbr></td>
 <td><abbr title="Widely used, especially for Android">High</abbr></td>
 <td><abbr title="First release 2011, 1.0 in 2016; mature">High</abbr></td>
 <td><abbr title="Regular releases; actively evolving">High</abbr></td>
@@ -473,8 +484,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal, with structural types available">Nominal</abbr></td>
-<td><abbr title="Strong local inference; more than Java, less than full Hindley–Milner">Strong local inference</abbr></td>
+<td><abbr title="Nominal, with structural types available as an opt-in">Nominal</abbr></td>
+<td><abbr title="Strong local inference; more than Java, less than full Hindley–Milner">Strong local</abbr></td>
 <td><abbr title="Advanced, expressive static types; JVM null holes (Scala 3 adds opt-in explicit nulls)">High</abbr></td>
 <td><abbr title="JVM garbage collection">Very Easy</abbr></td>
 <td><abbr title="Notoriously slow; implicit resolution and a heavy type checker">Slow</abbr></td>
@@ -488,10 +499,11 @@
 <td><abbr title="Metals LSP and IntelliJ; improved but build is heavy">Good</abbr></td>
 <td><abbr title="Concise, though advanced features can get dense">Medium</abbr></td>
 <td><abbr title="Large feature set; deep type system">Difficult</abbr></td>
-<td>JVM; Scala.js → browser, Scala Native</td>
+<td><abbr title="Used for: Backend, Data/AI (Spark)">2</abbr></td>
 <td><abbr title="Created at EPFL; governed by the non-profit Scala Center with commercial contributors">Medium</abbr></td>
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="JVM bytecode is highly portable; Scala.js/Native need separate builds">High</abbr></td>
 <td><abbr title="Established in data/backend, but a niche audience">Medium</abbr></td>
 <td><abbr title="Released 2004; mature, with a major Scala 3 transition">High</abbr></td>
 <td><abbr title="Moderate; a big Scala 3 leap, otherwise measured">Medium</abbr></td>
@@ -501,8 +513,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic by default; optional typing via clojure.spec or Typed Clojure">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed data; protocols</abbr></td>
-<td>N/A (dynamic)</td>
+<td><abbr title="Data is mostly structural (maps); protocols handle dispatch">Duck-typed</abbr></td>
+<td><abbr title="Dynamic; no static types to infer">None</abbr></td>
 <td><abbr title="Dynamic; optional runtime checks via Spec, nothing enforced statically">Low</abbr></td>
 <td><abbr title="JVM garbage collection; immutable persistent data structures">Very Easy</abbr></td>
 <td><abbr title="Compiles to JVM bytecode; notable startup latency">Fast</abbr></td>
@@ -516,10 +528,11 @@
 <td><abbr title="Outstanding REPL-driven workflow; Leiningen/tools.deps, but rougher onboarding">Good</abbr></td>
 <td><abbr title="Terse Lisp; minimal syntax">Very Low</abbr></td>
 <td><abbr title="Lisp syntax, FP, immutability, and the JVM">Medium</abbr></td>
-<td>JVM anywhere; ClojureScript→browser</td>
+<td><abbr title="Used for: Backend, Web (ClojureScript)">2</abbr></td>
 <td><abbr title="Tightly directed by Rich Hickey and the core team (Nubank-backed); limited outside contribution">High</abbr></td>
 <td><abbr title="Runs on the JVM; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="JVM bytecode runs on any JVM">Very High</abbr></td>
 <td><abbr title="Small but dedicated following">Low</abbr></td>
 <td><abbr title="Released 2007; stable and mature">High</abbr></td>
 <td><abbr title="Deliberately slow and infrequent releases">Low</abbr></td>
@@ -529,8 +542,8 @@
 <td><abbr title="Statically typed; the `dynamic` keyword opts into runtime binding">Static</abbr></td>
 <td><abbr title="Static by default; the `dynamic` keyword enables runtime-bound typing where needed">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="`var` and target-typed `new`; locals only">Strong local inference</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Strong local inference: `var` and target-typed `new`; locals only">Strong local</abbr></td>
 <td><abbr title="Static and strong, enforced by the CLR; nullable reference types are opt-in, so null holes remain">High</abbr></td>
 <td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Roslyn compiles to IL quickly">Fast</abbr></td>
@@ -544,10 +557,11 @@
 <td><abbr title="Visual Studio and Rider; top-tier IDEs and debuggers">Excellent</abbr></td>
 <td>Medium</td>
 <td>Medium</td>
-<td><abbr title=".NET runs cross-platform; Windows/Linux/macOS, Unity">Cross-platform (.NET)</abbr></td>
+<td><abbr title="Used for: Backend, Apps (desktop, mobile), Games (Unity)">3</abbr></td>
 <td><abbr title="Designed and controlled by Microsoft">Very High</abbr></td>
 <td><abbr title="Server/CLI on .NET runs well on Linux, but desktop GUI stacks (WinForms/WPF) remain Windows-only">Medium</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title=".NET IL runs on any .NET runtime across OSes">Very High</abbr></td>
 <td><abbr title="Very widely used across enterprise, games (Unity) and web">Very High</abbr></td>
 <td><abbr title="Released 2000; extremely mature">Very High</abbr></td>
 <td><abbr title="Annual major versions in lockstep with .NET">High</abbr></td>
@@ -557,8 +571,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Hindley–Milner-style inference, though file/declaration order matters and .NET interop needs annotations">Strong inference</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Hindley–Milner-style whole-program inference, though file/declaration order matters and .NET interop needs annotations">Global</abbr></td>
 <td><abbr title="Strong static types; options instead of null idiomatically, though .NET interop can reintroduce null">High</abbr></td>
 <td><abbr title="Garbage-collected on the .NET runtime">Very Easy</abbr></td>
 <td><abbr title="Slower than C#; type inference and strict file ordering add work">Medium</abbr></td>
@@ -572,10 +586,11 @@
 <td><abbr title="Ionide, Visual Studio, Rider">Good</abbr></td>
 <td><abbr title="Concise; light syntax, significant whitespace">Low</abbr></td>
 <td>Medium</td>
-<td><abbr title=".NET cross-platform; Fable → JavaScript">Cross-platform (.NET); JS</abbr></td>
+<td><abbr title="Used for: Backend, Data/AI">2</abbr></td>
 <td><abbr title="Created and driven by Microsoft, with the community-run F# Software Foundation">High</abbr></td>
 <td><abbr title="Runs on .NET on Linux for server/CLI; rarely tied to Windows-only GUI">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title=".NET IL runs across OSes; Fable can target JS">High</abbr></td>
 <td><abbr title="Niche within the .NET world">Low</abbr></td>
 <td><abbr title="Released 2005; mature">High</abbr></td>
 <td><abbr title="Evolves with .NET, but at a slower feature pace than C#">Medium</abbr></td>
@@ -585,8 +600,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing since Dart 2; `dynamic` is an opt-out escape hatch, not gradual typing">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal classes, but every class also defines an implicit interface">Nominal</abbr></td>
-<td>Strong local inference</td>
+<td><abbr title="Nominal classes, but every class also defines an implicit (structural) interface you can implement">Hybrid</abbr></td>
+<td><abbr title="Strong local inference">Strong local</abbr></td>
 <td><abbr title="Sound static type system with sound null safety since 2.12">High</abbr></td>
 <td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="JIT for fast dev/hot-reload, AOT for release">Fast</abbr></td>
@@ -600,10 +615,11 @@
 <td><abbr title="Hot reload, DartPad, strong analyzer">Excellent</abbr></td>
 <td>Medium</td>
 <td><abbr title="Familiar C-style syntax, easy to pick up">Easy</abbr></td>
-<td>Mobile (Flutter), web, desktop, server</td>
+<td><abbr title="Used for: Web, Apps (Flutter mobile/desktop)">2</abbr></td>
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
 <td><abbr title="CLI runs on Linux; Flutter targets Linux desktop (stable)">High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Compiles to native per-platform or to JS; broad reach but per-target builds">High</abbr></td>
 <td><abbr title="Riding Flutter's popularity for cross-platform apps">High</abbr></td>
 <td><abbr title="Released 2011; mature, reshaped by Flutter">High</abbr></td>
 <td><abbr title="Active, frequent releases tied to Flutter">High</abbr></td>
@@ -613,8 +629,8 @@
 <td><abbr title="Statically typed objects layered over a dynamic message-passing runtime; `id` is dynamically typed">Static</abbr></td>
 <td><abbr title="Static object types are optional; `id` lets any object be messaged dynamically">Partial</abbr></td>
 <td><abbr title="Weak; C base plus dynamic messaging — you can message any object">Weak</abbr></td>
-<td><abbr title="Nominal protocols, but runtime messaging is duck-typed">Nominal; duck-typed messaging</abbr></td>
-<td><abbr title="Minimal; C-style, with `__auto_type`">Minimal</abbr></td>
+<td><abbr title="Nominal protocols, but runtime messaging is duck-typed">Hybrid</abbr></td>
+<td><abbr title="Minimal; mostly manifest, C-style, with the `__auto_type` extension">Minimal</abbr></td>
 <td><abbr title="Dynamic messaging; messaging nil is silently ignored rather than erroring">Low</abbr></td>
 <td><abbr title="Automatic Reference Counting (or manual retain/release); break retain cycles with weak/unowned">Easy</abbr></td>
 <td><abbr title="Clang compiler">Medium</abbr></td>
@@ -628,10 +644,11 @@
 <td><abbr title="Xcode; mature but aging">Good</abbr></td>
 <td><abbr title="Long method names, bracket message syntax, headers">High</abbr></td>
 <td><abbr title="C plus message passing and manual memory concepts">Difficult</abbr></td>
-<td>Apple platforms (legacy)</td>
+<td><abbr title="Used for: Apps (Apple platforms)">1</abbr></td>
 <td><abbr title="Controlled by Apple (originally NeXT/Stepstone)">High</abbr></td>
 <td><abbr title="Tied to Apple frameworks; only partial support on Linux via GNUstep">Low</abbr></td>
 <td><abbr title="Supports: macOS, iOS">2</abbr></td>
+<td><abbr title="Tied to Apple frameworks; only partial support elsewhere (GNUstep)">Low</abbr></td>
 <td><abbr title="Legacy Apple development; largely supplanted by Swift">Medium</abbr></td>
 <td><abbr title="Created 1984; very mature but now frozen">Very High</abbr></td>
 <td><abbr title="Effectively frozen; Apple's focus moved to Swift">Very Low</abbr></td>
@@ -641,8 +658,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; `Any` and dynamic Obj-C interop are escape hatches">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Strong local inference">Strong local</abbr></td>
 <td><abbr title="Strong static types with optionals (no implicit null) and value semantics; some runtime holes via Obj-C interop">High</abbr></td>
 <td><abbr title="Automatic Reference Counting; you must break retain cycles with weak/unowned">Easy</abbr></td>
 <td><abbr title="Whole-module type inference and optimization make builds notably slow">Slow</abbr></td>
@@ -656,10 +673,11 @@
 <td><abbr title="Excellent on Apple platforms (Xcode); weaker elsewhere">Good</abbr></td>
 <td>Medium</td>
 <td>Medium</td>
-<td><abbr title="Apple platforms first; Linux and Windows support growing">Apple platforms; Linux/Windows</abbr></td>
+<td><abbr title="Used for: Apps (Apple platforms), Backend">2</abbr></td>
 <td><abbr title="Created and led by Apple; open source but Apple-directed">Very High</abbr></td>
 <td><abbr title="Official Linux toolchain exists (server-side Swift), but no Apple UI frameworks">Medium</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, iOS, Android (official Android SDK preview, 2025)">5</abbr></td>
+<td><abbr title="Apple platforms first-class; Linux/Windows support still maturing">Medium</abbr></td>
 <td><abbr title="Mainstream for Apple-platform development">High</abbr></td>
 <td><abbr title="Released 2014; now mature and stable">High</abbr></td>
 <td><abbr title="Very active; annual releases plus an open evolution process">High</abbr></td>
@@ -669,8 +687,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit numeric conversion">Strong</abbr></td>
-<td><abbr title="This is Go's signature quirk: concrete types are matched nominally, but a type satisfies an interface purely by having the right methods, with no implements keyword. So Go is nominal and structural depending on which part you're looking at."><strong>Nominal types, structural interfaces</strong></abbr></td>
-<td>Local inference (<code>:=</code>)</td>
+<td><abbr title="Go's signature quirk: concrete types match nominally, but a type satisfies an interface structurally — by having the right methods, with no implements keyword">Hybrid</abbr></td>
+<td><abbr title="Local inference via `:=`">Local</abbr></td>
 <td><abbr title="Static and strong, enforced at runtime, but nil and empty-interface escape hatches">High</abbr></td>
 <td><abbr title="Low-latency garbage collector">Very Easy</abbr></td>
 <td><abbr title="Compilation speed was an explicit design goal">Very Fast</abbr></td>
@@ -684,10 +702,11 @@
 <td><abbr title="Integrated toolchain out of the box: build, test, fmt, vet, modules">Excellent</abbr></td>
 <td><abbr title="Terse syntax, but explicit `if err != nil` handling adds repetition">Medium</abbr></td>
 <td><abbr title="Easy, small lang">Easy</abbr></td>
-<td>Servers, CLI, cloud</td>
+<td><abbr title="Used for: Backend (cloud, networking), Systems (CLI tooling)">2</abbr></td>
 <td><abbr title="Designed and controlled by Google">Very High</abbr></td>
 <td><abbr title="First-class on Linux; built at Google for Linux servers and cloud">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Trivial cross-compilation to a static binary for many OS/arch targets">High</abbr></td>
 <td><abbr title="Widely adopted for cloud, backend and CLI tooling">High</abbr></td>
 <td><abbr title="Released 2009; mature and stable">High</abbr></td>
 <td><abbr title="Six-month release cadence; deliberately conservative feature additions">High</abbr></td>
@@ -697,8 +716,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Weak; free casts and implicit conversions">Weak</abbr></td>
-<td>Nominal (by tag)</td>
-<td>None (manifest)</td>
+<td><abbr title="Nominal, by struct/union tag">Nominal</abbr></td>
+<td><abbr title="Manifest typing; the compiler infers nothing">None</abbr></td>
 <td><abbr title="Weak typing: free casts, implicit conversions, no runtime checks">Very Low</abbr></td>
 <td><abbr title="Fully manual malloc/free; no safety net">Very Difficult</abbr></td>
 <td><abbr title="Fast per–translation-unit compiles; simple language">Fast</abbr></td>
@@ -712,10 +731,11 @@
 <td><abbr title="Mature compilers/debuggers (gcc, gdb), but no standard build or package tooling">Average</abbr></td>
 <td><abbr title="Small language, but manual memory/struct handling adds boilerplate">Medium</abbr></td>
 <td><abbr title="Small lang, hard to master">Difficult</abbr></td>
-<td>Everywhere (embedded→kernels)</td>
+<td><abbr title="Used for: Systems (kernels, drivers), Embedded">2</abbr></td>
 <td><abbr title="An ISO standard developed by committee; no corporate owner">Very Low</abbr></td>
 <td><abbr title="The Linux kernel and most of its userland are written in C">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Highly portable source, but each platform needs recompilation and often #ifdefs">Medium</abbr></td>
 <td><abbr title="Foundational and pervasive; consistently top-ranked">Very High</abbr></td>
 <td><abbr title="Created 1972; the archetype of a mature language">Very High</abbr></td>
 <td><abbr title="ISO revisions roughly every decade; changes very little">Very Low</abbr></td>
@@ -725,8 +745,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Weak-ish; inherits C's coercions, but stronger with classes and explicit conversions">Weak</abbr></td>
-<td><abbr title="C++ classes use nominal typing, but templates are effectively duck-typed at compile time: a template just requires that whatever type you pass supports the operations used in the body, regardless of its name or declared interface (pre-C++20 concepts).">Nominal; templates duck-typed</abbr></td>
-<td><code>auto</code>, template deduction (C++11+)</td>
+<td><abbr title="Nominal classes, but templates are effectively duck-typed at compile time — a template only requires the operations it uses (pre-C++20 concepts)">Hybrid</abbr></td>
+<td><abbr title="`auto` and template argument deduction (C++11+); local only">Local</abbr></td>
 <td><abbr title="Stronger than C, but C-style casts and undefined behavior undermine guarantees">Medium</abbr></td>
 <td><abbr title="Manual, but RAII and smart pointers cut down errors; raw pointers and UB still possible">Difficult</abbr></td>
 <td><abbr title="Header inclusion and heavy template instantiation make builds notoriously slow">Slow</abbr></td>
@@ -740,10 +760,11 @@
 <td><abbr title="Powerful debuggers/IDEs but complex; fragmented build/package story, slow compiles">Average</abbr></td>
 <td><abbr title="Headers, templates, and manual resource patterns add bulk">High</abbr></td>
 <td><abbr title="Very steep">Very Difficult</abbr></td>
-<td>Systems, games, embedded</td>
+<td><abbr title="Used for: Systems, Games, Embedded, Apps (desktop)">4</abbr></td>
 <td><abbr title="An ISO standard developed by committee with broad vendor participation; no single owner">Low</abbr></td>
 <td><abbr title="First-class on Linux; GCC/Clang and full tooling">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Portable source, but per-platform recompilation and platform-specific code">Medium</abbr></td>
 <td><abbr title="Extremely widely used in systems, games and HPC">Very High</abbr></td>
 <td><abbr title="Created 1985; extremely mature">Very High</abbr></td>
 <td><abbr title="ISO revisions every ~3 years (C++11/14/17/20/23)">Medium</abbr></td>
@@ -753,8 +774,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Rust infers locals well but not function signatures — you must annotate parameters and return types. It's local inference, not whole-program Hindley–Milner like Haskell.">Strong local inference</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Infers locals well but not function signatures — you must annotate parameters and return types; local, not whole-program Hindley–Milner">Strong local</abbr></td>
 <td><abbr title="Sound, strong static types enforced throughout; no null, no data races">Very High</abbr></td>
 <td><abbr title="Compile-time ownership/borrowing; guarantees safety but you must satisfy the borrow checker">Difficult</abbr></td>
 <td><abbr title="Borrow checking, generic monomorphization, and LLVM make builds notoriously slow">Very Slow</abbr></td>
@@ -768,10 +789,11 @@
 <td><abbr title="Cargo, rust-analyzer, clippy; famously helpful compiler errors">Excellent</abbr></td>
 <td><abbr title="Explicit types, lifetimes, and error handling add ceremony">High</abbr></td>
 <td><abbr title="Steep (ownership)">Difficult</abbr></td>
-<td>Systems, embedded, WASM</td>
+<td><abbr title="Used for: Systems, Backend, Embedded">3</abbr></td>
 <td><abbr title="Community-governed via RFCs under the Rust Foundation (backed by many companies, controlled by none)">Low</abbr></td>
 <td><abbr title="First-class on Linux; excellent toolchain">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS, Android, iOS">6</abbr></td>
+<td><abbr title="Good cross-compilation via LLVM; per-target builds but portable source">High</abbr></td>
 <td><abbr title="Fast-rising; consistently the most-admired language">High</abbr></td>
 <td><abbr title="1.0 in 2015; now mature with strong stability guarantees">High</abbr></td>
 <td><abbr title="Six-week release train; very fast, steady evolution">Very High</abbr></td>
@@ -781,8 +803,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; explicit, with no hidden coercions">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Local inference; types are comptime values">Local inference</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Local inference; types are comptime values">Local</abbr></td>
 <td><abbr title="No null (optionals), no hidden control flow, but manual memory and allowed unsafe operations">Medium</abbr></td>
 <td><abbr title="Manual via explicit allocators (with defer/errdefer); no GC">Difficult</abbr></td>
 <td><abbr title="Self-hosted x86_64 backend is the default for Debug builds since 0.15 (2025), compiling ~5x faster than LLVM, plus fast cross-compilation; LLVM optional">Very Fast</abbr></td>
@@ -796,10 +818,11 @@
 <td><abbr title="Improving; ZLS and an integrated build system written in Zig">Average</abbr></td>
 <td>Medium</td>
 <td><abbr title="Small language, but manual memory and comptime take effort">Difficult</abbr></td>
-<td><abbr title="Systems, embedded, WASM; excellent cross-compilation">Systems, embedded, WASM</abbr></td>
+<td><abbr title="Used for: Systems, Embedded">2</abbr></td>
 <td><abbr title="Community-led under the non-profit Zig Software Foundation">Very Low</abbr></td>
 <td><abbr title="First-class on Linux with excellent cross-compilation">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Excellent built-in cross-compilation to many targets from any host">High</abbr></td>
 <td><abbr title="Small but growing systems-programming following">Low</abbr></td>
 <td><abbr title="Still pre-1.0; breaking changes expected">Low</abbr></td>
 <td><abbr title="Rapid, frequent (often breaking) changes pre-1.0">High</abbr></td>
@@ -809,8 +832,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td>Strong local inference</td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Strong local inference">Strong local</abbr></td>
 <td><abbr title="Static, strong static types throughout">High</abbr></td>
 <td><abbr title="Garbage-collected by default (ARC/ORC); optional manual memory">Very Easy</abbr></td>
 <td><abbr title="Compiles via C/C++/JS backends; fast">Fast</abbr></td>
@@ -824,10 +847,11 @@
 <td><abbr title="Functional but limited; smaller community">Average</abbr></td>
 <td><abbr title="Concise, Python-like indentation syntax">Low</abbr></td>
 <td>Medium</td>
-<td><abbr title="Systems, scripting, WASM, embedded">Systems, scripting, WASM</abbr></td>
+<td><abbr title="Used for: Systems, Scripting">2</abbr></td>
 <td><abbr title="Community-led; small volunteer core team">Very Low</abbr></td>
 <td><abbr title="Compiles via C; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Compiles via C to virtually any platform with a C compiler">High</abbr></td>
 <td><abbr title="Tiny user base">Very Low</abbr></td>
 <td><abbr title="Created 2008, 1.0 in 2019; moderately mature">Medium</abbr></td>
 <td><abbr title="Active but small team; moderate cadence">Medium</abbr></td>
@@ -838,7 +862,7 @@
 <td><abbr title="Gradual by design; `def` is dynamic and Python-like, `fn` is strictly typed">Yes</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
 <td><abbr title="Nominal structs and traits">Nominal</abbr></td>
-<td>Strong local inference</td>
+<td><abbr title="Strong local inference">Strong local</abbr></td>
 <td><abbr title="Strong static types and an ownership/borrow model when using typed code">High</abbr></td>
 <td><abbr title="Compile-time ownership/borrowing with value semantics; no GC">Difficult</abbr></td>
 <td><abbr title="MLIR-based toolchain; young">Medium</abbr></td>
@@ -852,10 +876,11 @@
 <td><abbr title="Maturing Modular toolchain, LSP and 1.0-beta tooling (2026); improving but still young">Good</abbr></td>
 <td><abbr title="Concise, Python-like syntax">Low</abbr></td>
 <td>Medium</td>
-<td><abbr title="AI/ML and systems; CPUs and GPUs via Modular MAX">AI/ML, systems (CPU/GPU)</abbr></td>
+<td><abbr title="Used for: Data/AI (ML), Systems (CPU/GPU)">2</abbr></td>
 <td><abbr title="Built by Modular; standard library is open source (Apache 2.0) and the compiler is committed to open-source in fall 2026, but the language is still single-vendor controlled">High</abbr></td>
 <td><abbr title="Linux is a primary target (AI servers); was Linux/macOS-first">High</abbr></td>
 <td><abbr title="Supports: Linux, macOS">2</abbr></td>
+<td><abbr title="Young; currently Linux/macOS, with no cross-platform story yet">Low</abbr></td>
 <td><abbr title="Very new; minimal adoption so far">Very Low</abbr></td>
 <td><abbr title="Announced 2023; reached 1.0.0 beta 1 in May 2026 with a 1.0 release imminent — stabilizing but still young">Low</abbr></td>
 <td><abbr title="Extremely rapid; the language is being built in the open">Very High</abbr></td>
@@ -865,8 +890,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Very strongly typed; strict, with explicit conversions and range/subtype checks">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Manifest; declarations are explicit">Minimal</abbr></td>
+<td><abbr title="Nominal, with strong distinct subtypes">Nominal</abbr></td>
+<td><abbr title="Mostly manifest; declarations are explicit">Minimal</abbr></td>
 <td><abbr title="Very strong typing with subtypes, ranges and contracts (SPARK can prove absence of runtime errors)">Very High</abbr></td>
 <td><abbr title="Manual via access types (no GC), but controlled types, scope rules and strong typing catch many errors">Medium</abbr></td>
 <td><abbr title="Heavy compile-time checking makes builds slow">Slow</abbr></td>
@@ -880,10 +905,11 @@
 <td><abbr title="GNAT/GCC and GNAT Studio; niche but solid">Average</abbr></td>
 <td><abbr title="Explicit and ceremony-heavy by design">High</abbr></td>
 <td><abbr title="Large language with strict rules">Difficult</abbr></td>
-<td>Embedded, aerospace/defense, real-time</td>
+<td><abbr title="Used for: Embedded (aerospace/defense, real-time), Systems">2</abbr></td>
 <td><abbr title="An ISO standard, but the GNAT toolchain is dominated by the commercial vendor AdaCore">Medium</abbr></td>
 <td><abbr title="GNAT/GCC gives solid Linux support">High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Portable across GNAT-supported targets, but needs recompilation">Medium</abbr></td>
 <td><abbr title="Niche, mostly defense/aerospace">Very Low</abbr></td>
 <td><abbr title="Created 1980; rigorously standardised, very mature">Very High</abbr></td>
 <td><abbr title="ISO revisions every several years (1995/2005/2012/2022)">Low</abbr></td>
@@ -893,8 +919,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed Object Pascal; explicit conversions, though pointers are available">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Mostly manifest; inline `var` inference since 10.3">Limited</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Mostly manifest; limited inline `var` inference since 10.3">Minimal</abbr></td>
 <td><abbr title="Strong typing, but pointers and manual object lifetimes leave room for error">Medium</abbr></td>
 <td><abbr title="Manual object lifetimes (Create/Free with try-finally); strings, interfaces and dynamic arrays are reference-counted">Medium</abbr></td>
 <td><abbr title="Famously fast single-pass compiler">Very Fast</abbr></td>
@@ -908,10 +934,11 @@
 <td><abbr title="Mature RAD IDE with a visual form designer; commercial and aging">Good</abbr></td>
 <td><abbr title="Pascal begin/end blocks add some ceremony">Medium</abbr></td>
 <td><abbr title="Pascal heritage; designed to be teachable">Easy</abbr></td>
-<td>Windows-first; macOS/Linux/mobile via FireMonkey</td>
+<td><abbr title="Used for: Apps (desktop GUI), Backend">2</abbr></td>
 <td><abbr title="A commercial, proprietary product owned by Embarcadero">Very High</abbr></td>
 <td><abbr title="Windows-first; Linux is server/console only (FMXLinux), no native Linux GUI">Low</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS, Android, iOS">5</abbr></td>
+<td><abbr title="Windows-first; other targets via the FireMonkey framework">Low</abbr></td>
 <td><abbr title="Declined from its 1990s peak; legacy desktop apps">Low</abbr></td>
 <td><abbr title="Released 1995 (Object Pascal older); very mature">Very High</abbr></td>
 <td><abbr title="Roughly annual commercial releases">Medium</abbr></td>
@@ -921,8 +948,8 @@
 <td><abbr title="Untyped; operates on raw registers, bytes, and memory addresses">Untyped</abbr></td>
 <td><abbr title="No type system">No</abbr></td>
 <td><abbr title="No type system to enforce">None</abbr></td>
-<td>N/A</td>
-<td>None (manifest)</td>
+<td><abbr title="No type system; data is raw bytes and registers">None</abbr></td>
+<td><abbr title="No type system; nothing to infer">None</abbr></td>
 <td><abbr title="No type system at all — nothing prevents misinterpreting data; the absolute floor of type safety">Very Low</abbr></td>
 <td><abbr title="Fully manual: direct register and memory management, no safety net">Very Difficult</abbr></td>
 <td><abbr title="Assembled directly to machine code">Very Fast</abbr></td>
@@ -936,10 +963,11 @@
 <td><abbr title="Assemblers and debuggers; almost no abstraction">Average</abbr></td>
 <td><abbr title="Every operation written out explicitly">Very High</abbr></td>
 <td><abbr title="Steep; requires understanding the hardware">Very Difficult</abbr></td>
-<td><abbr title="Architecture-specific; not portable">Architecture-specific</abbr></td>
+<td><abbr title="Used for: Systems, Embedded">2</abbr></td>
 <td><abbr title="No single owner; assemblers are largely community/open (GAS, NASM), though the underlying ISAs are vendor-controlled (Intel, ARM)">Medium</abbr></td>
 <td><abbr title="Fully supported on Linux for x86/ARM via GAS/NASM and standard toolchains">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Architecture-specific; must be rewritten for each ISA">Very Low</abbr></td>
 <td><abbr title="Niche but ever-present in low-level/embedded work">Medium</abbr></td>
 <td><abbr title="As old as computing; maximally mature">Very High</abbr></td>
 <td><abbr title="Barely changes; tracks slow ISA extensions">Very Low</abbr></td>
@@ -949,8 +977,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal (typeclasses)</td>
-<td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Strong global inference</abbr></td>
+<td><abbr title="Nominal, with typeclasses for ad-hoc polymorphism">Nominal</abbr></td>
+<td><abbr title="Full Hindley–Milner; infers most signatures whole-program">Global</abbr></td>
 <td><abbr title="Sound and pure; no null, side effects tracked in types (IO)">Very High</abbr></td>
 <td><abbr title="Garbage-collected, but lazy evaluation can cause space leaks that take effort to track down">Easy</abbr></td>
 <td><abbr title="GHC optimizing compiler; builds can be slow">Slow</abbr></td>
@@ -964,10 +992,11 @@
 <td><abbr title="HLS language server and GHCi REPL; much improved but historically rough">Average</abbr></td>
 <td><abbr title="Very concise and expressive; point-free style can obscure">Low</abbr></td>
 <td><abbr title="Monads, laziness, and an advanced type system">Very Difficult</abbr></td>
-<td>Servers, compilers, research</td>
+<td><abbr title="Used for: Backend, Systems (compilers, research)">2</abbr></td>
 <td><abbr title="Community-led; GHC maintained by the community and the Haskell Foundation">Low</abbr></td>
 <td><abbr title="GHC is first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="GHC targets the major desktop/server OSes; per-target builds">High</abbr></td>
 <td><abbr title="Small but influential; mostly academia and FP enthusiasts">Low</abbr></td>
 <td><abbr title="Created 1990; mature, standard frozen at Haskell 2010">Very High</abbr></td>
 <td><abbr title="GHC ships regularly with new extensions; the standard is frozen">Medium</abbr></td>
@@ -977,8 +1006,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal variants/records; structural objects and polymorphic variants">Nominal; structural objects</abbr></td>
-<td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
+<td><abbr title="Nominal variants/records, plus structural object types and polymorphic variants">Hybrid</abbr></td>
+<td><abbr title="Full Hindley–Milner type inference">Global</abbr></td>
 <td><abbr title="Sound, strong static types; no null (option type)">Very High</abbr></td>
 <td><abbr title="Garbage-collected with a fast minor-heap allocator">Very Easy</abbr></td>
 <td><abbr title="Famously fast native compiler">Very Fast</abbr></td>
@@ -992,10 +1021,11 @@
 <td><abbr title="Solid: dune build system, Merlin/LSP, utop REPL">Good</abbr></td>
 <td><abbr title="Concise, with a powerful module system">Low</abbr></td>
 <td><abbr title="Module system and FP concepts">Difficult</abbr></td>
-<td>Servers, compilers, finance</td>
+<td><abbr title="Used for: Backend, Systems (compilers, finance)">2</abbr></td>
 <td><abbr title="Developed at INRIA (French research institute) with the community-run OCaml Software Foundation">Low</abbr></td>
 <td><abbr title="Unix-native heritage; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Native and bytecode compilers target the major OSes">High</abbr></td>
 <td><abbr title="Niche; academia, finance, compiler tooling">Low</abbr></td>
 <td><abbr title="Created 1996; very mature">Very High</abbr></td>
 <td><abbr title="Steady yearly 5.x releases (5.3 in 2025, 5.4 in late 2025) building out multicore/effects, plus Jane Street's OxCaml branch (modes, locality, unboxed types) open-sourced in 2025">High</abbr></td>
@@ -1005,8 +1035,8 @@
 <td><abbr title="Dynamically typed; optional type declarations mainly guide the optimizer">Dynamic</abbr></td>
 <td><abbr title="Optional type declarations; primarily compiler hints, some implementations check them">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Duck-typed; CLOS classes are nominal">Duck-typed; CLOS nominal</abbr></td>
-<td><abbr title="No required annotations; compilers like SBCL infer types for optimization">Checker-only</abbr></td>
+<td><abbr title="Duck-typed values, but CLOS classes are nominal">Hybrid</abbr></td>
+<td><abbr title="No required annotations; compilers like SBCL infer types for optimization, not to relieve the programmer">Checker-only</abbr></td>
 <td><abbr title="Dynamic; type errors surface at runtime">Low</abbr></td>
 <td><abbr title="Garbage-collected; the runtime frees memory for you">Very Easy</abbr></td>
 <td><abbr title="Incremental, image-based; SBCL compiles to native fast">Fast</abbr></td>
@@ -1020,10 +1050,11 @@
 <td><abbr title="SLIME/SLY and a powerful image-based REPL">Good</abbr></td>
 <td><abbr title="S-expressions; macros remove boilerplate">Low</abbr></td>
 <td><abbr title="Parentheses and macro-based metaprogramming">Medium</abbr></td>
-<td>Servers, AI/research, scripting</td>
+<td><abbr title="Used for: Backend, Data/AI (AI, research)">2</abbr></td>
 <td><abbr title="Common Lisp is an ANSI standard with many independent implementations; no corporate owner">Very Low</abbr></td>
 <td><abbr title="SBCL and other implementations run first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="Implementations like SBCL run across the major OSes">High</abbr></td>
 <td><abbr title="Small, long-tail community across dialects">Low</abbr></td>
 <td><abbr title="Created 1958; one of the oldest languages alive">Very High</abbr></td>
 <td><abbr title="ANSI standard frozen since 1994; implementations update, the language doesn't">Very Low</abbr></td>
@@ -1033,8 +1064,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic; typespecs + Dialyzer, and gradual set-theoretic types landing (1.17+)">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
-<td><abbr title="Dynamic today; gradual set-theoretic types being added (1.17+)">N/A; typing in progress</abbr></td>
+<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed</abbr></td>
+<td><abbr title="Dynamic, but the built-in set-theoretic type checker (1.18–1.20) now infers patterns, guards and returns within functions at compile time">Local</abbr></td>
 <td><abbr title="Dynamic, but the gradual set-theoretic type checker (1.18–1.20, 2024–2026) now infers all constructs and flags type-violating calls at compile time">Medium</abbr></td>
 <td><abbr title="Per-process garbage collection on the BEAM; no global pauses">Very Easy</abbr></td>
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
@@ -1048,10 +1079,11 @@
 <td><abbr title="Polished: Mix build tool, IEx REPL, built-in formatter and docs">Good</abbr></td>
 <td><abbr title="Clean Ruby-like syntax with pipelines">Low</abbr></td>
 <td><abbr title="FP plus the actor model; approachable syntax">Medium</abbr></td>
-<td>Servers, distributed, real-time</td>
+<td><abbr title="Used for: Backend (web, distributed, real-time)">1</abbr></td>
 <td><abbr title="Led by creator José Valim and a core team; open community, no corporate owner">Medium</abbr></td>
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="BEAM bytecode runs unchanged anywhere the Erlang VM runs">Very High</abbr></td>
 <td><abbr title="Growing steadily, especially for web/real-time">Medium</abbr></td>
 <td><abbr title="First release 2011, 1.0 in 2014; mature">High</abbr></td>
 <td><abbr title="Annual-ish releases; set-theoretic types in active development">Medium</abbr></td>
@@ -1061,8 +1093,8 @@
 <td><abbr title="Dynamically typed; types resolved at runtime">Dynamic</abbr></td>
 <td><abbr title="Dynamic; typespecs plus Dialyzer success typing">Partial</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed; pattern matching</abbr></td>
-<td><abbr title="No runtime inference; Dialyzer applies success typing">Checker-only</abbr></td>
+<td><abbr title="Duck-typed; pattern matching on data shapes">Duck-typed</abbr></td>
+<td><abbr title="No compiler inference; Dialyzer applies success typing externally">Checker-only</abbr></td>
 <td><abbr title="Dynamic; optional typespecs checked externally by Dialyzer">Low</abbr></td>
 <td><abbr title="Per-process garbage collection on the BEAM; no global pauses">Very Easy</abbr></td>
 <td><abbr title="Compiles to BEAM bytecode">Fast</abbr></td>
@@ -1076,10 +1108,11 @@
 <td><abbr title="rebar3 and OTP; solid but less polished than Elixir's">Average</abbr></td>
 <td><abbr title="Prolog-influenced syntax; moderate ceremony">Medium</abbr></td>
 <td><abbr title="FP plus the actor model and OTP conventions">Medium</abbr></td>
-<td>Servers, distributed, telecom, real-time</td>
+<td><abbr title="Used for: Backend (distributed, telecom, real-time)">1</abbr></td>
 <td><abbr title="Created and still stewarded by Ericsson (the OTP team)">High</abbr></td>
 <td><abbr title="Runs on the BEAM; first-class on Linux servers">Very High</abbr></td>
 <td><abbr title="Supports: Linux, Windows, macOS">3</abbr></td>
+<td><abbr title="BEAM bytecode runs unchanged anywhere the Erlang VM runs">Very High</abbr></td>
 <td><abbr title="Niche; telecom and messaging backends">Low</abbr></td>
 <td><abbr title="Created 1986; battle-tested in telecom for decades">Very High</abbr></td>
 <td><abbr title="Annual OTP releases; steady">Medium</abbr></td>
@@ -1089,8 +1122,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; the typed language of the BEAM">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td>Nominal</td>
-<td><abbr title="Full Hindley–Milner-style inference">Strong inference</abbr></td>
+<td><abbr title="Nominal: by declared type name">Nominal</abbr></td>
+<td><abbr title="Full Hindley–Milner-style inference">Global</abbr></td>
 <td><abbr title="Sound, strong static types; no null and no exceptions in idiomatic code">Very High</abbr></td>
 <td><abbr title="Per-process garbage collection on the BEAM; no global pauses">Very Easy</abbr></td>
 <td><abbr title="Compiles to Erlang/BEAM (and to JavaScript); fast">Fast</abbr></td>
@@ -1104,10 +1137,11 @@
 <td><abbr title="Built-in build tool, formatter and LSP; friendly compiler errors">Good</abbr></td>
 <td><abbr title="Small, explicit syntax">Low</abbr></td>
 <td><abbr title="Small, simple language">Easy</abbr></td>
-<td>BEAM (Erlang VM), JavaScript</td>
+<td><abbr title="Used for: Web, Backend">2</abbr></td>
 <td><abbr title="Community-led; created and maintained by Louis Pilfold, funded by sponsorship">Low</abbr></td>
 <td><abbr title="Compiles to BEAM/JS; first-class on Linux">Very High</abbr></td>
 <td><abbr title="Supports: Web, Linux, Windows, macOS">4</abbr></td>
+<td><abbr title="Compiles to portable BEAM bytecode (and to JS); young tooling">High</abbr></td>
 <td><abbr title="Still niche but rising; debuted in the 2025 Stack Overflow survey as the 2nd most-admired language">Low</abbr></td>
 <td><abbr title="1.0 in 2024 followed by ~2 years of steady minor releases (to 1.17 by mid-2026); production-ready">Medium</abbr></td>
 <td><abbr title="Very active; rapid releases for a young language">Very High</abbr></td>
@@ -1117,8 +1151,8 @@
 <td><abbr title="Statically typed; types checked at compile time">Static</abbr></td>
 <td><abbr title="Mandatory static typing; no untyped mode">No</abbr></td>
 <td><abbr title="Strongly typed; no implicit cross-type coercion">Strong</abbr></td>
-<td><abbr title="Nominal custom types; structural extensible records">Nominal; structural records</abbr></td>
-<td><abbr title="Full Hindley–Milner type inference">Strong global inference</abbr></td>
+<td><abbr title="Nominal custom types, plus structural extensible records">Hybrid</abbr></td>
+<td><abbr title="Full Hindley–Milner type inference">Global</abbr></td>
 <td><abbr title="Sound, strong static types; famously no runtime exceptions">Very High</abbr></td>
 <td><abbr title="Garbage-collected; runs on the browser's JS engine">Very Easy</abbr></td>
 <td><abbr title="Fast compiler known for friendly error messages">Fast</abbr></td>
@@ -1132,10 +1166,11 @@
 <td><abbr title="Famously friendly compiler errors, elm-format and elm reactor; ecosystem is small">Good</abbr></td>
 <td><abbr title="Concise ML-style syntax">Low</abbr></td>
 <td><abbr title="Small, consistent language, but assumes FP and The Elm Architecture concepts">Medium</abbr></td>
-<td>Web (browser front-end)</td>
+<td><abbr title="Used for: Web (browser front-end)">1</abbr></td>
 <td><abbr title="Led by its creator as BDFL; not corporate-backed">Very Low</abbr></td>
 <td><abbr title="Compiler and tooling run well on Linux; output targets the browser">High</abbr></td>
 <td><abbr title="Supports: Web">1</abbr></td>
+<td><abbr title="Compiles to JavaScript; runs in any browser">Very High</abbr></td>
 <td><abbr title="Niche; a small and now shrinking front-end community">Very Low</abbr></td>
 <td><abbr title="Released 2012; stable but small, and stuck at 0.19">Medium</abbr></td>
 <td><abbr title="Effectively stalled; last release (0.19.1) was in 2019">Very Low</abbr></td>
@@ -1188,6 +1223,8 @@
     ['no', 'partial', 'yes'],
     ['none', 'third-party', 'built-in', 'first-class'],
     ['minimal', 'basic', 'good', 'strong', 'first-class'],
+    ['none', 'checker-only', 'minimal', 'local', 'strong local', 'global'],
+    ['none', 'duck-typed', 'structural', 'hybrid', 'nominal'],
     ['dynamic', 'static'],
     ['weak', 'strong'],
     ['1', '2', '3', '4', '5', '6']
