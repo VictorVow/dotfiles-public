@@ -193,9 +193,14 @@
                  # `strict-dep-builds` are pnpm-11 keys, ignored by 10.x and
                  # auto-activating once update-all advances the pin to a
                  # nixpkgs with pnpm 11 (where all three are also defaults).
-    yarn-berry_4 # Yarn Berry v4 (>= 4.10, currently 4.11) — provides
-                 # npmMinimalAgeGate, the release-age gate equivalent; classic
-                 # yarn v1 lacks all of this
+    # yarn via corepack (bundled with nodejs_24): dispatches to each project's
+    # packageManager-pinned version instead of one global yarn that shadows —
+    # and, for Berry, silently migrates — project lockfiles. A plain
+    # `yarn-berry_4` here broke any repo pinned to classic 1.x. The global
+    # ~/.yarnrc.yml hardening (shell-apps.nix) still applies to Berry projects
+    # corepack runs; classic 1.x ignores it (an accepted gap, as npm does too).
+    (writeShellScriptBin "yarn"    ''exec ${nodejs_24}/bin/corepack yarn "$@"'')
+    (writeShellScriptBin "yarnpkg" ''exec ${nodejs_24}/bin/corepack yarnpkg "$@"'')
 
     # ── Development: Tools & Editors ──────────────────────────────────────────
     # neovim   — managed by programs.neovim in programs.nix (installs it automatically)

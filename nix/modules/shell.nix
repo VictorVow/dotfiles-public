@@ -345,6 +345,11 @@
     # Disable GitHub CLI telemetry (enabled by default since gh ≥ 2.91.0)
     GH_TELEMETRY = "false";
 
+    # corepack provides yarn/pnpm (see packages.nix). Disable its interactive
+    # "download package manager X?" prompt so non-interactive contexts (git
+    # hooks, CI, scripts) fetch the pinned version silently instead of hanging.
+    COREPACK_ENABLE_DOWNLOAD_PROMPT = "0";
+
     # MCP server secrets — inherited by MCP server subprocesses at runtime.
     # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
     # shell-inherited values and an empty string would shadow the real value.
