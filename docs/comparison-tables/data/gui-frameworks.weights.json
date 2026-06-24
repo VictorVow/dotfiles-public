@@ -1,0 +1,105 @@
+{
+  "Build speed": {
+    "very fast": 3,
+    "fast": 2,
+    "slow": -2,
+    "very slow": -3,
+    "medium": -1
+  },
+  "Performance": {
+    "slow": -3,
+    "fast": 1,
+    "very fast": 2,
+    "medium": -2
+  },
+  "Ecosystem": {
+    "very large": 2,
+    "large": 1,
+    "small": -1,
+    "very small": -2
+  },
+  "Tooling/DX": {
+    "good": 1,
+    "excellent": 2
+  },
+  "Verbosity": {
+    "low": 1,
+    "very low": 2,
+    "very high": -2,
+    "high": -1
+  },
+  "Readability": {
+    "low": -1,
+    "very low": -2,
+    "high": 1,
+    "very high": 2
+  },
+  "Learning curve": {
+    "very easy": 1,
+    "very difficult": -1
+  },
+  "Corporate-controlled": {
+    "very high": -2,
+    "high": -1,
+    "low": 1,
+    "very low": 2
+  },
+  "Linux support": {
+    "very high": 2,
+    "low": -3,
+    "high": 1,
+    "medium": -2
+  },
+  "Platforms supported": {
+    "4": 2,
+    "5": 4,
+    "6": 6
+  },
+  "Maturity": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1,
+    "low": -1
+  },
+  "Development velocity": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1
+  },
+  "Bundle size": {
+    "very small": 2,
+    "small": 1,
+    "large": -1,
+    "very large": -2
+  },
+  "Memory footprint": {
+    "very low": 1,
+    "very high": -1
+  },
+  "Accessibility": {
+    "very high": 2,
+    "high": 1,
+    "low": -1,
+    "very low": -2
+  },
+  "Popularity": {
+    "high": 4,
+    "very high": 6,
+    "medium": 2,
+    "very low": -1
+  },
+  "Portability": {
+    "very high": 2,
+    "high": 1
+  },
+  "UI paradigm": {
+    "immediate": -10,
+    "retained": 2,
+    "declarative": 4
+  },
+  "React-like frontend": {
+    "identical": 2,
+    "moderate": 1,
+    "strong": 2
+  }
+}

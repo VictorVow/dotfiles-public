@@ -41,7 +41,9 @@ installs/
     │   ├── app-launchers.md
     │   ├── mesh-networks.md
     │   └── ...
-    └── browser-render/       # Render Markdown docs as styled webpages (live-reload server + standalone HTML)
+    └── comparison-tables/    # Sortable/weightable comparison tables + their renderer
+        ├── data/             # The table Markdown + per-table .weights.json sidecars
+        └── browser-render/   # Render the tables as styled webpages (live-reload server + standalone HTML)
 
 ```
 

@@ -1,0 +1,117 @@
+{
+  "Memory": {
+    "very easy": 2,
+    "easy": 1,
+    "very difficult": -2,
+    "difficult": -1
+  },
+  "Compilation": {
+    "very fast": 3,
+    "fast": 2,
+    "slow": -2,
+    "very slow": -3,
+    "medium": -1
+  },
+  "Ecosystem": {
+    "very large": 2,
+    "large": 1,
+    "small": -1,
+    "very small": -2
+  },
+  "Tooling/DX": {
+    "good": 1,
+    "excellent": 2
+  },
+  "Verbosity": {
+    "low": 1,
+    "very low": 2,
+    "very high": -2,
+    "high": -1
+  },
+  "Learning curve": {
+    "very easy": 1,
+    "very difficult": -1
+  },
+  "Static/Dynamic": {
+    "static": 2,
+    "dynamic": -3
+  },
+  "Gradual": {
+    "yes": 2,
+    "partial": 1
+  },
+  "Type safety": {
+    "very high": 2,
+    "high": 1,
+    "low": -1,
+    "very low": -2
+  },
+  "Performance": {
+    "slow": -3,
+    "fast": 1,
+    "very fast": 2,
+    "medium": -2
+  },
+  "REPL": {
+    "first-class": 2,
+    "built-in": 1,
+    "third-party": 0
+  },
+  "Concurrency": {
+    "good": 1,
+    "strong": 2,
+    "first-class": 3
+  },
+  "Linux support": {
+    "very high": 2,
+    "low": -3,
+    "high": 1,
+    "medium": -2
+  },
+  "Corporate-controlled": {
+    "very high": -2,
+    "high": -1,
+    "low": 1,
+    "very low": 2
+  },
+  "Strong/Weak": {
+    "strong": 1,
+    "weak": -1
+  },
+  "Functional support": {
+    "good": 1,
+    "first-class": 1,
+    "pure": 1
+  },
+  "Platforms supported": {
+    "4": 1,
+    "5": 2,
+    "6": 3
+  },
+  "Development velocity": {
+    "very high": 4,
+    "high": 2,
+    "medium": 1
+  },
+  "Maturity": {
+    "very high": 3,
+    "medium": 1,
+    "high": 2
+  },
+  "Popularity": {
+    "high": 2,
+    "very high": 3,
+    "medium": 1,
+    "very low": -1
+  },
+  "Readability": {
+    "low": -1,
+    "very low": -2,
+    "high": 1,
+    "very high": 2
+  },
+  "JS-like syntax": {
+    "identical": 2,
+    "strong": 1
+  }
+}

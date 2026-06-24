@@ -13,7 +13,7 @@ const path = require('path');
 // Args (order-independent):
 //   --port N | -p N | a bare integer   -> listen port (default 8080)
 //   anything else                      -> a Markdown file to serve
-// With no files given, defaults to ../research/programming-languages.md.
+// With no files given, defaults to ../data/programming-languages.md.
 
 function parseArgs(argv) {
   const files = [];
@@ -32,7 +32,7 @@ function parseArgs(argv) {
     }
   }
   if (files.length === 0) {
-    files.push(path.join(__dirname, '..', 'research', 'programming-languages.md'));
+    files.push(path.join(__dirname, '..', 'data', 'programming-languages.md'));
   }
   return { files, port };
 }

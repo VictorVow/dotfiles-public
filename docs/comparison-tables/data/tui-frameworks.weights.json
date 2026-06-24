@@ -1,0 +1,96 @@
+{
+  "Build speed": {
+    "very fast": 3,
+    "fast": 2,
+    "slow": -2,
+    "very slow": -3,
+    "medium": -1
+  },
+  "Performance": {
+    "slow": -3,
+    "fast": 1,
+    "very fast": 2,
+    "medium": -2
+  },
+  "Bundle size": {
+    "very small": 2,
+    "small": 1,
+    "large": -1,
+    "very large": -2
+  },
+  "Memory footprint": {
+    "very low": 2,
+    "low": 1,
+    "high": -1,
+    "very high": -2
+  },
+  "Widgets": {
+    "first-class": 2,
+    "strong": 1,
+    "basic": -1,
+    "minimal": -2
+  },
+  "Mouse support": {
+    "yes": 1,
+    "no": -1
+  },
+  "Ecosystem": {
+    "very large": 2,
+    "large": 1,
+    "small": -1,
+    "very small": -2
+  },
+  "Tooling/DX": {
+    "good": 1,
+    "excellent": 2
+  },
+  "Accessibility": {
+    "very high": 2,
+    "high": 1,
+    "low": -1,
+    "very low": -2
+  },
+  "Verbosity": {
+    "low": 1,
+    "very low": 2,
+    "very high": -2,
+    "high": -1
+  },
+  "Readability": {
+    "low": -1,
+    "very low": -2,
+    "high": 1,
+    "very high": 2
+  },
+  "Learning curve": {
+    "very easy": 1,
+    "very difficult": -1
+  },
+  "Corporate-controlled": {
+    "very high": -2,
+    "high": -1,
+    "low": 1,
+    "very low": 2
+  },
+  "Platforms supported": {
+    "4": 2,
+    "3": 1
+  },
+  "Maturity": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1,
+    "low": -1
+  },
+  "Popularity": {
+    "high": 2,
+    "very high": 3,
+    "medium": 1,
+    "very low": -1
+  },
+  "Development velocity": {
+    "very high": 4,
+    "high": 2,
+    "medium": 1
+  }
+}

@@ -1,16 +1,16 @@
 # browser-render
 
 > To run all at once:
-> `node server.js ../research/programming-languages.md ../research/gui-frameworks.md --port 8080`
+> `node server.js ../data/programming-languages.md ../data/gui-frameworks.md ../data/tui-frameworks.md --port 8080`
 
-Render Markdown docs (e.g. `../research/programming-languages.md`) as a styled
+Render Markdown docs (e.g. `../data/programming-languages.md`) as a styled
 webpage with working `<abbr>` hover tooltips, a sticky header/first-column, and
 horizontal scroll for wide tables.
 
 ## Live preview (auto-reloads on edit)
 
 ```sh
-node server.js                              # serves ../research/programming-languages.md on :8080
+node server.js                              # serves ../data/programming-languages.md on :8080
 node server.js path/to/other.md --port 8081 # custom file / port
 node server.js a.md b.md c.md               # several files at once, one server
 ```
@@ -38,7 +38,7 @@ npm install markdown-it@14
 directly in a browser. Regenerate it after editing the Markdown:
 
 ```sh
-npx markdown-it ../research/programming-languages.md > /tmp/body.html
+npx markdown-it ../data/programming-languages.md > /tmp/body.html
 cat header.html /tmp/body.html footer.html > programming-languages.html
 ```
 
