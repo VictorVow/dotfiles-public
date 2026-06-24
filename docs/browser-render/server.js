@@ -3,65 +3,140 @@ const fs = require('fs');
 const path = require('path');
 
 // Live Markdown preview server.
-//   node server.js [path/to/file.md] [port]
-// Renders the Markdown on every request and pushes a browser reload (via SSE)
-// whenever the file changes. Templates and the markdown-it dependency live
-// alongside this script, so it can run from anywhere.
+//   node server.js [--port N] [file1.md file2.md ...]
+// Renders each Markdown file on every request and pushes a browser reload (via
+// SSE) whenever that file changes. Multiple files can be served at once, each
+// at its own route (/<docKey>), so they can be previewed + edited side by side.
+// Templates and the markdown-it dependency live alongside this script, so it
+// can run from anywhere.
+//
+// Args (order-independent):
+//   --port N | -p N | a bare integer   -> listen port (default 8080)
+//   anything else                      -> a Markdown file to serve
+// With no files given, defaults to ../research/programming-languages.md.
 
-const MD = path.resolve(process.argv[2] || path.join(__dirname, '..', 'research', 'programming-languages.md'));
-const PORT = Number(process.argv[3]) || 8080;
+function parseArgs(argv) {
+  const files = [];
+  let port = 8080;
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--port' || a === '-p') {
+      port = Number(argv[++i]) || port;
+    } else if (a.startsWith('--port=')) {
+      port = Number(a.slice('--port='.length)) || port;
+    } else if (/^\d+$/.test(a)) {
+      // Bare integer -> port (keeps the old `server.js file.md 8081` form working).
+      port = Number(a);
+    } else {
+      files.push(a);
+    }
+  }
+  if (files.length === 0) {
+    files.push(path.join(__dirname, '..', 'research', 'programming-languages.md'));
+  }
+  return { files, port };
+}
+
+const { files, port: PORT } = parseArgs(process.argv.slice(2));
 const HEADER = path.join(__dirname, 'header.html');
 const FOOTER = path.join(__dirname, 'footer.html');
-// Sidecar for browser-set Points weights, alongside the source .md. Named so it
-// does NOT match basename(MD), so writing it never trips the reload watcher.
-const WEIGHTS = path.join(path.dirname(MD), path.basename(MD).replace(/\.md$/, '') + '.weights.json');
-// Stable per-document identifier (the source filename), injected into the page
-// so the browser can namespace its localStorage (Compare selection, Points
-// weights cache) per doc — otherwise two docs served on the same origin share
-// state. See footer.html.
-const DOC_KEY = path.basename(MD).replace(/\.md$/, '');
+
+// Build one descriptor per served document. docKey (the source filename without
+// extension) is the stable per-document identifier: it routes requests, scopes
+// SSE reloads + weights, and is injected into the page so the browser can
+// namespace its localStorage (Compare selection, Points weights cache) per doc.
+const docs = new Map();   // docKey -> descriptor
+const byFile = new Map(); // `${dir}\0${base}` -> docKey, for the change watcher
+for (const f of files) {
+  const mdPath = path.resolve(f);
+  const dir = path.dirname(mdPath);
+  const base = path.basename(mdPath);
+  const docKey = base.replace(/\.md$/, '');
+  if (docs.has(docKey)) {
+    console.warn('skipping duplicate doc key: ' + docKey + ' (' + mdPath + ')');
+    continue;
+  }
+  docs.set(docKey, {
+    key: docKey,
+    md: mdPath,
+    dir,
+    base,
+    // Sidecar for browser-set Points weights, alongside the source .md. Named so
+    // it does NOT match base, so writing it never trips the reload watcher.
+    weights: path.join(dir, docKey + '.weights.json'),
+    clients: new Set(),
+  });
+  byFile.set(dir + '\0' + base, docKey);
+}
 
 const MarkdownIt = require(path.join(__dirname, 'node_modules', 'markdown-it'));
 const md = new MarkdownIt({ html: true, linkify: true });
 
-const LIVE_RELOAD = `
+function liveReload(docKey) {
+  return `
 <script>
   (function () {
-    var es = new EventSource('/events');
+    var es = new EventSource('/events?doc=${encodeURIComponent(docKey)}');
     es.onmessage = function () { location.reload(); };
     es.onerror = function () { /* server restart: keep retrying */ };
   })();
 </script>
 `;
+}
 
-const clients = new Set();
-
-function render() {
+function render(doc) {
   const header = fs.readFileSync(HEADER, 'utf8');
   const footer = fs.readFileSync(FOOTER, 'utf8');
-  const body = md.render(fs.readFileSync(MD, 'utf8'));
-  const docGlobal = `<script>window.PL_DOC_KEY = ${JSON.stringify(DOC_KEY)};</script>\n`;
-  return header + docGlobal + body + LIVE_RELOAD + footer;
+  const body = md.render(fs.readFileSync(doc.md, 'utf8'));
+  const weightsUrl = '/weights?doc=' + encodeURIComponent(doc.key);
+  const docGlobal =
+    `<script>window.PL_DOC_KEY = ${JSON.stringify(doc.key)};` +
+    `window.PL_WEIGHTS_URL = ${JSON.stringify(weightsUrl)};</script>\n`;
+  return header + docGlobal + body + liveReload(doc.key) + footer;
+}
+
+function renderIndex() {
+  const items = [...docs.values()]
+    .map((d) => `<li><a href="/${encodeURIComponent(d.key)}">${d.key}</a> ` +
+      `<small>(${d.md})</small></li>`)
+    .join('\n');
+  return '<!doctype html><meta charset="utf-8"><title>Markdown preview</title>' +
+    '<style>body{font:16px system-ui,sans-serif;max-width:46rem;margin:3rem auto;padding:0 1rem}' +
+    'li{margin:.4rem 0}small{color:#888}</style>' +
+    '<h1>Markdown preview</h1><ul>\n' + items + '\n</ul>';
+}
+
+function send(res, code, type, payload) {
+  res.writeHead(code, { 'Content-Type': type });
+  res.end(payload);
 }
 
 const server = http.createServer((req, res) => {
-  if (req.url === '/events') {
+  const url = new URL(req.url, 'http://localhost');
+  const pathname = decodeURIComponent(url.pathname);
+  const docKey = url.searchParams.get('doc');
+
+  if (pathname === '/events') {
+    const doc = docs.get(docKey);
+    if (!doc) { res.writeHead(404); res.end('unknown doc'); return; }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
     });
     res.write('retry: 1000\n\n');
-    clients.add(res);
-    req.on('close', () => clients.delete(res));
+    doc.clients.add(res);
+    req.on('close', () => doc.clients.delete(res));
     return;
   }
-  if (req.url === '/weights') {
+
+  if (pathname === '/weights') {
+    const doc = docs.get(docKey);
+    if (!doc) { res.writeHead(404); res.end('unknown doc'); return; }
     // Persist the browser's Points weights to disk (and read them back).
     if (req.method === 'GET') {
-      fs.readFile(WEIGHTS, 'utf8', (err, data) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(err ? '{}' : data);
+      fs.readFile(doc.weights, 'utf8', (err, data) => {
+        send(res, 200, 'application/json', err ? '{}' : data);
       });
       return;
     }
@@ -75,7 +150,7 @@ const server = http.createServer((req, res) => {
         let parsed;
         try { parsed = JSON.parse(body); }
         catch (e) { res.writeHead(400); res.end('invalid JSON'); return; }
-        fs.writeFile(WEIGHTS, JSON.stringify(parsed, null, 2) + '\n', (err) => {
+        fs.writeFile(doc.weights, JSON.stringify(parsed, null, 2) + '\n', (err) => {
           if (err) { res.writeHead(500); res.end('write error'); return; }
           res.writeHead(204);
           res.end();
@@ -87,33 +162,58 @@ const server = http.createServer((req, res) => {
     res.end('method not allowed');
     return;
   }
-  if (req.url === '/' || req.url.startsWith('/index')) {
+
+  // Root: render the single doc directly (old behavior) or list all docs.
+  if (pathname === '/' || pathname.startsWith('/index')) {
+    if (docs.size === 1) {
+      const only = docs.values().next().value;
+      try {
+        send(res, 200, 'text/html; charset=utf-8', render(only));
+      } catch (e) {
+        send(res, 500, 'text/plain', 'Render error:\n' + e.stack);
+      }
+      return;
+    }
+    send(res, 200, 'text/html; charset=utf-8', renderIndex());
+    return;
+  }
+
+  // /<docKey> -> render that document.
+  const key = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+  const doc = docs.get(key);
+  if (doc) {
     try {
-      const html = render();
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(html);
+      send(res, 200, 'text/html; charset=utf-8', render(doc));
     } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Render error:\n' + e.stack);
+      send(res, 500, 'text/plain', 'Render error:\n' + e.stack);
     }
     return;
   }
+
   res.writeHead(404);
   res.end('not found');
 });
 
-let timer = null;
-fs.watch(path.dirname(MD), (ev, file) => {
-  if (file !== path.basename(MD)) return;
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    console.log('change detected -> reloading ' + clients.size + ' client(s)');
-    for (const res of clients) res.write('data: reload\n\n');
-  }, 120);
-});
+// Watch each directory containing a served file; on change, reload only the
+// clients viewing the doc whose source file changed.
+const timers = new Map();
+for (const dir of new Set([...docs.values()].map((d) => d.dir))) {
+  fs.watch(dir, (ev, file) => {
+    const key = byFile.get(dir + '\0' + file);
+    if (!key) return;
+    clearTimeout(timers.get(key));
+    timers.set(key, setTimeout(() => {
+      const doc = docs.get(key);
+      console.log('change detected -> reloading ' + doc.clients.size +
+        ' client(s) for ' + key);
+      for (const res of doc.clients) res.write('data: reload\n\n');
+    }, 120));
+  });
+}
 
 server.listen(PORT, () => {
   console.log('Live preview on http://localhost:' + PORT + '/');
-  console.log('Watching ' + MD);
-  console.log('Weights persisted to ' + WEIGHTS);
+  for (const d of docs.values()) {
+    console.log('  /' + d.key + '  <-  ' + d.md + '  (weights: ' + d.weights + ')');
+  }
 });

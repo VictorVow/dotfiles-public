@@ -1,5 +1,8 @@
 # browser-render
 
+> To run all at once:
+> `node server.js ../research/programming-languages.md ../research/gui-frameworks.md --port 8080`
+
 Render Markdown docs (e.g. `../research/programming-languages.md`) as a styled
 webpage with working `<abbr>` hover tooltips, a sticky header/first-column, and
 horizontal scroll for wide tables.
@@ -7,12 +10,21 @@ horizontal scroll for wide tables.
 ## Live preview (auto-reloads on edit)
 
 ```sh
-node server.js                       # serves ../research/programming-languages.md
-node server.js path/to/other.md 8081 # custom file / port
+node server.js                              # serves ../research/programming-languages.md on :8080
+node server.js path/to/other.md --port 8081 # custom file / port
+node server.js a.md b.md c.md               # several files at once, one server
 ```
 
-Open <http://localhost:8080/>. The page re-renders on every request and the
-browser auto-reloads (via Server-Sent Events) whenever the watched file changes.
+Args are order-independent: `--port N` (or `-p N`, or a bare integer) sets the
+port; everything else is a Markdown file to serve. Each file is served at its
+own route `/<filename-without-.md>` — e.g. `a.md` → <http://localhost:8080/a>.
+With a single file, `/` renders it directly (as before); with several, `/`
+lists them.
+
+Open <http://localhost:8080/>. Each page re-renders on every request and the
+browser auto-reloads (via Server-Sent Events) whenever *that* file changes. The
+reload stream and the on-disk Points-weights sidecar are scoped per document, so
+multiple files can be previewed and edited simultaneously without sharing state.
 
 If `node_modules/` is missing (it's gitignored), restore the one dependency:
 
