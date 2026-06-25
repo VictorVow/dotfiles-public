@@ -825,22 +825,34 @@ in
     run ${pkgs.xdg-utils}/bin/xdg-mime default com.stremio.Stremio.desktop x-scheme-handler/stremio
   '';
 
-  # Force Stremio's WebKitGTK off the DMA-BUF/GBM renderer.
+  # Stremio's app-menu / KRunner entry, managed here so its Exec stays correct.
   #
-  # This AMD 780M (Phoenix1) machine has a broken GBM EGL platform: WebKit's GPU
-  # process builds its GBM device on the auth-gated primary node, the amdgpu INFO
-  # ioctl returns EACCES (DRM-master is held by KWin), and Mesa falls back to
-  # llvmpipe — so the webview renders a black screen. The GNOME-runtime WebKit in
-  # this Flatpak is recent enough to honour WEBKIT_DISABLE_DMABUF_RENDERER, which
-  # avoids the GBM path entirely. A --user flatpak override applies to every launch
-  # method (KRunner/Alt+F2 included), unlike editing the .desktop Exec.
-  # `flatpak override` is idempotent, so this re-applies cleanly on every `hms`.
-  home.activation.stremioWebkitRenderer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if command -v flatpak &>/dev/null; then
-      $DRY_RUN_CMD flatpak override --user \
-        --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 com.stremio.Stremio 2>/dev/null || true
-    fi
-  '';
+  # A KDE Menu Editor-generated entry previously used
+  #   --command=sh -c 'stremio -u "%u"'
+  # which passes an EMPTY `-u` argument on a plain launch (when %u expands to
+  # nothing). Stremio 5's `-u/--url` overrides its default startup URL, so an empty
+  # value made the GTK4 webview navigate to "" and render a fully black window —
+  # only on menu/KRunner launches (a bare `stremio` with no `-u` uses the default
+  # URL and renders fine). This was originally misdiagnosed as an AMD GBM/llvmpipe
+  # GPU fault; it is purely the empty-URL argument, and the GPU path is fine.
+  #
+  # This mirrors upstream's flatpak export: --file-forwarding passes a stremio://
+  # link as a trailing arg only when one is present, otherwise Stremio falls back
+  # to its default startup URL.
+  xdg.desktopEntries."com.stremio.Stremio" = {
+    name        = "Stremio (Flatpak)";
+    comment     = "Freedom To Stream";
+    exec        = "/usr/bin/flatpak run --branch=beta --arch=x86_64 --command=stremio --file-forwarding com.stremio.Stremio @@u %u @@";
+    icon        = "com.stremio.Stremio";
+    terminal    = false;
+    type        = "Application";
+    categories  = [ "Utility" "AudioVideo" "Video" "Player" ];
+    mimeType    = [ "x-scheme-handler/stremio" ];
+    settings = {
+      Keywords  = "Stremio;Media;Play;";
+      X-Flatpak = "com.stremio.Stremio";
+    };
+  };
 
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
   # Outputs ~/.config/mcp/mcp.json, consumed by:
