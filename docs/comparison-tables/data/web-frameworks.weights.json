@@ -1,0 +1,85 @@
+{
+  "Build speed": {
+    "very fast": 3,
+    "fast": 2,
+    "medium": -2,
+    "slow": -4,
+    "very slow": -5
+  },
+  "Performance": {
+    "very fast": 2,
+    "fast": 1,
+    "medium": -2,
+    "slow": -3
+  },
+  "Bundle size": {
+    "very small": 2,
+    "small": 1,
+    "large": -1,
+    "very large": -2
+  },
+  "Ecosystem": {
+    "very large": 2,
+    "large": 1,
+    "small": -1,
+    "very small": -2
+  },
+  "Tooling/DX": {
+    "excellent": 2,
+    "good": 1,
+    "average": -1
+  },
+  "SSR/SSG support": {
+    "very high": 2,
+    "high": 1,
+    "low": -1,
+    "very low": -2
+  },
+  "TypeScript support": {
+    "first-class": 2,
+    "strong": 1,
+    "basic": -1,
+    "minimal": -2
+  },
+  "Verbosity": {
+    "very low": 2,
+    "low": 1,
+    "high": -1,
+    "very high": -2
+  },
+  "Readability": {
+    "very high": 2,
+    "high": 1,
+    "low": -1,
+    "very low": -2
+  },
+  "Learning curve": {
+    "very easy": 2,
+    "easy": 1,
+    "difficult": -1,
+    "very difficult": -2
+  },
+  "Corporate-controlled": {
+    "very low": 2,
+    "low": 1,
+    "high": -1,
+    "very high": -2
+  },
+  "Maturity": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1,
+    "low": -1
+  },
+  "Popularity": {
+    "very high": 6,
+    "high": 4,
+    "medium": 2,
+    "very low": -1
+  },
+  "Development velocity": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1
+  }
+}

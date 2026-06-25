@@ -1,7 +1,7 @@
 # browser-render
 
 > To run all at once:
-> `node server.js ../data/programming-languages.md ../data/gui-frameworks.md ../data/tui-frameworks.md --port 8080`
+> `node server.js ../data/programming-languages.md ../data/gui-frameworks.md ../data/tui-frameworks.md ../data/web-frameworks.md --port 8080`
 
 Render Markdown docs (e.g. `../data/programming-languages.md`) as a styled
 webpage with working `<abbr>` hover tooltips, a sticky header/first-column, and
