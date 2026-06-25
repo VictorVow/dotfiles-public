@@ -651,10 +651,22 @@ else
   # podman process holding the storage lock, this call hangs forever with no
   # output. Cap it at 30s so the step fails loudly instead of freezing the
   # whole script.
-  DBOX_LIST_OUTPUT=$(timeout 30 distrobox list --no-color 2>/dev/null)
-  if [[ $? -eq 124 ]]; then
+  #
+  # `set -e` is active: a bare `VAR=$(cmd)` assignment aborts the whole script
+  # the instant `cmd` exits non-zero — which is exactly what `timeout` does on
+  # a wedge (rc 124) or distrobox does on any error. That killed the script
+  # here before the rc check below could run. The `|| DBOX_LIST_RC=$?` keeps
+  # the assignment in a list context so `set -e` is suppressed and we capture
+  # the real exit code instead of crashing.
+  DBOX_LIST_RC=0
+  DBOX_LIST_OUTPUT=$(timeout 30 distrobox list --no-color 2>/dev/null) || DBOX_LIST_RC=$?
+  if [[ $DBOX_LIST_RC -eq 124 ]]; then
     warn "distrobox list timed out — podman may be wedged. Try: pgrep -fa podman ; then kill stuck PIDs and re-run."
     RESULTS["Distrobox"]="✗ list timed out (podman wedged?)"
+    DBOX_CONTAINERS=()
+  elif [[ $DBOX_LIST_RC -ne 0 ]]; then
+    warn "distrobox list failed (rc=$DBOX_LIST_RC) — skipping container upgrades."
+    RESULTS["Distrobox"]="✗ list failed (rc=$DBOX_LIST_RC)"
     DBOX_CONTAINERS=()
   else
     mapfile -t DBOX_CONTAINERS < <(printf '%s\n' "$DBOX_LIST_OUTPUT" \
