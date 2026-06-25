@@ -219,6 +219,75 @@ _chromium_helper_path() {
     | tail -1 || true
 }
 
+# Emit "<name>\t<version>" for each top-level package in a home-manager-path
+# store path (the `home-path` of a home-manager generation). Only the direct
+# references are listed — that's exactly the `home.packages` set, not the whole
+# dependency closure. Multiple outputs of one package (-man/-bin/-dev/…)
+# collapse to a single entry.
+_hm_toplevel_pkgs() {
+  local hmpath="$1"
+  [[ -n "$hmpath" && -e "$hmpath" ]] || return 0
+  nix-store -q --references "$hmpath" 2>/dev/null \
+    | sed 's|^/nix/store/[a-z0-9]\{32\}-||' \
+    | awk '
+        {
+          n = $0
+          # Split name vs version at the first "-" that is followed by a digit.
+          if (match(n, /-[0-9]/)) { name = substr(n, 1, RSTART-1); ver = substr(n, RSTART+1) }
+          else                    { name = n; ver = "" }
+          # Drop a trailing Nix output suffix so a pkg and its -man/-bin output
+          # collapse to the same (name, version) entry.
+          sub(/-(man|bin|dev|devdoc|doc|info|lib|out)$/, "", ver)
+          key = name SUBSEP ver
+          if (!(key in seen)) { seen[key] = 1; print name "\t" ver }
+        }' \
+    | sort
+}
+
+# Compare the top-level package sets of two home-manager-path store paths and
+# echo a formatted list of upgrades / additions / removals (colourised). Echoes
+# nothing when the sets are identical. Args: <before-path> <after-path>
+_format_hm_pkg_changes() {
+  local before="$1" after="$2"
+  [[ -n "$before" && -n "$after" && "$before" != "$after" ]] || return 0
+
+  declare -A B=() A=()
+  local name ver
+  while IFS=$'\t' read -r name ver; do B["$name"]="$ver"; done < <(_hm_toplevel_pkgs "$before")
+  while IFS=$'\t' read -r name ver; do A["$name"]="$ver"; done < <(_hm_toplevel_pkgs "$after")
+
+  local -a upgraded=() added=() removed=()
+  for name in "${!A[@]}"; do
+    if [[ -z "${B[$name]+x}" ]]; then
+      added+=("$name|${A[$name]}")
+    elif [[ "${B[$name]}" != "${A[$name]}" ]]; then
+      upgraded+=("$name|${B[$name]}|${A[$name]}")
+    fi
+  done
+  for name in "${!B[@]}"; do
+    [[ -z "${A[$name]+x}" ]] && removed+=("$name|${B[$name]}")
+  done
+
+  (( ${#upgraded[@]} + ${#added[@]} + ${#removed[@]} == 0 )) && return 0
+
+  local n o nw v
+  if (( ${#upgraded[@]} > 0 )); then
+    while IFS='|' read -r n o nw; do
+      printf "  ${GREEN}↑${NC} %-30s %s ${DIM}→${NC} %s\n" "$n" "${o:-?}" "${nw:-?}"
+    done < <(printf '%s\n' "${upgraded[@]}" | sort)
+  fi
+  if (( ${#added[@]} > 0 )); then
+    while IFS='|' read -r n v; do
+      printf "  ${BLUE}+${NC} %-30s %s\n" "$n" "${v:-?}"
+    done < <(printf '%s\n' "${added[@]}" | sort)
+  fi
+  if (( ${#removed[@]} > 0 )); then
+    while IFS='|' read -r n v; do
+      printf "  ${RED}-${NC} %-30s %s\n" "$n" "${v:-?}"
+    done < <(printf '%s\n' "${removed[@]}" | sort)
+  fi
+}
+
 # ── Setup ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FLAKE_DIR="$SCRIPT_DIR/nix"
@@ -389,6 +458,10 @@ else
   # Snapshot chromium's helper path before switching so we can tell afterwards
   # whether the switch bumped chromium (see the restart block below).
   CHROMIUM_HELPER_BEFORE="$(_chromium_helper_path)"
+  # Snapshot the current top-level package set so we can report which packages
+  # the switch upgraded (printed in the summary at the end of the run).
+  HM_PROFILE="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"
+  HM_PKGS_BEFORE="$(readlink -f "$HM_PROFILE/home-path" 2>/dev/null || true)"
   run_step "home-manager switch" \
     home-manager switch --flake "$NIX_FLAKE_DIR#boss" --no-write-lock-file
 
@@ -408,6 +481,13 @@ else
       skipped "Chromium unchanged — SUID sandbox helper still current."
       RESULTS["chromium-suid-sandbox restart"]="✓ unchanged"
     fi
+  fi
+
+  # Diff the top-level package set against the pre-switch snapshot. Stored now
+  # (while the profile symlink is fresh) and printed in the summary at the end.
+  if ! $DRY_RUN; then
+    HM_PKGS_AFTER="$(readlink -f "$HM_PROFILE/home-path" 2>/dev/null || true)"
+    HM_PKG_CHANGES="$(_format_hm_pkg_changes "$HM_PKGS_BEFORE" "$HM_PKGS_AFTER")"
   fi
 
   success "Nix / Home Manager done."
@@ -666,6 +746,16 @@ done
 echo ""
 echo -e "  Total time: ${MINUTES}m ${SECONDS}s"
 echo ""
+
+# Report which top-level (home.packages) packages the Nix step upgraded.
+if [[ -n "${HM_PKG_CHANGES:-}" ]]; then
+  echo -e "${BOLD}━━━ Nix top-level package changes ━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "$HM_PKG_CHANGES"
+  echo ""
+elif $UPDATE_NIX && ! $DRY_RUN && command -v nix &>/dev/null; then
+  info "No top-level Nix package version changes."
+  echo ""
+fi
 
 # Warn if any step failed
 FAILED=()
