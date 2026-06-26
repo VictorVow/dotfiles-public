@@ -81,5 +81,11 @@
     "very high": 3,
     "high": 2,
     "medium": 1
+  },
+  "React support": {
+    "none": -3,
+    "native": 3,
+    "first-class": 2,
+    "compatible": 1
   }
 }
