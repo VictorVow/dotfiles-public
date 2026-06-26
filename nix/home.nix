@@ -32,7 +32,6 @@
     ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
-    ./modules/claude-skill-logseq.nix # Large Logseq DB-query Claude skill (own module)
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
   ];
 

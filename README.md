@@ -21,13 +21,11 @@ installs/
 │   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
-│   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
-│   │   └── claude-skills/    # Large Claude Code skills sourced verbatim (e.g. logseq-db-queries)
+│   │   └── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
 │       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), zed-editor, rofi
-│       ├── claude-skill-logseq.nix # Large Logseq DB-query skill (kept out of shell-apps.nix)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
