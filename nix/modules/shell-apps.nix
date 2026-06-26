@@ -28,6 +28,10 @@ let
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
     effortLevel         = "medium";
+    # Render in the fullscreen (alt-screen) renderer by default every session. https://code.claude.com/docs/en/fullscreen
+    # Makes copying easier as it eliminates line breaks and doesn't require SHIFT + CTRL + C
+    # Equivalent to running `/tui fullscreen` once; toggle live with `/tui default`.
+    tui                 = "fullscreen";
     # Force OSC 8 hyperlink emission. Claude Code's hyperlink-support detection
     # returns false under TERM=screen-* (i.e. inside tmux), so it strips the OSC 8
     # repo link from the statusline before rendering. FORCE_HYPERLINK=1 overrides
@@ -368,7 +372,7 @@ in
 
       # New window without prefix — Ctrl+N
       bind -n C-n new-window -c "#{pane_current_path}"
-      
+
       # Close window with prefix — prefix+X
       # Note: C-w conflicts with Readline delete word. C-q conflicts with Micro quit
       # (prefix) C-x = kill pane, so it mirrors this pattern
@@ -388,7 +392,7 @@ in
     # Shell integration (eval "$(starship init bash)") is injected automatically.
     # The theme config is managed as a verbatim TOML file via home.file below
     # to preserve the gruvbox_dark powerline theme exactly (Unicode symbols, etc.).
-    # 
+    #
     # Note: still need to `hms` before `source ~/.bashrc` to reload config changes
     # This is because whilst the symlink from nix/dotfiles/starship.toml to ~/.config/starship.toml
     # the symlink still points to the old store path with the old content since these files are immutable
