@@ -46,9 +46,7 @@
   },
   "Accessibility": {
     "very high": 2,
-    "high": 1,
-    "low": -1,
-    "very low": -2
+    "high": 1
   },
   "Verbosity": {
     "low": 1,
@@ -73,8 +71,8 @@
     "very low": 2
   },
   "Platforms supported": {
-    "4": 2,
-    "3": 1
+    "3": 1,
+    "4": 2
   },
   "Maturity": {
     "very high": 3,
@@ -83,14 +81,19 @@
     "low": -1
   },
   "Popularity": {
-    "high": 2,
-    "very high": 3,
-    "medium": 1,
-    "very low": -1
+    "very high": 6,
+    "medium": 2,
+    "very low": -1,
+    "high": 4
   },
   "Development velocity": {
     "very high": 4,
     "high": 2,
     "medium": 1
+  },
+  "UI paradigm": {
+    "declarative": 6,
+    "retained": 3,
+    "immediate": -3
   }
 }
