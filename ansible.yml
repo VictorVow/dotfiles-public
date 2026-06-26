@@ -423,15 +423,23 @@
       become: yes
       failed_when: false # non-fatal: service unit absent if hms hasn't run yet
 
-    # ── zswap ──────────────────────────────────────────────────────────────
-    # Enable zswap (compressed swap cache in front of disk swap) with zstd
-    # compression. Dramatically reduces swap I/O latency vs plain disk swap.
-    # See: https://chrisdown.name/2026/03/24/zswap-vs-zram-when-to-use-what.html
-    - name: Enable zswap with zstd compression in GRUB
+    # ── Kernel cmdline (zswap + amdgpu external-display fix) ────────────────
+    # zswap: compressed swap cache (zstd) in front of disk swap. Dramatically
+    #   reduces swap I/O latency vs plain disk swap.
+    #   See: https://chrisdown.name/2026/03/24/zswap-vs-zram-when-to-use-what.html
+    # amdgpu.sg_display=0: disables scatter-gather display on the Phoenix APU
+    #   (Framework 13 AMD, DCN 3.1). With an external USB-C/DP-alt monitor
+    #   connected at boot, the SG display path hangs the display controller —
+    #   journal shows "REG_WAIT timeout ... dcn31_program_compbuf_size" and
+    #   WARNING in dcn31_hubbub.c, after which BOTH eDP and the external panel
+    #   stay black until the monitor is unplugged. Disabling SG display routes
+    #   framebuffers through carve-out VRAM instead and resolves the black
+    #   screen. (Distinct from the 2026-03-30 suspend/lid black-screen fix below.)
+    - name: Enable zswap (zstd) and amdgpu SG-display fix in GRUB
       ansible.builtin.lineinfile:
         path: /etc/default/grub
         regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd amdgpu.sg_display=0"'
       become: yes
       notify: Update GRUB
 
