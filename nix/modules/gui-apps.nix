@@ -510,6 +510,7 @@ in
       "https://.signin.aws"
       "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
+      "https://account.bbc.com"
       "https://account.booking.com"
       "https://account.nuffieldhealth.com"
       "https://accounts.firefox.com"
@@ -526,7 +527,7 @@ in
       "https://auth.rumble.com"
       "https://backloggd.com"
       "https://bank.barclays.co.uk"
-      "https://www.bbc.co.uk" # iPlayer sign-in
+      "https://www.bbc.co.uk" # iPlayer sign-in - wasn't enough
       "https://bcol.barclaycard.co.uk"
       "https://bugs.kde.org"
       "https://bugzilla.mozilla.org"
