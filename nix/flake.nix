@@ -11,14 +11,14 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/459943547fe41c51a164899c9642e33630e55b29";
+    nixpkgs.url = "github:NixOS/nixpkgs/6c8827d7b5f3528a992b04194d5109b982f234c4";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/28cf66cec3a3f78308ff92101b5b8f19d7cd8552";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/3a6a8da6a7a839c5552adafa2366d8316c0e9863";
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/e28654b71096e08c019d4861ca26acb646f583d8";
+      url = "github:nix-community/home-manager/d899b01766784bcc9a141ee13bad6dc689d47c37";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
