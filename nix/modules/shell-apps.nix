@@ -163,6 +163,35 @@ let
       type    = "command";
       command = "python3 ~/.claude/statusline/statusline.py";
     };
+    # ── Plugins (declarative equivalent of /plugin marketplace add + /plugin install) ──
+    # Why NOT programs.claude-code.{marketplaces,plugins}:
+    #   1. Feature gap: those options were added in home-manager PR #8934
+    #      (https://github.com/nix-community/home-manager/pull/8934, closing issue
+    #      #8227). `marketplaces` registers a market but only ever emits
+    #      source="directory" (a Nix store path); `plugins` side-loads a plugin
+    #      *directory* via a --plugin-dir wrapper arg. NEITHER is the equivalent of
+    #      `/plugin install <name>@<market>` — there is deliberately no `enabledPlugins`
+    #      option. The PR author's stated intent is to hand-write `enabledPlugins` into
+    #      the free-form `settings` instead, which is exactly what we do below.
+    #   2. This settings.json is the writable copy deployed via home.activation that
+    #      overwrites everything (see header comment above), so the module's own
+    #      settings.json output would be clobbered anyway.
+    # `source = "github"` makes Claude Code clone kerim/spellbook at runtime into
+    # ~/.claude/plugins/marketplaces/ — no sha256 pin needed (matches how the existing
+    # runtime-added markets in known_marketplaces.json look). The market KEY
+    # ("spellbook") must match the @suffix used in enabledPlugins.
+    extraKnownMarketplaces = {
+      spellbook = {
+        source = {
+          source = "github";
+          repo   = "kerim/spellbook";
+        };
+      };
+    };
+    enabledPlugins = {
+      "logseq-cli@spellbook"            = true;
+      "logseq-db-plugin-api@spellbook"  = true;
+    };
   });
 
   # MarkText UI readability fix, injected via preferences.json "customCss".
