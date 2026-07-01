@@ -184,6 +184,9 @@
           - wget # File downloader (used by 3rd-party scripts)
           - gpg # GPG key import for apt repos (also in Nix for user use)
 
+          # ── NFS client ────────────────────────────────────────────────────
+          - nfs-common # NFSv4 client utils for mounting lord-ubuntu:/home/lord
+
         state: present
         update_cache: yes
       become: yes
@@ -494,6 +497,47 @@
         mode: "0644"
       become: yes
       notify: Reload systemd daemon
+
+    # ── NFS client mount (lord-ubuntu:/home/lord) ──────────────────────────
+    # Persistent, reboot-surviving mount of the server's home dir over the
+    # headscale tailnet (WireGuard-encrypted transport, so plaintext NFS is
+    # fine). NFSv4 (single port 2049) + systemd automount: mounts lazily on
+    # first access to /mnt/lord and unmounts after 10 min idle, so a dropped
+    # tailnet link only bites during active use. `soft` returns I/O errors
+    # instead of hanging when the server is unreachable. Server-side export is
+    # managed in the 1-COMMON repo (common.yml, `nfs` tag). Client + server
+    # UID/GID both 1000, so files map cleanly with no idmap config.
+    - name: "NFS | ensure /mnt/lord mount point exists"
+      ansible.builtin.file:
+        path: /mnt/lord
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      become: yes
+
+    - name: "NFS | persistent automount of lord-ubuntu:/home/lord in /etc/fstab"
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '\s/mnt/lord\s'
+        line: "lord-ubuntu:/home/lord  /mnt/lord  nfs4  _netdev,x-systemd.automount,x-systemd.idle-timeout=600,nofail,soft,timeo=30,retrans=3,rw  0  0"
+        state: present
+      become: yes
+      register: _nfs_fstab
+
+    - name: "NFS | reload systemd so the automount unit is generated"
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      become: yes
+      when: _nfs_fstab.changed
+
+    - name: "NFS | enable and start the automount unit"
+      ansible.builtin.systemd:
+        name: mnt-lord.automount
+        enabled: yes
+        state: started
+      become: yes
+      when: _nfs_fstab.changed
 
   handlers:
     - name: Restart systemd-logind
