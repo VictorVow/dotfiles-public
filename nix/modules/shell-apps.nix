@@ -963,6 +963,11 @@ in
     package = pkgs.llm-agents.claude-code;
     # enableMcpIntegration — not available until HM 26.05
 
+    # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
+    context = ''
+      When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
+    '';
+
     # ── Agents — creates ~/.claude/agents/<key>.md ────────────────────────────────
 
     agents = {
