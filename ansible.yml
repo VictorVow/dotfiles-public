@@ -507,6 +507,16 @@
     # instead of hanging when the server is unreachable. Server-side export is
     # managed in the 1-COMMON repo (common.yml, `nfs` tag). Client + server
     # UID/GID both 1000, so files map cleanly with no idmap config.
+    # Is anything already mounted at /mnt/lord (autofs stub or a live NFS
+    # mount)? If so, the directory below is the *server's* /home/lord, and
+    # enforcing owner/mode would chown over NFS — which root_squash rejects
+    # (EPERM). Only manage the bare mount point when nothing is mounted.
+    - name: "NFS | detect existing mount at /mnt/lord"
+      ansible.builtin.command: findmnt --noheadings --first-only --output FSTYPE /mnt/lord
+      register: _nfs_lord_mount
+      changed_when: false
+      failed_when: false
+
     - name: "NFS | ensure /mnt/lord mount point exists"
       ansible.builtin.file:
         path: /mnt/lord
@@ -515,6 +525,7 @@
         group: root
         mode: "0755"
       become: yes
+      when: _nfs_lord_mount.rc != 0
 
     - name: "NFS | persistent automount of lord-ubuntu:/home/lord in /etc/fstab"
       ansible.builtin.lineinfile:
