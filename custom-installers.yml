@@ -155,6 +155,42 @@
       when: ansible_facts.packages['mullvad-vpn'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
+    # CLAUDE DESKTOP — https://code.claude.com/docs/en/desktop-linux
+    # Official Anthropic apt repository (Linux beta). Replaces the unofficial
+    # aaddrick AppImage that was previously managed via AppMan
+    # (appman-appimages.txt). Updates arrive through normal apt upgrades.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Claude Desktop | download Anthropic signing key
+      ansible.builtin.get_url:
+        url: https://downloads.claude.ai/claude-desktop/key.asc
+        dest: /usr/share/keyrings/claude-desktop-archive-keyring.asc
+        mode: '0644'
+        owner: root
+        group: root
+      become: yes
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | add apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc]
+          https://downloads.claude.ai/claude-desktop/apt/stable
+          stable main
+        filename: claude-desktop
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    - name: Claude Desktop | install package
+      ansible.builtin.apt:
+        name: claude-desktop
+        state: present
+      become: yes
+      when: ansible_facts.packages['claude-desktop'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
     # ANDROID STUDIO — ppa:maarten-fonville/android-studio
     # The Nix path (androidStudioPackages.stable via buildFHSEnv) was reverted
     # because the FHS rootfs rebuild on every lock bump dwarfed every other
@@ -494,7 +530,13 @@
     # RUSTDESK — https://github.com/rustdesk/rustdesk/releases
     # Open-source remote desktop. nixpkgs builds it from source (Rust + the
     # vendored libsciter crate); the upstream .deb is prebuilt.
-    # It IS available via AppMan however since it uses a systemd service I don't want to risk it.
+    # It IS available via AppMan but that recipe ships only the AppImage +
+    # launcher + AM-updater — no systemd unit. This machine runs the system
+    # service `rustdesk.service` (root, /usr/bin/rustdesk --service) for
+    # unattended access, so we stay on the .deb, which owns that unit.
+    # Updates: compare the latest GitHub release tag against the installed
+    # dpkg version and re-install the .deb when it's newer. Reinstalling over
+    # the running service is safe — dpkg swaps the binary and restarts it.
     # ════════════════════════════════════════════════════════════════════════
 
     - name: RustDesk | fetch latest release metadata
@@ -502,35 +544,50 @@
         url: https://api.github.com/repos/rustdesk/rustdesk/releases/latest
         return_content: yes
       register: rustdesk_release
-      when: ansible_facts.packages['rustdesk'] is not defined
 
-    - name: RustDesk | resolve .deb download URL
+    - name: RustDesk | resolve latest version and .deb download URL
       ansible.builtin.set_fact:
+        rustdesk_latest: "{{ rustdesk_release.json.tag_name }}"
+        rustdesk_installed: "{{ ansible_facts.packages['rustdesk'][0].version | default('0') }}"
         rustdesk_url: >-
           {{ rustdesk_release.json.assets
              | selectattr('name', 'search', '-x86_64\\.deb$')
              | map(attribute='browser_download_url')
              | first }}
-      when: ansible_facts.packages['rustdesk'] is not defined
+
+    # Install when absent, or upgrade when the installed version is older than
+    # the latest release. Never downgrades (guards against a transient/nightly
+    # tag reading as "newer" only when it genuinely compares higher).
+    - name: RustDesk | decide whether an install/upgrade is needed
+      ansible.builtin.set_fact:
+        rustdesk_needs_install: >-
+          {{ ansible_facts.packages['rustdesk'] is not defined
+             or rustdesk_installed is version(rustdesk_latest, '<') }}
+
+    - name: RustDesk | report version status
+      ansible.builtin.debug:
+        msg: >-
+          installed={{ rustdesk_installed }} latest={{ rustdesk_latest }}
+          -> {{ 'installing/upgrading' if rustdesk_needs_install else 'up to date' }}
 
     - name: RustDesk | download .deb
       ansible.builtin.get_url:
         url: "{{ rustdesk_url }}"
         dest: /tmp/rustdesk.deb
         mode: '0644'
-      when: ansible_facts.packages['rustdesk'] is not defined
+      when: rustdesk_needs_install
 
     - name: RustDesk | install .deb
       ansible.builtin.apt:
         deb: /tmp/rustdesk.deb
       become: yes
-      when: ansible_facts.packages['rustdesk'] is not defined
+      when: rustdesk_needs_install
 
     - name: RustDesk | clean up temp .deb
       ansible.builtin.file:
         path: /tmp/rustdesk.deb
         state: absent
-      when: ansible_facts.packages['rustdesk'] is not defined
+      when: rustdesk_needs_install
 
     # ════════════════════════════════════════════════════════════════════════
     # APPMAN (AM) — https://github.com/ivan-hc/AM
