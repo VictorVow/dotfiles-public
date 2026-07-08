@@ -1014,6 +1014,7 @@ in
 
   home.file.".claude/skills/nix-switch/SKILL.md".text = ''
     ---
+    name: nix-switch
     description: Run home-manager switch and show any new news items.
     ---
     1. If the user tells you to run `hms` then instead run `home-manager switch --flake ~/Projects/installs/nix#boss --no-write-lock-file` since you don't have access to `hms` from your Bash shell.
@@ -1025,9 +1026,13 @@ in
 
   home.file.".claude/skills/git-commit/SKILL.md".text = ''
     ---
+    name: git-commit
     description: Make a git commit of the changes from this Claude session.
     ---
-    - `git add` only the files touched by this session.
+    - `git add` only the files touched by this session. If there are no files touched by this
+      session then give a summary of what files have been changed outside of this session and
+      give a commit message suggestion.
+    - If executed not in a git repo, then check the child directories for which contain git repos.
     - git commit messages should follow the Conventional Commit structure i.e.
     <type>[optional scope]: <description>
 
@@ -1052,12 +1057,14 @@ in
           Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI
           class is exported as a singleton instance named api.
         - fix(README): fixed two small typos
-    - Do not `git push` unless it's necessary because a pull request, workflow action or
-      something else in our intended next steps needs the commit pushed first.
+    - Do not `git push` unless the remote is a example.com URL. If not, then don't unless
+      it's necessary because a pull request, workflow action or something else in our intended next steps needs the commit pushed first.
+
   '';
 
   home.file.".claude/skills/direnv-ignored/SKILL.md".text = ''
     ---
+    name: direnv-ignored
     description: Setup nix-direnv in this repo without having to commit it.
     ---
     1. Create `.envrc` in the top-level of repo with the content `use flake "path:$PWD/.nix"`.
@@ -1068,6 +1075,7 @@ in
 
   home.file.".claude/skills/claude-md-ignored/SKILL.md".text = ''
     ---
+    name: claude-md-ignored
     description: Add CLAUDE.md and AGENTS.md to this repo without committing them, redirecting CLAUDE.md to AGENTS.md.
     ---
     1. Append to the repo `.git/info/exclude` these two lines, one per line: `CLAUDE.md` then `AGENTS.md`.
@@ -1082,6 +1090,7 @@ in
 
   home.file.".claude/skills/dbox-status/SKILL.md".text = ''
     ---
+    name: dbox-status
     description: Show status of distrobox containers and their key packages.
     ---
     1. Run `dbl` to list containers and their running state.
@@ -1093,6 +1102,7 @@ in
 
   home.file.".claude/skills/wl-copy/SKILL.md".text = ''
     ---
+    name: wl-copy
     description: Copy text from Claude Code's messages to the clipboard directly in order to eliminate formatting issues.
     ---
     1. A user selecting text to copy and paste from Claude Code's messages has indenting and new line issues.
@@ -1106,6 +1116,7 @@ in
 
     home.file.".claude/skills/md-open/SKILL.md".text = ''
     ---
+    name: md-open
     description: Save text from Claude Code's messages to a temporary Markdown file and open it in order to more easily read the text.
     ---
     1. Claude Code's messages are rendered in a small tmux pane, which is good for multi-tasking productivity but makes reading long messages a challenge.
@@ -1115,6 +1126,7 @@ in
 
   home.file.".claude/skills/yt-summary/SKILL.md".text = ''
     ---
+    name: yt-summary
     description: Summarise a YouTube video using yt-dlp subtitles.
     allowed_tools:
       - Bash
@@ -1163,6 +1175,7 @@ in
 
   home.file.".claude/skills/usage/SKILL.md".text = ''
     ---
+    name: usage
     description: Show Claude.ai subscription usage (current 5-hour session + weekly limits) by calling the OAuth usage endpoint that powers /usage.
     allowed_tools:
       - Bash
