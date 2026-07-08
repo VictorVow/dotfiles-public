@@ -17,8 +17,6 @@ am-gui
 zed
 # Agent orchestrator and VSCode fork
 cursor
-# Claude Code desktop - unofficial Linux build https://github.com/aaddrick/claude-desktop-debian
-claude-desktop
 # T3 Code https://github.com/pingdotgg/t3code/
 t3code
 # GPU monitoring
