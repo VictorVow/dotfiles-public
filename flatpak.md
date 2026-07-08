@@ -140,7 +140,6 @@ org.onionshare.OnionShare
 org.openshot.OpenShot
 org.polymc.PolyMC
 org.prismlauncher.PrismLauncher
-org.recoll.recoll
 org.sabnzbd.sabnzbd
 org.signal.Signal
 org.strawberrymusicplayer.strawberry
