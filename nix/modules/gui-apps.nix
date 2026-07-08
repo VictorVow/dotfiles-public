@@ -506,7 +506,8 @@ in
       "https://.amazon.com"
       "https://.aws.com"
       "https://.awspartner.com"
-      "https://.skillbuilder.aws"
+      "https://us-east-1.signin.aws"
+      "https://cloudquest.skillbuilder.aws"
       "https://.signin.aws"
       "https://steampowered.com"    # "https://store.steampowered.com" alone didn't work
       "https://store.steampowered.com"    # "https://.steampowered.com" didn't work
