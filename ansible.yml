@@ -28,8 +28,6 @@
       ansible.builtin.command:
         cmd: whoami
       become: true
-      # If sudo-rs is installed instead use sudo.ws. April 2026 - it currently doesn't work with Ansiblec
-      become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
       changed_when: false
       register: whoami_result
 
