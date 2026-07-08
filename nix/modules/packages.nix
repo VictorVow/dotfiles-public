@@ -421,6 +421,9 @@
     # package. Same flake source as codex: pkgs.llm-agents.* overlay from
     # numtide (cache.numtide.com).
     llm-agents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
+    llm-agents.opencode         # OpenCode agentic AI CLI — was npm opencode-ai in shell.nix
+    llm-agents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
+    llm-agents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
@@ -428,8 +431,8 @@
     # vendored .so) and rebuilds whenever the rustdesk crate version moves.
     # Installed via custom-installers.yml from official GitHub .deb release.
     # claude-desktop — removed from Nix; the aaddrick flake input rebuilt the
-    # .deb on every lock bump. Installed via custom-installers.yml from the
-    # upstream aaddrick/claude-desktop-debian release .deb.
+    # .deb on every lock bump. Installed via custom-installers.yml from
+    # Anthropic's official apt repository (code.claude.com/docs/en/desktop-linux).
     jan # ChatBox-like desktop LLM chat app
     streamlink-twitch-gui-bin
     suwayomi-server # which tachidesk-server

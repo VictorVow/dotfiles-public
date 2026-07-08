@@ -407,11 +407,10 @@
         fi
       }
 
-      # AI / LLM CLI tools not yet in nixpkgs:
+      # AI / LLM CLI tools not available via llm-agents.nix (numtide's flake —
+      # see packages.nix for opencode/copilot-cli, which moved there):
       _npm_global_install "cline" "cline"                    # Cline LLM CLI
       _npm_global_install "@continuedev/cli" "continue"      # Continue Dev LLM CLI
-      _npm_global_install "opencode-ai" "opencode"           # OpenCode agentic AI
-      _npm_global_install "@githubnext/github-copilot-cli" "github-copilot-cli"  # Copilot CLI
 
       unset -f _npm_global_install
     fi
