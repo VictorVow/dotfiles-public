@@ -66,6 +66,7 @@
     # micro — managed by programs.micro in programs.nix (installs it automatically)
     lynx    # Text-only web browser
     ripgrep  # Fast text search
+    shellcheck # Static analysis tool for shell scripts
 
     # ── Security / Privacy ────────────────────────────────────────────────────
     gnupg   # GNU Privacy Guard — GPG encryption and signing
