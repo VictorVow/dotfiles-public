@@ -502,6 +502,28 @@ in
     strict-dep-builds=true
   '';
 
+  # ── OpenCode ───────────────────────────────────────────────────────────────────
+  # opencode binary is in packages.nix (pkgs.llm-agents.opencode). Config here
+  # covers the two JSON files opencode reads from ~/.config/opencode/:
+  #   - opencode.json: server/runtime prefs (provider, model)
+  #   - tui.json:      TUI prefs (keybinds)
+  # Read-only nix symlinks are fine — opencode stores provider auth in a separate
+  # auth.json, never writes opencode.json/tui.json at runtime. The npm-managed
+  # package.json / bun.lock / node_modules in the same dir are left alone (those
+  # are opencode's plugin loader state).
+  xdg.configFile."opencode/opencode.json".source = jsonFormat.generate "opencode-config" {
+    "$schema"   = "https://opencode.ai/config.json";
+    provider    = {};
+    model       = "anthropic/claude-sonnet-4-5";
+    small_model = "anthropic/claude-haiku-4-5";
+  };
+
+  xdg.configFile."opencode/tui.json".source = jsonFormat.generate "opencode-tui" {
+    "$schema" = "https://opencode.ai/tui.json";
+    # Rebind the command picker from the default ctrl+p to ctrl+o.
+    keybinds.command_list = "ctrl+o";
+  };
+
   # ── Claude Code hook scripts ───────────────────────────────────────────────────
   # Managed here so they're version-controlled alongside the rest of the nix config.
   # Using home.file with executable = true (NOT programs.claude-code.hooks, which
