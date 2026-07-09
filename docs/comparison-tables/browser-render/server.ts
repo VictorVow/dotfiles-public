@@ -1,9 +1,10 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import type * as httpNS from 'node:http';
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Live Markdown preview server.
-//   node server.js [--port N] [file1.md file2.md ...]
+//   node server.ts [--port N] [file1.md file2.md ...]
 // Renders each Markdown file on every request and pushes a browser reload (via
 // SSE) whenever that file changes. Multiple files can be served at once, each
 // at its own route (/<docKey>), so they can be previewed + edited side by side.
@@ -15,8 +16,22 @@ const path = require('path');
 //   anything else                      -> a Markdown file to serve
 // With no files given, defaults to ../data/programming-languages.md.
 
-function parseArgs(argv) {
-  const files = [];
+interface Doc {
+  key: string;
+  md: string;
+  dir: string;
+  base: string;
+  weights: string;
+  clients: Set<httpNS.ServerResponse>;
+}
+
+interface ParsedArgs {
+  files: string[];
+  port: number;
+}
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const files: string[] = [];
   let port = 8080;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -25,7 +40,7 @@ function parseArgs(argv) {
     } else if (a.startsWith('--port=')) {
       port = Number(a.slice('--port='.length)) || port;
     } else if (/^\d+$/.test(a)) {
-      // Bare integer -> port (keeps the old `server.js file.md 8081` form working).
+      // Bare integer -> port (keeps the old `server.ts file.md 8081` form working).
       port = Number(a);
     } else {
       files.push(a);
@@ -45,8 +60,8 @@ const FOOTER = path.join(__dirname, 'footer.html');
 // extension) is the stable per-document identifier: it routes requests, scopes
 // SSE reloads + weights, and is injected into the page so the browser can
 // namespace its localStorage (Compare selection, Points weights cache) per doc.
-const docs = new Map();   // docKey -> descriptor
-const byFile = new Map(); // `${dir}\0${base}` -> docKey, for the change watcher
+const docs = new Map<string, Doc>();      // docKey -> descriptor
+const byFile = new Map<string, string>(); // `${dir}\0${base}` -> docKey, for the change watcher
 for (const f of files) {
   const mdPath = path.resolve(f);
   const dir = path.dirname(mdPath);
@@ -69,10 +84,11 @@ for (const f of files) {
   byFile.set(dir + '\0' + base, docKey);
 }
 
-const MarkdownIt = require(path.join(__dirname, 'node_modules', 'markdown-it'));
-const md = new MarkdownIt({ html: true, linkify: true });
+import type MarkdownIt from 'markdown-it';
+const MarkdownItCtor: typeof MarkdownIt = require(path.join(__dirname, 'node_modules', 'markdown-it'));
+const md: MarkdownIt = new MarkdownItCtor({ html: true, linkify: true });
 
-function liveReload(docKey) {
+function liveReload(docKey: string): string {
   return `
 <script>
   (function () {
@@ -84,7 +100,7 @@ function liveReload(docKey) {
 `;
 }
 
-function render(doc) {
+function render(doc: Doc): string {
   const header = fs.readFileSync(HEADER, 'utf8');
   const footer = fs.readFileSync(FOOTER, 'utf8');
   const body = md.render(fs.readFileSync(doc.md, 'utf8'));
@@ -95,7 +111,7 @@ function render(doc) {
   return header + docGlobal + body + liveReload(doc.key) + footer;
 }
 
-function renderIndex() {
+function renderIndex(): string {
   const items = [...docs.values()]
     .map((d) => `<li><a href="/${encodeURIComponent(d.key)}">${d.key}</a> ` +
       `<small>(${d.md})</small></li>`)
@@ -106,18 +122,18 @@ function renderIndex() {
     '<h1>Markdown preview</h1><ul>\n' + items + '\n</ul>';
 }
 
-function send(res, code, type, payload) {
+function send(res: httpNS.ServerResponse, code: number, type: string, payload: string): void {
   res.writeHead(code, { 'Content-Type': type });
   res.end(payload);
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer((req: httpNS.IncomingMessage, res: httpNS.ServerResponse) => {
   const url = new URL(req.url, 'http://localhost');
   const pathname = decodeURIComponent(url.pathname);
   const docKey = url.searchParams.get('doc');
 
   if (pathname === '/events') {
-    const doc = docs.get(docKey);
+    const doc = docKey ? docs.get(docKey) : undefined;
     if (!doc) { res.writeHead(404); res.end('unknown doc'); return; }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -131,18 +147,18 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/weights') {
-    const doc = docs.get(docKey);
+    const doc = docKey ? docs.get(docKey) : undefined;
     if (!doc) { res.writeHead(404); res.end('unknown doc'); return; }
     // Persist the browser's Points weights to disk (and read them back).
     if (req.method === 'GET') {
-      fs.readFile(doc.weights, 'utf8', (err, data) => {
+      fs.readFile(doc.weights, 'utf8', (err: NodeJS.ErrnoException | null, data: string) => {
         send(res, 200, 'application/json', err ? '{}' : data);
       });
       return;
     }
     if (req.method === 'POST') {
       let body = '';
-      req.on('data', (chunk) => {
+      req.on('data', (chunk: Buffer) => {
         body += chunk;
         if (body.length > 1e6) req.destroy(); // guard against runaway payloads
       });
@@ -150,7 +166,7 @@ const server = http.createServer((req, res) => {
         let parsed;
         try { parsed = JSON.parse(body); }
         catch (e) { res.writeHead(400); res.end('invalid JSON'); return; }
-        fs.writeFile(doc.weights, JSON.stringify(parsed, null, 2) + '\n', (err) => {
+        fs.writeFile(doc.weights, JSON.stringify(parsed, null, 2) + '\n', (err: NodeJS.ErrnoException | null) => {
           if (err) { res.writeHead(500); res.end('write error'); return; }
           res.writeHead(204);
           res.end();
@@ -167,10 +183,11 @@ const server = http.createServer((req, res) => {
   if (pathname === '/' || pathname.startsWith('/index')) {
     if (docs.size === 1) {
       const only = docs.values().next().value;
+      if (!only) { res.writeHead(500); res.end('no doc'); return; }
       try {
         send(res, 200, 'text/html; charset=utf-8', render(only));
       } catch (e) {
-        send(res, 500, 'text/plain', 'Render error:\n' + e.stack);
+        send(res, 500, 'text/plain', 'Render error:\n' + (e as Error).stack);
       }
       return;
     }
@@ -185,7 +202,7 @@ const server = http.createServer((req, res) => {
     try {
       send(res, 200, 'text/html; charset=utf-8', render(doc));
     } catch (e) {
-      send(res, 500, 'text/plain', 'Render error:\n' + e.stack);
+      send(res, 500, 'text/plain', 'Render error:\n' + (e as Error).stack);
     }
     return;
   }
@@ -196,14 +213,16 @@ const server = http.createServer((req, res) => {
 
 // Watch each directory containing a served file; on change, reload only the
 // clients viewing the doc whose source file changed.
-const timers = new Map();
+const timers = new Map<string, NodeJS.Timeout>();
 for (const dir of new Set([...docs.values()].map((d) => d.dir))) {
-  fs.watch(dir, (ev, file) => {
+  fs.watch(dir, (ev: string, file: string | Buffer | null) => {
     const key = byFile.get(dir + '\0' + file);
     if (!key) return;
-    clearTimeout(timers.get(key));
+    const t = timers.get(key);
+    if (t) clearTimeout(t);
     timers.set(key, setTimeout(() => {
       const doc = docs.get(key);
+      if (!doc) return;
       console.log('change detected -> reloading ' + doc.clients.size +
         ' client(s) for ' + key);
       for (const res of doc.clients) res.write('data: reload\n\n');

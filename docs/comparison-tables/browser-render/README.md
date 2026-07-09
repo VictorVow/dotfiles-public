@@ -1,7 +1,7 @@
 # browser-render
 
 > To run all at once:
-> `node server.js ../data/programming-languages.md ../data/gui-frameworks.md ../data/tui-frameworks.md ../data/web-frameworks.md --port 8080`
+> `node server.ts ../data/*.md --port 8080`
 
 Render Markdown docs (e.g. `../data/programming-languages.md`) as a styled
 webpage with working `<abbr>` hover tooltips, a sticky header/first-column, and
@@ -10,9 +10,9 @@ horizontal scroll for wide tables.
 ## Live preview (auto-reloads on edit)
 
 ```sh
-node server.js                              # serves ../data/programming-languages.md on :8080
-node server.js path/to/other.md --port 8081 # custom file / port
-node server.js a.md b.md c.md               # several files at once, one server
+node server.ts                              # serves ../data/programming-languages.md on :8080
+node server.ts path/to/other.md --port 8081 # custom file / port
+node server.ts a.md b.md c.md               # several files at once, one server
 ```
 
 Args are order-independent: `--port N` (or `-p N`, or a bare integer) sets the
@@ -26,10 +26,10 @@ browser auto-reloads (via Server-Sent Events) whenever *that* file changes. The
 reload stream and the on-disk Points-weights sidecar are scoped per document, so
 multiple files can be previewed and edited simultaneously without sharing state.
 
-If `node_modules/` is missing (it's gitignored), restore the one dependency:
+If `node_modules/` is missing (it's gitignored), restore the dependencies:
 
 ```sh
-npm install markdown-it@14
+npm install markdown-it@14 @types/markdown-it @types/node
 ```
 
 ## Standalone HTML (no server)
@@ -44,6 +44,6 @@ cat header.html /tmp/body.html footer.html > programming-languages.html
 
 ## Files
 
-- `server.js` — live-reload preview server (Node built-ins + markdown-it)
+- `server.ts` — live-reload preview server (Node built-ins + markdown-it)
 - `header.html` / `footer.html` — page shell + CSS, and the table-wrap script
 - `programming-languages.html` — standalone rendered snapshot
