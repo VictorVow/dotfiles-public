@@ -30,6 +30,7 @@
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
+    ./modules/ai-secrets.nix # OpenRouter API key for Tray-Links "ai" tray (sops-encrypted)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
