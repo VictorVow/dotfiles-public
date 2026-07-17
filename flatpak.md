@@ -4,7 +4,6 @@ app.comaps.comaps
 app.grayjay.Grayjay
 art.fatdawlf.Piccolo
 au.stevetech.yafi
-br.com.wiselabs.simplexity
 chat.delta.desktop
 codes.merritt.Nyrna
 codes.nora.gDiceRoller
@@ -14,7 +13,6 @@ com.bilingify.readest
 com.bktus.gpgfrontend
 com.borgbase.Vorta
 com.calibre_ebook.calibre
-com.dec05eba.gpu_screen_recorder
 com.discordapp.Discord
 com.github.ahrm.sioyek
 com.github.jeromerobert.pdfarranger
@@ -174,7 +172,3 @@ gg.hydralauncher.hydra
 ## launcher.moe
 
 moe.celica.BabyloniaTerminal
-
-## pied-origin
-
-com.mikeasoft.pied
