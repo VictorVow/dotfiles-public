@@ -1,7 +1,12 @@
-{ config, pkgs, lib, pkgs-unstable, ... }:
+{ config, pkgs, lib, pkgs-unstable, llm-agents, ... }:
 
 let
   jsonFormat = pkgs.formats.json { };
+
+  # llm-agents.nix's own packages output, built against its pinned nixpkgs —
+  # matches numtide's binary cache (cache.numtide.com). See home.nix for why
+  # this is used instead of the llm-agents overlay.
+  llmAgents = llm-agents.packages.${pkgs.system};
 
   # VSCodium with --no-sandbox wrap. Extensions are installed by the user via the
   # marketplace into ~/.vscode-oss/extensions/ (writable). vscode-with-extensions
@@ -503,7 +508,7 @@ in
   '';
 
   # ── OpenCode ───────────────────────────────────────────────────────────────────
-  # opencode binary is in packages.nix (pkgs.llm-agents.opencode). Config here
+  # opencode binary is in packages.nix (llmAgents.opencode). Config here
   # covers the two JSON files opencode reads from ~/.config/opencode/:
   #   - opencode.json: server/runtime prefs (provider, model)
   #   - tui.json:      TUI prefs (keybinds)
@@ -982,7 +987,7 @@ in
 
   programs.claude-code = {
     enable  = true;
-    package = pkgs.llm-agents.claude-code;
+    package = llmAgents.claude-code;
     # enableMcpIntegration — not available until HM 26.05
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
@@ -1461,7 +1466,7 @@ in
 
   programs.codex = {
     enable  = true;
-    package = pkgs.llm-agents.codex;
+    package = llmAgents.codex;
     # enableMcpIntegration — not available until HM 26.05
   };
 

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, llm-agents, tuxManager, ... }:
+{ config, pkgs, lib, tuxManager, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
@@ -17,11 +17,16 @@
   # Allow non-free (proprietary) packages.
   # Needed for: VS Code, Steam, and other proprietary software.
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.overlays = [
-    # Exposes pkgs.llm-agents.{claude-code,codex,antigravity,...} using
-    # pre-built binaries from numtide's cache (cache.numtide.com).
-    llm-agents.overlays.default
-  ];
+
+  # llm-agents.nix packages (claude-code, codex, gemini-cli, ...) are consumed
+  # directly via `llm-agents.packages.${pkgs.system}` in packages.nix and
+  # shell-apps.nix, NOT through nixpkgs.overlays. The overlay
+  # (llm-agents.overlays.shared-nixpkgs) rebuilds each package against *our*
+  # nixpkgs revision, which almost never matches numtide's own pinned
+  # nixpkgs — so every package silently compiles locally instead of hitting
+  # numtide's binary cache (cache.numtide.com). Using the flake's packages
+  # output directly gets the exact store paths numtide already built and
+  # cached.
 
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)

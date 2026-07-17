@@ -38,6 +38,12 @@ DRY_RUN=false
 # Override via env: PIN_AGE_DAYS=21 ./update.sh
 PIN_AGE_DAYS="${PIN_AGE_DAYS:-14}"
 
+# Same idea, but for llm-agents.nix (gemini/codex/opencode/... CLIs). numtide
+# rebuilds and republishes its binary cache (cache.numtide.com) daily, so a
+# 1-day floor is enough to reliably hit the cache without going stale for
+# weeks like nixpkgs. Override via env: PIN_AGE_DAYS_LLM_AGENTS=2 ./update.sh
+PIN_AGE_DAYS_LLM_AGENTS="${PIN_AGE_DAYS_LLM_AGENTS:-1}"
+
 for arg in "$@"; do
   case "$arg" in
     --no-nix)           UPDATE_NIX=false ;;
@@ -384,27 +390,31 @@ else
       fi
     fi
 
-    # ── Age-pin nixpkgs / home-manager to a ≥PIN_AGE_DAYS-old commit ────────
+    # ── Age-pin tracked inputs to a ≥<age>-day-old commit ────────────────────
     # Rewrite the SHAs embedded in flake.nix's input URLs to the newest
-    # upstream commit on each tracked branch that is at least PIN_AGE_DAYS
-    # old. By the time a commit is that old, Hydra has fully populated its
-    # binary cache for it, so home-manager switch downloads pre-built store
-    # paths instead of compiling from source. Subsequent same-day `hms` runs
-    # then reuse those cached paths from flake.lock without further work.
+    # upstream commit on each tracked branch that is at least <age> days old.
+    # For nixpkgs/home-manager that age is PIN_AGE_DAYS: by the time a commit
+    # is that old, Hydra has fully populated its binary cache for it, so
+    # home-manager switch downloads pre-built store paths instead of
+    # compiling from source. For llm-agents.nix it's the much shorter
+    # PIN_AGE_DAYS_LLM_AGENTS, since numtide republishes cache.numtide.com
+    # daily rather than on nixpkgs' slower cadence. Subsequent same-day `hms`
+    # runs then reuse those cached paths from flake.lock without further work.
     #
     # The `nix flake update` afterwards reads the new SHAs out of flake.nix
-    # and writes them into flake.lock (and refreshes unpinned inputs like
-    # llm-agents to their HEAD, which has its own daily binary cache).
+    # and writes them into flake.lock (and refreshes remaining unpinned
+    # inputs like tuxManager/ie-r to their HEAD).
     if command -v gh &>/dev/null; then
-      info "Age-pinning flake inputs to ≥${PIN_AGE_DAYS}-day-old commits..."
-      # Inputs to age-pin: <input-name> <github owner/repo>
+      info "Age-pinning flake inputs..."
+      # Inputs to age-pin: <input-name> <github owner/repo> <min-age-days>
       pin_specs=(
-        "nixpkgs NixOS/nixpkgs"
-        "nixpkgs-unstable NixOS/nixpkgs"
-        "home-manager nix-community/home-manager"
+        "nixpkgs NixOS/nixpkgs ${PIN_AGE_DAYS}"
+        "nixpkgs-unstable NixOS/nixpkgs ${PIN_AGE_DAYS}"
+        "home-manager nix-community/home-manager ${PIN_AGE_DAYS}"
+        "llm-agents numtide/llm-agents.nix ${PIN_AGE_DAYS_LLM_AGENTS}"
       )
       for spec in "${pin_specs[@]}"; do
-        read -r in_name repo_path <<< "$spec"
+        read -r in_name repo_path age_days <<< "$spec"
         owner="${repo_path%%/*}"
         repo="${repo_path##*/}"
         branch=$(_channel_for_input "$NIX_FLAKE_DIR/flake.nix" "$in_name")
@@ -414,9 +424,9 @@ else
           continue
         fi
         old_sha=$(_current_input_sha "$NIX_FLAKE_DIR/flake.nix" "$in_name" "$repo_path")
-        new_sha=$(_latest_commit_at_least_n_days_old "$owner" "$repo" "$branch" "$PIN_AGE_DAYS") || true
+        new_sha=$(_latest_commit_at_least_n_days_old "$owner" "$repo" "$branch" "$age_days") || true
         if [[ -z "$new_sha" ]]; then
-          warn "  ${in_name}: could not find a ≥${PIN_AGE_DAYS}d-old commit on ${branch}."
+          warn "  ${in_name}: could not find a ≥${age_days}d-old commit on ${branch}."
           RESULTS["age-pin ${in_name}"]="✗ fetch failed"
           continue
         fi
@@ -440,7 +450,7 @@ else
     fi
 
     # Resolve the (possibly updated) flake.nix URLs into flake.lock. Also
-    # refreshes unpinned inputs (llm-agents, tuxManager, ie-r) to their HEAD.
+    # refreshes remaining unpinned inputs (tuxManager, ie-r) to their HEAD.
     info "Updating flake.lock..."
     run_step "Nix flake update" nix flake update --flake "$NIX_FLAKE_DIR"
   else

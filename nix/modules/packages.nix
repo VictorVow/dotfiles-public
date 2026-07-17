@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-unstable, tuxManager, ie-r, ... }:
+{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -12,6 +12,12 @@
 #   - Third-party daemons: mullvad-vpn (via mullvad-vpn.sh), docker (via docker.sh), tailscale (via tailscale.sh)
 #   - Android Studio — now Nix-managed via androidStudioPackages.stable (android-studio.sh retained as fallback)
 #   - Flatpak (system-level integration)
+let
+  # llm-agents.nix's own packages output, built against its pinned nixpkgs —
+  # matches numtide's binary cache (cache.numtide.com). See home.nix for why
+  # this is used instead of the llm-agents overlay.
+  llmAgents = llm-agents.packages.${pkgs.system};
+in
 {
   home.packages = with pkgs; [
     # How to search for the binary name if which doesn't show it:
@@ -109,16 +115,11 @@
 
     # ── Screen Recording / Streaming ─────────────────────────────────────────
     simplescreenrecorder  # Screen recorder with hardware encoding support
-    gpu-screen-recorder   # GPU-accelerated screen recorder (replaces flathub-gpu-screen-recorder.sh)
+    gpu-screen-recorder     # GPU-accelerated screen recorder (replaces flathub-gpu-screen-recorder.sh)
+    gpu-screen-recorder-gtk # GUI frontend for gpu-screen-recorder (replaces Flatpak com.dec05eba.gpu_screen_recorder)
 
     # ── Audio / Music ─────────────────────────────────────────────────────────
     puddletag # Audio tag (ID3/etc.) editor
-
-    # ── Graphics / Pixel Art ──────────────────────────────────────────────────
-    aseprite # Pixel-art / sprite editor (source-available; nixpkgs builds from source)
-             # AI plugins (PixelLab.ai, Retro Diffusion) are installed manually via
-             # Edit > Preferences > Extensions > Add Extension. See
-             # docs/research/ai-sprite-art-creation.md for context.
 
     # ── Video Downloading ─────────────────────────────────────────────────────
     yt-dlp # Download video/audio from YouTube and 1000+ other sites
@@ -419,12 +420,12 @@
     # CLI — Home Manager's programs.antigravity wraps the IDE build via
     # mkVscodeModule, which manages ~/.antigravity IDE settings and doesn't
     # apply to the CLI binary. So this entry installs just the CLI as a plain
-    # package. Same flake source as codex: pkgs.llm-agents.* overlay from
-    # numtide (cache.numtide.com).
-    llm-agents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
-    llm-agents.opencode         # OpenCode agentic AI CLI — was npm opencode-ai in shell.nix
-    llm-agents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
-    llm-agents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
+    # package. Same flake source as codex: llm-agents.packages.${system}
+    # (cache.numtide.com) — see the `llmAgents` binding above.
+    llmAgents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
+    llmAgents.opencode         # OpenCode agentic AI CLI — was npm opencode-ai in shell.nix
+    llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
+    llmAgents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer

@@ -11,14 +11,14 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/d73b4184a66818d90eaa355559409c1a66c11006";
+    nixpkgs.url = "github:NixOS/nixpkgs/f915bb397406d6214028c84dda64b7e4c1935a09";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/b191667197a6fafbf77a1eb06ed1c3d50e5b0d33";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/3b6df044821946df7fc1d202a171a18d867f30d8";
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/8355f0a16b2dbb06a97959a918af5b239bbe05ae";
+      url = "github:nix-community/home-manager/868d0a692de703c2de98fab61968e4e310b7c28e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -33,12 +33,16 @@
     # The flake rebuilt a Debian .deb on every lock bump. Now installed via
     # custom-installers.yml from the upstream .deb release.
 
-    # AI coding tools — auto-updated daily, own binary cache at cache.numtide.com.
-    # Intentionally NOT age-pinned: numtide rebuilds and re-publishes the cache
-    # daily for HEAD, so an old pin would just miss the cache. Also intentionally
-    # NOT following nixpkgs so the pre-built packages in numtide's cache (built
-    # against unstable) remain valid store paths — cache hits work.
-    llm-agents.url = "github:numtide/llm-agents.nix";
+    # AI coding tools — own binary cache at cache.numtide.com, rebuilt daily.
+    # Age-pinned to a ≥PIN_AGE_DAYS_LLM_AGENTS-day-old commit (see update.sh) so
+    # a `nix flake update` never lands on a same-day commit numtide hasn't
+    # published a cache for yet — that forced hms to compile gemini/codex
+    # locally instead of downloading. The pin floor is much shorter than
+    # nixpkgs' PIN_AGE_DAYS since numtide's cache catches up within a day.
+    # Also intentionally NOT following nixpkgs so the pre-built packages in
+    # numtide's cache (built against unstable) remain valid store paths.
+    # channel: main
+    llm-agents.url = "github:numtide/llm-agents.nix/45b0a359630126c84b1685bacf986cf7ddbb57a7";
 
     # Tiny single-purpose flakes — not age-pinned because they barely change
     # and don't pull in the heavy nixpkgs rebuild surface that motivated the
