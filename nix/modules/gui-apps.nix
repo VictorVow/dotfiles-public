@@ -889,4 +889,21 @@ INSTALLS
     type        = "Application";
     categories  = [ "Utility" ];
   };
+
+  # ── Pixel Art ─────────────────────────────────────────────────────────────────
+
+  # LibreSprite AppImage is installed by custom-installers.yml to
+  # ~/AppImages/libresprite.appimage (replaces pkgs.aseprite — see
+  # docs/research/ai-sprite-art-creation.md for the FOSS-alternative context).
+  # This entry just gives it a KDE menu launcher.
+  xdg.desktopEntries."org.libresprite.LibreSprite" = {
+    name        = "LibreSprite";
+    comment     = "Animated sprite editor & pixel art tool";
+    exec        = "${config.home.homeDirectory}/AppImages/libresprite.appimage %F";
+    icon        = "libresprite";
+    terminal    = false;
+    type        = "Application";
+    categories  = [ "Graphics" "2DGraphics" "RasterGraphics" ];
+    mimeType    = [ "image/x-aseprite" ];
+  };
 }
