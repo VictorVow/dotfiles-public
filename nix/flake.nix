@@ -11,10 +11,10 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/f915bb397406d6214028c84dda64b7e4c1935a09";
+    nixpkgs.url = "github:NixOS/nixpkgs/487762020e6555d6e5df87db6c835f30a833626b";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/3b6df044821946df7fc1d202a171a18d867f30d8";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/bec4e712b2fdf4c136ec28f0e0a5b7c093ada190";
 
     home-manager = {
       # channel: release-26.05

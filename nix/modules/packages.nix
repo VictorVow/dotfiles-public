@@ -442,5 +442,7 @@ in
 
     # ── Chromium-based - needs to be non-Flatpak to retain it's stronger sandboxing ──────────────────────────
     ungoogled-chromium
+    pkgs-unstable.brave-origin  # De-Braved fork of Brave (no crypto/rewards/telemetry cruft).
+                                 # Pinned to unstable: too new for the current stable channel.
   ];
 }
