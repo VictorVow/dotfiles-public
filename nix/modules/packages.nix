@@ -17,6 +17,19 @@ let
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
   llmAgents = llm-agents.packages.${pkgs.system};
+
+  # NeverDecaf's "Chromium Web Store" extension — re-enables installing from
+  # the Chrome Web Store on non-Google-branded Chromium builds (ungoogled-chromium
+  # doesn't ship Google API keys or the inline-install webstorePrivate API that
+  # the store's "Add to Chrome" button relies on). Loaded unpacked via
+  # --load-extension since it can't be force-installed from the store itself.
+  # Pinned to a specific commit for reproducibility; bump the rev + sha256 to update.
+  chromiumWebStoreExt = pkgs.fetchFromGitHub {
+    owner = "NeverDecaf";
+    repo = "chromium-web-store";
+    rev = "8f39cf7477714d8826aadbb12067bd5c0c1af8e3";
+    sha256 = "sha256-/pJVNVTjLS3ZaeSkhS9ltCtEH237gVqCnb4S1f/yfD0=";
+  };
 in
 {
   home.packages = with pkgs; [
@@ -441,8 +454,27 @@ in
     amdgpu_top # Tool to display AMDGPU usage
 
     # ── Chromium-based - needs to be non-Flatpak to retain it's stronger sandboxing ──────────────────────────
-    ungoogled-chromium
+    # commandLineArgs bakes in --load-extension so the Chrome Web Store enabler
+    # (chromiumWebStoreExt, defined above) is always loaded without manual setup.
+    (ungoogled-chromium.override {
+      commandLineArgs = "--load-extension=${chromiumWebStoreExt}/src";
+    })
     pkgs-unstable.brave-origin  # De-Braved fork of Brave (no crypto/rewards/telemetry cruft).
                                  # Pinned to unstable: too new for the current stable channel.
+    # Google-branded Chrome. Needed alongside ungoogled-chromium because the Chrome Web
+    # Store's own client-side browser check blocks non-Chrome-branded browsers from
+    # installing extensions — no local policy/extension can work around a check that
+    # runs on Google's page before install is attempted.
+    #
+    # Same setuid-sandbox problem as ungoogled-chromium (the Nix store can't hold a
+    # setuid-root file), but Google Chrome ignores CHROME_DEVEL_SANDBOX in release
+    # builds (verified — it's a locked-down dev-only escape hatch, for obvious
+    # privilege-escalation reasons), so unlike ungoogled-chromium this can't be fixed
+    # by pointing it at a fixed path via env var. Instead scripts/chromium-suid-sandbox.sh
+    # bind-mounts a setuid-root helper directly over this exact store path's
+    # share/google/chrome/chrome-sandbox at boot (the chromium_sandbox tag in
+    # custom-installers.yml) — re-run it after every google-chrome update since the
+    # store path (and thus the bind-mount target) changes.
+    google-chrome
   ];
 }

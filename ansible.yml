@@ -233,6 +233,41 @@
       become: yes
       changed_when: false
 
+    # ── Chromium Web Store policy ─────────────────────────────────────────────
+    # ungoogled-chromium (nix/modules/packages.nix) isn't Google-branded, so
+    # Chromium's built-in check for "is this the real Chrome Web Store" fails
+    # and it blocks installs from chromewebstore.google.com with the native
+    # "Apps, extensions and user scripts cannot be added from this website"
+    # banner — this happens before the chromiumWebStoreExt helper extension
+    # even gets a chance to act. ExtensionInstallSources is the sanctioned
+    # Chromium policy for allowlisting install origins, but policies are only
+    # honored from root-owned /etc paths (by design, so a compromised user
+    # account can't self-grant install permissions) — hence this lives here
+    # in Ansible rather than in the user-level Nix/Home Manager config.
+    - name: Ensure Chromium managed policies directory exists
+      ansible.builtin.file:
+        path: /etc/chromium/policies/managed
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      become: yes
+
+    - name: Allow Chrome Web Store installs in Chromium via managed policy
+      ansible.builtin.copy:
+        dest: /etc/chromium/policies/managed/webstore.json
+        content: |
+          {
+            "ExtensionInstallSources": [
+              "https://chromewebstore.google.com/*",
+              "https://clients2.google.com/*"
+            ]
+          }
+        owner: root
+        group: root
+        mode: "0644"
+      become: yes
+
     # NOTE: pipx, npm, and Homebrew package tasks have been removed.
     # Those packages are now managed by Nix Home Manager. See:
     #   nix/modules/packages.nix   — home.packages list

@@ -30,7 +30,7 @@ installs/
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
-│   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Chromium-based AppImages
+│   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
 │   └── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)

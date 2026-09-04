@@ -813,24 +813,28 @@
       when: appman_apparmor_profile.changed
 
     # ════════════════════════════════════════════════════════════════════════
-    # CHROMIUM SUID SANDBOX — setuid helper for Nix ungoogled-chromium
+    # CHROMIUM SUID SANDBOX — setuid helpers for Nix ungoogled-chromium + google-chrome
     # ════════════════════════════════════════════════════════════════════════
     # The Nix chromium wrapper expects a setuid-root SUID sandbox helper at
     # /run/wrappers/bin/__chromium-suid-sandbox (NixOS creates this via
     # security.chromiumSuidSandbox; a plain Nix-on-Ubuntu install does not).
     # Without it Chromium aborts at launch, because Ubuntu's AppArmor also
     # clamps unprivileged user namespaces so the namespace sandbox is
-    # unavailable too.
+    # unavailable too. google-chrome (nix/modules/packages.nix) hits the same
+    # issue with its own bundled chrome-sandbox; since Chrome ignores
+    # CHROME_DEVEL_SANDBOX in release builds, its setuid helper
+    # (__google-chrome-suid-sandbox) is bind-mounted directly over the Nix
+    # store's chrome-sandbox path instead — see scripts/chromium-suid-sandbox.sh.
     #
     # Two pieces are needed, mirroring what NixOS' security.wrappers does:
     #   1. A dedicated tmpfs at /run/wrappers that ALLOWS suid + exec. The host
     #      /run is mounted nosuid,noexec, which both strips the setuid bit and
-    #      forbids execution — so the helper cannot live directly under /run.
-    #   2. A boot-time oneshot that installs the setuid helper into it (tmpfs is
-    #      wiped on every boot).
+    #      forbids execution — so the helpers cannot live directly under /run.
+    #   2. A boot-time oneshot that installs both setuid helpers into it (tmpfs
+    #      is wiped on every boot).
     # Run by tag:
     #   ansible-playbook custom-installers.yml --ask-become-pass --tags chromium_sandbox
-    # After a chromium update (home-manager switch):
+    # After a chromium/chrome update (home-manager switch):
     #   sudo systemctl restart chromium-suid-sandbox
 
     - name: Chromium sandbox | install suid/exec-capable tmpfs mount for /run/wrappers
@@ -881,7 +885,7 @@
         content: |
           # Managed by installs/custom-installers.yml — do not edit by hand.
           [Unit]
-          Description=Install setuid SUID sandbox helper for Nix ungoogled-chromium
+          Description=Install setuid SUID sandbox helpers for Nix ungoogled-chromium + google-chrome
           # Needs the suid/exec-capable /run/wrappers tmpfs in place first.
           Requires=run-wrappers.mount
           After=run-wrappers.mount
