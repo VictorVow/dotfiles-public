@@ -158,7 +158,11 @@ in
     #            gamemoderun binary avoids the nix bash-wrapper/libc conflict
     gamescope # Valve's micro-compositor for gaming (FSR, resolution scaling)
               # Note: plasma-gamemode (KDE integration) stays in apt
-    wine      # Windows application compatibility layer
+    wineWow64Packages.stable # Windows application compatibility layer
+              # Pure 64-bit build using WoW64 mode, still runs 32-bit apps. Plain
+              # `wine` is 32-bit-only and drags in a pkgsi686Linux dep chain
+              # (mbedtls → ffmpeg → gtk4 → pipewire) that Hydra often fails to
+              # cache, forcing multi-hour local builds (or build failures).
 
     # ── Database ──────────────────────────────────────────────────────────────
     sqlitebrowser # GUI browser and editor for SQLite databases
