@@ -295,8 +295,8 @@
       ansible.builtin.set_fact:
         dnvm_download_url: >-
           {{ dnvm_release.json.assets
-             | selectattr('name', 'search', 'linux-' + dnvm_arch + '\\.tar\\.gz$')
-             | rejectattr('name', 'search', '\\.sig$')
+             | selectattr('name', 'search', 'linux-' + dnvm_arch + '\.tar\.gz$')
+             | rejectattr('name', 'search', '\.sig$')
              | map(attribute='browser_download_url')
              | first }}
       when: not dnvm_binary.stat.exists
@@ -385,7 +385,7 @@
       ansible.builtin.set_fact:
         awatcher_download_url: >-
           {{ awatcher_release.json.assets
-             | selectattr('name', 'search', '^awatcher_.*_amd64\\.deb$')
+             | selectattr('name', 'search', '^awatcher_.*_amd64\.deb$')
              | map(attribute='browser_download_url')
              | first }}
       when: ansible_facts.packages['awatcher'] is not defined
@@ -437,7 +437,7 @@
       ansible.builtin.set_fact:
         libresprite_download_url: >-
           {{ libresprite_release.json.assets
-             | selectattr('name', 'search', 'linux-x86_64\\.zip$')
+             | selectattr('name', 'search', 'linux-x86_64\.zip$')
              | map(attribute='browser_download_url')
              | first }}
       when: not libresprite_binary.stat.exists
@@ -622,7 +622,7 @@
         rustdesk_installed: "{{ ansible_facts.packages['rustdesk'][0].version | default('0') }}"
         rustdesk_url: >-
           {{ rustdesk_release.json.assets
-             | selectattr('name', 'search', '-x86_64\\.deb$')
+             | selectattr('name', 'search', '-x86_64\.deb$')
              | map(attribute='browser_download_url')
              | first }}
 
