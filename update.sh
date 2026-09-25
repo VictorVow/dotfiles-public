@@ -25,6 +25,12 @@
 
 set -euo pipefail
 
+# Raise the soft open-files limit to the hard limit. Shells spawned outside the
+# systemd user session (e.g. a detached `tmux new-session -d`) inherit the
+# default soft limit of 1024, which Nix flake evaluation (lazy-trees + dirty
+# git tree) can exhaust → "error: opening file ...: Too many open files".
+ulimit -Sn "$(ulimit -Hn)" 2>/dev/null || true
+
 # ── Options ───────────────────────────────────────────────────────────────────
 UPDATE_NIX=true
 UPDATE_DISTROBOX=true
