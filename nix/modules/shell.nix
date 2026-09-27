@@ -308,6 +308,17 @@
       # Assorted
       cwd = "pwd | wl-copy"; # Copy working directory to clipboard
 
+      # XDG migration: settings.xml moved to $XDG_CONFIG_HOME/maven (see
+      # ~/.config/maven/settings.xml's <localRepository> for the repo-cache side).
+      mvn = "mvn -gs $XDG_CONFIG_HOME/maven/settings.xml";
+
+      # XDG migration: wget doesn't support an env var for its HSTS cache file.
+      wget = "wget --hsts-file=$XDG_DATA_HOME/wget-hsts";
+
+      # XDG migration: yarn classic has no env var for its rc file location;
+      # this alias may not stick — yarn can still write ~/.yarnrc directly.
+      yarn = "yarn --use-yarnrc $XDG_CONFIG_HOME/yarn/config";
+
     };
   };
 
@@ -325,6 +336,40 @@
 
     # Go workspace root
     GOPATH = "$HOME/go";
+
+    # XDG migration (via xdg-ninja) — redirect dev-tool state out of $HOME.
+    WINEPREFIX = "$HOME/.local/share/wine";
+    KDEHOME = "$HOME/.config/kde";
+    CARGO_HOME = "$HOME/.local/share/cargo";
+    RUSTUP_HOME = "$HOME/.local/share/rustup";
+    GNUPGHOME = "$HOME/.local/share/gnupg";
+    DOTNET_CLI_HOME = "$HOME/.local/share/dotnet";
+    ANSIBLE_HOME = "$HOME/.local/share/ansible";
+    GRADLE_USER_HOME = "$HOME/.local/share/gradle";
+    AWS_SHARED_CREDENTIALS_FILE = "$HOME/.config/aws/credentials";
+    AWS_CONFIG_FILE = "$HOME/.config/aws/config";
+    NVM_DIR = "$HOME/.local/share/nvm";
+    IPFS_PATH = "$HOME/.local/share/ipfs";
+    ANDROID_USER_HOME = "$HOME/.local/share/android";
+    ANDROID_AVD_HOME = "$HOME/.local/share/android/avd";
+    # CODEX_HOME is set by programs.codex itself (home.preferXdgDirectories, home.nix)
+    NUGET_PACKAGES = "$HOME/.cache/NuGetPackages";
+    DOCKER_CONFIG = "$HOME/.config/docker";
+    NPM_CONFIG_CACHE = "$HOME/.cache/npm";
+    GTK2_RC_FILES = "$HOME/.config/gtk-2.0/gtkrc";
+    # INPUTRC is set by programs.readline itself (home.preferXdgDirectories, home.nix)
+    RECOLL_CONFDIR = "$HOME/.config/recoll";
+    HISTFILE = "$HOME/.local/state/bash/history";
+    NODE_REPL_HISTORY = "$HOME/.local/state/node_repl_history";
+    PYTHON_HISTORY = "$HOME/.local/state/python_history";
+    GITLIBS = "$HOME/.local/state/clojure/gitlibs";
+    # Base dir only — Ren'Py appends its own <Game>-<id> subfolder underneath.
+    RENPY_PATH_TO_SAVES = "$HOME/.local/share/renpy";
+    FVM_CACHE_PATH = "$HOME/.cache/fvm";
+
+    # XDG migration: pipx (apt-installed, not Nix-managed)
+    PIPX_HOME = "$HOME/.local/share/pipx";
+    PIPX_BIN_DIR = "$HOME/.local/bin";  # unchanged, but pipx's docs want it explicit for this move
 
     # Podman rootless networking — required for Distrobox rootless containers
     PODMAN_USERNS = "keep-id";
@@ -388,8 +433,9 @@
       mkdir -p "$HOME/.npm-global"
 
       # Helper: install an npm package globally if it's not already installed.
-      # The global ~/.npmrc (programs.nix) hardens every npm invocation with
-      # ignore-scripts=true and min-release-age=1. These AI CLIs are curated and
+      # The global npmrc ($XDG_CONFIG_HOME/npm/npmrc, programs.npm in
+      # shell-apps.nix) hardens every npm invocation with ignore-scripts=true
+      # and min-release-age=1. These AI CLIs are curated and
       # trusted, and several need their postinstall scripts (e.g. native binary
       # downloads), so this install path explicitly opts out:
       #   --ignore-scripts=false   run postinstall (binaries would be missing otherwise)

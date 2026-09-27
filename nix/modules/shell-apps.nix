@@ -468,19 +468,30 @@ in
   # package managers, at user scope so every project inherits it. Per-invocation
   # flags / per-project config can still override where a real need exists.
 
-  # npm (~/.npmrc, userconfig). Requires npm >= 11.10 for `min-release-age`
+  # npm (userconfig; path decided by programs.npm below, home.preferXdgDirectories
+  # → $XDG_CONFIG_HOME/npm/npmrc). Requires npm >= 11.10 for `min-release-age`
   # (guaranteed by nodejs_24 in packages.nix). npm has NO equivalent to pnpm's
   # blockExoticSubdeps / yarn's hardened mode — that third control is documented
   # here as an accepted gap rather than silently dropped. Independent of the
   # NPM_CONFIG_PREFIX env set in shell.nix (env vs rc are separate mechanisms).
   # The npm activation installs in shell.nix intentionally opt out (see there).
-  home.file.".npmrc".text = ''
-    min-release-age=1
-    ignore-scripts=true
-    # GAP: npm cannot block exotic (git / tarball / non-registry) transitive
-    # deps. pnpm (block-exotic-subdeps) and yarn (enableHardenedMode) do; npm
-    # has no equivalent setting as of npm 11.x. Audit lockfiles manually.
-  '';
+  #
+  # GAP: npm cannot block exotic (git / tarball / non-registry) transitive deps.
+  # pnpm (block-exotic-subdeps) and yarn (enableHardenedMode) do; npm has no
+  # equivalent setting as of npm 11.x. Audit lockfiles manually.
+  #
+  # package = null: programs.npm defaults to pulling in plain `pkgs.nodejs`,
+  # which would collide with the nodejs_24 derivation already declared in
+  # packages.nix (both provide bin/npm). nodejs_24 already satisfies this
+  # module's runtime needs, so don't add a second Node package.
+  programs.npm = {
+    enable = true;
+    package = null;
+    settings = {
+      "min-release-age" = 1;
+      ignore-scripts = true;
+    };
+  };
 
   # Yarn Berry v4 (~/.yarnrc.yml, global). npmMinimalAgeGate is the release-age
   # gate (default "3d"; pinned to 24h here). enableScripts:false is already the
@@ -565,6 +576,8 @@ in
       set tabstop=2
       set shiftwidth=2
       set expandtab
+      " XDG migration: keep .viminfo out of $HOME (xdg-ninja)
+      set viminfofile=$XDG_STATE_HOME/vim/viminfo
     '';
   };
 

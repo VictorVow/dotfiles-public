@@ -47,6 +47,18 @@
         validate: "visudo -cf %s"
       become: yes
 
+    # ── User groups: evdev access for OBS input-overlay ──────────────────
+    # /dev/input/event* is root:input 660 by default, so reading raw
+    # keyboard/mouse events (OBS's input-overlay plugin — the key-mon
+    # replacement, see nix/modules/gui-apps.nix) needs the user in `input`.
+    # Requires a logout/login (or `newgrp input`) after first apply.
+    - name: Add user to input group (evdev access for OBS input-overlay)
+      ansible.builtin.user:
+        name: boss
+        groups: input
+        append: yes
+      become: yes
+
     # ── Snap: remove and permanently block ──────────────────────────────
     # Snap is not used — all packages come from Nix, apt, or Flatpak.
     # Removing snapd frees ~150 MB RAM (snapd daemon + snap mounts) and
@@ -216,6 +228,38 @@
           - podman
         state: absent
         purge: yes
+      become: yes
+
+    # ── Secret Service: KWallet only, drop gnome-keyring ──────────────
+    # Kubuntu installs gnome-keyring alongside KWallet, and it grabbed the
+    # org.freedesktop.secrets D-Bus name at login. Two live keychains meant
+    # Electron/KDE apps (Signal via --password-store=kwallet6) and libsecret
+    # clients stored secrets in different places; daemon churn then left
+    # Signal unable to decrypt its database on every launch. Purge
+    # gnome-keyring so KWallet's ksecretd is the sole Secret Service provider
+    # (see nix/modules/desktop.nix for the user-level D-Bus activation file
+    # that points org.freedesktop.secrets at ksecretd).
+    - name: Remove gnome-keyring (KWallet/ksecretd is the sole Secret Service provider)
+      ansible.builtin.apt:
+        name:
+          - gnome-keyring
+          - gnome-keyring-pkcs11
+          - libpam-gnome-keyring
+        state: absent
+        purge: yes
+        autoremove: yes
+      become: yes
+
+    - name: Pin gnome-keyring to prevent reinstallation
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/no-gnome-keyring
+        content: |
+          Package: gnome-keyring gnome-keyring-pkcs11 libpam-gnome-keyring
+          Pin: release a=*
+          Pin-Priority: -10
+        owner: root
+        group: root
+        mode: "0644"
       become: yes
 
     # Install Solaar's udev rules so it can access Logitech hidraw devices.

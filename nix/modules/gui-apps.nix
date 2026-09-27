@@ -121,6 +121,7 @@ let
     "browser.search.suggest.enabled"           = false;  # global switch disabling search engine live suggestions in all contexts (URL bar, search bar, new tab)
     # ── Media ─────────────────────────────────────────────────────────────
     "media.autoplay.default" = 5;  # block all autoplay (audio and video)
+    "media.videocontrols.picture-in-picture.playback-speed.enabled" = true;   # Enable playback speed control in PiP
   };
 
   # Search engines shared by minimal profiles (extracted from VERTEX)
@@ -555,7 +556,9 @@ in
       "https://github.com"
       "https://gitlab.com"
       "https://howlongtobeat.com"
+      "https://www.isekaizero.ai"
       "https://www.itv.com" # Football streams
+      "https://access.leedsbuildingsociety.co.uk"
       "https://login.coinbase.com"
       "https://login.live.com"
       "https://login.mailbox.org"
@@ -563,6 +566,7 @@ in
       "https://login.tailscale.com"
       "https://logseq.com"
       "https://mega.nz"
+      "https://personal.metrobankonline.co.uk"
       "https://money4life.scottishwidows.co.uk"
       "https://musicbrainz.org"
       "https://my.asos.com"
@@ -588,6 +592,9 @@ in
       "https://redlib.privadency.com"
       "https://redlib.pussthecat.org"
       "https://redlib.r4fo.com"
+      "https://redlib-2.privadency.com"
+      "https://safereddit.com"
+
       "https://roadmap.sh"
       "https://secure.backblaze.com"
       "https://slack.com"
@@ -612,6 +619,7 @@ in
       "https://www.loaded.com"
       "https://www.mtggoldfish.com"
       "https://.nexusmods.com"
+      "https://www.nexusmods.com"
       "https://www.patreon.com"
       "https://www.paypal.com"
       "https://www.reddit.com"
@@ -888,6 +896,21 @@ INSTALLS
     terminal    = false;
     type        = "Application";
     categories  = [ "Utility" ];
+  };
+
+  # ── Screencasting ─────────────────────────────────────────────────────────────
+
+  # Replaces key-mon (uninstalled — abandoned upstream, broken on Python 3.12+
+  # and unbuildable against system PyGObject in a pipx venv). input-overlay
+  # reads raw evdev input directly, so unlike key-mon (Xlib) or screenkey
+  # (X11 XRecord) it works under Wayland/KWin and captures every app, not just
+  # XWayland clients. Needs evdev read access: either run OBS as a member of
+  # the `input` group, or add a udev rule granting access to /dev/input/event*.
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      input-overlay
+    ];
   };
 
   # ── Pixel Art ─────────────────────────────────────────────────────────────────

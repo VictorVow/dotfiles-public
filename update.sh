@@ -615,8 +615,10 @@ if ! command -v pipx &>/dev/null; then
   RESULTS["pipx"]="skipped (not installed)"
 else
   # Upgrade all pipx-managed packages. Some tools have moved to Nix (yt-dlp,
-  # poetry, uv, ansible), but the rest (key-mon, fanficfare, git-filter-repo,
-  # claude-code-log) remain pipx-managed and are upgraded here.
+  # poetry, uv, ansible), but the rest (fanficfare, git-filter-repo,
+  # claude-code-log) remain pipx-managed and are upgraded here. key-mon was
+  # uninstalled — abandoned upstream, broken on Python 3.12+ (SafeConfigParser
+  # removed) and unbuildable against system PyGObject in an isolated venv.
   #
   # If venvs reference a Python that no longer exists (e.g. after a system
   # Python bump), `pipx upgrade-all` crashes with a traceback. Detect that up
