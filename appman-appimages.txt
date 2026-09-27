@@ -28,3 +28,4 @@ github-store
 hydra
 # Misc
 appimagetool
+opencode-desktop
