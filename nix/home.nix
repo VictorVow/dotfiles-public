@@ -47,6 +47,16 @@
   # GPU apps (Qt6, etc.) can find the OpenGL/Vulkan driver.
   targets.genericLinux.enable = true;
 
+  # Export XDG_{CONFIG,DATA,STATE,CACHE}_HOME via home.sessionVariables so
+  # tools (and xdg-ninja) see explicit values instead of relying on defaults.
+  xdg.enable = true;
+
+  # Make HM-provided program modules that support it (currently: readline,
+  # codex — see modules/programs/*.nix upstream) write to XDG paths instead of
+  # $HOME directly. Part of the xdg-ninja migration; safer than hand-rolled
+  # env vars for these two since HM manages the file *and* the var together.
+  home.preferXdgDirectories = true;
+
   # Register Nix-installed fonts with the system fontconfig.
   # Required on non-NixOS — without this, fonts in the Nix store are invisible
   # to GTK apps (like Lutris) even if the packages are installed.
