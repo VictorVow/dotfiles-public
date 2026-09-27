@@ -33,7 +33,6 @@ com.openwebui.open-webui
 com.parsecgaming.parsec
 com.poweriso.PowerISO
 com.rafaelmardojai.Blanket
-com.rustdesk.RustDesk
 com.sigil_ebook.Sigil
 com.slack.Slack
 com.spacestation14.Launcher
@@ -83,6 +82,7 @@ io.github.trigg.discover_overlay
 io.github.vani_tty1.memerist
 io.github.webcamoid.Webcamoid
 io.github.wiiznokes.fan-control
+io.gitlab.hinnerkm.Kairos
 io.gpt4all.gpt4all
 io.itch.itch
 io.missioncenter.MissionCenter
@@ -147,7 +147,6 @@ org.videolan.VLC
 org.zotero.Zotero
 page.codeberg.JakobDev.jdSystemMonitor
 page.codeberg.vendillah.GamepadMirror
-page.kramo.Cartridges
 re.fossplant.songrec
 re.sonny.Eloquent
 re.sonny.Junction
