@@ -41,6 +41,26 @@
     X-KDE-autostart-after=panel
   '';
 
+  # Route the freedesktop Secret Service (org.freedesktop.secrets) to KWallet's
+  # ksecretd rather than gnome-keyring.
+  #
+  # Kubuntu ships both providers. gnome-keyring won the D-Bus name race at login
+  # (via pam_gnome_keyring + its systemd user unit), so libsecret clients stored
+  # secrets there while KDE/Electron apps using `--password-store=kwallet6` (e.g.
+  # Signal) stored theirs in KWallet. When the daemons churned, Signal's
+  # `safeStorage`-wrapped SQLCipher key stopped resolving and its database failed
+  # to open on every launch ("hmac check failed for pgno=1").
+  #
+  # Fix: gnome-keyring is purged in ansible.yml, and this user-level D-Bus
+  # activation file (which takes precedence over any /usr/share service file)
+  # makes ksecretd — the KWallet-backed Secret Service — the sole provider.
+  # See docs/system/secret-service-consolidation.md.
+  home.file.".local/share/dbus-1/services/org.freedesktop.secrets.service".text = ''
+    [D-BUS Service]
+    Name=org.freedesktop.secrets
+    Exec=/usr/bin/ksecretd
+  '';
+
   # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
   # convention into `gio launch`.
   #
