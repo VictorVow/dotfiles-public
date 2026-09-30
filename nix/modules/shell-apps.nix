@@ -352,6 +352,8 @@ in
       # Show pane titles at the top of each pane border
       set -g pane-border-status top
       set -g pane-border-style fg="#00c1ff",bg=default
+      # Active pane border: green normally, yellow while zoomed (prefix+z)
+      set -g pane-active-border-style "#{?window_zoomed_flag,fg=#ffff00,fg=green},bg=default"
 
       # ── Status bar ──────────────────────────────────────────────────────────
       set -g status-style         bg="#1a1a2e",fg="#cdd6f4"
