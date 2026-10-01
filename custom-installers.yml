@@ -437,7 +437,53 @@
       when: ansible_facts.packages['awatcher'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
-    # LIBRESPRITE — https://github.com/LibreSprite/LibreSprite
+    # CLINE DESKTOP — https://github.com/cline/cline/releases
+    # Desktop app .deb (package name `cline`). The repo mixes releases for the
+    # CLI, SDK and VS Code extension, so /releases/latest is unreliable; pick the
+    # newest non-prerelease tagged `desktop-v*` instead. Install-if-absent only.
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Cline Desktop | fetch release list from GitHub
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/cline/cline/releases?per_page=100
+        return_content: yes
+      register: cline_releases
+      when: ansible_facts.packages['cline'] is not defined
+
+    - name: Cline Desktop | resolve .deb download URL
+      ansible.builtin.set_fact:
+        cline_download_url: >-
+          {{ (cline_releases.json
+              | selectattr('tag_name', 'match', '^desktop-v')
+              | rejectattr('prerelease')
+              | rejectattr('draft')
+              | first).assets
+             | selectattr('name', 'search', '_' ~ deb_arch ~ '\.deb$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: ansible_facts.packages['cline'] is not defined
+
+    - name: Cline Desktop | download .deb package
+      ansible.builtin.get_url:
+        url: "{{ cline_download_url }}"
+        dest: /tmp/cline.deb
+        mode: '0644'
+      when: ansible_facts.packages['cline'] is not defined
+
+    - name: Cline Desktop | install .deb
+      ansible.builtin.apt:
+        deb: /tmp/cline.deb
+      become: yes
+      when: ansible_facts.packages['cline'] is not defined
+
+    - name: Cline Desktop | clean up temp .deb
+      ansible.builtin.file:
+        path: /tmp/cline.deb
+        state: absent
+      when: ansible_facts.packages['cline'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
+    # LIBRESPRITE —https://github.com/LibreSprite/LibreSprite
     # FOSS (MIT) fork of Aseprite. Replaces pkgs.aseprite: nixpkgs' aseprite
     # builds Aseprite's source-available tree from scratch on every lock bump
     # (slow, and the prebuilt binary upstream sells is paid). LibreSprite ships
