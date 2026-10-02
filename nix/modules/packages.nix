@@ -241,6 +241,7 @@ in
 
     # ── Development: Utilities ────────────────────────────────────────────────
     ffmpeg  # Video/audio processing Swiss army knife
+    just    # Command runner for project-specific tasks (justfile)
     pkgs-unstable.zrok  # Peer-to-peer reverse proxy / tunnel (replaces brew install zrok).
                         # Pinned to unstable: stable nixpkgs lags on zrok 1.x;
                         # unstable has 2.x (1.x dropped the --name-selection flag).
