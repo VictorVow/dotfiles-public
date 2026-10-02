@@ -698,6 +698,22 @@ if ! command -v appman &>/dev/null; then
   skipped "appman not found — skipping."
   RESULTS["AppMan"]="skipped (not installed)"
 else
+  # Install anything declared in appman-appimages.txt but not yet installed
+  # (same sync as custom-installers.yml, so new entries don't wait for the next
+  # ansible run — `appman -u` only upgrades apps that are already installed).
+  # Removal stays manual, as in the playbook.
+  mapfile -t APPMAN_MISSING < <(
+    comm -23 \
+      <(grep -vE '^[[:space:]]*(#|$)' "$SCRIPT_DIR/appman-appimages.txt" | tr -d '[:blank:]' | sort -u) \
+      <(NO_COLOR=1 appman -f 2>/dev/null | awk -F'|' '/◆/ { sub(/^[^◆]*◆[[:space:]]*/, "", $1); gsub(/[[:space:]]/, "", $1); print $1 }' | sort -u)
+  )
+  if (( ${#APPMAN_MISSING[@]} )); then
+    info "Installing AppImages declared but missing: ${APPMAN_MISSING[*]}"
+    run_step "appman install new" env NO_COLOR=1 appman -i "${APPMAN_MISSING[@]}"
+  else
+    RESULTS["appman install new"]="✓ none missing"
+  fi
+
   # `appman -u` self-updates AM and upgrades every managed AppImage. Runs
   # non-interactively (no TTY prompts), matching the rest of update.sh.
   run_step "appman update" appman -u
@@ -815,7 +831,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv tools" "AppMan" "appman update" "Distrobox" "Nix GC"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"
