@@ -478,6 +478,9 @@ else
   # the switch upgraded (printed in the summary at the end of the run).
   HM_PROFILE="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"
   HM_PKGS_BEFORE="$(readlink -f "$HM_PROFILE/home-path" 2>/dev/null || true)"
+  # Build logs written after this point are derivations the switch had to
+  # compile locally (cache misses) — reported once the switch finishes.
+  NIX_BUILD_SINCE="$(date +%s)"
   run_step "home-manager switch" \
     home-manager switch --flake "$NIX_FLAKE_DIR#boss" --no-write-lock-file
 
@@ -504,6 +507,16 @@ else
   if ! $DRY_RUN; then
     HM_PKGS_AFTER="$(readlink -f "$HM_PROFILE/home-path" 2>/dev/null || true)"
     HM_PKG_CHANGES="$(_format_hm_pkg_changes "$HM_PKGS_BEFORE" "$HM_PKGS_AFTER")"
+
+    # Which top-level packages needed building rather than substituting, and
+    # how long their builds took. Attributes each locally-built derivation to
+    # the home.packages entries whose closure contains it. If the switch
+    # failed, the profile still points at the old generation, so only the
+    # totals line is meaningful.
+    HM_PATH_DRV="$(nix-store -q --deriver "$HM_PKGS_AFTER" 2>/dev/null || true)"
+    info "Packages built locally during the switch:"
+    python3 "$SCRIPT_DIR/scripts/nix-build-report.py" "$NIX_BUILD_SINCE" "$HM_PATH_DRV" \
+      || warn "nix-build-report.py failed — build report unavailable."
   fi
 
   success "Nix / Home Manager done."
