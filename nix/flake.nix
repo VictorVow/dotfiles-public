@@ -51,16 +51,20 @@
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
     ie-r.url = "github:miaupaw/ie-r";
+
+    # Zed's Delta (official prebuilt Linux binaries, wrapped for Nix).
+    delta.url = "github:zed-industries/delta-nix";
+    delta.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, sops-nix, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r;
+        inherit llm-agents tuxManager ie-r delta;
         pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
         hostProfile = {
           hms = {

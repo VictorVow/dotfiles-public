@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, ... }:
+{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -229,6 +229,9 @@ in
     # vscodium — managed by vscodiumPkg + home.packages in programs.nix
     kdePackages.kate          # KDE text editor with syntax highlighting and plugins
     kdePackages.markdownpart  # KPart for rendering Markdown — enables live preview in Kate
+    delta.packages.${pkgs.stdenv.hostPlatform.system}.delta
+                              # Zed's Delta (delta.dev) — proprietary prebuilt binary via
+                              # the official zed-industries/delta-nix flake
     # code-cursor — removed from Nix; nixpkgs repackages each release as a
     # heavy Electron build. Installed via custom-installers.yml from upstream
     # AppImage / .deb instead.
