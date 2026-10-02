@@ -493,6 +493,8 @@ in
       "https://rclone-lord-ubuntu.device.example.com"
       "https://syncyomi.device.example.com"
       "https://yamtrack.device.example.com/"
+      "https://watchsync.device.example.com/"
+      "https://wud-lord-ubuntu.device.example.com"
       # Tailscale
       "https://lord-ubuntu.tailee8f02.ts.net"
       # Own services
