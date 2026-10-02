@@ -184,9 +184,8 @@
 
           # ── System Python tooling ─────────────────────────────────────────
           # Kept at system level for compatibility with system Python workflows.
-          # User-space Python tools (poetry, uv, yt-dlp) are now in Nix.
+          # User-space Python tools (uv, yt-dlp) are now in Nix.
           - python3-pip
-          - pipx
 
           # ── apt infrastructure ────────────────────────────────────────────
           - apt-transport-https # HTTPS support for apt repositories

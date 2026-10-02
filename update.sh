@@ -9,7 +9,7 @@
 #   3. Homebrew            — remaining brew packages not in Nix
 #   4. npm globals         — AI CLI tools installed to ~/.npm-global
 #   5. Flatpak             — user Flatpak apps
-#   6. pipx                — any remaining system pipx packages
+#   6. uv tools            — Python CLI tools installed via `uv tool install`
 #   7. Distrobox           — OS packages inside containers
 #
 # Usage:
@@ -678,36 +678,17 @@ else
   success "Flatpak done."
 fi
 
-# ── 6. pipx ───────────────────────────────────────────────────────────────────
-step "6/9  pipx"
+# ── 6. uv tools ───────────────────────────────────────────────────────────────
+step "6/9  uv tools"
 
-if ! command -v pipx &>/dev/null; then
-  skipped "pipx not found — skipping."
-  RESULTS["pipx"]="skipped (not installed)"
+if ! command -v uv &>/dev/null; then
+  skipped "uv not found — skipping."
+  RESULTS["uv tools"]="skipped (not installed)"
 else
-  # Upgrade all pipx-managed packages. Some tools have moved to Nix (yt-dlp,
-  # poetry, uv, ansible), but the rest (fanficfare, git-filter-repo,
-  # claude-code-log) remain pipx-managed and are upgraded here. key-mon was
-  # uninstalled — abandoned upstream, broken on Python 3.12+ (SafeConfigParser
-  # removed) and unbuildable against system PyGObject in an isolated venv.
-  #
-  # If venvs reference a Python that no longer exists (e.g. after a system
-  # Python bump), `pipx upgrade-all` crashes with a traceback. Detect that up
-  # front and rebuild against the current interpreter before upgrading.
-  # Note: `pipx list` exits non-zero when an interpreter is missing, so its
-  # output is captured before grepping — piping straight into grep would let
-  # that non-zero status trip `set -o pipefail` regardless of the match.
-  pipx_upgrade_all() {
-    local list_out
-    list_out=$(pipx list 2>&1) || true
-    if grep -q 'invalid interpreter' <<<"$list_out"; then
-      warn "pipx venvs reference a missing Python — running reinstall-all."
-      pipx reinstall-all || return 1
-    fi
-    pipx upgrade-all
-  }
-  run_step "pipx upgrade-all" pipx_upgrade_all
-  success "pipx done."
+  # Upgrade all uv-managed tools (fanficfare, git-filter-repo, claude-code-log).
+  # Tools that live in Nix (yt-dlp, uv, ansible) are not touched here.
+  run_step "uv tool upgrade --all" uv tool upgrade --all
+  success "uv tools done."
 fi
 
 # ── 7. AppMan (AM) — AppImages ────────────────────────────────────────────────
@@ -834,7 +815,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "pipx" "AppMan" "appman update" "Distrobox" "Nix GC"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv tools" "AppMan" "appman update" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"

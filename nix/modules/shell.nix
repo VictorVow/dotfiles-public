@@ -51,8 +51,8 @@
       export NPM_CONFIG_PREFIX="$HOME/.npm-global"
       export PATH="$HOME/.npm-global/bin:$PATH"
 
-      # ── Pipx ────────────────────────────────────────────────────────────────
-      # pipx installs remain on the system from ansible; expose their bin dir.
+      # ── uv tools ────────────────────────────────────────────────────────────
+      # `uv tool install` links executables into ~/.local/bin.
       export PATH="$HOME/.local/bin:$PATH"
 
       # ── Android SDK ─────────────────────────────────────────────────────────
@@ -366,10 +366,6 @@
     # Base dir only — Ren'Py appends its own <Game>-<id> subfolder underneath.
     RENPY_PATH_TO_SAVES = "$HOME/.local/share/renpy";
     FVM_CACHE_PATH = "$HOME/.cache/fvm";
-
-    # XDG migration: pipx (apt-installed, not Nix-managed)
-    PIPX_HOME = "$HOME/.local/share/pipx";
-    PIPX_BIN_DIR = "$HOME/.local/bin";  # unchanged, but pipx's docs want it explicit for this move
 
     # Podman rootless networking — required for Distrobox rootless containers
     PODMAN_USERNS = "keep-id";
