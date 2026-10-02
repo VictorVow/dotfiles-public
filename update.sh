@@ -39,8 +39,10 @@ GC_NIX=true
 DRY_RUN=false
 
 # Minimum age (in days) of the upstream commit each pinned flake input is
-# advanced to. Older commits are reliably covered by Hydra's binary cache,
-# so home-manager switch downloads pre-built artifacts rather than compiling.
+# advanced to. For nixpkgs this is the age of the channel *release* (when Hydra
+# published it), not the commit date. Older releases are reliably covered by
+# Hydra's binary cache, so home-manager switch downloads pre-built artifacts
+# rather than compiling.
 # Override via env: PIN_AGE_DAYS=21 ./update.sh
 PIN_AGE_DAYS="${PIN_AGE_DAYS:-14}"
 
@@ -148,6 +150,55 @@ _latest_commit_at_least_n_days_old() {
         fi
       done
   return 1
+}
+
+# Find the newest NixOS channel release (nixos-unstable, nixos-YY.MM) that was
+# *published* at least <days> ago. Echoes the 40-char SHA; empty + non-zero on
+# failure or for non-nixos channels.
+#
+# Why not _latest_commit_at_least_n_days_old for nixpkgs: a commit's committer
+# date is when it was made, not when it reached the branch. PRs merged into
+# `staging` keep their date, then land on nixos-unstable days or weeks later
+# in a staging-next merge — so the commit walk can pick a staging-only tree
+# that Hydra never built (e.g. 3475f3c, dated 2026-09-18 but only on the
+# branch since 2026-09-28: ~600 local builds incl. perl/gettext/ncurses).
+#
+# Channel releases are exactly the revisions Hydra fully built before
+# advancing the channel. nix-releases' S3 bucket keeps one object per release
+# (nixos/<unstable|YY.MM>/nixos-<ver>.<shortrev>) whose LastModified is the
+# publish time; its git-revision file holds the full SHA.
+_latest_channel_release_at_least_n_days_old() {
+  local channel="$1" days="$2"
+  local dir
+  case "$channel" in
+    nixos-unstable)           dir="nixos/unstable" ;;
+    nixos-[0-9][0-9].[0-9][0-9]) dir="nixos/${channel#nixos-}" ;;
+    *) return 1 ;;
+  esac
+  local cutoff; cutoff=$(date -u -d "${days} days ago" +%s) || return 1
+  # Keys sort lexically by version; starting after last year's releases keeps
+  # the listing to the current + previous cycle instead of everything since 2017.
+  local start_after="${dir}/nixos-$(( $(date +%y) - 1 ))"
+  local token="" page best_key="" best_ts=0 key lm ts
+  while :; do
+    local args=(-G -s --fail "https://nix-releases.s3.amazonaws.com/"
+      --data-urlencode "list-type=2" --data-urlencode "delimiter=/"
+      --data-urlencode "prefix=${dir}/nixos-" --data-urlencode "start-after=${start_after}")
+    [[ -n "$token" ]] && args+=(--data-urlencode "continuation-token=${token}")
+    page=$(curl "${args[@]}") || return 1
+    while read -r key lm; do
+      ts=$(date -u -d "$lm" +%s 2>/dev/null) || continue
+      if (( ts <= cutoff && ts > best_ts )); then best_key="$key"; best_ts=$ts; fi
+    done < <(grep -oE '<Key>[^<]+</Key><LastModified>[^<]+' <<<"$page" \
+               | sed -E 's|<Key>||; s|</Key><LastModified>| |')
+    token=$(grep -oE '<NextContinuationToken>[^<]+' <<<"$page" | sed 's|.*>||') || true
+    [[ -z "$token" ]] && break
+  done
+  [[ -n "$best_key" ]] || return 1
+  local sha
+  sha=$(curl -sL --fail "https://releases.nixos.org/${best_key}/git-revision") || return 1
+  [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || return 1
+  echo "$sha"
 }
 
 # Read the upstream branch name recorded in the `# channel: <name>` comment
@@ -398,7 +449,9 @@ else
 
     # ── Age-pin tracked inputs to a ≥<age>-day-old commit ────────────────────
     # Rewrite the SHAs embedded in flake.nix's input URLs to the newest
-    # upstream commit on each tracked branch that is at least <age> days old.
+    # upstream commit on each tracked branch that is at least <age> days old
+    # (for nixpkgs: the newest channel release published at least that long
+    # ago — see _latest_channel_release_at_least_n_days_old).
     # For nixpkgs/home-manager that age is PIN_AGE_DAYS: by the time a commit
     # is that old, Hydra has fully populated its binary cache for it, so
     # home-manager switch downloads pre-built store paths instead of
@@ -430,7 +483,12 @@ else
           continue
         fi
         old_sha=$(_current_input_sha "$NIX_FLAKE_DIR/flake.nix" "$in_name" "$repo_path")
-        new_sha=$(_latest_commit_at_least_n_days_old "$owner" "$repo" "$branch" "$age_days") || true
+        if [[ "$branch" =~ ^nixos- ]]; then
+          # nixpkgs: only ever pin to a Hydra-built channel release (see helper).
+          new_sha=$(_latest_channel_release_at_least_n_days_old "$branch" "$age_days") || true
+        else
+          new_sha=$(_latest_commit_at_least_n_days_old "$owner" "$repo" "$branch" "$age_days") || true
+        fi
         if [[ -z "$new_sha" ]]; then
           warn "  ${in_name}: could not find a ≥${age_days}d-old commit on ${branch}."
           RESULTS["age-pin ${in_name}"]="✗ fetch failed"
