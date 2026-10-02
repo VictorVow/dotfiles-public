@@ -29,3 +29,5 @@ hydra
 # Misc
 appimagetool
 opencode-desktop
+marktext
+veracrypt
