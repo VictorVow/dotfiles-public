@@ -437,6 +437,46 @@
       when: ansible_facts.packages['awatcher'] is not defined
 
     # ════════════════════════════════════════════════════════════════════════
+    # HW-MONITOR — https://github.com/husseinhareb/hw-monitor
+    # Tauri system monitor distributed as .deb (links against system WebKit).
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: hw-monitor | fetch latest release metadata from GitHub
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/husseinhareb/hw-monitor/releases/latest
+        return_content: yes
+      register: hw_monitor_release
+      when: ansible_facts.packages['hw-monitor'] is not defined
+
+    - name: hw-monitor | resolve .deb download URL
+      ansible.builtin.set_fact:
+        hw_monitor_download_url: >-
+          {{ hw_monitor_release.json.assets
+             | selectattr('name', 'search', '_' ~ deb_arch ~ '\.deb$')
+             | map(attribute='browser_download_url')
+             | first }}
+      when: ansible_facts.packages['hw-monitor'] is not defined
+
+    - name: hw-monitor | download .deb package
+      ansible.builtin.get_url:
+        url: "{{ hw_monitor_download_url }}"
+        dest: /tmp/hw-monitor.deb
+        mode: '0644'
+      when: ansible_facts.packages['hw-monitor'] is not defined
+
+    - name: hw-monitor | install .deb
+      ansible.builtin.apt:
+        deb: /tmp/hw-monitor.deb
+      become: yes
+      when: ansible_facts.packages['hw-monitor'] is not defined
+
+    - name: hw-monitor | clean up temp .deb
+      ansible.builtin.file:
+        path: /tmp/hw-monitor.deb
+        state: absent
+      when: ansible_facts.packages['hw-monitor'] is not defined
+
+    # ════════════════════════════════════════════════════════════════════════
     # CLINE DESKTOP — https://github.com/cline/cline/releases
     # Desktop app .deb (package name `cline`). The repo mixes releases for the
     # CLI, SDK and VS Code extension, so /releases/latest is unreliable; pick the
