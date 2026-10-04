@@ -148,7 +148,7 @@
       }
 
       # ── md/mds: open file(s) in MarkText ───────────────────────────────────────
-      # The marktext.appimage fork's second-instance handler routes args
+      # The AppMan-installed marktext fork's second-instance handler routes args
       # into the running process. With `openFilesInNewWindow: false` set in
       # ~/.config/marktext/preferences.json (the default), bare args land as
       # tabs in the existing window. Passing `-n` forces a fresh window
@@ -159,10 +159,10 @@
       #   md   — files open as tabs in the existing window (default flow).
       #   mds  — new window per invocation (even with no args → blank window).
       md() {
-        ~/AppImages/marktext.appimage --no-sandbox "$@" & disown
+        ~/.local/bin/marktext --no-sandbox "$@" & disown
       }
       mds() {
-        ~/AppImages/marktext.appimage --no-sandbox -n "$@" & disown
+        ~/.local/bin/marktext --no-sandbox -n "$@" & disown
       }
 
       # ── hms: home-manager switch ───────────────────────────────────────────
