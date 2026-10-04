@@ -14,6 +14,11 @@
   vars:
     deb_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
     dnvm_arch: "{{ 'x64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+    # Looking Glass: must match the client rev pinned in nix/modules/packages.nix
+    # (lookingGlassClient) and the IDD installed in the Windows guest.
+    looking_glass_rev: 236efcb155f952f5d7d9fcd5891a3060ad254e68
+    kvmfr_version: "0.0.12"      # PACKAGE_VERSION in module/dkms.conf at that rev
+    kvmfr_static_size_mb: 64     # 2256x1504 needs ~46 MiB → next power of two
 
   tasks:
 
@@ -1036,3 +1041,219 @@
         state: restarted
       become: yes
       tags: chromium_sandbox
+
+    # ════════════════════════════════════════════════════════════════════════
+    # LOOKING GLASS (KVMFR) — https://github.com/gnif/LookingGlass
+    # Host side for viewing a Windows VM through the Looking Glass IDD: the
+    # kvmfr kernel module (via dkms) exposing /dev/kvmfr0 as IVSHMEM backing,
+    # plus the udev/AppArmor/cgroup permissions QEMU and the client need.
+    # The client itself is Nix-managed (packages.nix); VM creation and the
+    # guest IDD install are in scripts/looking-glass/README.md.
+    # Run alone: ansible-playbook custom-installers.yml --tags looking_glass -K
+    # ════════════════════════════════════════════════════════════════════════
+
+    - name: Looking Glass | install VM + module build prerequisites
+      ansible.builtin.apt:
+        name:
+          - dkms
+          - "linux-headers-{{ ansible_kernel }}"
+          - swtpm        # TPM 2.0 emulator, required by Windows 11
+          - swtpm-tools
+          # libvirtd + virsh. Explicit because a past `apt autoremove` silently
+          # dropped the daemon (virt-manager comes from Nix, so nothing on the
+          # apt side kept it marked as needed).
+          - libvirt-daemon-system
+          - libvirt-clients
+        state: present
+      become: yes
+      tags: looking_glass
+
+    - name: Looking Glass | read installed kvmfr source rev
+      ansible.builtin.slurp:
+        src: "/usr/src/kvmfr-{{ kvmfr_version }}/.looking-glass-rev"
+      register: kvmfr_rev_stamp
+      failed_when: false
+      tags: looking_glass
+
+    - name: Looking Glass | decide whether kvmfr needs (re)installing
+      ansible.builtin.set_fact:
+        kvmfr_needs_install: >-
+          {{ kvmfr_rev_stamp.content is not defined
+             or (kvmfr_rev_stamp.content | b64decode | trim) != looking_glass_rev }}
+      tags: looking_glass
+
+    - name: Looking Glass | remove previous kvmfr dkms module
+      ansible.builtin.command: dkms remove "kvmfr/{{ kvmfr_version }}" --all
+      become: yes
+      failed_when: false
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | clear previous kvmfr source tree
+      ansible.builtin.file:
+        path: "/usr/src/kvmfr-{{ kvmfr_version }}"
+        state: absent
+      become: yes
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | download source tarball at pinned rev
+      ansible.builtin.get_url:
+        url: "https://codeload.github.com/gnif/LookingGlass/tar.gz/{{ looking_glass_rev }}"
+        dest: /tmp/looking-glass-src.tar.gz
+        mode: '0644'
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | create kvmfr dkms source directory
+      ansible.builtin.file:
+        path: "/usr/src/kvmfr-{{ kvmfr_version }}"
+        state: directory
+        mode: '0755'
+      become: yes
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | extract module/ into dkms source directory
+      ansible.builtin.unarchive:
+        src: /tmp/looking-glass-src.tar.gz
+        dest: "/usr/src/kvmfr-{{ kvmfr_version }}"
+        remote_src: yes
+        extra_opts:
+          - --strip-components=2
+          - --wildcards
+          - "*/module/*"
+      become: yes
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | dkms add + build + install kvmfr
+      ansible.builtin.shell: |
+        set -e
+        dkms add "kvmfr/{{ kvmfr_version }}"
+        dkms install "kvmfr/{{ kvmfr_version }}"
+        echo "{{ looking_glass_rev }}" > "/usr/src/kvmfr-{{ kvmfr_version }}/.looking-glass-rev"
+      become: yes
+      when: kvmfr_needs_install | bool
+      tags: looking_glass
+
+    - name: Looking Glass | clean up source tarball
+      ansible.builtin.file:
+        path: /tmp/looking-glass-src.tar.gz
+        state: absent
+      tags: looking_glass
+
+    - name: Looking Glass | set kvmfr shared memory size
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/kvmfr.conf
+        content: |
+          # Managed by installs/custom-installers.yml — do not edit by hand.
+          # Must equal the IVSHMEM 'size' in the VM's <qemu:commandline> (MiB × 1048576).
+          options kvmfr static_size_mb={{ kvmfr_static_size_mb }}
+        mode: '0644'
+      become: yes
+      tags: looking_glass
+
+    - name: Looking Glass | load kvmfr at boot
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/kvmfr.conf
+        content: |
+          # Managed by installs/custom-installers.yml — KVMFR Looking Glass module
+          kvmfr
+        mode: '0644'
+      become: yes
+      tags: looking_glass
+
+    - name: Looking Glass | udev rule granting the seat user access to /dev/kvmfr0
+      ansible.builtin.copy:
+        dest: /etc/udev/rules.d/70-kvmfr.rules
+        # 70- sorts before 73-seat-late.rules so the uaccess tag is honoured.
+        content: |
+          # Managed by installs/custom-installers.yml — do not edit by hand.
+          SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
+        mode: '0644'
+      become: yes
+      register: kvmfr_udev_rule
+      tags: looking_glass
+
+    - name: Looking Glass | reload udev rules
+      ansible.builtin.command: udevadm control --reload-rules
+      become: yes
+      when: kvmfr_udev_rule.changed
+      tags: looking_glass
+
+    - name: Looking Glass | allow QEMU (AppArmor) to use /dev/kvmfr0
+      ansible.builtin.blockinfile:
+        path: /etc/apparmor.d/local/abstractions/libvirt-qemu
+        create: yes
+        mode: '0644'
+        marker: "# {mark} Looking Glass — managed by installs/custom-installers.yml"
+        block: |
+          /dev/kvmfr0 rw,
+      become: yes
+      register: kvmfr_apparmor
+      tags: looking_glass
+
+    - name: Looking Glass | allow QEMU (cgroup device ACL) to use /dev/kvmfr0
+      # The stock Ubuntu qemu.conf ships cgroup_device_acl commented out, so this
+      # block is the only active definition: libvirt's defaults + /dev/kvmfr0.
+      ansible.builtin.blockinfile:
+        path: /etc/libvirt/qemu.conf
+        marker: "# {mark} Looking Glass — managed by installs/custom-installers.yml"
+        block: |
+          cgroup_device_acl = [
+              "/dev/null", "/dev/full", "/dev/zero",
+              "/dev/random", "/dev/urandom",
+              "/dev/ptmx", "/dev/kvm", "/dev/userfaultfd",
+              "/dev/kvmfr0"
+          ]
+      become: yes
+      register: kvmfr_qemu_conf
+      tags: looking_glass
+
+    - name: Looking Glass | reload AppArmor
+      ansible.builtin.systemd:
+        name: apparmor
+        state: reloaded
+      become: yes
+      when: kvmfr_apparmor.changed
+      tags: looking_glass
+
+    # Load before libvirtd/any VM starts: if QEMU opens /dev/kvmfr0 first it
+    # creates a plain file there and the module can't create its char device.
+    - name: Looking Glass | load kvmfr module now
+      community.general.modprobe:
+        name: kvmfr
+        params: "static_size_mb={{ kvmfr_static_size_mb }}"
+        state: present
+      become: yes
+      tags: looking_glass
+
+    - name: Looking Glass | enable + start libvirtd
+      ansible.builtin.systemd:
+        name: libvirtd
+        enabled: yes
+        state: "{{ 'restarted' if kvmfr_qemu_conf.changed else 'started' }}"
+      become: yes
+      tags: looking_glass
+
+    # The package only activates the NAT network on first install; after a
+    # remove/reinstall (leftover config) it stays inactive with autostart off.
+    - name: Looking Glass | start + autostart libvirt default NAT network
+      ansible.builtin.shell: |
+        set -e
+        info=$(virsh -c qemu:///system net-info default)
+        changed=0
+        if ! grep -Eq '^Active:\s+yes' <<<"$info"; then
+          virsh -c qemu:///system net-start default; changed=1
+        fi
+        if ! grep -Eq '^Autostart:\s+yes' <<<"$info"; then
+          virsh -c qemu:///system net-autostart default; changed=1
+        fi
+        echo "changed=$changed"
+      args:
+        executable: /bin/bash
+      become: yes
+      register: libvirt_default_net
+      changed_when: "'changed=1' in libvirt_default_net.stdout"
+      tags: looking_glass

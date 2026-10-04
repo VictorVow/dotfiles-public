@@ -30,6 +30,33 @@ let
     rev = "8f39cf7477714d8826aadbb12067bd5c0c1af8e3";
     sha256 = "sha256-/pJVNVTjLS3ZaeSkhS9ltCtEH237gVqCnb4S1f/yfD0=";
   };
+
+  # Looking Glass client, bleeding-edge build. nixpkgs only has B7, but the
+  # signed Windows IDD is bleeding-only, and the client, IDD and kvmfr kernel
+  # module must all come from the SAME upstream commit. To update, bump this
+  # rev + hash AND `looking_glass_rev` in custom-installers.yml, then install
+  # the matching looking-glass-idd-setup.exe in the guest.
+  # See scripts/looking-glass/README.md.
+  lookingGlassClient = pkgs.looking-glass-client.overrideAttrs (old: {
+    version = "B7-826-236efcb1";
+    src = pkgs.fetchFromGitHub {
+      owner = "gnif";
+      repo = "LookingGlass";
+      rev = "236efcb155f952f5d7d9fcd5891a3060ad254e68";
+      fetchSubmodules = true;
+      hash = "sha256-NAfV4Z0RZp2IGBzVAFysm53aGMEReT03RIN+45TveUU=";
+    };
+    patches = [ ]; # nixpkgs' nanosvg-unvendor.diff targets B7
+    # New since B7: fuse3 (required), libunwind + libdw (crash backtraces),
+    # usbredir (emulated USB audio). zstd/libxcb satisfy transitive .pc lookups.
+    buildInputs = old.buildInputs ++ (with pkgs; [
+      fuse3 libunwind elfutils usbredir libdrm zstd libxcb
+    ]);
+    postUnpack = ''
+      echo B7-826-236efcb1 > source/VERSION
+      export sourceRoot="source/client"
+    '';
+  });
 in
 {
   home.packages = with pkgs; [
@@ -69,6 +96,8 @@ in
     rootlesskit  # User namespace helper for rootless containers
     virt-manager # GUI for managing QEMU/KVM virtual machines
                  # Note: libvirtd daemon is managed by the system (stays in apt/systemd)
+    lookingGlassClient # Looking Glass client: low-latency view of a Windows VM via IVSHMEM/kvmfr
+                       # (pinned bleeding build, see let-block; kvmfr module via custom-installers.yml)
 
     # ── File Management & Backup ──────────────────────────────────────────────
     # rclone — installed by programs.rclone (modules/rclone.nix), which also
@@ -482,4 +511,19 @@ in
     # store path (and thus the bind-mount target) changes.
     google-chrome
   ];
+
+  # Looking Glass client config. lgmp:shmDevice points at the kvmfr char device created
+  # by the kernel module (custom-installers.yml) rather than /dev/shm, enabling
+  # the DMA-BUF import path recommended for iGPUs.
+  xdg.configFile."looking-glass/client.ini".text = ''
+    [lgmp]
+    shmDevice=/dev/kvmfr0
+
+    [win]
+    title=Looking Glass (win11)
+    fullScreen=no
+
+    [spice]
+    enable=yes
+  '';
 }
