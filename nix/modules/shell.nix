@@ -397,8 +397,21 @@
     # MCP server secrets — inherited by MCP server subprocesses at runtime.
     # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
     # shell-inherited values and an empty string would shadow the real value.
-    LOGSEQ_API_TOKEN = "7z5opygq2";   # ← paste your LogSeq HTTP API token (Settings → HTTP APIs)
-    GITHUB_TOKEN     = "REDACTED_TOKEN";   # ← paste a GitHub PAT with repo + read:org scopes (github.com → Settings → Developer settings → PATs)
+    # Values are sops-encrypted in ../secrets/shell.yaml (see `sops` below) and
+    # read from their decrypted files when the session starts.
+    LOGSEQ_API_TOKEN = "$(cat ${config.sops.secrets.logseq_api_token.path} 2>/dev/null)";   # LogSeq HTTP API token (Settings → HTTP APIs)
+    GITHUB_TOKEN     = "$(cat ${config.sops.secrets.github_token.path} 2>/dev/null)";       # GitHub token with repo + read:org scopes
+  };
+
+  # ── Sops secrets for session variables ───────────────────────────────────────
+  # Same pattern as modules/ai-secrets.nix: explicit stable paths so the
+  # session variables above can `cat` them. Edit with: sops nix/secrets/shell.yaml
+  sops = {
+    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    secrets = lib.genAttrs [ "github_token" "logseq_api_token" ] (name: {
+      sopsFile = ../secrets/shell.yaml;
+      path = "${config.home.homeDirectory}/.config/shell-secrets/${name}";
+    });
   };
 
   # ── Activation: Ensure Flathub user remote is configured ─────────────────────

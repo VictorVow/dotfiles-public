@@ -947,7 +947,7 @@ in
 
       # LogSeq knowledge base — requires LogSeq running with HTTP API enabled (port 12315).
       # One-time setup: LogSeq → Settings → Features → HTTP APIs → enable → generate token
-      # → set LOGSEQ_API_TOKEN in home.sessionVariables above → hms + restart shell.
+      # → store it as logseq_api_token via `sops nix/secrets/shell.yaml` → hms + restart shell.
       logseq = {
         command = "uv";
         args    = [ "run" "--with" "mcp-logseq" "mcp-logseq" ];
@@ -962,7 +962,7 @@ in
       };
 
       # GitHub API — PR/issue operations, release queries, cross-repo search.
-      # Needs GITHUB_TOKEN (classic PAT, repo + read:org scopes) in sessionVariables.
+      # Needs GITHUB_TOKEN (repo + read:org scopes); sops-encrypted in nix/secrets/shell.yaml.
       github = {
         command = "npx";
         args    = [ "-y" "@modelcontextprotocol/server-github" ];
