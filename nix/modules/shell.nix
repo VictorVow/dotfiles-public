@@ -261,10 +261,13 @@
 
         current_gh=$(gh api user --jq .login 2>/dev/null)
         if [ "$current_gh" != "$name" ]; then
-          if gh auth switch -u "$name" >/dev/null 2>&1; then
+          # Re-check after switching: a stale keyring token lets `switch`
+          # succeed while `gh api user` still fails.
+          if gh auth switch -u "$name" >/dev/null 2>&1 \
+             && [ "$(gh api user --jq .login 2>/dev/null)" = "$name" ]; then
             echo "  gh active account -> $name"
           else
-            echo "  WARN: could not switch gh to $name — run: gh auth login -u $name" >&2
+            echo "  WARN: could not switch gh to $name (not in keyring or token stale) — run: gh auth login -h github.com (log in as $name in the browser)" >&2
           fi
         fi
       }
