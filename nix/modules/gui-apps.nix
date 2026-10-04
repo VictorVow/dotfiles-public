@@ -491,6 +491,7 @@ in
       "https://calibre-content.device.example.com"
       "https://git.device.example.com"
       "https://rclone-lord-ubuntu.device.example.com"
+      "https://reddit.device.example.com/"
       "https://syncyomi.device.example.com"
       "https://yamtrack.device.example.com/"
       "https://watchsync.device.example.com/"
@@ -558,6 +559,7 @@ in
       "https://github.com"
       "https://gitlab.com"
       "https://howlongtobeat.com"
+      "https://www.kagesekai.ai/"
       "https://www.isekaizero.ai"
       "https://www.itv.com" # Football streams
       "https://access.leedsbuildingsociety.co.uk"
