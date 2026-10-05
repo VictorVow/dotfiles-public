@@ -158,11 +158,15 @@
       #
       #   md   — files open as tabs in the existing window (default flow).
       #   mds  — new window per invocation (even with no args → blank window).
+      #
+      # AppMan-installed AppImage at `~/.local/bin/marktext` vs ~/AppImages/marktext-fork.appimage
+      #   There's a few features of my fork that I haven't been able to upstream yet
+      #
       md() {
-        ~/.local/bin/marktext --no-sandbox "$@" & disown
+        ~/AppImages/marktext-fork.appimage --no-sandbox "$@" & disown
       }
       mds() {
-        ~/.local/bin/marktext --no-sandbox -n "$@" & disown
+        ~/AppImages/marktext-fork.appimage --no-sandbox -n "$@" & disown
       }
 
       # ── hms: home-manager switch ───────────────────────────────────────────
