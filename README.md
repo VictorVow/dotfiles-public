@@ -25,7 +25,7 @@ installs/
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
-│       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), zed-editor, rofi
+│       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)

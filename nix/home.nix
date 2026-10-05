@@ -31,7 +31,7 @@
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)
     ./modules/shell-apps.nix # home.programs.* for shell/CLI apps
-    ./modules/gui-apps.nix   # home.programs.* for GUI apps (Firefox, Zed, Rofi)
+    ./modules/gui-apps.nix   # home.programs.* for GUI apps (Firefox, Rofi, OBS)
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
