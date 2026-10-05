@@ -42,8 +42,13 @@ let
     # repo link from the statusline before rendering. FORCE_HYPERLINK=1 overrides
     # that detection so the 🔗 segment renders as a clickable link. (tmux forwards
     # the sequence to Konsole/Yakuake via terminal-features ,*:hyperlinks.)
+    #
+    # CLAUDE_CODE_ENABLE_TODO_TOOLS=1 opts in to TaskCreate/TaskUpdate/TaskList/TaskGet,
+    # which Opus 5.5 doesn't get by default. Also reaches claude-agent-acp (Zed), which
+    # runs the real Claude Code and renders the task list as an ACP plan update.
     env = {
       FORCE_HYPERLINK = "1";
+      CLAUDE_CODE_ENABLE_TODO_TOOLS = "1";
     };
     # Centrally-managed permission allowlist. These apply to EVERY repo (user-level
     # settings merge under per-project settings), so common safe approvals no longer
