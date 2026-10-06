@@ -61,6 +61,38 @@
     Exec=/usr/bin/ksecretd
   '';
 
+  # HTML thumbnails in Dolphin (and KDE file dialogs).
+  #
+  # KDE ships no HTML thumbnailer (the old KDE4 KHTML-based one is gone), but
+  # KIO (KF6) also runs freedesktop `.thumbnailer` entries found in
+  # $XDG_DATA_DIRS/thumbnailers/. The renderer itself (headless Chromium,
+  # SingleFile handling, caching, KIO workarounds) is scripts/html-thumbnailer.sh;
+  # here it's wrapped with PATH pinned to Nix store tools and registered.
+  #
+  # KIO uses the .thumbnailer file's base name as the plugin ID, so the ID is
+  # "html-thumbnailer"; htmlThumbnailerEnable below adds it to Dolphin's
+  # enabled preview plugins (Settings → Interface → Previews).
+  xdg.dataFile."thumbnailers/html-thumbnailer.thumbnailer".text = let
+    htmlThumbnailer = "${pkgs.writeShellScriptBin "html-thumbnailer" ''
+      export PATH=${lib.makeBinPath (with pkgs; [ coreutils findutils gnugrep util-linux unzip ungoogled-chromium ])}
+      ${builtins.readFile ../../scripts/html-thumbnailer.sh}
+    ''}/bin/html-thumbnailer";
+  in ''
+    [Thumbnailer Entry]
+    TryExec=${htmlThumbnailer}
+    Exec=${htmlThumbnailer} %s %u %o
+    MimeType=text/html;application/xhtml+xml;
+  '';
+
+  # Append the HTML thumbnailer to Dolphin's enabled preview plugins without
+  # clobbering any other plugins toggled in the Dolphin UI.
+  home.activation.htmlThumbnailerEnable = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    plugins=$(/usr/bin/kreadconfig6 --file dolphinrc --group PreviewSettings --key Plugins)
+    if [ -n "$plugins" ] && [[ ",$plugins," != *",html-thumbnailer,"* ]]; then
+      run /usr/bin/kwriteconfig6 --file dolphinrc --group PreviewSettings --key Plugins "$plugins,html-thumbnailer"
+    fi
+  '';
+
   # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
   # convention into `gio launch`.
   #

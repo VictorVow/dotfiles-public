@@ -31,6 +31,7 @@ installs/
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
+│   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
