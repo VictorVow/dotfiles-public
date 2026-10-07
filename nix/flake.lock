@@ -236,6 +236,22 @@
         "type": "github"
       }
     },
+    "orca": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791383983,
+        "narHash": "sha256-ASe0eF+Ki2c34E0Dz2faVlwfO/RZuWuacp9iMrhIM/A=",
+        "owner": "stablyai",
+        "repo": "orca",
+        "rev": "76d1b7bf29932f6e1edfb6b0b34d65c5c88e5f55",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stablyai",
+        "repo": "orca",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "delta": "delta",
@@ -244,6 +260,7 @@
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "orca": "orca",
         "sops-nix": "sops-nix",
         "tuxManager": "tuxManager"
       }

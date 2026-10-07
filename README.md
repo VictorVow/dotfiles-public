@@ -25,8 +25,10 @@ installs/
 │   │   └── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
-│       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, neovim, htop, claude-code (+ small inline skills)
-│       ├── gui-apps.nix      # programs.* for GUI apps: firefox (+ shared profile blocks), rofi, obs (Zed is AppMan-installed, config unmanaged)
+│       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, neovim, htop, claude-code
+│       ├── claude-skills.nix # Claude Code user skills: inline SKILL.md files + Orca skills (flake input)
+│       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
+│       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
