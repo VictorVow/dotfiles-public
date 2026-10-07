@@ -198,6 +198,7 @@ in
     # ── Development: Version Control ──────────────────────────────────────────
     git      # Distributed version control
     git-lfs  # Git extension for large file storage (binary assets, models, etc.)
+    git-filter-repo # Rewrite git history (successor to git filter-branch / BFG)
     gh       # Official GitHub CLI
     # The legacy gitAndTools wrapper was removed from nixpkgs. Keep using the
     # libsecret credential helper via the Git config in programs.nix.

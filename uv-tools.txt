@@ -1,0 +1,12 @@
+# uv-tools.txt — Declarative list of Python CLI tools managed by `uv tool`.
+#
+# Only for tools that aren't in nixpkgs, or whose nixpkgs version lags too far
+# behind upstream. Prefer nix/modules/packages.nix when nixpkgs has a usable version.
+#
+# - Blank lines and lines starting with `#` are ignored.
+# - One PyPI package name per line.
+# - Adding a name + re-running update.sh installs anything missing. Existing
+#   tools are left alone; removal stays manual (`uv tool uninstall <name>`).
+
+claude-code-log  # Convert Claude Code transcript JSONL into readable HTML (not in nixpkgs)
+fanficfare       # Fanfiction downloader; nixpkgs lags upstream and site adapters break often

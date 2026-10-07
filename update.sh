@@ -9,7 +9,7 @@
 #   3. Homebrew            — remaining brew packages not in Nix
 #   4. npm globals         — AI CLI tools installed to ~/.npm-global
 #   5. Flatpak             — user Flatpak apps
-#   6. uv tools            — Python CLI tools installed via `uv tool install`
+#   6. uv tools            — Python CLI tools declared in uv-tools.txt
 #   7. Distrobox           — OS packages inside containers
 #
 # Usage:
@@ -685,9 +685,24 @@ if ! command -v uv &>/dev/null; then
   skipped "uv not found — skipping."
   RESULTS["uv tools"]="skipped (not installed)"
 else
-  # Upgrade all uv-managed tools (fanficfare, git-filter-repo, claude-code-log).
-  # Tools that live in Nix (yt-dlp, uv, ansible) are not touched here.
-  run_step "uv tool upgrade --all" uv tool upgrade --all
+  # Install anything declared in uv-tools.txt but not yet installed
+  # (`uv tool upgrade` only upgrades tools that are already installed).
+  # Removal stays manual, as with appman-appimages.txt.
+  mapfile -t UV_MISSING < <(
+    comm -23 \
+      <(sed 's/#.*//' "$SCRIPT_DIR/uv-tools.txt" | tr -d '[:blank:]' | grep -v '^$' | sort -u) \
+      <(uv tool list 2>/dev/null | awk '!/^-/ { print $1 }' | sort -u)
+  )
+  if (( ${#UV_MISSING[@]} )); then
+    info "Installing uv tools declared but missing: ${UV_MISSING[*]}"
+    run_step "uv install new" bash -c 'for t; do uv tool install "$t" || exit 1; done' _ "${UV_MISSING[@]}"
+  else
+    RESULTS["uv install new"]="✓ none missing"
+  fi
+
+  # Upgrade all uv-managed tools. Tools that live in Nix (yt-dlp, uv, ansible)
+  # are not touched here.
+  run_step "uv tools" uv tool upgrade --all
   success "uv tools done."
 fi
 
@@ -831,7 +846,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox" "Nix GC"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox" "Nix GC"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"

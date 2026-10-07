@@ -13,6 +13,7 @@ installs/
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
+├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
