@@ -1,5 +1,20 @@
 # Claude Code user skills (~/.claude/skills/<name>/SKILL.md).
 # Inline skills are written here; third-party skills are linked from pinned flake inputs.
+#
+# Which agents see these (researched 2026-10): all use the same SKILL.md format
+# (folder + frontmatter name/description, loaded on demand) but scan different dirs:
+#   Claude Code — ~/.claude/skills, project .claude/skills (+ plugin skills)
+#   OpenCode    — ~/.config/opencode/skills, plus ~/.claude/skills and ~/.agents/skills
+#                 (project: .opencode/, .claude/, .agents/ skills dirs)
+#   Codex       — ~/.agents/skills, /etc/codex/skills, bundled ~/.codex/skills/.system
+#                 (project: .agents/skills up to repo root). Does NOT read .claude/.
+#   Antigravity — ~/.gemini/config/skills (all flavours; IDE also ~/.gemini/antigravity/skills,
+#                 CLI also ~/.gemini/antigravity-cli/skills, ~/.gemini/skills)
+#                 (project: .agents/skills). Does NOT read .claude/.
+# Deliberately only deployed to ~/.claude/skills → Claude Code + OpenCode (the primary
+# agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
+# ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
+# see each skill twice (same-name dedup behaviour unverified).
 { orca, ... }:
 
 {
