@@ -1,0 +1,14 @@
+{
+  "Velocity - PRs": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1,
+    "none": -3
+  },
+  "Velocity - Commits": {
+    "very high": 3,
+    "high": 2,
+    "medium": 1,
+    "none": -3
+  }
+}

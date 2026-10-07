@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programming language comparison</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    color: #1b1f23;
+    background: #fff;
+  }
+  h2 { margin-top: 0; }
+  blockquote {
+    border-left: 4px solid #d0d7de;
+    margin: 1rem 0;
+    padding: 0.25rem 1rem;
+    color: #57606a;
+  }
+  .tablewrap { overflow-x: auto; border: 1px solid #d0d7de; border-radius: 6px; }
+  table { border-collapse: collapse; width: max-content; min-width: 100%; }
+  th, td {
+    border: 1px solid #d0d7de;
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #f6f8fa;
+    z-index: 1;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { background: #eaeef2; }
+  .sort-arrow { font-size: 0.8em; opacity: 0.7; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  /* injected client-side Points column */
+  .points-col {
+    width: 56px;
+    min-width: 56px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  td.points-col { cursor: help; font-weight: 600; }
+  /* first two columns (Points, then Language) stick while scrolling sideways */
+  th:first-child, td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f6f8fa;
+    font-weight: 600;
+  }
+  th:nth-child(2), td:nth-child(2) {
+    position: sticky;
+    left: var(--points-w, 56px);
+    background: #f6f8fa;
+    font-weight: 600;
+  }
+  thead th:first-child, thead th:nth-child(2) { z-index: 2; }
+  .points-toolbar {
+    margin: 0 0 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .clear-points-btn {
+    font: inherit;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    cursor: pointer;
+  }
+  .clear-points-btn:hover { background: #eaeef2; }
+  /* Compare feature: active button, selected-language list, row hover + selection, column divider */
+  .clear-points-btn.active { background: #ddf4ff; border-color: #54aeff; color: #0969da; font-weight: 600; }
+  .compare-names { font-size: 0.85rem; color: #57606a; }
+  table.compare-hover tbody tr { cursor: pointer; }
+  table.compare-hover tbody tr:hover td { background: #fff8c5; }
+  tbody tr.compare-selected td { background: #fff3cd; }
+  th.compare-divider, td.compare-divider { border-left: 3px solid #fd8c73; }
+  .weights-panel {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-top: 0.4rem;
+    padding: 0.75rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    box-sizing: border-box;
+  }
+  .weights-panel[hidden] { display: none; }
+  .weights-col-label { font-weight: 600; font-size: 0.8rem; margin-bottom: 0.3rem; }
+  .weights-inputs { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .weights-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 0.65rem;
+    color: #57606a;
+    gap: 0.1rem;
+  }
+  .weights-field input {
+    width: 3.4rem;
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.12rem 0.3rem;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    background: #fff;
+  }
+  abbr[title], abbr[data-tip] { text-decoration: underline dotted; cursor: help; }
+  .pl-tooltip {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    max-width: 32rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 1.5rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    background: #1b1f23;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
+  code {
+    background: rgba(175,184,193,0.2);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #c9d1d9; background: #0d1117; }
+    blockquote { border-left-color: #30363d; color: #8b949e; }
+    .tablewrap { border-color: #30363d; }
+    th, td { border-color: #30363d; }
+    thead th, th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { background: #161b22; }
+    tbody tr:nth-child(even) { background: #0f141a; }
+    .clear-points-btn { background: #161b22; border-color: #30363d; color: #c9d1d9; }
+    .clear-points-btn:hover { background: #21262d; }
+    .clear-points-btn.active { background: #121d2f; border-color: #1f6feb; color: #58a6ff; }
+    .compare-names { color: #8b949e; }
+    table.compare-hover tbody tr:hover td { background: #2d2a1a; }
+    tbody tr.compare-selected td { background: #2a2613; }
+    th.compare-divider, td.compare-divider { border-left-color: #f0883e; }
+    .weights-panel { background: #161b22; border-color: #30363d; }
+    .weights-field { color: #8b949e; }
+    .weights-field input { background: #0d1117; border-color: #30363d; color: #c9d1d9; }
+    code { background: rgba(110,118,129,0.4); }
+  }
+</style>
+</head>
+<body>
+<div class="tablewrap-outer">
+<h1>Agentic development environments comparison</h1>
+<blockquote>
+<p>Hover the <abbr title="Cells with a dotted underline have an explanatory tooltip — hover to read it.">dotted-underlined</abbr> cells and column headers to see explanatory comments.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th><abbr title="The agentic development environment (editor, terminal, desktop app or agent orchestrator) being compared.">Name</abbr></th>
+<th><abbr title="License, linked to the source code repository — or to the download page if the app is proprietary.">Source</abbr></th>
+<th><abbr title="GitHub stargazer count as of 2026-10-07 (k = thousands). N/A if there is no public repository.">GitHub Stars</abbr></th>
+<th><abbr title="Main language(s) and UI framework the app is built with.">Tech stack</abbr></th>
+<th><abbr title="How actively it is developed, by pull requests merged (into any branch) in the 30 days to 2026-10-07; rated None (archived/discontinued) → Very High (Very High ≥1000, High 300–999, Medium 100–299, Low &lt;100). Closed-source rows: estimated from release cadence. Hover a cell for the exact number.">Velocity - PRs</abbr></th>
+<th><abbr title="How actively it is developed, by commits on the default branch (unless the cell says otherwise) in the 30 days to 2026-10-07 — catches projects that push directly rather than via PRs; rated None (archived/discontinued) → Very High (Very High ≥1000, High 300–999, Medium 100–299, Low &lt;100). Closed-source rows: estimated from release cadence. Hover a cell for the exact number.">Velocity - Commits</abbr></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><abbr title="Anthropic's desktop app: Claude chat plus Claude Code (Code tab) and Cowork.">Claude Desktop</abbr></td>
+<td><a href="https://claude.com/download" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td>Electron, React TypeScript</td>
+<td><abbr title="Closed source — near-weekly releases">Very High</abbr></td>
+<td><abbr title="Closed source — near-weekly releases">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="OpenAI's desktop app; ChatGPT has been merged into the Codex desktop app (parallel coding agents with git worktrees).">ChatGPT</abbr></td>
+<td><a href="https://chatgpt.com/download" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="The merged desktop app is built on the Codex app, which is Electron-based.">Electron, React TypeScript</abbr></td>
+<td><abbr title="Closed source — frequent releases; mid-merge with Codex">Very High</abbr></td>
+<td><abbr title="Closed source — frequent releases; mid-merge with Codex">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Google's agent-first IDE (a VS Code fork) with an Agent Manager for parallel agents.">Antigravity</abbr></td>
+<td><a href="https://antigravity.google/download" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="VS Code fork">Electron, TypeScript</abbr></td>
+<td><abbr title="Closed source — regular releases; 2.0 launched May 2026">High</abbr></td>
+<td><abbr title="Closed source — regular releases; 2.0 launched May 2026">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Zed Industries' multiplayer environment where people and agents share threads over live, CRDT-replicated worktrees (DeltaDB). Private beta.">Delta</abbr></td>
+<td><a href="https://delta.dev/" title="Website (private beta)">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="Not publicly confirmed — presumed to share Zed's Rust + GPUI stack.">Rust, GPUI</abbr></td>
+<td><abbr title="Closed source, private beta — cadence not public">Medium</abbr></td>
+<td><abbr title="Closed source, private beta — cadence not public">Medium</abbr></td>
+</tr>
+<tr>
+<td><abbr title="High-performance multiplayer code editor with a built-in agent panel and ACP support for external agents.">Zed</abbr></td>
+<td><a href="https://github.com/zed-industries/zed" title="Source code"><abbr title="Editor: GPL-3.0; GPUI and other crates: Apache-2.0; collab server: AGPL-3.0.">GPL-3.0 / Apache-2.0</abbr></a></td>
+<td><abbr title="91,389">91.4k</abbr></td>
+<td><abbr title="GPU-accelerated UI via Zed's own GPUI framework">Rust, GPUI</abbr></td>
+<td><abbr title="523 merged PRs in the last 30 days. Zed squash-merges, so one commit per PR.">High</abbr></td>
+<td><abbr title="464 commits in the last 30 days. Down from ~800–880/month through Apr 2026 to 430 in Sept.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Ghostty-based macOS terminal with vertical tabs and notifications for AI coding agents.">cmux</abbr></td>
+<td><a href="https://github.com/manaflow-ai/cmux" title="Source code"><abbr title="App, CLI and TUI: GPL-3.0-or-later; server components (web/, workers/, etc.): BUSL-1.1.">GPL-3.0</abbr></a></td>
+<td><abbr title="27,683">27.7k</abbr></td>
+<td><abbr title="Native macOS app; terminal rendering via libghostty (Zig)">Swift, AppKit, libghostty</abbr></td>
+<td><abbr title="3,520 merged PRs in the last 30 days.">Very High</abbr></td>
+<td><abbr title="6,578 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Terminal runtime/multiplexer for running and supervising coding agents (repo moved to herdrdev/herdr).">herdr</abbr></td>
+<td><a href="https://github.com/herdrdev/herdr" title="Source code">Apache-2.0</a></td>
+<td><abbr title="42,733">42.7k</abbr></td>
+<td><abbr title="TUI via ratatui + crossterm; terminal emulation via ghostty-vt">Rust, ratatui</abbr></td>
+<td><abbr title="243 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="276 commits in the last 30 days.">Medium</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Microsoft's editor with GitHub Copilot agent mode and third-party agent extensions.">VS Code</abbr></td>
+<td><a href="https://github.com/microsoft/vscode" title="Source code"><abbr title="Code-OSS source is MIT; Microsoft's branded VS Code builds ship under a proprietary license.">MIT</abbr></a></td>
+<td><abbr title="193,616">193.6k</abbr></td>
+<td>Electron, TypeScript</td>
+<td><abbr title="1,910 merged PRs in the last 30 days.">Very High</abbr></td>
+<td><abbr title="2,382 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="T3's minimal GUI for coding agents (Codex, Claude Code) with desktop, web and mobile clients.">T3 Code</abbr></td>
+<td><a href="https://github.com/pingdotgg/t3code" title="Source code">MIT</a></td>
+<td><abbr title="25,990">26.0k</abbr></td>
+<td><abbr title="Desktop: Electron; web UI: React + Vite; Effect on the server">Electron, React TypeScript</abbr></td>
+<td><abbr title="1,581 merged PRs in the last 30 days.">Very High</abbr></td>
+<td><abbr title="1,264 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Agentic development environment built on the OpenCode agent; desktop, web/PWA, VS Code and mobile clients.">OpenChamber</abbr></td>
+<td><a href="https://github.com/openchamber/openchamber" title="Source code">MIT</a></td>
+<td><abbr title="11,231">11.2k</abbr></td>
+<td><abbr title="Desktop: Electron; UI: React + Tailwind CSS">Electron, React TypeScript</abbr></td>
+<td><abbr title="376 merged PRs in the last 30 days.">High</abbr></td>
+<td><abbr title="1,099 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="TUI that manages multiple terminal agents (Claude Code, Codex, OpenCode, Amp) in tmux sessions + git worktrees.">Claude Squad</abbr></td>
+<td><a href="https://github.com/smtg-ai/claude-squad" title="Source code">AGPL-3.0</a></td>
+<td><abbr title="8,573">8.6k</abbr></td>
+<td><abbr title="TUI via Charm's Bubble Tea + Lip Gloss; sessions run in tmux">Go, Bubble Tea</abbr></td>
+<td><abbr title="0 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="0 commits in the last 30 days. Last commit 2026-08-20.">Low</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Agentic development environment born out of the terminal.">Warp</abbr></td>
+<td><a href="https://github.com/warpdotdev/warp" title="Source code">AGPL-3.0</a></td>
+<td><abbr title="65,387">65.4k</abbr></td>
+<td><abbr title="Warp's own GPU-rendered UI framework (warpui)">Rust, WarpUI</abbr></td>
+<td><abbr title="181 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="177 commits in the last 30 days.">Medium</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Open-source coding agent with a TUI, desktop app and client/server architecture.">OpenCode</abbr></td>
+<td><a href="https://github.com/anomalyco/opencode" title="Source code">MIT</a></td>
+<td><abbr title="212,124">212.1k</abbr></td>
+<td><abbr title="Runs on Bun; TUI via OpenTUI (Zig core) + SolidJS; desktop app via Electron + SolidJS">TypeScript, OpenTUI, SolidJS</abbr></td>
+<td><abbr title="1,173 merged PRs in the last 30 days. Includes PRs into the v2 branch.">Very High</abbr></td>
+<td><abbr title="1,217 commits in the last 30 days. On the v2 branch, where most development happens (only 172 on the default dev branch).">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Autonomous coding agent as a VS Code/JetBrains extension, CLI or SDK (repo moved to cline/cline).">Cline</abbr></td>
+<td><a href="https://github.com/cline/cline" title="Source code">Apache-2.0</a></td>
+<td><abbr title="69,975">70.0k</abbr></td>
+<td><abbr title="Editor extension with a React webview UI">TypeScript, React</abbr></td>
+<td><abbr title="298 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="343 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="macOS app for running many Claude Code / Codex agents in parallel, each in its own git worktree.">Conductor</abbr></td>
+<td><a href="https://conductor.build/" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="Tauri (Rust backend, native WebKit renderer); web frontend presumed React TypeScript">Tauri, React TypeScript</abbr></td>
+<td><abbr title="Closed source — frequent releases">High</abbr></td>
+<td><abbr title="Closed source — frequent releases">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Visual workspace for Claude Code / Codex sessions beside the files they edit; open-sourced 2026-04-29.">Nimbalyst</abbr></td>
+<td><a href="https://github.com/nimbalyst/nimbalyst" title="Source code">MIT</a></td>
+<td><abbr title="1,847">1.8k</abbr></td>
+<td><abbr title="Electron desktop app, React UI with Lexical editors; Swift iOS app">Electron, React TypeScript</abbr></td>
+<td><abbr title="13 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="304 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="AI-first code editor (a VS Code fork) with agent mode and background agents.">Cursor</abbr></td>
+<td><a href="https://cursor.com/download" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="VS Code fork">Electron, TypeScript</abbr></td>
+<td><abbr title="Closed source — very frequent releases; Cursor 3 in April 2026">Very High</abbr></td>
+<td><abbr title="Closed source — very frequent releases; Cursor 3 in April 2026">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="ADE for running a fleet of parallel agents (Claude Code, Codex, Gemini, Copilot, 20+ CLI agents), each in its own worktree with its own browser tab; desktop + mobile.">Orca</abbr></td>
+<td><a href="https://github.com/stablyai/orca" title="Source code">MIT</a></td>
+<td><abbr title="86,784">86.8k</abbr></td>
+<td>Electron, React TypeScript</td>
+<td><abbr title="2,732 merged PRs in the last 30 days.">Very High</abbr></td>
+<td><abbr title="2,552 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Kanban board where each card is a coding-agent task run in its own worktree, with diff review and merge.">Vibe Kanban</abbr></td>
+<td><a href="https://github.com/BloopAI/vibe-kanban" title="Source code">Apache-2.0</a></td>
+<td><abbr title="28,276">28.3k</abbr></td>
+<td><abbr title="Rust backend; React web UI, served via npx or wrapped in a Tauri desktop app">Rust, Tauri, React TypeScript</abbr></td>
+<td><abbr title="10 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="10 commits in the last 30 days. Last commit 2026-09-19.">Low</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Agentic engineering platform: VS Code + JetBrains extensions and a CLI (forked from OpenCode), with its own model gateway.">Kilo Code</abbr></td>
+<td><a href="https://github.com/Kilo-Org/kilocode" title="Source code">MIT</a></td>
+<td><abbr title="27,519">27.5k</abbr></td>
+<td><abbr title="TypeScript on Bun; SolidJS UI; Kotlin for the JetBrains plugin">TypeScript, SolidJS</abbr></td>
+<td><abbr title="518 merged PRs in the last 30 days.">High</abbr></td>
+<td><abbr title="2,118 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Self-hosted daemon that runs agents in parallel on your own machines, driven from desktop, iOS/Android, web or CLI, with voice control and no telemetry.">Paseo</abbr></td>
+<td><a href="https://github.com/getpaseo/paseo" title="Source code">Apache-2.0</a></td>
+<td><abbr title="19,930">19.9k</abbr></td>
+<td><abbr title="One React Native (Expo) app shared across mobile, web and an Electron desktop shell; TypeScript daemon">Electron, React Native TypeScript</abbr></td>
+<td><abbr title="383 merged PRs in the last 30 days.">High</abbr></td>
+<td><abbr title="454 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Agentic IDE for orchestrating many CLI agents in parallel worktrees, locally or across a team's connected hosts.">Superset</abbr></td>
+<td><a href="https://github.com/superset-sh/superset" title="Source code"><abbr title="Elastic License 2.0 — source-available, not OSI open source (no offering it as a managed service).">ELv2</abbr></a></td>
+<td><abbr title="14,956">15.0k</abbr></td>
+<td>Electron, React TypeScript</td>
+<td><abbr title="636 merged PRs in the last 30 days.">High</abbr></td>
+<td><abbr title="604 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Composio's agent IDE for fleets: plans the work, spawns agents (Claude Code, Codex, 25+ harnesses), then fixes CI failures and merge conflicts; desktop, web, mobile and cloud.">Agent Orchestrator</abbr></td>
+<td><a href="https://github.com/OrchestratorInc/agent-orchestrator" title="Source code">Apache-2.0</a></td>
+<td><abbr title="12,857">12.9k</abbr></td>
+<td><abbr title="Go backend; Electron + React desktop frontend">Go, Electron, React TypeScript</abbr></td>
+<td><abbr title="554 merged PRs in the last 30 days.">High</abbr></td>
+<td><abbr title="537 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="YC W26 open-source ADE running multiple coding agents in parallel against any provider.">Emdash</abbr></td>
+<td><a href="https://github.com/generalaction/emdash" title="Source code">Apache-2.0</a></td>
+<td><abbr title="5,924">5.9k</abbr></td>
+<td>Electron, React TypeScript</td>
+<td><abbr title="99 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="400 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="GUI for coding agents where tabs are agent sessions (Claude Code, Codex, Cursor, OpenCode, Pi, …) on your existing subscriptions.">MonoCode</abbr></td>
+<td><a href="https://github.com/hardbeat920/monocode" title="Source code">MIT</a></td>
+<td><abbr title="2,744">2.7k</abbr></td>
+<td>Tauri, React TypeScript</td>
+<td><abbr title="169 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="507 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Desktop and web command center around the OpenCode CLI; SideCars embed tools like VS Code and terminals as tabs.">CodeNomad</abbr></td>
+<td><a href="https://github.com/NeuralNomadsAI/CodeNomad" title="Source code">MIT</a></td>
+<td><abbr title="2,614">2.6k</abbr></td>
+<td><abbr title="SolidJS UI shipped in Tauri (and Electron) desktop apps">Tauri, SolidJS TypeScript</abbr></td>
+<td><abbr title="145 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="223 commits in the last 30 days.">Medium</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Native macOS command center for worktree-per-agent development, with libghostty terminals.">supacode</abbr></td>
+<td><a href="https://github.com/supabitapp/supacode" title="Source code"><abbr title="Functional Source License 1.1 — source-available; converts to Apache-2.0 after two years.">FSL-1.1-ALv2</abbr></a></td>
+<td><abbr title="2,395">2.4k</abbr></td>
+<td><abbr title="Native macOS app built with The Composable Architecture; terminals via libghostty">Swift, libghostty</abbr></td>
+<td><abbr title="0 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="0 commits in the last 30 days. Last commit 2026-09-05.">Low</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Coolify team's desktop + web app for orchestrating Claude, Codex and OpenCode across projects and their git worktrees.">Jean</abbr></td>
+<td><a href="https://github.com/coollabsio/jean" title="Source code">Apache-2.0</a></td>
+<td><abbr title="1,311">1.3k</abbr></td>
+<td>Tauri, React TypeScript</td>
+<td><abbr title="47 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="343 commits in the last 30 days.">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="TUI session manager covering Claude Code, Codex, Gemini and OpenCode, with live status and resume for each.">Agent Deck</abbr></td>
+<td><a href="https://github.com/asheshgoplani/agent-deck" title="Source code">MIT</a></td>
+<td><abbr title="1,029">1.0k</abbr></td>
+<td><abbr title="TUI via Charm's Bubble Tea + Lip Gloss">Go, Bubble Tea</abbr></td>
+<td><abbr title="197 merged PRs in the last 30 days.">Medium</abbr></td>
+<td><abbr title="1,155 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Native macOS agent-CLI manager with Ghostty terminals, embedded browser/editor panes, a Kanban board and iOS/Android session access.">Ghostex</abbr></td>
+<td><a href="https://github.com/maddada/Ghostex" title="Source code">MIT</a></td>
+<td><abbr title="898">0.9k</abbr></td>
+<td><abbr title="Zed's GPUI framework; terminals via libghostty (Zig)">Rust, GPUI</abbr></td>
+<td><abbr title="58 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="2,251 commits in the last 30 days.">Very High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Imbue's app for grounded, parallel coding agents, each running in its own container.">Sculptor</abbr></td>
+<td><a href="https://github.com/imbue-ai/sculptor" title="Source code">MIT</a></td>
+<td><abbr title="236">0.2k</abbr></td>
+<td><abbr title="Python backend; Electron + React frontend; agents in Docker containers">Python, Electron, React TypeScript</abbr></td>
+<td><abbr title="12 merged PRs in the last 30 days.">Low</abbr></td>
+<td><abbr title="49 commits in the last 30 days. Last commit 2026-09-18.">Low</abbr></td>
+</tr>
+<tr>
+<td><abbr title="AWS's spec-driven agentic IDE (requirements → design → tasks before code), a Code OSS fork.">Kiro</abbr></td>
+<td><a href="https://kiro.dev/downloads/" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="Code OSS (VS Code) fork">Electron, TypeScript</abbr></td>
+<td><abbr title="Closed source — regular releases">High</abbr></td>
+<td><abbr title="Closed source — regular releases">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="JetBrains' agent-first desktop app (public preview March 2026) orchestrating Codex, Claude Agent, Gemini CLI and Junie in worktrees or Docker; built on the shelved Fleet platform.">JetBrains Air</abbr></td>
+<td><a href="https://air.dev/" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="Built on the Fleet platform (Kotlin, JetBrains' own Noria UI framework)">Kotlin, Fleet</abbr></td>
+<td><abbr title="Closed source — rapid preview releases; expanded into the Air product family Sept 2026">High</abbr></td>
+<td><abbr title="Closed source — rapid preview releases; expanded into the Air product family Sept 2026">High</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Augment Code's macOS workspace for spec-driven development: a coordinator agent plans, specialists execute in parallel, a verifier checks; supports Auggie, Claude Code, Codex and OpenCode.">Intent</abbr></td>
+<td><a href="https://www.augmentcode.com/product/intent" title="Download page">Proprietary</a></td>
+<td>N/A</td>
+<td><abbr title="Closed source; framework not publicly documented">Unknown</abbr></td>
+<td><abbr title="Closed source — cadence not public">Medium</abbr></td>
+<td><abbr title="Closed source — cadence not public">Medium</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Open-source Cursor alternative (VS Code fork) from Y Combinator-backed Glass Devtools; development paused and the repo archived.">Void</abbr></td>
+<td><a href="https://github.com/voideditor/void" title="Source code (archived)">Apache-2.0</a></td>
+<td><abbr title="28,773">28.8k</abbr></td>
+<td><abbr title="VS Code fork">Electron, TypeScript</abbr></td>
+<td><abbr title="Archived; last commit 2026-06-02">None</abbr></td>
+<td><abbr title="Archived; last commit 2026-06-02">None</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Multi-mode agent VS Code extension (a Cline fork); the extension was shut down 2026-05-15 and the repo archived.">Roo Code</abbr></td>
+<td><a href="https://github.com/RooCodeInc/Roo-Code" title="Source code (archived)">Apache-2.0</a></td>
+<td><abbr title="24,282">24.3k</abbr></td>
+<td><abbr title="Editor extension with a React webview UI">TypeScript, React</abbr></td>
+<td><abbr title="Shut down 2026-05-15 and archived">None</abbr></td>
+<td><abbr title="Shut down 2026-05-15 and archived">None</abbr></td>
+</tr>
+<tr>
+<td><abbr title="Stravu desktop app for running multiple Claude Code / Codex sessions in parallel worktrees; deprecated Feb 2026 in favour of its successor, Nimbalyst.">Crystal</abbr></td>
+<td><a href="https://github.com/stravu/crystal" title="Source code (deprecated)">MIT</a></td>
+<td><abbr title="3,125">3.1k</abbr></td>
+<td>Electron, React TypeScript</td>
+<td><abbr title="Deprecated in favour of Nimbalyst; last commit 2026-02-26">None</abbr></td>
+<td><abbr title="Deprecated in favour of Nimbalyst; last commit 2026-02-26">None</abbr></td>
+</tr>
+</tbody>
+</table>
+<p>For many more (mostly small) open-source orchestrators, see <a href="https://github.com/andyrewlee/awesome-agent-orchestrators">awesome-agent-orchestrators</a> (<a href="https://agent-orchestrators.com">web version</a>).</p>
+</div>
+<script>
+  // Use the document's first Markdown heading as the browser tab title,
+  // overriding the static <title> in header.html.
+  (function () {
+    var h = document.querySelector('h1, h2, h3, h4, h5, h6');
+    var t = h && (h.textContent || '').trim();
+    if (t) document.title = t;
+    // Per-document key for namespacing localStorage. The server injects
+    // PL_DOC_KEY (the source filename); standalone HTML falls back to the
+    // first heading so distinct docs don't share Compare/weights state.
+    window.PL_DOC_KEY = window.PL_DOC_KEY || t || 'default';
+  })();
+</script>
+<script>
+  // wrap the wide table in a horizontal-scroll container
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'tablewrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+</script>
+<script>
+  // Shared ordinal scales (low -> high), the single source of truth used by
+  // both the Points weighting and the column sorter. Each scale is an ordered
+  // list of bucket words; a column "belongs" to whichever scale contains all of
+  // its values.
+  window.PL_SCALES = [
+    ['very small', 'small', 'medium', 'large', 'very large'],
+    ['very slow', 'slow', 'medium', 'fast', 'very fast'],
+    ['none', 'very low', 'low', 'medium', 'high', 'very high'],
+    ['very easy', 'easy', 'medium', 'difficult', 'very difficult'],
+    ['none', 'minimal', 'good', 'first-class', 'pure'],
+    ['none', 'adapter', 'compatible', 'first-class', 'native'],
+    ['compiled/native', 'managed/execution engine', 'interpreted/dynamic (repl)'],
+    ['bad', 'poor', 'average', 'good', 'excellent'],
+    ['no', 'partial', 'yes'],
+    ['none', 'third-party', 'built-in', 'first-class'],
+    ['minimal', 'basic', 'good', 'strong', 'first-class'],
+    ['none', 'checker-only', 'minimal', 'local', 'strong local', 'global'],
+    ['none', 'duck-typed', 'structural', 'hybrid', 'nominal'],
+    ['none', 'faint', 'moderate', 'strong', 'identical'],
+    ['dynamic', 'static'],
+    ['weak', 'strong'],
+    ['immediate', 'retained', 'declarative'],
+    ['1', '2', '3', '4', '5', '6']
+  ];
+</script>
+<script>
+  // Inject a "Points" column (client-side only — NOT in the Markdown) whose
+  // value for each row is computed from per-column, per-bucket weights set in a
+  // "Weights" panel above the table. Weights persist in localStorage
+  // (pl-weights-v1) and, on first run, are pre-seeded from any manual points
+  // saved by the earlier click-to-score feature (pl-points-v1) — the mean of
+  // the values the user gave each bucket. Runs BEFORE the sort script so the
+  // injected column gets correct indices (and is sortable by total).
+  (function () {
+    var DOC = window.PL_DOC_KEY || 'default';
+    var WEIGHTS_KEY = 'pl-weights-v1:' + DOC;
+    var MANUAL_KEY = 'pl-points-v1:' + DOC;
+    var SCALES = window.PL_SCALES || [];
+
+    function loadJSON(key) {
+      try { return JSON.parse(localStorage.getItem(key)) || null; }
+      catch (e) { return null; }
+    }
+    function saveWeights(obj) {
+      try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(obj)); }
+      catch (e) { /* private mode / file:// — persistence unavailable */ }
+    }
+
+    function headerLabel(headRow, idx) {
+      var h = headRow.cells[idx];
+      if (!h) return '';
+      var clone = h.cloneNode(true);
+      var a = clone.querySelector('.sort-arrow');
+      if (a) a.remove();
+      return (clone.textContent || '').trim();
+    }
+    function cellText(tr, idx) {
+      var c = tr.cells[idx];
+      return c ? (c.textContent || '').trim() : '';
+    }
+    // Pick the scale that covers the most of a column's distinct values. A
+    // column is weightable if some scale covers >= 2 of its values and leaves at
+    // most one outlier (e.g. Assembly's "Untyped"/"None" don't disqualify the
+    // otherwise-binary Static/Dynamic and Strong/Weak columns; the outlier just
+    // gets no weight). Genuinely text columns cover 0 and stay excluded.
+    function scaleFor(values) {
+      var seen = {};
+      values.forEach(function (v) { v = v.toLowerCase(); if (v) seen[v] = true; });
+      var distinct = Object.keys(seen);
+      if (!distinct.length) return null;
+      var best = null, bestCover = 0;
+      SCALES.forEach(function (scale) {
+        var cover = distinct.filter(function (v) { return scale.indexOf(v) !== -1; }).length;
+        if (cover > bestCover) { bestCover = cover; best = scale; }
+      });
+      if (best && bestCover >= 2 && (distinct.length - bestCover) <= 1) return best;
+      return null;
+    }
+
+    document.querySelectorAll('table').forEach(function (table) {
+      if (!table.tHead || !table.tBodies.length) return;
+      var headRow = table.tHead.rows[0];
+      var tbody = table.tBodies[0];
+
+      // inject Points header + body cells
+      var th = document.createElement('th');
+      th.className = 'points-col';
+      th.textContent = 'Points';
+      th.setAttribute('data-tip', 'Computed from the per-bucket weights set in the Weights panel. ' +
+        "Hover a row's Points for the breakdown.");
+      headRow.insertBefore(th, headRow.cells[0]);
+
+      var rows = Array.prototype.slice.call(tbody.rows);
+      rows.forEach(function (tr) {
+        var td = document.createElement('td');
+        td.className = 'points-col';
+        tr.insertBefore(td, tr.cells[0]);
+      });
+
+      // match the Language column's sticky offset to the real Points width
+      table.style.setProperty('--points-w', th.offsetWidth + 'px');
+
+      // weightable (rating) columns: those whose values all fit one scale
+      // (skip Points col 0 and Language col 1). Capture each present bucket's
+      // display text too, for nice panel labels.
+      var ratingCols = [];
+      Array.prototype.forEach.call(headRow.cells, function (h, idx) {
+        if (idx <= 1) return;
+        var scale = scaleFor(rows.map(function (tr) { return cellText(tr, idx); }));
+        if (!scale) return;
+        var displayByLower = {};
+        rows.forEach(function (tr) {
+          var t = cellText(tr, idx);
+          if (t) displayByLower[t.toLowerCase()] = t;
+        });
+        ratingCols.push({
+          idx: idx,
+          label: headerLabel(headRow, idx),
+          scale: scale,
+          display: displayByLower
+        });
+      });
+      var colByLabel = {};
+      ratingCols.forEach(function (c) { colByLabel[c.label] = c; });
+
+      function weightFor(label, bucketLower) {
+        var col = weights[label];
+        if (!col) return 0;
+        var w = col[bucketLower];
+        return typeof w === 'number' && !isNaN(w) ? w : 0;
+      }
+
+      // pre-seed weights from existing manual points (mean per column+bucket)
+      function seedFromManual() {
+        var manual = loadJSON(MANUAL_KEY);
+        if (!manual) return null;
+        var langToRow = {};
+        rows.forEach(function (tr) { langToRow[cellText(tr, 1)] = tr; });
+        var acc = {}; // acc[label][bucketLower] = { sum, count }
+        Object.keys(manual).forEach(function (lang) {
+          var tr = langToRow[lang];
+          if (!tr) return;
+          var cols = manual[lang] || {};
+          Object.keys(cols).forEach(function (label) {
+            var c = colByLabel[label];
+            if (!c) return; // not a weightable column
+            var bucket = cellText(tr, c.idx).toLowerCase();
+            if (c.scale.indexOf(bucket) === -1) return; // value off-scale
+            var val = cols[label];
+            if (typeof val !== 'number' || !val) return;
+            if (!acc[label]) acc[label] = {};
+            if (!acc[label][bucket]) acc[label][bucket] = { sum: 0, count: 0 };
+            acc[label][bucket].sum += val;
+            acc[label][bucket].count += 1;
+          });
+        });
+        var out = {};
+        Object.keys(acc).forEach(function (label) {
+          out[label] = {};
+          Object.keys(acc[label]).forEach(function (bucket) {
+            var a = acc[label][bucket];
+            out[label][bucket] = Math.round(a.sum / a.count);
+          });
+        });
+        return Object.keys(out).length ? out : null;
+      }
+
+      var weights = loadJSON(WEIGHTS_KEY);
+      var seeded = false;
+      if (!weights) {
+        var s = seedFromManual();
+        if (s) { weights = s; seeded = true; saveWeights(weights); }
+        else { weights = {}; }
+      }
+
+      function computeRow(tr) {
+        var total = 0, parts = [];
+        ratingCols.forEach(function (c) {
+          // read by stable column index so Points stays correct after Compare
+          // reorders columns; falls back to positional before cells are stamped.
+          var cell = tr.querySelector('[data-col-index="' + c.idx + '"]') || tr.cells[c.idx];
+          var bucket = cell ? (cell.textContent || '').trim() : '';
+          var w = weightFor(c.label, bucket.toLowerCase());
+          if (w) {
+            total += w;
+            parts.push({ w: w, text: (w > 0 ? '+' : '') + w + ' ' + bucket + ' (' + c.label + ')' });
+          }
+        });
+        parts.sort(function (a, b) { return b.w - a.w; }); // most positive first
+        var lines = parts.map(function (p) { return p.text; });
+        var pc = tr.cells[0];
+        pc.textContent = String(total);
+        pc.setAttribute('data-tip', 'Points: ' + total +
+          (lines.length ? '\n' + lines.join('\n') : '\n(no weights set)'));
+      }
+      function computeAll() { rows.forEach(computeRow); }
+
+      // ---- toolbar: Weights toggle + Reset + the panel ----
+      var toolbar = document.createElement('div');
+      toolbar.className = 'points-toolbar';
+
+      var panel = document.createElement('div');
+      panel.className = 'weights-panel';
+
+      var toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'clear-points-btn';
+      function setCollapsed(collapsed) {
+        panel.hidden = collapsed;
+        toggleBtn.textContent = collapsed ? 'Weights ▸' : 'Weights ▾';
+      }
+      toggleBtn.addEventListener('click', function () { setCollapsed(!panel.hidden); });
+
+      var resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'clear-points-btn';
+      resetBtn.textContent = 'Reset';
+      resetBtn.addEventListener('click', function () {
+        if (!window.confirm('Reset all bucket weights to 0?')) return;
+        weights = {};
+        persist(weights);
+        Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
+          inp.value = '';
+        });
+        computeAll();
+      });
+
+      // ---- Compare: pick languages, then filter to them + group matching cols ----
+      var COMPARE_KEY = 'pl-compare-v1:' + (window.PL_DOC_KEY || 'default');
+      function loadCompare() {
+        try { var a = JSON.parse(localStorage.getItem(COMPARE_KEY)); return Array.isArray(a) ? a : []; }
+        catch (e) { return []; }
+      }
+      function saveCompare() {
+        try { localStorage.setItem(COMPARE_KEY, JSON.stringify(selectedNames)); }
+        catch (e) { /* private mode / file:// — persistence unavailable */ }
+      }
+      var selectedNames = loadCompare();
+      var compareMode = false; // selection mode: hover-highlight + click-to-pick
+      var comparing = false;   // "Compare Now" filter + column grouping applied
+
+      // Stamp each cell with its stable original column index (Points already
+      // injected at 0) so column reordering can always be undone.
+      Array.prototype.forEach.call(headRow.cells, function (c, i) { c.dataset.colIndex = i; });
+      rows.forEach(function (tr) {
+        Array.prototype.forEach.call(tr.cells, function (c, i) { c.dataset.colIndex = i; });
+      });
+
+      var compareBtn = document.createElement('button');
+      compareBtn.type = 'button';
+      compareBtn.className = 'clear-points-btn';
+      compareBtn.textContent = 'Compare';
+
+      var compareNowBtn = document.createElement('button');
+      compareNowBtn.type = 'button';
+      compareNowBtn.className = 'clear-points-btn';
+      compareNowBtn.textContent = 'Compare Now';
+      compareNowBtn.hidden = true;
+
+      var namesSpan = document.createElement('span');
+      namesSpan.className = 'compare-names';
+
+      function cellByIndex(tr, idx) { return tr.querySelector('[data-col-index="' + idx + '"]'); }
+      // Position-independent value read — survives column reordering (unlike the
+      // positional cellText helper above).
+      function valueAt(tr, idx) { var c = cellByIndex(tr, idx); return c ? (c.textContent || '').trim() : ''; }
+      function langOf(tr) { return valueAt(tr, 1); }
+      function isSelected(name) { return selectedNames.indexOf(name) !== -1; }
+
+      function markRows() {
+        rows.forEach(function (tr) {
+          tr.classList.toggle('compare-selected', isSelected(langOf(tr)));
+        });
+      }
+      function renderNames() {
+        namesSpan.textContent = selectedNames.join(', ');
+        var enough = selectedNames.length >= 2;
+        compareNowBtn.hidden = !enough;
+        if (!enough && comparing) clearCompare(); // dropped below 2 → undo
+      }
+      function toggleSelect(name) {
+        var i = selectedNames.indexOf(name);
+        if (i === -1) selectedNames.push(name); else selectedNames.splice(i, 1);
+        saveCompare();
+        markRows();
+        renderNames();
+        if (comparing) applyCompare(); // keep filter/grouping in sync
+      }
+
+      // appendChild moves a node, so re-appending cells in `order` reorders them
+      function applyOrder(order) {
+        [headRow].concat(rows).forEach(function (tr) {
+          order.forEach(function (idx) {
+            var c = cellByIndex(tr, idx);
+            if (c) tr.appendChild(c);
+          });
+        });
+      }
+      function clearDivider() {
+        Array.prototype.forEach.call(table.querySelectorAll('.compare-divider'), function (c) {
+          c.classList.remove('compare-divider');
+        });
+      }
+      // Columns (idx >= 2; Points + Language stay pinned left) whose value is
+      // identical across every selected row move to the right, with a divider
+      // before the first such column.
+      function distinctCount(sel, idx) {
+        var seen = {};
+        sel.forEach(function (tr) { seen[valueAt(tr, idx)] = true; });
+        return Object.keys(seen).length;
+      }
+      function reorderColumns() {
+        var sel = rows.filter(function (tr) { return isSelected(langOf(tr)); });
+        var differ = [], match = [];
+        // iterate by stable colIndex, not DOM position (columns may be reordered)
+        for (var idx = 2; idx < headRow.cells.length; idx++) {
+          var n = distinctCount(sel, idx);
+          (n <= 1 ? match : differ).push(idx);
+        }
+        // most-differing columns first (e.g. all-distinct before nearly-uniform)
+        differ.sort(function (a, b) {
+          return distinctCount(sel, b) - distinctCount(sel, a) || a - b;
+        });
+        applyOrder([0, 1].concat(differ, match));
+        clearDivider();
+        if (match.length && differ.length) {
+          [headRow].concat(rows).forEach(function (tr) {
+            var c = cellByIndex(tr, match[0]);
+            if (c) c.classList.add('compare-divider');
+          });
+        }
+      }
+      function restoreColumns() {
+        var asc = [];
+        for (var i = 0; i < headRow.cells.length; i++) asc.push(i);
+        applyOrder(asc);
+        clearDivider();
+      }
+
+      function applyCompare() {
+        comparing = true;
+        compareNowBtn.classList.add('active');
+        rows.forEach(function (tr) { tr.hidden = !isSelected(langOf(tr)); });
+        reorderColumns();
+      }
+      function clearCompare() {
+        comparing = false;
+        compareNowBtn.classList.remove('active');
+        rows.forEach(function (tr) { tr.hidden = false; });
+        restoreColumns();
+      }
+
+      compareBtn.addEventListener('click', function () {
+        compareMode = !compareMode;
+        compareBtn.classList.toggle('active', compareMode);
+        table.classList.toggle('compare-hover', compareMode);
+      });
+      compareNowBtn.addEventListener('click', function () {
+        if (comparing) clearCompare(); else applyCompare();
+      });
+      tbody.addEventListener('click', function (e) {
+        if (!compareMode) return;
+        var tr = e.target.closest ? e.target.closest('tr') : null;
+        if (!tr || tr.parentNode !== tbody) return;
+        toggleSelect(langOf(tr));
+      });
+
+      markRows();
+      renderNames();
+
+      // one group per rating column, with a number input per present bucket
+      ratingCols.forEach(function (c) {
+        var group = document.createElement('div');
+        group.className = 'weights-col';
+        var lab = document.createElement('div');
+        lab.className = 'weights-col-label';
+        lab.textContent = c.label;
+        group.appendChild(lab);
+        var inputs = document.createElement('div');
+        inputs.className = 'weights-inputs';
+        c.scale.forEach(function (bucketLower) {
+          var disp = c.display[bucketLower];
+          if (!disp) return; // bucket not present in this column
+          var field = document.createElement('label');
+          field.className = 'weights-field';
+          var name = document.createElement('span');
+          name.textContent = disp;
+          var inp = document.createElement('input');
+          inp.type = 'number';
+          inp.step = '1';
+          inp.dataset.col = c.label;
+          inp.dataset.bucket = bucketLower;
+          var cur = weightFor(c.label, bucketLower);
+          inp.value = cur ? String(cur) : '';
+          inp.addEventListener('input', function () {
+            if (!weights[c.label]) weights[c.label] = {};
+            var v = parseFloat(inp.value);
+            if (isNaN(v) || v === 0) delete weights[c.label][bucketLower];
+            else weights[c.label][bucketLower] = v;
+            persist(weights);
+            computeAll();
+          });
+          field.appendChild(name);
+          field.appendChild(inp);
+          inputs.appendChild(field);
+        });
+        group.appendChild(inputs);
+        panel.appendChild(group);
+      });
+
+      toolbar.appendChild(toggleBtn);
+      toolbar.appendChild(resetBtn);
+      toolbar.appendChild(compareBtn);
+      toolbar.appendChild(compareNowBtn);
+      toolbar.appendChild(namesSpan);
+      toolbar.appendChild(panel);
+      var wrap = table.closest('.tablewrap') || table;
+      wrap.parentNode.insertBefore(toolbar, wrap);
+
+      var serverAvailable = false;
+      function persist(obj) {
+        saveWeights(obj); // localStorage cache / standalone fallback
+        if (serverAvailable && typeof fetch === 'function') {
+          try {
+            fetch(window.PL_WEIGHTS_URL || '/weights', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(obj)
+            });
+          } catch (e) { /* ignore network errors */ }
+        }
+      }
+      function refreshInputs() {
+        Array.prototype.forEach.call(panel.querySelectorAll('input'), function (inp) {
+          var w = weightFor(inp.dataset.col, inp.dataset.bucket);
+          inp.value = w ? String(w) : '';
+        });
+      }
+
+      setCollapsed(!seeded); // auto-expand on first-run seeding
+      computeAll();
+
+      // When served by the live preview server, its on-disk weights file is the
+      // source of truth; opened as a static file (no server), localStorage is used.
+      if (typeof fetch === 'function') {
+        fetch(window.PL_WEIGHTS_URL || '/weights', { cache: 'no-store' }).then(function (r) {
+          if (!r.ok) throw new Error('no server');
+          return r.json();
+        }).then(function (server) {
+          serverAvailable = true;
+          if (server && Object.keys(server).length) {
+            weights = server;          // server wins
+            saveWeights(weights);      // cache locally
+            refreshInputs();
+            computeAll();
+            if (table._plResort) table._plResort(); // re-sort on new Points
+          } else if (Object.keys(weights).length) {
+            persist(weights);          // seed the empty server from local/seeded weights
+          }
+        }).catch(function () { /* standalone / no server: localStorage only */ });
+      }
+    });
+  })();
+</script>
+<script>
+  // click-to-sort columns. Ordinal rating columns sort by their scale's order;
+  // everything else sorts as (natural) text. Click toggles ascending / descending.
+  (function () {
+    var SCALES = window.PL_SCALES || [];
+    function text(td) { return (td.textContent || '').trim(); }
+
+    // Pick the scale for a column from its non-empty values; null if none fits.
+    function scaleFor(values) {
+      var vals = values.map(function (v) { return v.toLowerCase(); }).filter(Boolean);
+      if (!vals.length) return null;
+      return SCALES.find(function (scale) {
+        return vals.every(function (v) { return scale.indexOf(v) !== -1; });
+      }) || null;
+    }
+
+    document.querySelectorAll('table').forEach(function (table) {
+      if (!table.tHead || !table.tBodies.length) return;
+      var headRow = table.tHead.rows[0];
+      Array.prototype.forEach.call(headRow.cells, function (th, col) {
+        th.addEventListener('click', function () { sortBy(table, headRow, col, th); });
+      });
+
+      // Re-apply whichever column is currently sorted, keeping its direction.
+      // Used after the async on-disk weights load recomputes Points, so the row
+      // order tracks the new values instead of going stale.
+      table._plResort = function () {
+        var active = headRow.querySelector('th[data-dir]');
+        if (!active) return;
+        var dir = active.getAttribute('data-dir');
+        var ci = active.dataset.colIndex != null
+          ? Number(active.dataset.colIndex)
+          : Array.prototype.indexOf.call(headRow.cells, active);
+        active.setAttribute('data-dir', dir === 'asc' ? 'desc' : 'asc'); // sortBy toggles back
+        sortBy(table, headRow, ci, active);
+      };
+
+      // On load, default-sort by the injected Points column, descending.
+      var pointsTh = headRow.cells[0];
+      if (pointsTh && pointsTh.classList.contains('points-col')) {
+        pointsTh.setAttribute('data-dir', 'asc'); // sortBy toggles asc -> desc
+        sortBy(table, headRow, 0, pointsTh);
+      }
+    });
+
+    function sortBy(table, headRow, col, th) {
+      var tbody = table.tBodies[0];
+      var rows = Array.prototype.slice.call(tbody.rows);
+      // Resolve cells by the stable data-col-index stamp (set by the Points/
+      // Compare script), so sorting stays correct after Compare reorders the
+      // columns. Falls back to the positional index when unstamped.
+      var ci = th.dataset.colIndex != null ? Number(th.dataset.colIndex) : col;
+      function cell(r) { return r.querySelector('[data-col-index="' + ci + '"]') || r.cells[col]; }
+      var scale = scaleFor(rows.map(function (r) { return text(cell(r)); }));
+
+      var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
+      Array.prototype.forEach.call(headRow.cells, function (h) {
+        h.removeAttribute('data-dir');
+        var a = h.querySelector('.sort-arrow');
+        if (a) a.remove();
+      });
+      th.setAttribute('data-dir', dir);
+      var sign = dir === 'asc' ? 1 : -1;
+
+      rows.sort(function (a, b) {
+        var ta = text(cell(a)), tb = text(cell(b));
+        var cmp;
+        if (scale) {
+          var ra = scale.indexOf(ta.toLowerCase()), rb = scale.indexOf(tb.toLowerCase());
+          cmp = (ra === -1 ? Infinity : ra) - (rb === -1 ? Infinity : rb);
+        } else {
+          cmp = ta.localeCompare(tb, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return cmp * sign;
+      });
+      rows.forEach(function (r) { tbody.appendChild(r); });
+
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+      th.appendChild(arrow);
+    }
+  })();
+</script>
+<script>
+  // Custom hover tooltips: instant (no delay), larger font, and they stay open
+  // while the pointer moves between cells (the text just swaps) instead of the
+  // native title close/reopen. Driven by mouseover/mousemove, so — unlike native
+  // title tooltips — they also show when the browser window isn't focused.
+  // Text comes from data-tip, migrated from any title attribute so the native
+  // tooltip never competes.
+  (function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[title]'), function (el) {
+      el.setAttribute('data-tip', el.getAttribute('title'));
+      el.removeAttribute('title');
+    });
+
+    var tip = document.createElement('div');
+    tip.className = 'pl-tooltip';
+    document.body.appendChild(tip);
+    var shown = null;
+
+    function place(x, y) {
+      var pad = 14, r = tip.getBoundingClientRect();
+      var left = x + pad, top = y + pad + 4;
+      if (left + r.width + 4 > window.innerWidth) left = x - r.width - pad;
+      if (left < 4) left = 4;
+      if (top + r.height + 4 > window.innerHeight) top = y - r.height - pad;
+      if (top < 4) top = 4;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+    function showFrom(target, x, y) {
+      var el = target && target.closest ? target.closest('[data-tip]') : null;
+      var text = el ? el.getAttribute('data-tip') : null;
+      if (text) {
+        if (text !== shown) { tip.textContent = text; shown = text; }
+        tip.style.display = 'block';
+        place(x, y);
+      } else if (shown !== null) {
+        tip.style.display = 'none';
+        shown = null;
+      }
+    }
+    document.addEventListener('mouseover', function (e) { showFrom(e.target, e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener('mousemove', function (e) { showFrom(e.target, e.clientX, e.clientY); }, { passive: true });
+    document.addEventListener('mouseout', function (e) {
+      if (!e.relatedTarget) { tip.style.display = 'none'; shown = null; }
+    });
+  })();
+</script>
+</body>
+</html>
