@@ -15,10 +15,10 @@
 am-gui
 # Zed Editor (Rust-based, VSCode-like, agentic too)
 zed
-# Agent orchestrator and VSCode fork
+# Agent orchestrators
 cursor
-# T3 Code https://github.com/pingdotgg/t3code/
-t3code
+orca # https://github.com/stablyai/orca
+t3code # T3 Code https://github.com/pingdotgg/t3code/
 # GPU monitoring
 gpu-t
 # Simple AppImage Sandbox - for adding additional sandboxing (bwrap) to an AppImage installed via AM-GUI
