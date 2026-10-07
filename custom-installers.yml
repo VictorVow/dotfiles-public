@@ -495,7 +495,8 @@
     # Not in AM's (AppMan) catalogue, so this bypasses appman-appimages.txt and
     # installs straight to ~/AppImages, matching that directory's convention
     # for standalone AppImages (see docs/system/declarative-vs-imperative-state.md).
-    # Menu entry lives in gui-apps.nix (xdg.desktopEntries."org.libresprite.LibreSprite").
+    # Menu entry: a plain .desktop file in ~/.local/share/applications, icon
+    # extracted from the AppImage into the hicolor theme (tasks below).
     # ════════════════════════════════════════════════════════════════════════
 
     - name: LibreSprite | check if already installed
@@ -556,6 +557,47 @@
         - /tmp/libresprite.zip
         - /tmp/LibreSprite-x86_64.AppImage
       when: not libresprite_binary.stat.exists
+
+    - name: LibreSprite | check if icon already installed
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+      register: libresprite_icon
+
+    - name: LibreSprite | extract icon from AppImage
+      ansible.builtin.command:
+        cmd: "{{ ansible_env.HOME }}/AppImages/libresprite.appimage --appimage-extract libresprite.png"
+        chdir: /tmp
+      when: not libresprite_icon.stat.exists
+
+    - name: LibreSprite | install icon into hicolor theme
+      ansible.builtin.copy:
+        src: /tmp/squashfs-root/libresprite.png
+        dest: "{{ ansible_env.HOME }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+        mode: '0644'
+      when: not libresprite_icon.stat.exists
+
+    - name: LibreSprite | clean up extracted icon
+      ansible.builtin.file:
+        path: /tmp/squashfs-root
+        state: absent
+      when: not libresprite_icon.stat.exists
+
+    - name: LibreSprite | install .desktop menu entry
+      ansible.builtin.copy:
+        dest: "{{ ansible_env.HOME }}/.local/share/applications/org.libresprite.LibreSprite.desktop"
+        mode: '0644'
+        content: |
+          [Desktop Entry]
+          Type=Application
+          Name=LibreSprite
+          GenericName=Sprite Editor
+          Comment=Animated sprite editor & pixel art tool
+          Exec={{ ansible_env.HOME }}/AppImages/libresprite.appimage %F
+          Icon=libresprite
+          Terminal=false
+          StartupWMClass=libresprite
+          Categories=Graphics;2DGraphics;RasterGraphics;
+          MimeType=image/x-aseprite;
 
     # ════════════════════════════════════════════════════════════════════════
     # FW-FANCTRL — https://github.com/TamtamHero/fw-fanctrl
