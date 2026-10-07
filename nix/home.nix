@@ -20,7 +20,7 @@
 
   # llm-agents.nix packages (claude-code, codex, gemini-cli, ...) are consumed
   # directly via `llm-agents.packages.${pkgs.system}` in packages.nix and
-  # shell-apps.nix, NOT through nixpkgs.overlays. The overlay
+  # ai-agents.nix, NOT through nixpkgs.overlays. The overlay
   # (llm-agents.overlays.shared-nixpkgs) rebuilds each package against *our*
   # nixpkgs revision, which almost never matches numtide's own pinned
   # nixpkgs — so every package silently compiles locally instead of hitting
@@ -31,6 +31,8 @@
   imports = [
     ./modules/packages.nix   # All home.packages (replaces apt/brew/pipx/npm lists)
     ./modules/shell-apps.nix # home.programs.* for shell/CLI apps
+    ./modules/ai-agents.nix  # Claude Code, Codex, OpenCode, MCP server registry, statusline
+    ./modules/editors.nix    # Neovim, micro, VS Code/VSCodium settings, MarkText
     ./modules/claude-skills.nix # Claude Code user skills (inline + Orca skills from flake input)
     ./modules/firefox.nix    # Firefox: profiles, shared settings, search engines, cookie policy
     ./modules/gui-apps.nix   # home.programs.* for GUI apps (Rofi, OBS)
