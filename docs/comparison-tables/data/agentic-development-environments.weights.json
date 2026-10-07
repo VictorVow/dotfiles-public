@@ -1,4 +1,9 @@
 {
+  "Platforms supported": {
+    "4": 2,
+    "5": 4,
+    "6": 6
+  },
   "Velocity - PRs": {
     "very high": 3,
     "high": 2,

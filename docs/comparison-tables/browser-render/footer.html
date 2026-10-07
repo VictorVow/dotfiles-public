@@ -540,6 +540,16 @@
       var ci = th.dataset.colIndex != null ? Number(th.dataset.colIndex) : col;
       function cell(r) { return r.querySelector('[data-col-index="' + ci + '"]') || r.cells[col]; }
       var scale = scaleFor(rows.map(function (r) { return text(cell(r)); }));
+      // In an otherwise numeric column (e.g. "91.4k" stars), sort "N/A" as 0
+      // so it lands below every number rather than among the letters.
+      var numeric = rows.every(function (r) {
+        var t = text(cell(r));
+        return /^n\/a$/i.test(t) || /^\d/.test(t);
+      });
+      function sortText(r) {
+        var t = text(cell(r));
+        return numeric && /^n\/a$/i.test(t) ? '0' : t;
+      }
 
       var dir = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
       Array.prototype.forEach.call(headRow.cells, function (h) {
@@ -551,7 +561,7 @@
       var sign = dir === 'asc' ? 1 : -1;
 
       rows.sort(function (a, b) {
-        var ta = text(cell(a)), tb = text(cell(b));
+        var ta = sortText(a), tb = sortText(b);
         var cmp;
         if (scale) {
           var ra = scale.indexOf(ta.toLowerCase()), rb = scale.indexOf(tb.toLowerCase());
