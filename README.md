@@ -38,6 +38,10 @@ installs/
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
 │   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
 │   └── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
+├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG
+│   ├── 0STARTUP/             # Login/startup scripts: yakuake1.sh orchestrator, sections/*.sh tmux panes, shutdown.sh
+│   ├── 1COMMON/              # Everyday apps; subdirs become [Category] prefixes in vault-launch
+│   └── 2OTHER/               # Miscellaneous apps (top level only scanned)
 └── docs/                     # All documentation
     ├── archive/              # Previously relevant, only kept for historical purposes
     ├── system/               # Reference docs for this system's config (implemented, in use)

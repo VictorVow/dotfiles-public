@@ -309,10 +309,10 @@ in
       name = "vault-launch";
       runtimeInputs = [ pkgs.rofi pkgs.dex pkgs.libnotify ];
       text = ''
-        VAULT="$HOME/Vaults/gocryptfs1/0SHORTCUTS"
+        VAULT="$HOME/Projects/installs/0SHORTCUTS"
 
         if [[ ! -d "$VAULT/0STARTUP" ]]; then
-          notify-send -u critical "vault-launch" "Vault is not mounted"
+          notify-send -u critical "vault-launch" "0SHORTCUTS not found at $VAULT"
           exit 1
         fi
 
