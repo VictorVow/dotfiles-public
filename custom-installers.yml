@@ -401,47 +401,6 @@
       changed_when: false
 
     # ════════════════════════════════════════════════════════════════════════
-    # AWATCHER — https://github.com/2e3s/awatcher
-    # ActivityWatch-compatible window + idle watcher distributed as .deb.
-    # ════════════════════════════════════════════════════════════════════════
-
-    - name: awatcher | fetch latest release metadata from GitHub
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/2e3s/awatcher/releases/latest
-        return_content: yes
-      register: awatcher_release
-      when: ansible_facts.packages['awatcher'] is not defined
-
-    # '^awatcher_' anchor excludes the 'aw-awatcher' bundle .deb without a rejectattr.
-    - name: awatcher | resolve .deb download URL
-      ansible.builtin.set_fact:
-        awatcher_download_url: >-
-          {{ awatcher_release.json.assets
-             | selectattr('name', 'search', '^awatcher_.*_amd64\.deb$')
-             | map(attribute='browser_download_url')
-             | first }}
-      when: ansible_facts.packages['awatcher'] is not defined
-
-    - name: awatcher | download .deb package
-      ansible.builtin.get_url:
-        url: "{{ awatcher_download_url }}"
-        dest: /tmp/awatcher.deb
-        mode: '0644'
-      when: ansible_facts.packages['awatcher'] is not defined
-
-    - name: awatcher | install .deb
-      ansible.builtin.apt:
-        deb: /tmp/awatcher.deb
-      become: yes
-      when: ansible_facts.packages['awatcher'] is not defined
-
-    - name: awatcher | clean up temp .deb
-      ansible.builtin.file:
-        path: /tmp/awatcher.deb
-        state: absent
-      when: ansible_facts.packages['awatcher'] is not defined
-
-    # ════════════════════════════════════════════════════════════════════════
     # HW-MONITOR — https://github.com/husseinhareb/hw-monitor
     # Tauri system monitor distributed as .deb (links against system WebKit).
     # ════════════════════════════════════════════════════════════════════════
