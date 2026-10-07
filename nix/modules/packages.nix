@@ -200,6 +200,20 @@ in
     git-lfs  # Git extension for large file storage (binary assets, models, etc.)
     git-filter-repo # Rewrite git history (successor to git filter-branch / BFG)
     gh       # Official GitHub CLI
+    forgejo-cli # `fj` — Forgejo client CLI (repos, issues, PRs) via the API
+                # Logged in to git.device.example.com (token in ~/.local/share/forgejo-cli/keys.json)
+    # `forgejo` — the Forgejo admin CLI can't talk to a remote instance (it reads
+    # app.ini + the DB directly), so run it inside the self-hosted container over
+    # SSH. Uses the server's own binary, so it always matches the server version.
+    (pkgs.writeShellApplication {
+      name = "forgejo";
+      text = ''
+        tty=()
+        [[ -t 0 && -t 1 ]] && tty=(-t)
+        exec ssh "''${tty[@]}" -i ~/.ssh/boss-XPS-9380 lord@lord-ubuntu \
+          docker exec -i "''${tty[@]}" -u git forgejo forgejo "''${@@Q}"
+      '';
+    })
     # The legacy gitAndTools wrapper was removed from nixpkgs. Keep using the
     # libsecret credential helper via the Git config in programs.nix.
 

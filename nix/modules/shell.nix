@@ -344,6 +344,9 @@
     # Go workspace root
     GOPATH = "$HOME/go";
 
+    # forgejo-cli (`fj`): host to use when it can't infer one from the cwd's git remote
+    FJ_FALLBACK_HOST = "https://git.device.example.com";
+
     # XDG migration (via xdg-ninja) — redirect dev-tool state out of $HOME.
     WINEPREFIX = "$HOME/.local/share/wine";
     KDEHOME = "$HOME/.config/kde";
