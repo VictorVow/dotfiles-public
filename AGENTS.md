@@ -5,3 +5,5 @@ If you need to make changes within this repo that affect the high-level repo str
 When you see a `> Decision`, `> Summary` or similar quote block near the top of Markdown files do not edit or create that - it's only for the user to create, not agents.
 
 If asked to change config/packages/system use `rg` (Ripgrep) to search for it in this repository, as this will likely be the canonical place to make changes. 
+
+Self-hosted services (Headscale, Forgejo, Stremio, Calibre, RSS, etc.) and the servers they run on (lord-ubuntu, VPSes) are NOT managed here — they live in separate repos under `~/Projects/Git/1MY_REPOS/Self-Hosted`. When troubleshooting or looking for a self-hosted service/tool, start with that directory's `README.md` (repo map).

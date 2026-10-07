@@ -65,6 +65,10 @@ installs/
 
 
 
+## Related Repos
+
+- **Self-hosted services** — `~/Projects/Git/1MY_REPOS/Self-Hosted`: one repo per service (Headscale, Forgejo, Stremio, Calibre, DAV, RSS, Rclone, Dashboard, …), mostly deployed with Ansible to the home server `lord-ubuntu` and reachable tailnet-only at `*.device.example.com`. Its `README.md` is the repo map — a symlink to [docs/system/self-hosted-readme.md](docs/system/self-hosted-readme.md), kept here so it's tracked in git (relative links in it resolve from the Self-Hosted directory). This repo only holds the client side (e.g. `nix/modules/rclone.nix`, `docs/system/headscale.md`, `docs/system/nfs-mounts.md`).
+
 ## Quick Start
 
 ### Prerequisites
