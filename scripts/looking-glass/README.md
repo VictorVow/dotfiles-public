@@ -10,7 +10,7 @@ The IDD is bleeding-edge only for now. Upstream requires **the client, IDD and k
 |-------|-----------|
 | `looking-glass-client` (bleeding build) + `~/.config/looking-glass/client.ini` | Nix: `lookingGlassClient` in `nix/modules/packages.nix` |
 | kvmfr kernel module (dkms), `/etc/modprobe.d` + `/etc/modules-load.d` config, udev rule, AppArmor + `qemu.conf` cgroup ACL for `/dev/kvmfr0`, swtpm, virsh, libvirtd enabled | Ansible: `looking_glass` tag in `custom-installers.yml` |
-| Windows 11 VM definition (q35, UEFI without Secure Boot, TPM, virtio, SPICE fallback, IVSHMEM on `/dev/kvmfr0`) | `create-win11-vm.sh` (one-shot) |
+| Windows 11 VM definition (q35, UEFI without Secure Boot, TPM, virtio, SPICE fallback, QEMU guest agent channel, IVSHMEM on `/dev/kvmfr0`) | `create-win11-vm.sh` (one-shot) |
 | IDD + IVSHMEM driver inside Windows | Manual, step 5 below |
 
 IVSHMEM is 64 MiB, which covers resolutions up to 3440x1440 (this laptop panel is 2256x1504). If you need more, change `kvmfr_static_size_mb` in `custom-installers.yml`. `create-win11-vm.sh` reads the VM's `size` from `/etc/modprobe.d/kvmfr.conf`, but an already-defined VM has to be edited (`virsh edit win11`). Formula and table: `doc/install_libvirt.rst` upstream.

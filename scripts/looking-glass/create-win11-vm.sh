@@ -3,7 +3,8 @@
 #
 # Defines and boots a Windows 11 libvirt VM wired up for Looking Glass (IDD):
 # q35 + UEFI (no Secure Boot, see below) + emulated TPM, virtio disk/net, SPICE fallback
-# display/clipboard/audio, and an IVSHMEM device backed by /dev/kvmfr0.
+# display/clipboard/audio, a QEMU guest agent channel, and an IVSHMEM device
+# backed by /dev/kvmfr0.
 # There's no GPU passthrough (iGPU-only laptop), so the IDD runs in software mode.
 #
 # Prerequisites: `ansible-playbook custom-installers.yml --tags looking_glass -K`
@@ -86,6 +87,7 @@ args=(
     --graphics spice
     --video vga
     --channel spicevmc,target.type=virtio,target.name=com.redhat.spice.0
+    --channel unix,target.type=virtio,target.name=org.qemu.guest_agent.0
     --sound ich9,audio.id=1
     --audio type=spice,id=1
     --qemu-commandline="-device '{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}'"
