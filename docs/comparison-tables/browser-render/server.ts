@@ -12,7 +12,7 @@ const path = require('node:path');
 // can run from anywhere.
 //
 // Args (order-independent):
-//   --port N | -p N | a bare integer   -> listen port (default 8080)
+//   --port N | -p N | a bare integer   -> listen port (default 47813)
 //   anything else                      -> a Markdown file to serve
 // With no files given, defaults to ../data/programming-languages.md.
 
@@ -32,7 +32,7 @@ interface ParsedArgs {
 
 function parseArgs(argv: string[]): ParsedArgs {
   const files: string[] = [];
-  let port = 8080;
+  let port = 47813;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--port' || a === '-p') {

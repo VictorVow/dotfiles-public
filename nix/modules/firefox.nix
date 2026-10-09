@@ -480,7 +480,6 @@ in
     # user visiting each time despite VPN pseudononymisation. Additionally
     # local attacks (evil maid) can see my account info / steal cookies.
     policies.Cookies.Allow = [
-      "http://localhost:8080"
       "http://localhost:8384"
       "http://localhost:8193"
       # Headscale
