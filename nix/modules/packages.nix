@@ -191,6 +191,9 @@ in
               # `wine` is 32-bit-only and drags in a pkgsi686Linux dep chain
               # (mbedtls → ffmpeg → gtk4 → pipewire) that Hydra often fails to
               # cache, forcing multi-hour local builds (or build failures).
+    pkgs-unstable.wl-freeze # https://github.com/Zerodya/wl-freeze Suspend/resume the focused game (or any app) on Wayland — bind to a hotkey.
+              # Pinned to unstable: KDE Plasma (KWin) support landed in 2.1.0;
+              # stable has 2.0.2 (Hyprland/Niri/Sway only).
 
     # ── Database ──────────────────────────────────────────────────────────────
     sqlitebrowser # GUI browser and editor for SQLite databases
