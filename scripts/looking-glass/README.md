@@ -6,12 +6,12 @@ The IDD is bleeding-edge only for now. Upstream requires **the client, IDD and k
 
 ## What lives where
 
-| Piece | Managed by |
-|-------|-----------|
-| `looking-glass-client` (bleeding build) + `~/.config/looking-glass/client.ini` | Nix: `lookingGlassClient` in `nix/modules/packages.nix` |
+| Piece                                                                                                                                                                        | Managed by                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `looking-glass-client` (bleeding build) + `~/.config/looking-glass/client.ini`                                                                                               | Nix: `lookingGlassClient` in `nix/modules/packages.nix` |
 | kvmfr kernel module (dkms), `/etc/modprobe.d` + `/etc/modules-load.d` config, udev rule, AppArmor + `qemu.conf` cgroup ACL for `/dev/kvmfr0`, swtpm, virsh, libvirtd enabled | Ansible: `looking_glass` tag in `custom-installers.yml` |
-| Windows 11 VM definition (q35, UEFI without Secure Boot, TPM, virtio, SPICE fallback, QEMU guest agent channel, IVSHMEM on `/dev/kvmfr0`) | `create-win11-vm.sh` (one-shot) |
-| IDD + IVSHMEM driver inside Windows | Manual, step 5 below |
+| Windows 11 VM definition (q35, UEFI without Secure Boot, TPM, virtio, SPICE fallback, QEMU guest agent channel, IVSHMEM on `/dev/kvmfr0`)                                    | `create-win11-vm.sh` (one-shot)                         |
+| IDD + IVSHMEM driver inside Windows                                                                                                                                          | Manual, step 5 below                                    |
 
 IVSHMEM is 64 MiB, which covers resolutions up to 3440x1440 (this laptop panel is 2256x1504). If you need more, change `kvmfr_static_size_mb` in `custom-installers.yml`. `create-win11-vm.sh` reads the VM's `size` from `/etc/modprobe.d/kvmfr.conf`, but an already-defined VM has to be edited (`virsh edit win11`). Formula and table: `doc/install_libvirt.rst` upstream.
 
@@ -24,9 +24,13 @@ IVSHMEM is 64 MiB, which covers resolutions up to 3440x1440 (this laptop panel i
 3. **VM**: download the Windows 11 ISO and [`virtio-win.iso`](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso), then run `scripts/looking-glass/create-win11-vm.sh ~/Downloads/Win11*.iso ~/Downloads/virtio-win.iso`. Defaults are 8 vCPU, 16 GiB RAM and a 120 GB disk; override with `VCPUS`, `RAM_MIB`, `DISK_GB` or `VM_NAME`. Add `DRY_RUN=1` to only print the XML.
 4. **Install Windows** in virt-manager's console (`win11` → Open). Work through these in order:
    1. **Boot prompt:** open the console straight away, because the ISO's "Press any key to boot from CD or DVD" times out after about 5 s. If you miss it, see *"No bootable option or device was found"* under Troubleshooting. Alternatively, send the keypress from the host: `for i in $(seq 30); do virsh -c qemu:///system send-key win11 KEY_ENTER; sleep 1; done`. Repeated Enters also click through the language and "Install now" screens, so check where you've ended up.
+
    2. **Secure Boot bypass:** do this before clicking Next on the edition-selection screen. The VM has no Secure Boot (see *Why no Secure Boot* below), so Windows 11 setup refuses with "This PC can't run Windows 11" unless you bypass the check. Press **Shift+F10** and run `reg add HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f`. Close the prompt and continue. TPM, CPU and RAM pass on their own.
+
    3. **Edition and install type:** pick the edition (Home is preselected; you probably want Pro), accept the licence and choose **Custom: Install Windows only**.
+
    4. **Disk driver:** the disk is virtio, so the disk list starts empty. Choose *Load driver* and pick `viostor\w11\amd64` from the virtio-win CD.
+
    5. **Network at "Let's connect you to a network"** (Next is greyed out): Windows has no driver for the virtio NIC. Press **Shift+F10** and run the line below. It finds the virtio CD whatever drive letter it got.
 
       ```
@@ -34,7 +38,9 @@ IVSHMEM is 64 MiB, which covers resolutions up to 3440x1440 (this laptop panel i
       ```
 
       It should report "Driver package added successfully". The wired connection appears within seconds and Next lights up. For a local account instead of a Microsoft account, run `OOBE\BYPASSNRO` in that prompt instead: the VM reboots, and this screen then offers *"I don't have internet"*. Install the NIC driver later with step 6.
+
    6. **Other drivers:** once you're at the desktop, run `virtio-win-guest-tools.exe` from the virtio-win CD. It installs the remaining virtio drivers, the QEMU guest agent and the SPICE agent.
+
    7. **Eject the ISOs** (optional): in virt-manager → Show virtual hardware → each SATA CDROM → Disconnect. The saved VM definition boots from the disk only, so leaving them in is harmless. If you used `--boot cdrom,hd` to recover from the timeout (Troubleshooting), set it back with `virt-xml -c qemu:///system win11 --edit --boot hd`.
 5. **In the guest**, download `looking-glass-idd-setup.exe` from https://looking-glass.io/downloads, taking the **bleeding-edge build matching `236efcb1`**. Run it as administrator and tick **IVSHMEM Driver**, **Indirect Display Driver (IDD)** and, if offered, **Disable old host app**. Reboot if it asks. Optionally install [spice-guest-tools](https://www.spice-space.org/download.html#windows-binaries) for clipboard sync. A "Looking Glass" display and a tray helper should appear; the helper should report *software* processing (no GPU).
 6. **Run `looking-glass-client`** on the host. Press Scroll Lock (the default escape key) to toggle input capture, or hold it for the shortcut list.
