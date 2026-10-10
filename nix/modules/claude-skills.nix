@@ -265,4 +265,8 @@
   # and updates independently, so these may lag/lead the app's CLI slightly.
   home.file.".claude/skills/orca-cli".source      = "${orca}/skills/orca-cli";
   home.file.".claude/skills/orchestration".source = "${orca}/skills/orchestration";
+  # Shared root read by Codex etc.; Orca counts it as coverage for every detected
+  # agent, so this stops it prompting to install for non-Claude CLIs.
+  home.file.".agents/skills/orca-cli".source      = "${orca}/skills/orca-cli";
+  home.file.".agents/skills/orchestration".source = "${orca}/skills/orchestration";
 }
