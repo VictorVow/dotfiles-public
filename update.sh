@@ -21,7 +21,10 @@
 #   ./update.sh --dry-run          # Print what would run without executing
 #
 # Cron example (daily at 10:00):
-#   0 10 * * * /home/boss/Projects/installs/update.sh >> /tmp/update.log 2>&1
+#   0 10 * * * /home/boss/Projects/installs/update.sh >/dev/null 2>&1
+#
+# Every run is logged to ~/.local/state/update-all/update.log (5 MB cap, then
+# rotated to update.log.1).
 
 set -euo pipefail
 
@@ -65,6 +68,53 @@ for arg in "$@"; do
       ;;
   esac
 done
+
+# ── Run log ───────────────────────────────────────────────────────────────────
+# Every run's full output is appended (ANSI colours and \r progress redraws
+# stripped) to $UPDATE_LOG for later review. Size cap: once the log exceeds
+# UPDATE_LOG_MAX_BYTES it's rotated to .1 (previous .1 dropped), so at most
+# ~2× the cap is kept on disk.
+UPDATE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/update-all/update.log"
+UPDATE_LOG_MAX_BYTES=$(( 5 * 1024 * 1024 ))
+
+# stdin: raw terminal output → stdout: plain text.
+_clean_log() {
+  sed -u -E \
+    -e 's/\x1b\[[0-9;?]*[A-Za-z]//g' \
+    -e 's/\x1b\][^\x07]*\x07//g' \
+    -e 's/\r+$//' \
+    -e 's/.*\r//'
+}
+
+_rotate_log() {
+  mkdir -p "$(dirname "$UPDATE_LOG")"
+  if [[ -f "$UPDATE_LOG" ]] && (( $(stat -c %s "$UPDATE_LOG") > UPDATE_LOG_MAX_BYTES )); then
+    mv -f "$UPDATE_LOG" "$UPDATE_LOG.1"
+  fi
+}
+
+_log_hint() { echo -e "\n\033[0;34m[INFO]\033[0m  Full log: $UPDATE_LOG"; }
+
+if [[ -z "${UPDATE_SH_LOGGING:-}" ]]; then
+  export UPDATE_SH_LOGGING=1
+  _rotate_log
+  if [[ -t 1 ]] && command -v script &>/dev/null; then
+    # Interactive: re-run under script(1) so children still see a TTY
+    # (progress bars, colours, the `[[ -t 1 ]]` prompt checks below).
+    raw_log=$(mktemp)
+    rc=0
+    script -q -e -c "$(printf '%q ' "$0" "$@")" "$raw_log" || rc=$?
+    # script(1) adds its own "Script started/done" header/footer lines.
+    _clean_log < "$raw_log" | grep -v '^Script \(started\|done\) on ' >> "$UPDATE_LOG"
+    rm -f "$raw_log"
+    _log_hint
+    exit "$rc"
+  else
+    # Non-interactive (cron, piped): tee a cleaned copy into the log.
+    exec > >(tee >(_clean_log >> "$UPDATE_LOG")) 2>&1
+    trap _log_hint EXIT
+  fi
+fi
 
 # ── Colours & helpers ─────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -128,7 +178,8 @@ _latest_stable_release() {
     --jq '.[].name' 2>/dev/null \
     | grep -E '^nixos-[0-9]+\.[0-9]+$' \
     | sort -V \
-    | tail -1
+    | tail -1 \
+    || true  # empty on failure — callers handle it; don't trip `set -e`
 }
 
 # Find the newest commit on <owner>/<repo>@<branch> that is at least <days>
@@ -381,6 +432,16 @@ if ! command -v nix &>/dev/null; then
   RESULTS["Nix"]="skipped (not installed)"
 else
   if $UPDATE_NIX; then
+    # ── gh preflight ──────────────────────────────────────────────────────────
+    # The helpers below silence gh's stderr, so a broken auth state (stale
+    # keyring token, GITHUB_TOKEN unset by `git su`) or rate limit otherwise
+    # shows up only as vague "could not fetch/find" warnings. Surface it once.
+    if command -v gh &>/dev/null && ! gh_err=$(gh api rate_limit --jq .resources.core.remaining 2>&1); then
+      warn "gh api is failing — GitHub-based checks/pins below will be skipped:"
+      echo -e "  ${DIM}${gh_err}${NC}"
+      echo -e "  ${DIM}auth: GITHUB_TOKEN $([[ -n "${GITHUB_TOKEN:-}" ]] && echo set || echo unset); see \`gh auth status\`${NC}"
+    fi
+
     # ── Stable-release upgrade check ──────────────────────────────────────────
     # If the config is pinned to a named stable release (nixos-XX.YY), check
     # whether a newer stable branch has shipped. If so, offer to update both
@@ -958,7 +1019,7 @@ else
 fi
 
 # Exit with failure if any step failed
-[[ ${#FAILED[@]} -gt 0 ]] && exit 1
+if [[ ${#FAILED[@]} -gt 0 ]]; then exit 1; fi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Optional: yt-dlp nightly
