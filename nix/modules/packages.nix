@@ -276,6 +276,7 @@ in
     delta.packages.${pkgs.stdenv.hostPlatform.system}.delta
                               # Zed's Delta (delta.dev) — proprietary prebuilt binary via
                               # the official zed-industries/delta-nix flake
+    nixd      # Nix language server — used by Zed's Nix extension (and any LSP client)
     # code-cursor — removed from Nix; nixpkgs repackages each release as a
     # heavy Electron build. Installed via custom-installers.yml from upstream
     # AppImage / .deb instead.
