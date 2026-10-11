@@ -87,6 +87,11 @@ def built_since(since):
             # …/drvs/<2 chars>/<rest>.drv.bz2 → /nix/store/<2 chars><rest>.drv
             rel = os.path.relpath(path, LOG_DIR).replace("/", "", 1).removesuffix(".bz2")
             start = float(birth) if birth not in ("-", "?") and float(birth) > 0 else None
+            # Rebuilding a drv whose log already exists (e.g. never-substituted
+            # runCommandLocal outputs that were GC'd) overwrites the file in
+            # place, keeping the old birth time — so start isn't this build's.
+            if start is not None and start < since:
+                start = None
             built["/nix/store/" + rel] = (start, float(mtime))
     return built
 
