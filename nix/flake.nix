@@ -69,7 +69,12 @@
 
       extraSpecialArgs = {
         inherit llm-agents tuxManager ie-r delta orca;
-        pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+        # import (not legacyPackages) so allowUnfree applies — home.nix's
+        # nixpkgs.config only reaches the main pkgs set.
+        pkgs-unstable = import nixpkgs-unstable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
         hostProfile = {
           hms = {
             flakePath  = "$HOME/Projects/installs/nix";

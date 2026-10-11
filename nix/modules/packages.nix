@@ -491,6 +491,8 @@ in
     llmAgents.opencode         # OpenCode agentic AI CLI — was npm opencode-ai in shell.nix
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
     llmAgents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
+    pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
+                               # build lags far behind. Upstream alternative is `npm i -g devin`.
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
