@@ -313,6 +313,8 @@ in
     # ── System Administration ─────────────────────────────────────────────────
     ansible  # IT automation — used to run ansible.yml after bootstrap
              # Provides ansible-playbook, ansible-galaxy, etc.
+    doctl    # Official DigitalOcean CLI — manage droplets, k8s, domains, etc.
+             # Authenticate with: doctl auth init
 
     # ── System / CLI Utilities ────────────────────────────────────────────────
     screenkey  # Display keyboard input on screen — useful for screencasts
