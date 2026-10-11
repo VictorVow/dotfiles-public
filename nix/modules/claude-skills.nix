@@ -11,6 +11,9 @@
 #   Antigravity — ~/.gemini/config/skills (all flavours; IDE also ~/.gemini/antigravity/skills,
 #                 CLI also ~/.gemini/antigravity-cli/skills, ~/.gemini/skills)
 #                 (project: .agents/skills). Does NOT read .claude/.
+#   Devin CLI   — ~/.config/devin/skills, ~/.agents/skills, plus ~/.claude/skills via its
+#                 Claude Code import (read_config_from.claude, default on). In Zed (ACP) the
+#                 slash menu is empty; type " /name" (leading space) — see docs/system/claude-code.md.
 # Deliberately only deployed to ~/.claude/skills → Claude Code + OpenCode (the primary
 # agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would

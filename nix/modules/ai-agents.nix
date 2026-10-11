@@ -153,6 +153,8 @@ let
         "Bash(fc-list)"
       ];
     };
+    # Devin CLI also reads these but rejects the whole block (no `Notification` event).
+    # Intentional — Devin/Zed notify natively; see docs/system/claude-code.md § Hooks.
     hooks = {
       Stop             = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh stop";      }]; }];
       Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
