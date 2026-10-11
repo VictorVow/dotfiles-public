@@ -276,6 +276,20 @@
         fi
       }
 
+      # ── namecheap: route API calls via the ts-exit forward proxy ────────────
+      # Namecheap's API only answers whitelisted egress IPs and Mullvad exits
+      # rotate, so send all namecheap traffic through the forward proxy in
+      # $GCP_VPS_EGRESS_PROXY (tinyproxy on ts-exit, static GCP IP — see
+      # Self-Hosted/Egress-proxy). Whitelist that IP at
+      # Namecheap → Profile → Tools → API Access and use it as the ClientIp in
+      # `namecheap auth login`.
+      # NODE_USE_ENV_PROXY=1 is required: Node 24's global fetch ignores
+      # HTTPS_PROXY without it.
+      namecheap() {
+        NODE_USE_ENV_PROXY=1 HTTPS_PROXY="$GCP_VPS_EGRESS_PROXY" \
+          command namecheap "$@"
+      }
+
       # eza uses its own built-in colour support (dircolors not needed)
     '';
 
@@ -346,6 +360,10 @@
 
     # forgejo-cli (`fj`): host to use when it can't infer one from the cwd's git remote
     FJ_FALLBACK_HOST = "https://git.device.example.com";
+
+    # Forward proxy on ts-exit (tinyproxy, tailnet-only, static GCP egress IP).
+    # See Self-Hosted/Egress-proxy. Used by the `namecheap` function in initExtra.
+    GCP_VPS_EGRESS_PROXY = "http://100.x.x.x:8888";
 
     # XDG migration (via xdg-ninja) — redirect dev-tool state out of $HOME.
     WINEPREFIX = "$HOME/.local/share/wine";
@@ -476,6 +494,9 @@
       # see packages.nix for opencode/copilot-cli, which moved there):
       _npm_global_install "cline" "cline"                    # Cline LLM CLI
       _npm_global_install "@continuedev/cli" "continue"      # Continue Dev LLM CLI
+
+      # Other npm CLI tools not in nixpkgs:
+      _npm_global_install "@helgesverre/namecheap-cli" "namecheap"  # Namecheap domains/DNS CLI
 
       unset -f _npm_global_install
     fi
