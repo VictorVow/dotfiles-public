@@ -345,6 +345,21 @@ in
     $DRY_RUN_CMD install -m 644 ${claudeCodeSettings} "$dest"
   '';
 
+  # ── Devin CLI settings (merged keys) ───────────────────────────────────────────
+  # ~/.config/devin/config.json is runtime-mutable (Devin writes permissions/org_id,
+  # Orca writes hooks), so only the keys below are merged in with jq rather than
+  # replacing the file. attribution = false drops the "Generated with Devin" +
+  # Co-Authored-By trailer from commits/PRs (Devin's includeCoAuthoredBy).
+  home.activation.devinSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.config/devin/config.json"
+    $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
+    tmp="$(mktemp)"
+    { [ -s "$dest" ] && cat "$dest" || echo '{}'; } \
+      | ${pkgs.jq}/bin/jq '. + { attribution: false }' > "$tmp" \
+      && $DRY_RUN_CMD install -m 600 "$tmp" "$dest"
+    rm -f "$tmp"
+  '';
+
   # ── OpenCode ───────────────────────────────────────────────────────────────────
   # opencode binary is in packages.nix (llmAgents.opencode). Config here
   # covers the two JSON files opencode reads from ~/.config/opencode/:
