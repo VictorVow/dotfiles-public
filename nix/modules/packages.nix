@@ -315,6 +315,9 @@ in
              # Provides ansible-playbook, ansible-galaxy, etc.
     doctl    # Official DigitalOcean CLI — manage droplets, k8s, domains, etc.
              # Authenticate with: doctl auth init
+    google-cloud-sdk # `gcloud` — Google Cloud CLI (ts-exit VM in project stremio-selfhosted)
+                     # Authenticate with: gcloud auth login
+    opentofu # `tofu` — Terraform-compatible IaC; drives Self-Hosted/Terraform/*
 
     # ── System / CLI Utilities ────────────────────────────────────────────────
     screenkey  # Display keyboard input on screen — useful for screencasts
