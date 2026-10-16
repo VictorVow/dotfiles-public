@@ -16,7 +16,7 @@ let
   # llm-agents.nix's own packages output, built against its pinned nixpkgs —
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
-  llmAgents = llm-agents.packages.${pkgs.system};
+  llmAgents = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
   # NeverDecaf's "Chromium Web Store" extension — re-enables installing from
   # the Chrome Web Store on non-Google-branded Chromium builds (ungoogled-chromium

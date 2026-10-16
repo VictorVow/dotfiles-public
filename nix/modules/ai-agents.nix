@@ -31,7 +31,7 @@ let
   # llm-agents.nix's own packages output, built against its pinned nixpkgs —
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
-  llmAgents = llm-agents.packages.${pkgs.system};
+  llmAgents = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
   # modify it at runtime — e.g. the /effort slash command rewrites this file.

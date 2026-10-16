@@ -19,7 +19,7 @@
   nixpkgs.config.allowUnfree = true;
 
   # llm-agents.nix packages (claude-code, codex, gemini-cli, ...) are consumed
-  # directly via `llm-agents.packages.${pkgs.system}` in packages.nix and
+  # directly via `llm-agents.packages.${pkgs.stdenv.hostPlatform.system}` in packages.nix and
   # ai-agents.nix, NOT through nixpkgs.overlays. The overlay
   # (llm-agents.overlays.shared-nixpkgs) rebuilds each package against *our*
   # nixpkgs revision, which almost never matches numtide's own pinned
