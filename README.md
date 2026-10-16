@@ -23,13 +23,14 @@ installs/
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
 │   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
-│   │   └── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
+│   │   ├── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
+│   │   └── claude-skills/    # Own Claude Code skills, one folder per skill (SKILL.md + helpers); auto-linked by claude-skills.nix
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, htop, gh, direnv, ssh
 │       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode, shared MCP server registry
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
-│       ├── claude-skills.nix # Claude Code user skills: inline SKILL.md files + Orca skills (flake input)
+│       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input)
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
