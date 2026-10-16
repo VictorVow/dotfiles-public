@@ -367,8 +367,12 @@
   # is listed explicitly under [Default Applications]. It will NOT derive one from
   # a desktop file's MimeType= line the way KDE's xdg-mime query does — so without
   # this, clicking a stremio:// link in Firefox silently does nothing.
+  #
+  # On KDE 6, xdg-mime locates mimeapps.list via a bare `qtpaths`, which on Ubuntu
+  # is a qtchooser shim with no Qt 6 entry ("could not find a Qt installation of ''")
+  # — xdg-mime then silently skips the write. /usr/lib/qt6/bin has a real qtpaths.
   home.activation.stremioSchemeHandler = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    run ${pkgs.xdg-utils}/bin/xdg-mime default com.stremio.Stremio.desktop x-scheme-handler/stremio
+    PATH="/usr/lib/qt6/bin:$PATH" run ${pkgs.xdg-utils}/bin/xdg-mime default com.stremio.Stremio.desktop x-scheme-handler/stremio
   '';
 
   # Stremio's app-menu / KRunner entry, managed here so its Exec stays correct.
