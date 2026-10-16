@@ -3,6 +3,20 @@
 let
   jsonFormat = pkgs.formats.json { };
 
+  # Firefox DevTools MCP (Mozilla) — attaches to the live, already-running Firefox over
+  # Marionette + WebDriver BiDi: tabs, DOM snapshot, console, network, JS eval,
+  # logpoints, Gecko profiler. Connects lazily on first tool call, so it's inert until
+  # the profile is relaunched in remote-debug mode (scripts/firefox-debugging/
+  # ff-remote-debug.sh on). Procedure lives in the firefox-live-debug skill.
+  # Public package: chrome-context/prefs tools are only in @mozilla/firefox-devtools-mcp-moz.
+  # Defined here (not read back from config.programs.mcp.servers) because that copy
+  # carries option defaults (url = null, enabled = null, …) into Claude Code's .mcp.json.
+  firefoxDevtoolsMcp = {
+    command = "npx";
+    args    = [ "-y" "@mozilla/firefox-devtools-mcp@latest"
+                "--connect-existing" "--tool-preset" "developer" ];
+  };
+
   # llm-agents.nix's own packages output, built against its pinned nixpkgs —
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
@@ -200,9 +214,10 @@ in
 # AI coding agents: Claude Code, Codex, OpenCode, and the shared MCP server registry.
 {
   # ── MCP Servers — shared registry ─────────────────────────────────────────────
-  # Outputs ~/.config/mcp/mcp.json, consumed by:
-  #   - programs.claude-code (via enableMcpIntegration = true → ~/.claude/.mcp.json)
-  #   - programs.codex       (via enableMcpIntegration = true → ~/.codex/.mcp.json)
+  # Outputs ~/.config/mcp/mcp.json. NOT wired into Claude Code / Codex wholesale
+  # (enableMcpIntegration = false); Claude Code picks individual servers via
+  # programs.claude-code.mcpServers below. HM bakes those into a plugin dir passed
+  # with `--plugin-dir` by a wrapper around the claude binary (not ~/.claude.json).
   #   - VSCode (no longer auto-wired since programs.vscode was removed; configure
   #     a marketplace MCP extension to read ~/.config/mcp/mcp.json if needed)
   #
@@ -264,6 +279,9 @@ in
         args    = [ "-y" "@fabriqa.ai/youtube-transcript-mcp@latest" ];
       };
 
+      # Firefox DevTools — see firefoxDevtoolsMcp in the let block (also given to Claude Code).
+      firefox-devtools = firefoxDevtoolsMcp;
+
     };
   };
 
@@ -273,7 +291,8 @@ in
   programs.claude-code = {
     enable  = true;
     package = llmAgents.claude-code;
-    # enableMcpIntegration — not available until HM 26.05
+    # Whole-registry enableMcpIntegration is available but deliberately off; opt in per server.
+    mcpServers = { firefox-devtools = firefoxDevtoolsMcp; };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
     context = ''
@@ -330,7 +349,7 @@ in
   programs.codex = {
     enable  = true;
     package = llmAgents.codex;
-    # enableMcpIntegration — not available until HM 26.05
+    # enableMcpIntegration available but off (same opt-in policy as Claude Code)
   };
 
   # ── Claude Code settings (writable copy) ────────────────────────────────────

@@ -24,6 +24,8 @@ let
     "privacy.clearOnShutdown_v2.formdata"                        = true;   # clear form data on shutdown
     "privacy.userContext.enabled"                                = true;   # enable Multi-Account Containers
     "privacy.userContext.ui.enabled"                             = true;   # show container UI in menus
+    # ── Remote debugging (ff-remote-debug.sh / firefox-devtools MCP) ───────
+    "remote.prefs.recommended"                                   = false;  # don't apply automation prefs (no low-memory tab unloading, extension scopes, no crash resume…) when attaching to a live profile
     # ── Telemetry / Studies ───────────────────────────────────────────────
     "toolkit.telemetry.reportingpolicy.firstRun"                 = false;  # suppress the "help improve Firefox" telemetry opt-in dialog on first launch
     "browser.newtabpage.activity-stream.showSponsoredTopSites"   = false;  # no sponsored top sites
