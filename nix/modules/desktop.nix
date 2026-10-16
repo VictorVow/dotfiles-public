@@ -23,6 +23,18 @@
     X-KDE-autostart-after=panel
   '';
 
+  # Start Handy (dictation, see gui-apps.nix) hidden in the tray on login, so
+  # the Meta+F toggle has a running instance to talk to. Handy's own
+  # "launch on startup" setting rewrites its autostart entry, so leave that off.
+  home.file.".config/autostart/handy.desktop".text = ''
+    [Desktop Entry]
+    Name=Handy
+    Exec=${config.home.profileDirectory}/bin/handy --start-hidden
+    Icon=handy
+    Type=Application
+    X-KDE-autostart-after=panel
+  '';
+
   # Start Tailscale system tray icon on login.
   # Tailscale is installed via apt (custom-installers.yml), not Nix,
   # so we use the absolute system path rather than a Nix store reference.
