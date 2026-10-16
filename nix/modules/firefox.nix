@@ -191,6 +191,7 @@ let
       ebay.metaData.hidden = true;
       ecosia.metaData.hidden = true;
       qwant.metaData.hidden = true;
+      startpage.metaData.hidden = true;
       amazondotcom-us.metaData.hidden = true;
 
       # ── Custom engines ─────────────────────────────────────────────────
