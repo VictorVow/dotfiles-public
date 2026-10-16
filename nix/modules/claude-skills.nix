@@ -19,7 +19,7 @@
 # agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified).
-{ lib, orca, ... }:
+{ lib, orca, context7, ... }:
 
 let
   skillsDir = ../dotfiles/claude-skills;
@@ -48,6 +48,12 @@ in
       # agent, so this stops it prompting to install for non-Claude CLIs.
       ".agents/skills/orca-cli".source      = "${orca}/skills/orca-cli";
       ".agents/skills/orchestration".source = "${orca}/skills/orchestration";
+
+      # ── Context7 docs lookup (github:upstash/context7, flake = false input) ──────────
+      # Declarative equivalent of `npx ctx7 setup` in "CLI + Skills" mode (instead of
+      # the Context7 MCP server). The skill runs `npx ctx7@latest library|docs …`;
+      # anonymous use works, CONTEXT7_API_KEY / `ctx7 login` only raise rate limits.
+      ".claude/skills/find-docs".source = "${context7}/skills/find-docs";
     }
   ];
 }

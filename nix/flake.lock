@@ -34,6 +34,22 @@
         "type": "github"
       }
     },
+    "context7": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792161050,
+        "narHash": "sha256-oIqqAtRGs77g1Q+Thz1/r+qGMr+xn+7O65ESqXByWh0=",
+        "owner": "upstash",
+        "repo": "context7",
+        "rev": "e0041949fdb3b49b304d98715dde35be51b7c3d1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "upstash",
+        "repo": "context7",
+        "type": "github"
+      }
+    },
     "delta": {
       "inputs": {
         "nixpkgs": [
@@ -254,6 +270,7 @@
     },
     "root": {
       "inputs": {
+        "context7": "context7",
         "delta": "delta",
         "home-manager": "home-manager",
         "ie-r": "ie-r",

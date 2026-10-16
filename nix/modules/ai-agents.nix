@@ -3,14 +3,25 @@
 let
   jsonFormat = pkgs.formats.json { };
 
+  # MCP servers given to Claude Code are defined here (not read back from
+  # config.programs.mcp.servers) because that copy carries option defaults
+  # (url = null, enabled = null, …) into Claude Code's .mcp.json.
+
+  # https://github.com/utensils/mcp-nixos
+  # NixOS/nixpkgs — real package names, NixOS / Home Manager / nix-darwin options,
+  # FlakeHub, Noogle. Two tools (~1k tokens). Queries upstream APIs; no credentials.
+  nixosMcp = {
+    command = "uvx";
+    args    = [ "mcp-nixos" ];
+  };
+
+  # https://github.com/mozilla/firefox-devtools-mcp
   # Firefox DevTools MCP (Mozilla) — attaches to the live, already-running Firefox over
   # Marionette + WebDriver BiDi: tabs, DOM snapshot, console, network, JS eval,
   # logpoints, Gecko profiler. Connects lazily on first tool call, so it's inert until
   # the profile is relaunched in remote-debug mode (scripts/firefox-debugging/
   # ff-remote-debug.sh on). Procedure lives in the firefox-live-debug skill.
   # Public package: chrome-context/prefs tools are only in @mozilla/firefox-devtools-mcp-moz.
-  # Defined here (not read back from config.programs.mcp.servers) because that copy
-  # carries option defaults (url = null, enabled = null, …) into Claude Code's .mcp.json.
   firefoxDevtoolsMcp = {
     command = "npx";
     args    = [ "-y" "@mozilla/firefox-devtools-mcp@latest"
@@ -218,10 +229,10 @@ in
   # (enableMcpIntegration = false); Claude Code picks individual servers via
   # programs.claude-code.mcpServers below. HM bakes those into a plugin dir passed
   # with `--plugin-dir` by a wrapper around the claude binary (not ~/.claude.json).
-  #   - VSCode (no longer auto-wired since programs.vscode was removed; configure
-  #     a marketplace MCP extension to read ~/.config/mcp/mcp.json if needed)
+  # VSCode is not wired either (no longer auto-wired since programs.vscode was removed; configure
+  # a marketplace MCP extension to read ~/.config/mcp/mcp.json if needed)
   #
-  # Secret env vars (LOGSEQ_API_TOKEN, GITHUB_TOKEN) are intentionally NOT placed in
+  # Secret env vars (API tokens) are intentionally NOT placed in
   # env blocks here — the env block overrides inherited shell values, so an empty string
   # would shadow the real token set in home.sessionVariables. MCP server processes
   # inherit the full session environment automatically.
@@ -230,54 +241,8 @@ in
     enable = true;
     servers = {
 
-      # LogSeq knowledge base — requires LogSeq running with HTTP API enabled (port 12315).
-      # One-time setup: LogSeq → Settings → Features → HTTP APIs → enable → generate token
-      # → store it as logseq_api_token via `sops nix/secrets/shell.yaml` → hms + restart shell.
-      logseq = {
-        command = "uv";
-        args    = [ "run" "--with" "mcp-logseq" "mcp-logseq" ];
-        env     = { LOGSEQ_API_URL = "http://localhost:12315"; };
-      };
-
-      # Local file system — exposes ~/Documents for navigation and file operations.
-      filesystem = {
-        command = "npx";
-        args    = [ "-y" "@modelcontextprotocol/server-filesystem"
-                    "/home/boss/Documents" ];
-      };
-
-      # GitHub API — PR/issue operations, release queries, cross-repo search.
-      # Needs GITHUB_TOKEN (repo + read:org scopes); sops-encrypted in nix/secrets/shell.yaml.
-      github = {
-        command = "npx";
-        args    = [ "-y" "@modelcontextprotocol/server-github" ];
-      };
-
-      # Context7 — resolves up-to-date library docs at query time (Rust/Python/TS/Java/etc.)
-      # HTTP transport; no credentials required.
-      context7 = {
-        url = "https://mcp.context7.com/mcp";
-      };
-
-      # Sequential thinking — structured step-by-step reasoning for architecture/analysis tasks.
-      sequential-thinking = {
-        command = "npx";
-        args    = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
-      };
-
-      # NixOS/nixpkgs — real package names, options, and Home Manager config lookups.
-      # No NixOS required; queries upstream APIs. Works on any system.
-      nixos = {
-        command = "uvx";
-        args    = [ "mcp-nixos" ];
-      };
-
-      # YouTube transcripts — extract captions from any YouTube video.
-      # No credentials required.
-      youtube-transcript = {
-        command = "npx";
-        args    = [ "-y" "@fabriqa.ai/youtube-transcript-mcp@latest" ];
-      };
+      # NixOS/nixpkgs — see nixosMcp in the let block (also given to Claude Code).
+      nixos = nixosMcp;
 
       # Firefox DevTools — see firefoxDevtoolsMcp in the let block (also given to Claude Code).
       firefox-devtools = firefoxDevtoolsMcp;
@@ -292,7 +257,10 @@ in
     enable  = true;
     package = llmAgents.claude-code;
     # Whole-registry enableMcpIntegration is available but deliberately off; opt in per server.
-    mcpServers = { firefox-devtools = firefoxDevtoolsMcp; };
+    mcpServers = {
+      nixos            = nixosMcp;
+      firefox-devtools = firefoxDevtoolsMcp;
+    };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
     context = ''

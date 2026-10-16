@@ -59,16 +59,20 @@
     # Orca agent skills (skills/orca-cli, skills/orchestration) — source only,
     # linked into ~/.claude/skills by modules/claude-skills.nix.
     orca = { url = "github:stablyai/orca"; flake = false; };
+
+    # Context7 find-docs skill (skills/find-docs, drives `npx ctx7@latest`) — source only,
+    # linked by modules/claude-skills.nix. Replaces the Context7 MCP server.
+    context7 = { url = "github:upstash/context7"; flake = false; };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, ... }: {
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, ... }: {
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca;
+        inherit llm-agents tuxManager ie-r delta orca context7;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
