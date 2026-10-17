@@ -42,6 +42,7 @@
     ./modules/ai-secrets.nix # OpenRouter API key for Tray-Links "ai" tray (sops-encrypted)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
+    ./modules/cass.nix       # cass agent-session search: background index timers (cass itself via Brewfile)
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
   ];
 

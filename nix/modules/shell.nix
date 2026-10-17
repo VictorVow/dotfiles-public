@@ -39,6 +39,14 @@
       if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
       fi
+      # Brew puts bash completions in etc/bash_completion.d, which bash-completion doesn't scan.
+      # Source only the ones wanted: the dir has 120+ files (incl. brew's util-linux, which would
+      # shadow the Nix ones) and sourcing it all adds ~350ms to startup.
+      for _brew_comp in cass; do
+        [ -r "/home/linuxbrew/.linuxbrew/etc/bash_completion.d/$_brew_comp" ] && \
+          . "/home/linuxbrew/.linuxbrew/etc/bash_completion.d/$_brew_comp"
+      done
+      unset _brew_comp
 
       # ── Rust / Cargo ────────────────────────────────────────────────────────
       # rustup (installed via nixpkgs) installs toolchains to ~/.cargo.
