@@ -494,7 +494,14 @@ in
     # package. Same flake source as codex: llm-agents.packages.${system}
     # (cache.numtide.com) — see the `llmAgents` binding above.
     llmAgents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
-    llmAgents.opencode         # OpenCode agentic AI CLI — was npm opencode-ai in shell.nix
+    # OpenCode 2 (binary: `opencode2`). llm-agents.nix renames it so it can sit next
+    # to v1 (`llmAgents.opencode`, which still tracks 1.x); the alias restores the
+    # upstream `opencode` command. Orca detects `opencode2` as its "OpenCode 2" agent.
+    llmAgents.opencode2
+    (pkgs.runCommand "opencode2-as-opencode" { } ''
+      mkdir -p $out/bin
+      ln -s ${llmAgents.opencode2}/bin/opencode2 $out/bin/opencode
+    '')
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
     llmAgents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's

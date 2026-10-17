@@ -33,6 +33,12 @@ let
   # this is used instead of the llm-agents overlay.
   llmAgents = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
+  # Global agent instructions, shared by Claude Code (~/.claude/CLAUDE.md) and
+  # OpenCode (~/.config/opencode/AGENTS.md).
+  globalContext = ''
+    When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
+  '';
+
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
   # modify it at runtime — e.g. the /effort slash command rewrites this file.
   # Same content that programs.claude-code.settings would generate, but
@@ -263,9 +269,7 @@ in
     };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
-    context = ''
-      When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
-    '';
+    context = globalContext;
 
     # ── Agents — creates ~/.claude/agents/<key>.md ────────────────────────────────
 
@@ -348,26 +352,30 @@ in
   '';
 
   # ── OpenCode ───────────────────────────────────────────────────────────────────
-  # opencode binary is in packages.nix (llmAgents.opencode). Config here
-  # covers the two JSON files opencode reads from ~/.config/opencode/:
-  #   - opencode.json: server/runtime prefs (provider, model)
-  #   - tui.json:      TUI prefs (keybinds)
+  # OpenCode 2 binary is in packages.nix (llmAgents.opencode2). Config here
+  # covers the files it reads from ~/.config/opencode/:
+  #   - opencode.json: background service prefs (providers, model, agents)
+  #   - cli.json:      terminal client prefs (keybinds) — v2's replacement for tui.json
+  #   - AGENTS.md:     global instructions (v2 no longer reads ~/.claude/CLAUDE.md)
   # Read-only nix symlinks are fine — opencode stores provider auth in a separate
-  # auth.json, never writes opencode.json/tui.json at runtime. The npm-managed
-  # package.json / bun.lock / node_modules in the same dir are left alone (those
-  # are opencode's plugin loader state).
+  # auth.json, never writes these at runtime. The package.json / bun.lock /
+  # node_modules / plugins/ in the same dir are left alone (plugin loader state;
+  # plugins/orca-opencode-status-tui is installed by Orca).
+  # v1 → v2 key mapping: https://opencode.ai/v2/docs/migrate-v1/
   xdg.configFile."opencode/opencode.json".source = jsonFormat.generate "opencode-config" {
-    "$schema"   = "https://opencode.ai/config.json";
-    provider    = {};
-    model       = "anthropic/claude-sonnet-4-5";
-    small_model = "anthropic/claude-haiku-4-5";
+    "$schema" = "https://opencode.ai/config.json";
+    model     = "anthropic/claude-sonnet-4-5";
+    # v1's small_model; v2 uses it only for session titles.
+    agents.title.model = "anthropic/claude-haiku-4-5";
   };
 
-  xdg.configFile."opencode/tui.json".source = jsonFormat.generate "opencode-tui" {
-    "$schema" = "https://opencode.ai/tui.json";
-    # Rebind the command picker from the default ctrl+p to ctrl+o.
-    keybinds.command_list = "ctrl+o";
+  xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
+    "$schema" = "https://opencode.ai/v2/cli.json";
+    # Rebind the command palette from the default ctrl+p to ctrl+o.
+    keybinds."command.palette.show" = "ctrl+o";
   };
+
+  xdg.configFile."opencode/AGENTS.md".text = globalContext;
 
   # ── Claude Code hook scripts ───────────────────────────────────────────────────
   # Managed here so they're version-controlled alongside the rest of the nix config.
