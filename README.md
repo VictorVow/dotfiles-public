@@ -46,6 +46,7 @@ installs/
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
 │   ├── logseq-md-to-blocks.py     # Markdown → Logseq block outline (+ --gfw GitHub widgets); used by the logseq-add-md-to-blocks / logseq-research skills
 │   ├── logseq-clear-children.sh   # Remove all child blocks under a Logseq block; used by the logseq-research skill
+│   ├── logseq-tree.py             # Print a Logseq block subtree (db/ids, uuids, raw titles) via queries; used by the logseq-comparisons-update skill
 │   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
 │   └── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
 ├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG
