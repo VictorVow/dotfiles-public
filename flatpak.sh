@@ -19,6 +19,24 @@ fi
 flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 echo "Flathub user remote is configured."
 
+# ── Per-app permission overrides ─────────────────────────────────────────────
+# Overrides apply even before the app is installed, so set them up front.
+#
+# Element: on KDE, Electron picks the kwallet6 backend for safeStorage, but the
+# Flathub sandbox can't reach KWallet over D-Bus → "Your system has a supported
+# keyring but encryption is not available" on launch.
+flatpak override --user --talk-name=org.kde.kwalletd6 im.riot.Riot
+
+# Signal: drop blanket host access, expose only the folders used for sharing
+# attachments.
+flatpak override --user --nofilesystem=host \
+    --filesystem="~/Downloads" \
+    --filesystem="~/Media" \
+    --filesystem="~/Vaults/gocryptfs1/Android-sync/Android-MP" \
+    --filesystem="~/Vaults/gocryptfs1/1Vault/v Red Pill/" \
+    org.signal.Signal
+echo "Flatpak permission overrides applied."
+
 # ── Reinstall previously installed apps from ~/.var/app ───────────────────────
 # Scans ~/.var/app for app IDs (leftover config dirs from previous installs)
 # and reinstalls them. Useful when migrating to a new system or after a reinstall.
