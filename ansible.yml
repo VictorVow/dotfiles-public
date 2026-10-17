@@ -104,7 +104,7 @@
         - /var/snap
         - /var/lib/snapd
         - /var/cache/snapd
-        - "{{ ansible_env.HOME }}/snap"
+        - "{{ ansible_facts['env']['HOME'] }}/snap"
       become: yes
 
     - name: Install system-level apt packages

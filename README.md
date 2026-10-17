@@ -12,6 +12,8 @@ installs/
 ├── update.sh                 # Update all package managers in one pass
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
+├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root
+├── inventory.ini             # Explicit localhost inventory for the playbooks
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)

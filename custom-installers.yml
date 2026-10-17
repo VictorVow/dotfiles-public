@@ -12,8 +12,8 @@
   gather_facts: yes
 
   vars:
-    deb_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
-    dnvm_arch: "{{ 'x64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+    deb_arch: "{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' }}"
+    dnvm_arch: "{{ 'x64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' }}"
     # Looking Glass: must match the client rev pinned in nix/modules/packages.nix
     # (lookingGlassClient) and the IDD installed in the Windows guest.
     looking_glass_rev: 236efcb155f952f5d7d9fcd5891a3060ad254e68
@@ -51,14 +51,15 @@
       when: ansible_facts.packages['docker-ce'] is not defined
 
     - name: Docker | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [arch={{ deb_arch }} signed-by=/etc/apt/keyrings/docker.asc]
-          https://download.docker.com/linux/ubuntu
-          {{ ansible_distribution_release }} stable
-        filename: docker
+      ansible.builtin.deb822_repository:
+        name: docker
+        types: deb
+        uris: https://download.docker.com/linux/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: stable
+        architectures: "{{ deb_arch }}"
+        signed_by: /etc/apt/keyrings/docker.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['docker-ce'] is not defined
 
@@ -71,6 +72,7 @@
           - docker-buildx-plugin
           - docker-compose-plugin
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['docker-ce'] is not defined
 
@@ -78,7 +80,7 @@
     # docker was installed externally without this playbook.
     - name: Docker | add user to docker group
       ansible.builtin.user:
-        name: "{{ ansible_user_id }}"
+        name: "{{ ansible_facts['user_id'] }}"
         groups: docker
         append: yes
       become: yes
@@ -89,7 +91,7 @@
 
     - name: Tailscale | download GPG keyring
       ansible.builtin.get_url:
-        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_distribution_release }}.noarmor.gpg"
+        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
         dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
         mode: '0644'
         owner: root
@@ -98,14 +100,14 @@
       when: ansible_facts.packages['tailscale'] is not defined
 
     - name: Tailscale | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg]
-          https://pkgs.tailscale.com/stable/ubuntu
-          {{ ansible_distribution_release }} main
-        filename: tailscale
+      ansible.builtin.deb822_repository:
+        name: tailscale
+        types: deb
+        uris: https://pkgs.tailscale.com/stable/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: main
+        signed_by: /usr/share/keyrings/tailscale-archive-keyring.gpg
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['tailscale'] is not defined
 
@@ -113,6 +115,7 @@
       ansible.builtin.apt:
         name: tailscale
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['tailscale'] is not defined
 
@@ -141,14 +144,15 @@
       when: ansible_facts.packages['mullvad-vpn'] is not defined
 
     - name: Mullvad | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch={{ deb_arch }}]
-          https://repository.mullvad.net/deb/stable
-          {{ ansible_distribution_release }} main
-        filename: mullvad
+      ansible.builtin.deb822_repository:
+        name: mullvad
+        types: deb
+        uris: https://repository.mullvad.net/deb/stable
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: main
+        architectures: "{{ deb_arch }}"
+        signed_by: /usr/share/keyrings/mullvad-keyring.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['mullvad-vpn'] is not defined
 
@@ -156,6 +160,7 @@
       ansible.builtin.apt:
         name: mullvad-vpn
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['mullvad-vpn'] is not defined
 
@@ -177,14 +182,15 @@
       when: ansible_facts.packages['claude-desktop'] is not defined
 
     - name: Claude Desktop | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc]
-          https://downloads.claude.ai/claude-desktop/apt/stable
-          stable main
-        filename: claude-desktop
+      ansible.builtin.deb822_repository:
+        name: claude-desktop
+        types: deb
+        uris: https://downloads.claude.ai/claude-desktop/apt/stable
+        suites: "stable"
+        components: main
+        architectures: "{{ deb_arch }}"
+        signed_by: /usr/share/keyrings/claude-desktop-archive-keyring.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['claude-desktop'] is not defined
 
@@ -192,6 +198,7 @@
       ansible.builtin.apt:
         name: claude-desktop
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['claude-desktop'] is not defined
 
@@ -248,14 +255,14 @@
         - ansible_facts.packages['android-studio'] is not defined
 
     - name: Android Studio | add PPA
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [signed-by=/etc/apt/keyrings/maarten-fonville-android-studio.asc]
-          https://ppa.launchpadcontent.net/maarten-fonville/android-studio/ubuntu
-          {{ ansible_distribution_release }} main
-        filename: maarten-fonville-ubuntu-android-studio
+      ansible.builtin.deb822_repository:
+        name: maarten-fonville-ubuntu-android-studio
+        types: deb
+        uris: https://ppa.launchpadcontent.net/maarten-fonville/android-studio/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: main
+        signed_by: /etc/apt/keyrings/maarten-fonville-android-studio.asc
         state: present
-        update_cache: yes
       become: yes
       when:
         - not android_studio_ppa.stat.exists
@@ -265,6 +272,7 @@
       ansible.builtin.apt:
         name: android-studio
         state: present
+        update_cache: yes
       become: yes
       when:
         - not android_studio_ppa.stat.exists
@@ -287,14 +295,14 @@
       when: ansible_facts.packages['mainline'] is not defined
 
     - name: Mainline | add PPA
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [signed-by=/etc/apt/keyrings/cappelikan-ppa.asc]
-          https://ppa.launchpadcontent.net/cappelikan/ppa/ubuntu
-          {{ ansible_distribution_release }} main
-        filename: cappelikan-ubuntu-ppa
+      ansible.builtin.deb822_repository:
+        name: cappelikan-ubuntu-ppa
+        types: deb
+        uris: https://ppa.launchpadcontent.net/cappelikan/ppa/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: main
+        signed_by: /etc/apt/keyrings/cappelikan-ppa.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['mainline'] is not defined
 
@@ -302,6 +310,7 @@
       ansible.builtin.apt:
         name: mainline
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['mainline'] is not defined
 
@@ -313,7 +322,7 @@
 
     - name: dnvm | check if already installed
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/share/dnvm/dnvm"
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/share/dnvm/dnvm"
       register: dnvm_binary
 
     - name: dnvm | fetch latest release metadata from GitHub
@@ -501,7 +510,7 @@
 
     - name: LibreSprite | check if already installed
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/AppImages/libresprite.appimage"
+        path: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage"
       register: libresprite_binary
 
     - name: LibreSprite | fetch latest release metadata from GitHub
@@ -536,7 +545,7 @@
 
     - name: LibreSprite | ensure ~/AppImages exists
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/AppImages"
+        path: "{{ ansible_facts['env']['HOME'] }}/AppImages"
         state: directory
         mode: '0755'
       when: not libresprite_binary.stat.exists
@@ -544,7 +553,7 @@
     - name: LibreSprite | install AppImage
       ansible.builtin.copy:
         src: /tmp/LibreSprite-x86_64.AppImage
-        dest: "{{ ansible_env.HOME }}/AppImages/libresprite.appimage"
+        dest: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage"
         mode: '0755'
         remote_src: yes
       when: not libresprite_binary.stat.exists
@@ -560,19 +569,19 @@
 
     - name: LibreSprite | check if icon already installed
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
       register: libresprite_icon
 
     - name: LibreSprite | extract icon from AppImage
       ansible.builtin.command:
-        cmd: "{{ ansible_env.HOME }}/AppImages/libresprite.appimage --appimage-extract libresprite.png"
+        cmd: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage --appimage-extract libresprite.png"
         chdir: /tmp
       when: not libresprite_icon.stat.exists
 
     - name: LibreSprite | install icon into hicolor theme
       ansible.builtin.copy:
         src: /tmp/squashfs-root/libresprite.png
-        dest: "{{ ansible_env.HOME }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+        dest: "{{ ansible_facts['env']['HOME'] }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
         mode: '0644'
       when: not libresprite_icon.stat.exists
 
@@ -584,7 +593,7 @@
 
     - name: LibreSprite | install .desktop menu entry
       ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.local/share/applications/org.libresprite.LibreSprite.desktop"
+        dest: "{{ ansible_facts['env']['HOME'] }}/.local/share/applications/org.libresprite.LibreSprite.desktop"
         mode: '0644'
         content: |
           [Desktop Entry]
@@ -592,7 +601,7 @@
           Name=LibreSprite
           GenericName=Sprite Editor
           Comment=Animated sprite editor & pixel art tool
-          Exec={{ ansible_env.HOME }}/AppImages/libresprite.appimage %F
+          Exec={{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage %F
           Icon=libresprite
           Terminal=false
           StartupWMClass=libresprite
@@ -665,13 +674,15 @@
       when: ansible_facts.packages['code'] is not defined
 
     - name: VSCode | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/microsoft.asc]
-          https://packages.microsoft.com/repos/code stable main
-        filename: vscode
+      ansible.builtin.deb822_repository:
+        name: vscode
+        types: deb
+        uris: https://packages.microsoft.com/repos/code
+        suites: "stable"
+        components: main
+        architectures: "{{ deb_arch }}"
+        signed_by: /usr/share/keyrings/microsoft.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['code'] is not defined
 
@@ -679,6 +690,7 @@
       ansible.builtin.apt:
         name: code
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['code'] is not defined
 
@@ -702,14 +714,15 @@
       when: ansible_facts.packages['devin-desktop'] is not defined
 
     - name: Devin Desktop | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [arch=amd64 signed-by=/etc/apt/keyrings/windsurf-stable.asc]
-          https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt
-          stable main
-        filename: windsurf
+      ansible.builtin.deb822_repository:
+        name: windsurf
+        types: deb
+        uris: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt
+        suites: "stable"
+        components: main
+        architectures: "amd64"
+        signed_by: /etc/apt/keyrings/windsurf-stable.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['devin-desktop'] is not defined
 
@@ -717,6 +730,7 @@
       ansible.builtin.apt:
         name: devin-desktop
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['devin-desktop'] is not defined
 
@@ -737,13 +751,14 @@
       when: ansible_facts.packages['megasync'] is not defined
 
     - name: MEGAsync | add apt repository
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/meganz.asc]
-          https://mega.nz/linux/repo/xUbuntu_{{ ansible_distribution_version }}/ ./
-        filename: megasync
+      ansible.builtin.deb822_repository:
+        name: megasync
+        types: deb
+        uris: "https://mega.nz/linux/repo/xUbuntu_{{ ansible_facts['distribution_version'] }}/"
+        suites: "./"
+        architectures: "{{ deb_arch }}"
+        signed_by: /usr/share/keyrings/meganz.asc
         state: present
-        update_cache: yes
       become: yes
       when: ansible_facts.packages['megasync'] is not defined
 
@@ -751,6 +766,7 @@
       ansible.builtin.apt:
         name: megasync
         state: present
+        update_cache: yes
       become: yes
       when: ansible_facts.packages['megasync'] is not defined
 
@@ -825,7 +841,7 @@
 
     - name: AppMan | check if appman is already installed
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/bin/appman"
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/appman"
       register: appman_bin
 
     - name: AppMan | download AM-INSTALLER
@@ -840,7 +856,7 @@
       ansible.builtin.shell: |
         echo 2 | /tmp/AM-INSTALLER
       args:
-        creates: "{{ ansible_env.HOME }}/.local/bin/appman"
+        creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/appman"
       when: not appman_bin.stat.exists
 
     - name: AppMan | remove installer
@@ -858,14 +874,14 @@
 
     - name: AppMan | ensure install directory exists
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/AppImages/AppMan"
+        path: "{{ ansible_facts['env']['HOME'] }}/AppImages/AppMan"
         state: directory
         mode: '0755'
 
     - name: AppMan | configure install directory
       ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.config/appman/appman-config"
-        content: "{{ ansible_env.HOME }}/AppImages/AppMan\n"
+        dest: "{{ ansible_facts['env']['HOME'] }}/.config/appman/appman-config"
+        content: "{{ ansible_facts['env']['HOME'] }}/AppImages/AppMan\n"
         mode: '0644'
 
     # ── Declarative AppImage sync ──────────────────────────────────────────
@@ -1095,7 +1111,7 @@
       ansible.builtin.apt:
         name:
           - dkms
-          - "linux-headers-{{ ansible_kernel }}"
+          - "linux-headers-{{ ansible_facts['kernel'] }}"
           - swtpm        # TPM 2.0 emulator, required by Windows 11
           - swtpm-tools
           # libvirtd + virsh. Explicit because a past `apt autoremove` silently
