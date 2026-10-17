@@ -11,14 +11,14 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/5e2305d577ca00acbba631b05cb1094d172b29f3";
+    nixpkgs.url = "github:NixOS/nixpkgs/774debe7a0d1b496e35677ad955a1011c6ff74f3";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/e158d9ed9b51c98974c5e66e1ba1c9e0255fecaa";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/c59305bab2065cfecc4944690d9eedbb56f3a9fa";
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/ec172013fa62135f58fb58dd17ae9651e8f39727";
+      url = "github:nix-community/home-manager/db7d5e2332710f5abb088f6b5de927d7f9511b35";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,7 +42,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/3a994324e0a724f3eb043200368f0b60c06862e3";
+    llm-agents.url = "github:numtide/llm-agents.nix/e85b99217baf13a38fc887b31338b1833f1159c0";
 
     # Tiny single-purpose flakes — not age-pinned because they barely change
     # and don't pull in the heavy nixpkgs rebuild surface that motivated the
