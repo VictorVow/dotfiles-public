@@ -8,10 +8,13 @@ Usage:
 Options:
   --gfw   Add a Git Forge Watcher widget (logseq-plugin-git-forge-watcher) to
           every block that starts with a GitHub link, e.g. a heading block
-          `### [hunk](https://github.com/modem-dev/hunk)`. The macro
-          `{{renderer :gfw, <url-encoded link>}}` goes on the block's second
-          line. The widget shows live stars, last-commit age and open
-          issue/PR counts, so don't repeat those in the text.
+          `### [hunk](https://github.com/modem-dev/hunk)`. The macro is
+          `{{renderer :gfw, <url-encoded link>}}`. For a repo link it goes on
+          the block's second line (the repo widget shows live stars,
+          last-commit age and open issue/PR counts, so don't repeat those in
+          the text). For an issue, pull request or branch link (`/issues/N`,
+          `/pull/N`, `/tree/<branch>`) it goes at the start of the first line,
+          after any heading `#`s, followed by one space.
 
 Mapping:
   - Headings become parent blocks; each heading nests under the nearest
@@ -37,7 +40,10 @@ LIST_RE = re.compile(r'^( *)(?:[-*+] |\d+[.)] )(.*)$')
 HEADING_RE = re.compile(r'^(#{1,6}) ')
 HR_RE = re.compile(r'^(?:-{3,}|\*{3,}|_{3,})\s*$')
 GH_LEAD_RE = re.compile(
-    r'^(?:#{1,6} )?(?:\[[^\]]*\]\(|<)?(https://github\.com/[\w.-]+/[\w.-]+[^\s)>]*)')
+    r'^(#{1,6} )?(?:\[[^\]]*\]\(|<)?(https://github\.com/[\w.-]+/[\w.-]+[^\s)>]*)')
+# Links the plugin renders as an inline (non-repo) widget.
+GH_INLINE_RE = re.compile(
+    r'^https://github\.com/[^/]+/[^/]+/(?:issues/\d+|pull/\d+|tree/[^/?#]+)')
 
 
 def convert(text, gfw=False):
@@ -47,7 +53,12 @@ def convert(text, gfw=False):
     def emit(depth, block):
         m = GH_LEAD_RE.match(block) if gfw else None
         if m:
-            block += '\n{{renderer :gfw, ' + quote(m.group(1), safe='') + '}}'
+            macro = '{{renderer :gfw, ' + quote(m.group(2), safe='') + '}}'
+            if GH_INLINE_RE.match(m.group(2)):
+                prefix = m.group(1) or ''
+                block = prefix + macro + ' ' + block[len(prefix):]
+            else:
+                block += '\n' + macro
         first, *rest = block.split('\n')
         out.append('  ' * depth + '- ' + first)
         out.extend('  ' * depth + '  ' + r for r in rest)

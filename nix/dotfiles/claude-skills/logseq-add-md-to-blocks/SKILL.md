@@ -21,7 +21,7 @@ The user gives a Markdown file and a destination: a block (`[[<uuid>]]` or a uui
    ```
    Headings become parent blocks (nested by level). Paragraphs and list items become one block each. Tables and code fences stay whole as one block. A list, table or code block after a paragraph ending in ":" nests under it. Skim the output (`cut -c1-110`) and check that the structure looks right.
 
-   Add `--gfw` (before the input path) to give every block that *starts with* a GitHub link a live Git Forge Watcher widget (`{{renderer :gfw, <encoded-url>}}` on the block's second line; plugin source in `~/Projects/Git/Categories/Logseq-ALL/logseq-plugin-git-forge-watcher`). Use it whenever the blocks are about GitHub repos.
+   Add `--gfw` (before the input path) to give every block that *starts with* a GitHub link a live Git Forge Watcher widget (`{{renderer :gfw, <encoded-url>}}`; plugin source in `~/Projects/Git/Categories/Logseq-ALL/logseq-plugin-git-forge-watcher`). For a repo link the macro goes on the block's second line. For an issue, pull request or branch link (`/issues/N`, `/pull/N`, `/tree/<branch>`) it goes at the start of the first line (after any heading `#`s), with one space before the rest of the block. Use it whenever the blocks are about GitHub repos, issues or PRs.
 
 4. **Check for side effects.** `[[...]]` and `#tag` in the text create or link pages in Logseq. Run a dry run and check `would-create-pages`:
    ```
