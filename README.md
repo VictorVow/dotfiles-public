@@ -15,6 +15,7 @@ installs/
 ├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root
 ├── inventory.ini             # Explicit localhost inventory for the playbooks
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
+├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
 ├── nix/                      # Home Manager flake — all user-space config
