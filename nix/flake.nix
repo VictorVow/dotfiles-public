@@ -42,7 +42,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/e85b99217baf13a38fc887b31338b1833f1159c0";
+    llm-agents.url = "github:numtide/llm-agents.nix/4f727f609ffe42ebffab1dd55b5e85d913e78fbd";
 
     # Tiny single-purpose flakes — not age-pinned because they barely change
     # and don't pull in the heavy nixpkgs rebuild surface that motivated the

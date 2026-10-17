@@ -158,17 +158,17 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792149628,
-        "narHash": "sha256-z6OJhOCXlLXdP1GdqS+6wLe/blU6KGZFrib+b/nxYE8=",
+        "lastModified": 1792186720,
+        "narHash": "sha256-n4qy2036HgHO/xicF8A6NTfAbViQUA+fjhsWEX3shfw=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "e85b99217baf13a38fc887b31338b1833f1159c0",
+        "rev": "4f727f609ffe42ebffab1dd55b5e85d913e78fbd",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "e85b99217baf13a38fc887b31338b1833f1159c0",
+        "rev": "4f727f609ffe42ebffab1dd55b5e85d913e78fbd",
         "type": "github"
       }
     },
@@ -255,11 +255,11 @@
     "orca": {
       "flake": false,
       "locked": {
-        "lastModified": 1792235203,
-        "narHash": "sha256-qV+ZajSIBprQ4x1xgFgmripqlzTJPmxY8nztuwVYzOY=",
+        "lastModified": 1792276075,
+        "narHash": "sha256-43ROrataTTkDTrlPbSBD9sOpa8nuEa3I2n0H+MwX2wA=",
         "owner": "stablyai",
         "repo": "orca",
-        "rev": "6fcc183ab951fb751cf02ccb9e2af3cf129a4316",
+        "rev": "09f12fa6dcbc910fea9113c3adf0617b0efe3e35",
         "type": "github"
       },
       "original": {
