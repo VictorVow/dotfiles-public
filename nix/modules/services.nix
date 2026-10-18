@@ -34,6 +34,17 @@
     };
   };
 
+  # Weekly Nix GC so the store doesn't depend on running update-all. Same
+  # 30-day window as update.sh's GC step. Only expires this user's profile
+  # generations, but the collection itself frees anything unreferenced.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+    persistent = true;
+    randomizedDelaySec = "1h";
+  };
+
   home.packages = [ pkgs.ollama-vulkan ];
 
 }
