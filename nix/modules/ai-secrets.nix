@@ -17,5 +17,16 @@
       sopsFile = ../secrets/ai.yaml;
       path = "${config.home.homeDirectory}/.config/tray-links/openrouter_api_key";
     };
+    # FreeLLMAPI unified key (dashboard Keys page header), for OpenCode's
+    # `freellmapi` provider (see modules/ai-agents.nix).
+    secrets."freellmapi_api_key" = {
+      sopsFile = ../secrets/ai.yaml;
+      path = "${config.home.homeDirectory}/.config/shell-secrets/freellmapi_api_key";
+    };
   };
+
+  # Deliberately not OPENAI_API_KEY/ANTHROPIC_AUTH_TOKEN: those would shadow
+  # real provider auth in other agent CLIs. Only OpenCode's provider reads this.
+  home.sessionVariables.FREELLMAPI_API_KEY =
+    "$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)";
 }

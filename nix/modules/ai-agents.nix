@@ -366,6 +366,20 @@ in
     model     = "anthropic/claude-sonnet-4-5";
     # v1's small_model; v2 uses it only for session titles.
     agents.title.model = "anthropic/claude-haiku-4-5";
+    # Self-hosted FreeLLMAPI (Self-Hosted/FreeLLMAPI, tailnet-only). Key comes
+    # from FREELLMAPI_API_KEY (sops, see modules/ai-secrets.nix). `auto*` let
+    # the router pick; any explicit model ID from its Models page also works.
+    providers.freellmapi = {
+      name     = "FreeLLMAPI";
+      env      = [ "FREELLMAPI_API_KEY" ];
+      package  = "@opencode/ai/providers/openai-compatible";
+      settings.baseURL = "https://freellmapi.device.example.com/v1";
+      models = {
+        "auto"       = { name = "FreeLLMAPI auto"; };
+        "auto:fast"  = { name = "FreeLLMAPI auto (fast)"; };
+        "auto:smart" = { name = "FreeLLMAPI auto (smart)"; };
+      };
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
