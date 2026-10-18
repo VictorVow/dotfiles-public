@@ -15,6 +15,10 @@ installs/
 ├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root
 ├── inventory.ini             # Explicit localhost inventory for the playbooks
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
+├── flatpak.md                # List of installed Flatpak apps
+├── Brewfile                  # Homebrew packages (Linuxbrew)
+├── appman-appimages.txt      # AppImages managed by AppMan
+├── arkenfox.sh               # Apply/update arkenfox user.js on a Firefox profile
 ├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
@@ -32,9 +36,13 @@ installs/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, htop, gh, direnv, ssh
 │       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode, shared MCP server registry
+│       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
 │       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input)
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
+│       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer
+│       ├── services.nix      # systemd user services (Ollama, Jackett) + weekly Nix GC timer
+│       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
 │       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
@@ -98,20 +106,6 @@ installs/
 ansible-playbook ansible.yml --ask-become-pass
 ```
 
-### Migrating an existing system
-
-If you already have the old apt/brew/pipx/npm setup:
-
-```bash
-# Dry-run first to preview what will be removed
-./migrate.sh --dry-run
-
-# Then run for real
-./migrate.sh
-```
-
-`migrate.sh` verifies all Nix packages are present before removing anything. See [docs/migration.md](docs/migration.md) for details.
-
 ## Daily Use
 
 | Task | Command |
@@ -126,9 +120,9 @@ If you already have the old apt/brew/pipx/npm setup:
 
 ## Further Reading
 
-- [Architecture](docs/architecture.md) — why multiple package managers coexist
-- [Package inventory](docs/packages.md) — full list of what's managed where
-- [Daily workflow](docs/daily-workflow.md) — adding packages, updating, rollbacks
-- [Migration guide](docs/migration.md) — migrating from apt/brew/pipx/npm
-- [Limitations](docs/limitations.md) — what can't go in Nix and alternatives
+- [Architecture](docs/system/architecture.md) — why multiple package managers coexist
+- [Package inventory](docs/system/packages.md) — full list of what's managed where
+- [Daily workflow](docs/system/daily-workflow.md) — adding packages, updating, rollbacks
+- [Limitations](docs/system/limitations.md) — what can't go in Nix and alternatives
+- [Migration to Nix](docs/archive/migration-to-nix.md) — archived: the completed apt/brew/pipx/npm → Nix migration
 - [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)
