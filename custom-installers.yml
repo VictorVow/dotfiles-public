@@ -612,12 +612,15 @@
     # FW-FANCTRL — https://github.com/TamtamHero/fw-fanctrl
     # Framework Laptop fan controller. Upstream install.sh bundles ectool, the
     # systemd service, and the system-sleep hook — none of which the nixpkgs
-    # package ships. Idempotent: skipped if /usr/bin/fw-fanctrl already exists.
+    # package ships. Idempotent: skipped if /usr/local/bin/fw-fanctrl already
+    # exists. install.sh pip-installs the binary to /usr/local/bin, but the unit
+    # and sleep hook it writes hardcode /usr/bin/fw-fanctrl (→ 203/EXEC at boot),
+    # so a /usr/bin symlink is kept in place on every run.
     # ════════════════════════════════════════════════════════════════════════
 
     - name: fw-fanctrl | check if already installed
       ansible.builtin.stat:
-        path: /usr/bin/fw-fanctrl
+        path: /usr/local/bin/fw-fanctrl
       register: fw_fanctrl_bin
 
     - name: fw-fanctrl | install build/runtime prerequisites
@@ -653,6 +656,22 @@
         path: /tmp/fw-fanctrl
         state: absent
       when: not fw_fanctrl_bin.stat.exists
+
+    - name: fw-fanctrl | link /usr/bin path expected by the unit and sleep hook
+      ansible.builtin.file:
+        src: /usr/local/bin/fw-fanctrl
+        dest: /usr/bin/fw-fanctrl
+        state: link
+      become: yes
+      register: fw_fanctrl_link
+
+    - name: fw-fanctrl | (re)start service
+      ansible.builtin.systemd:
+        name: fw-fanctrl
+        state: restarted
+        enabled: yes
+      become: yes
+      when: fw_fanctrl_link.changed or not fw_fanctrl_bin.stat.exists
 
     # ════════════════════════════════════════════════════════════════════════
     # VSCODE — https://code.visualstudio.com/docs/setup/linux
