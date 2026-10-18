@@ -421,4 +421,18 @@ in
     source     = ../dotfiles/claude-hooks/notify-reset-dedupe.sh;
     executable = true;
   };
+
+  # ── Claude Code: direnv in the Bash tool ───────────────────────────────────────
+  # The Bash tool runs non-interactive shells, so direnv's PROMPT_COMMAND hook
+  # never fires. Claude Code sources $CLAUDE_ENV_FILE before every Bash command,
+  # so exporting direnv's env there loads the .envrc for the current cwd (follows
+  # `cd`; nix-direnv's cache keeps it cheap). Unallowed .envrc files stay blocked.
+  home.file.".claude/direnv-env.sh".text = ''
+    if command -v direnv >/dev/null 2>&1; then
+      export DIRENV_LOG_FORMAT=""
+      eval "$(direnv export bash 2>/dev/null)"
+    fi
+  '';
+
+  home.sessionVariables.CLAUDE_ENV_FILE = "$HOME/.claude/direnv-env.sh";
 }
