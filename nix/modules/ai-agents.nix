@@ -44,7 +44,8 @@ let
   # Same content that programs.claude-code.settings would generate, but
   # deployed via home.activation (install -m 644) instead of home.file.
   # See: home-manager#8654 — Nix-store symlink blocks runtime writes.
-  # Changes made at runtime are overwritten on the next `hms`.
+  # Changes made at runtime are overwritten on the next `hms`, except Orca's
+  # managed hooks (see home.activation.claudeCodeSettings).
   claudeCodeSettings = pkgs.writeText "claude-code-settings.json" (builtins.toJSON {
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
@@ -326,13 +327,29 @@ in
   # ── Claude Code settings (writable copy) ────────────────────────────────────
   # Replaces programs.claude-code.settings to avoid a read-only Nix-store
   # symlink. install -m 644 copies the file so Claude Code can overwrite it.
+  # The Nix settings win wholesale, except Orca's managed hook entries (any
+  # hook whose command references ~/.orca/agent-hooks/) are carried over from
+  # the existing file. Without them Orca can't detect Claude in its terminals:
+  # no agent status, and "Switch to chat view" shows "No conversation here".
   home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     dest="$HOME/.claude/settings.json"
     # Replace any existing Nix-store symlink with a writable copy
     if [ -L "$dest" ]; then
       $DRY_RUN_CMD rm "$dest"
     fi
-    $DRY_RUN_CMD install -m 644 ${claudeCodeSettings} "$dest"
+    tmp="$(mktemp)"
+    if [ -s "$dest" ] && ${pkgs.jq}/bin/jq -s '
+         (.[0].hooks // {}) as $old
+         | .[1]
+         | .hooks = reduce ($old | keys[]) as $ev (.hooks // {};
+             ($old[$ev] | map(select(any(.hooks[]?; (.command // "") | contains(".orca/agent-hooks/"))))) as $orca
+             | if ($orca | length) > 0 then .[$ev] = ((.[$ev] // []) + $orca) else . end)
+       ' "$dest" ${claudeCodeSettings} > "$tmp" 2>/dev/null; then
+      $DRY_RUN_CMD install -m 644 "$tmp" "$dest"
+    else
+      $DRY_RUN_CMD install -m 644 ${claudeCodeSettings} "$dest"
+    fi
+    rm -f "$tmp"
   '';
 
   # ── Devin CLI settings (merged keys) ───────────────────────────────────────────
