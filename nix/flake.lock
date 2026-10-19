@@ -47,6 +47,7 @@
       "original": {
         "owner": "upstash",
         "repo": "context7",
+        "rev": "6b636d3c35e051a1a653a236afb7f612c02a1ad3",
         "type": "github"
       }
     },
@@ -67,6 +68,7 @@
       "original": {
         "owner": "zed-industries",
         "repo": "delta-nix",
+        "rev": "6091b4eb4a0d41ab2b23f039b991683a6181535f",
         "type": "github"
       }
     },
@@ -146,6 +148,7 @@
       "original": {
         "owner": "miaupaw",
         "repo": "ie-r",
+        "rev": "016b62ecb21f3e0cf900b5907aba52ce5608c062",
         "type": "github"
       }
     },
@@ -265,6 +268,7 @@
       "original": {
         "owner": "stablyai",
         "repo": "orca",
+        "rev": "09f12fa6dcbc910fea9113c3adf0617b0efe3e35",
         "type": "github"
       }
     },
@@ -317,6 +321,7 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
+        "rev": "44931708c62937c2b1bf7953902989fa5bb9ee1b",
         "type": "github"
       }
     },
@@ -389,6 +394,7 @@
       "original": {
         "owner": "benapetr",
         "repo": "TuxManager",
+        "rev": "305bcadbc2d1ec00689e4827041700ed0ca8341f",
         "type": "github"
       }
     }

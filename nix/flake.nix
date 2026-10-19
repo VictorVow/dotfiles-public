@@ -25,7 +25,8 @@
     # Secrets management — decrypts age-encrypted secrets (nix/secrets/*.yaml)
     # at activation. Used by modules/rclone.nix for rclone remote credentials.
     sops-nix = {
-      url = "github:Mic92/sops-nix";
+      # channel: master
+      url = "github:Mic92/sops-nix/44931708c62937c2b1bf7953902989fa5bb9ee1b";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -44,25 +45,39 @@
     # channel: main
     llm-agents.url = "github:numtide/llm-agents.nix/4f727f609ffe42ebffab1dd55b5e85d913e78fbd";
 
-    # Tiny single-purpose flakes — not age-pinned because they barely change
-    # and don't pull in the heavy nixpkgs rebuild surface that motivated the
-    # age pin in the first place.
-    tuxManager.url = "github:benapetr/TuxManager/";
+    # Third-party inputs below (and sops-nix above) are age-pinned too, but for
+    # a different reason: a supply-chain cooldown rather than cache coverage.
+    # A compromised or broken upstream commit gets PIN_AGE_DAYS_SOURCE days
+    # (orca: PIN_AGE_DAYS_ORCA) to be noticed before update.sh adopts it.
+    # channel: master
+    tuxManager.url = "github:benapetr/TuxManager/305bcadbc2d1ec00689e4827041700ed0ca8341f";
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
-    ie-r.url = "github:miaupaw/ie-r";
+    # channel: master
+    ie-r.url = "github:miaupaw/ie-r/016b62ecb21f3e0cf900b5907aba52ce5608c062";
 
     # Zed's Delta (official prebuilt Linux binaries, wrapped for Nix).
-    delta.url = "github:zed-industries/delta-nix";
+    # channel: main
+    delta.url = "github:zed-industries/delta-nix/6091b4eb4a0d41ab2b23f039b991683a6181535f";
     delta.inputs.nixpkgs.follows = "nixpkgs";
 
     # Orca agent skills (skills/orca-cli, skills/orchestration) — source only,
-    # linked into ~/.claude/skills by modules/claude-skills.nix.
-    orca = { url = "github:stablyai/orca"; flake = false; };
+    # linked into ~/.claude/skills by modules/claude-skills.nix. Shorter pin
+    # window than the others: the Orca app (AppMan) updates freely, and the
+    # skills shouldn't lag its CLI by long.
+    orca = {
+      # channel: main
+      url = "github:stablyai/orca/09f12fa6dcbc910fea9113c3adf0617b0efe3e35";
+      flake = false;
+    };
 
     # Context7 find-docs skill (skills/find-docs, drives `npx ctx7@latest`) — source only,
     # linked by modules/claude-skills.nix. Replaces the Context7 MCP server.
-    context7 = { url = "github:upstash/context7"; flake = false; };
+    context7 = {
+      # channel: master
+      url = "github:upstash/context7/6b636d3c35e051a1a653a236afb7f612c02a1ad3";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, ... }:

@@ -53,6 +53,18 @@ PIN_AGE_DAYS="${PIN_AGE_DAYS:-14}"
 # weeks like nixpkgs. Override via env: PIN_AGE_DAYS_LLM_AGENTS=2 ./update.sh
 PIN_AGE_DAYS_LLM_AGENTS="${PIN_AGE_DAYS_LLM_AGENTS:-1}"
 
+# Supply-chain cooldown for the other third-party inputs (sops-nix, delta,
+# tuxManager, ie-r, context7): no cache reason to wait, but a compromised or
+# broken upstream commit gets this long to be noticed before we adopt it.
+# orca is shorter so its skills don't lag the (freely updating) Orca app CLI.
+# Override via env: PIN_AGE_DAYS_SOURCE=14 PIN_AGE_DAYS_ORCA=1 ./update.sh
+PIN_AGE_DAYS_SOURCE="${PIN_AGE_DAYS_SOURCE:-7}"
+PIN_AGE_DAYS_ORCA="${PIN_AGE_DAYS_ORCA:-2}"
+
+# Inputs whose source feeds instructions straight into Claude (skills). When
+# they move, print a compare link so the diff can be skimmed.
+REVIEW_INPUTS=" orca context7 "
+
 for arg in "$@"; do
   case "$arg" in
     --no-nix)           UPDATE_NIX=false ;;
@@ -518,10 +530,12 @@ else
     # PIN_AGE_DAYS_LLM_AGENTS, since numtide republishes cache.numtide.com
     # daily rather than on nixpkgs' slower cadence. Subsequent same-day `hms`
     # runs then reuse those cached paths from flake.lock without further work.
+    # Every other input is pinned with PIN_AGE_DAYS_SOURCE / PIN_AGE_DAYS_ORCA
+    # as a supply-chain cooldown (see the variables at the top).
     #
     # The `nix flake update` afterwards reads the new SHAs out of flake.nix
-    # and writes them into flake.lock (and refreshes remaining unpinned
-    # inputs like tuxManager/ie-r to their HEAD).
+    # and writes them into flake.lock. Every direct input is pinned, so it
+    # only adds new inputs that aren't in pin_specs yet.
     if command -v gh &>/dev/null; then
       info "Age-pinning flake inputs..."
       # Inputs to age-pin: <input-name> <github owner/repo> <min-age-days>
@@ -530,6 +544,12 @@ else
         "nixpkgs-unstable NixOS/nixpkgs ${PIN_AGE_DAYS}"
         "home-manager nix-community/home-manager ${PIN_AGE_DAYS}"
         "llm-agents numtide/llm-agents.nix ${PIN_AGE_DAYS_LLM_AGENTS}"
+        "sops-nix Mic92/sops-nix ${PIN_AGE_DAYS_SOURCE}"
+        "tuxManager benapetr/TuxManager ${PIN_AGE_DAYS_SOURCE}"
+        "ie-r miaupaw/ie-r ${PIN_AGE_DAYS_SOURCE}"
+        "delta zed-industries/delta-nix ${PIN_AGE_DAYS_SOURCE}"
+        "context7 upstash/context7 ${PIN_AGE_DAYS_SOURCE}"
+        "orca stablyai/orca ${PIN_AGE_DAYS_ORCA}"
       )
       for spec in "${pin_specs[@]}"; do
         read -r in_name repo_path age_days <<< "$spec"
@@ -565,6 +585,9 @@ else
         fi
         _pin_input_sha "$NIX_FLAKE_DIR/flake.nix" "$in_name" "$repo_path" "$new_sha"
         success "  ${in_name} (${branch}): ${old_sha:0:7} → ${new_sha:0:7}"
+        if [[ "$REVIEW_INPUTS" == *" ${in_name} "* ]]; then
+          info "    review skill changes: https://github.com/${repo_path}/compare/${old_sha}...${new_sha}"
+        fi
         RESULTS["age-pin ${in_name}"]="✓ ${old_sha:0:7}→${new_sha:0:7}"
       done
     else
@@ -572,8 +595,8 @@ else
       RESULTS["age-pin nixpkgs"]="skipped (no gh)"
     fi
 
-    # Resolve the (possibly updated) flake.nix URLs into flake.lock. Also
-    # refreshes remaining unpinned inputs (tuxManager, ie-r) to their HEAD.
+    # Resolve the (possibly updated) flake.nix URLs into flake.lock. A new
+    # input added without a SHA would float to HEAD here — add it to pin_specs.
     info "Updating flake.lock..."
     run_step "Nix flake update" nix flake update --flake "$NIX_FLAKE_DIR"
   else
@@ -888,6 +911,8 @@ printf "  %-30s %s\n" "Step" "Result"
 printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
+           "age-pin llm-agents" "age-pin sops-nix" "age-pin tuxManager" "age-pin ie-r" \
+           "age-pin delta" "age-pin context7" "age-pin orca" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
            "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
