@@ -20,7 +20,7 @@ lint-nix:
     {{dev}} sh -c 'statix check -c nix/statix.toml nix && deadnix --fail nix'
 
 lint-shell:
-    {{dev}} sh -c "git ls-files -z '*.sh' ':!:docs/archive/*' | xargs -0 shellcheck -S warning"
+    {{dev}} sh -c "git ls-files -z '*.sh' ':!:docs/archive/*' | xargs -0 shellcheck -x -S warning"
 
 lint-ansible:
     {{dev}} sh -c 'yamllint ansible.yml custom-installers.yml && ansible-lint -q ansible.yml custom-installers.yml'

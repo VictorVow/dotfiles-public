@@ -18,7 +18,7 @@ run() { nix develop ./nix --command "$@"; }
 
 if (( ${#sh[@]} )); then
   echo "pre-commit: shellcheck"
-  run shellcheck -S warning "${sh[@]}"
+  run shellcheck -x -S warning "${sh[@]}"
 fi
 
 if (( ${#nixf[@]} )); then

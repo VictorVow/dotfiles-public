@@ -10,6 +10,7 @@ Note: High-level view with not every file/directory is listed, only the most imp
 installs/
 ├── bootstrap.sh              # Install Nix + activate Home Manager on a fresh system
 ├── update.sh                 # Update all package managers in one pass
+├── update.d/                 # update.sh's sourced pieces: lib.sh helpers + one NN-<manager>.sh per step
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
 ├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root

@@ -109,7 +109,7 @@
       deadnix = lint "deadnix" [ pkgs.deadnix ] "deadnix --fail nix";
       shellcheck = lint "shellcheck" [ pkgs.shellcheck pkgs.git pkgs.findutils ] ''
         find . -name '*.sh' -not -path './docs/archive/*' -print0 \
-          | xargs -0 shellcheck -S warning
+          | xargs -0 shellcheck -x -S warning
       '';
     };
 
