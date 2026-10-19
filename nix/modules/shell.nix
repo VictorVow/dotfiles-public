@@ -242,6 +242,34 @@ in
         NIXPKGS_ALLOW_UNFREE=1 nix run --impure "nixpkgs#$pkg" "$@"
       }
 
+      # Print a command's version, like `which` but for versions: ver <cmd>
+      # Asks the package manager rather than the binary (--version flags vary):
+      # Nix → store path name, apt → dpkg-query. Anything else (AppImages,
+      # cargo/uv/npm installs) falls back to trying common version flags.
+      ver() {
+        if [ $# -ne 1 ]; then
+          echo "usage: ver <command>" >&2
+          return 2
+        fi
+        local p real pkg f
+        p=$(command -v "$1") || { echo "$1: not found" >&2; return 1; }
+        real=$(readlink -f "$p")
+        case $real in
+          /nix/store/*)
+            real=''${real#/nix/store/*-}; echo "''${real%%/*}" ;;
+          *)
+            if pkg=$(dpkg -S "$real" 2>/dev/null); then
+              dpkg-query -W "''${pkg%%:*}"
+            else
+              for f in --version -V version -v; do
+                timeout 2 "$p" "$f" </dev/null 2>&1 | head -n1 | grep -m1 '[0-9]' && return
+              done
+              echo "$1: version unknown ($real)" >&2
+              return 1
+            fi ;;
+        esac
+      }
+
       # ── git identity switch (full-axis) ─────────────────────────────────────
       # Override `git su [N]` so it realigns push-auth state too — clearing
       # GITHUB_TOKEN in this shell and switching the gh keyring active account
