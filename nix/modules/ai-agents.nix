@@ -241,8 +241,8 @@ in
   #
   # Secret env vars (API tokens) are intentionally NOT placed in
   # env blocks here — the env block overrides inherited shell values, so an empty string
-  # would shadow the real token set in home.sessionVariables. MCP server processes
-  # inherit the full session environment automatically.
+  # would shadow the real token exported by bash initExtra (shell.nix). MCP server
+  # processes inherit it from the terminal the agent was launched from.
 
   programs.mcp = {
     enable = true;

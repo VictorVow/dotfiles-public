@@ -27,6 +27,6 @@
 
   # Deliberately not OPENAI_API_KEY/ANTHROPIC_AUTH_TOKEN: those would shadow
   # real provider auth in other agent CLIs. Only OpenCode's provider reads this.
-  home.sessionVariables.FREELLMAPI_API_KEY =
-    "$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)";
+  # Exported as FREELLMAPI_API_KEY in shell.nix's bash initExtra (interactive
+  # shells only, so GUI apps don't inherit it).
 }

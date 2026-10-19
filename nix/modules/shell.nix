@@ -48,6 +48,20 @@ in
       fi
       unset _hm_sess_current
 
+      # ── API tokens: interactive shells only ─────────────────────────────────
+      # Deliberately NOT home.sessionVariables: those reach the Plasma session via
+      # ~/.profile, so every GUI app inherited the tokens (and Flatpak's
+      # flatpak-spawn puts its whole env on its world-readable command line).
+      # Terminal-launched agents/MCP servers still inherit them from here.
+      # Exported once per shell tree so `git su`'s `unset GITHUB_TOKEN` still
+      # carries over to child shells. Values: sops, see `sops` below + ai-secrets.nix.
+      if [ -z "''${__SHELL_SECRETS_LOADED-}" ]; then
+        export LOGSEQ_API_TOKEN="$(cat ${config.sops.secrets.logseq_api_token.path} 2>/dev/null)"     # LogSeq HTTP API token (Settings → HTTP APIs)
+        export GITHUB_TOKEN="$(cat ${config.sops.secrets.github_token.path} 2>/dev/null)"             # GitHub token with repo + read:org scopes
+        export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)" # OpenCode's freellmapi provider
+        export __SHELL_SECRETS_LOADED=1
+      fi
+
       # ── Homebrew (Linux) ────────────────────────────────────────────────────
       # Homebrew is kept for packages not available in nixpkgs.
       # The nix-managed PATH takes priority; Homebrew fills in the gaps.
@@ -469,18 +483,13 @@ in
     # hooks, CI, scripts) fetch the pinned version silently instead of hanging.
     COREPACK_ENABLE_DOWNLOAD_PROMPT = "0";
 
-    # MCP server secrets — inherited by MCP server subprocesses at runtime.
-    # DO NOT put these in programs.mcp.servers env blocks; the env block overrides
-    # shell-inherited values and an empty string would shadow the real value.
-    # Values are sops-encrypted in ../secrets/shell.yaml (see `sops` below) and
-    # read from their decrypted files when the session starts.
-    LOGSEQ_API_TOKEN = "$(cat ${config.sops.secrets.logseq_api_token.path} 2>/dev/null)";   # LogSeq HTTP API token (Settings → HTTP APIs)
-    GITHUB_TOKEN     = "$(cat ${config.sops.secrets.github_token.path} 2>/dev/null)";       # GitHub token with repo + read:org scopes
+    # API tokens (GITHUB_TOKEN, LOGSEQ_API_TOKEN, FREELLMAPI_API_KEY) are NOT
+    # here — they're exported in initExtra so GUI apps don't inherit them.
   };
 
-  # ── Sops secrets for session variables ───────────────────────────────────────
-  # Same pattern as modules/ai-secrets.nix: explicit stable paths so the
-  # session variables above can `cat` them. Edit with: sops nix/secrets/shell.yaml
+  # ── Sops secrets for shell API tokens ────────────────────────────────────────
+  # Same pattern as modules/ai-secrets.nix: explicit stable paths so initExtra
+  # can `cat` them. Edit with: sops nix/secrets/shell.yaml
   sops = {
     age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
     secrets = lib.genAttrs [ "github_token" "logseq_api_token" ] (name: {
