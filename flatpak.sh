@@ -48,7 +48,8 @@ if [ ! -d "$HOME/.var/app" ]; then
 fi
 
 cd ~/.var/app || exit 1
-launcher_array=($(ls -d */))
+shopt -s nullglob
+launcher_array=(*/)
 
 # Remove trailing `/` from each entry
 for i in "${!launcher_array[@]}"; do

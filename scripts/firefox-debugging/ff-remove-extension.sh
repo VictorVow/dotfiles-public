@@ -21,6 +21,7 @@ PROFILE=VERTEX EXT_ID=""
 while getopts "p:x:h" o; do case $o in
   p) PROFILE=$OPTARG;; x) EXT_ID=$OPTARG;;
   h) grep '^#' "$0" | head -16; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 [[ -z $EXT_ID ]] && { echo "usage: $0 -x 'EXTENSION_ID' [-p PROFILE]" >&2; exit 1; }
 

@@ -20,6 +20,7 @@ PROFILE=VERTEX MARIONETTE_PORT=2828 BIDI_PORT=9222
 while getopts "p:h" o; do case $o in
   p) PROFILE=$OPTARG;;
   h) grep '^#' "$0" | head -16; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 shift $((OPTIND - 1))
 ACTION="${1:-status}"

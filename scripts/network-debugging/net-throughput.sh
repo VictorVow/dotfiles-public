@@ -18,6 +18,7 @@ cd "$(dirname "$0")" && source ./net-lib.sh
 T=10
 while getopts "t:h" o; do case $o in
   t) T=$OPTARG;; h) grep '^#' "$0" | head -16; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 
 MY_IP=$(ip -4 addr show "$NET_IF" | awk '/inet /{sub(/\/.*/,"",$2); print $2; exit}')

@@ -14,6 +14,7 @@ cd "$(dirname "$0")" && source ./net-lib.sh
 COUNT=100 DESKTOP=0
 while getopts "c:dh" o; do case $o in
   c) COUNT=$OPTARG;; d) DESKTOP=1;; h) grep '^#' "$0" | head -9; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 
 printf "%-38s " "1) radio hop -> near node ($NODE_NEAR):";  net_ping_summary "$NODE_NEAR" "$COUNT"

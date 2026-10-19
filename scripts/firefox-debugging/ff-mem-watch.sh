@@ -12,6 +12,7 @@ PROFILE=VERTEX INTERVAL=10 COUNT=0
 while getopts "p:i:n:h" o; do case $o in
   p) PROFILE=$OPTARG;; i) INTERVAL=$OPTARG;; n) COUNT=$OPTARG;;
   h) grep '^#' "$0" | head -8; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 
 MAIN=$(ff_main_pid "$PROFILE")

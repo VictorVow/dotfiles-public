@@ -22,6 +22,7 @@ PROFILE=VERTEX DURATION=90 OUTDIR="${TMPDIR:-/tmp}/ff-profiles"
 while getopts "p:d:o:h" o; do case $o in
   p) PROFILE=$OPTARG;; d) DURATION=$OPTARG;; o) OUTDIR=$OPTARG;;
   h) grep '^#' "$0" | head -18; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 mkdir -p "$OUTDIR"
 

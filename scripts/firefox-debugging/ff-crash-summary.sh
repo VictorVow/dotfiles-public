@@ -10,6 +10,7 @@ PENDING="$HOME/.mozilla/firefox/Crash Reports/pending"
 COUNT=5
 while getopts "n:h" o; do case $o in
   n) COUNT=$OPTARG;; h) grep '^#' "$0" | head -7; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 
 [[ -d $PENDING ]] || { echo "no pending crash reports dir"; exit 0; }

@@ -12,6 +12,7 @@ PROFILE=VERTEX ALL=0
 while getopts "p:ah" o; do case $o in
   p) PROFILE=$OPTARG;; a) ALL=1;;
   h) grep '^#' "$0" | head -7; exit 0;;
+  *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 DIR=$(ff_profile_dir "$PROFILE")
 

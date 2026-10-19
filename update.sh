@@ -413,6 +413,7 @@ $DRY_RUN && echo -e "${YELLOW}[DRY RUN MODE — nothing will be changed]${NC}"
 
 # Source Nix environment so nix/home-manager commands are available
 NIX_DAEMON_PROFILE="/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+# shellcheck source=/dev/null
 [[ -f "$NIX_DAEMON_PROFILE" ]] && . "$NIX_DAEMON_PROFILE"
 
 # Source Homebrew environment if installed

@@ -10,7 +10,7 @@ MASTER_PROFILE="09muof4b.MASTER"
 VAULT_PATH="/home/boss/Vaults/gocryptfs1/Browsers/1-OTHER/Arkenfox/"
 
 # Run the MAINTAIN steps on the MASTER profile
-cd "$PROFILE_PATH$MASTER_PROFILE"
+cd "$PROFILE_PATH$MASTER_PROFILE" || exit 1
 ./updater.sh
 ./prefsCleaner.sh
 echo "Ran the MAINTAIN steps on the MASTER profile"
