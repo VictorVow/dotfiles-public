@@ -397,6 +397,18 @@ in
         "auto:smart" = { name = "FreeLLMAPI auto (smart)"; };
       };
     };
+    # Web search via FreeLLMAPI's /mcp `web_search` tool (its pooled search
+    # providers) instead of OpenCode's built-in websearch, whose provider list
+    # is fixed (exa/tavily/…) and can't point at a custom endpoint. Needs the
+    # MCP server enabled on FreeLLMAPI (Keys → Agent compatibility) and search
+    # provider keys (Tavily/Exa/Firecrawl, sops ai.yaml → its declarative config).
+    websearch = false;
+    mcp.servers.freellmapi = {
+      type    = "remote";
+      url     = "https://freellmapi.device.example.com/mcp";
+      oauth   = false;
+      headers.Authorization = "Bearer {env:FREELLMAPI_API_KEY}";
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
