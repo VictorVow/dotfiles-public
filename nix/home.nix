@@ -43,6 +43,7 @@
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
     ./modules/cass.nix       # cass agent-session search: background index timers (cass itself via Brewfile)
+    ./modules/recoll.nix     # Recoll full-text document index (~/Documents, ~/Downloads, ~/Media) + hourly timer
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
   ];
 

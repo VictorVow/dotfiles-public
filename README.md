@@ -51,6 +51,7 @@ installs/
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       ├── cass.nix          # systemd user timers keeping the cass agent-session search index fresh (search-agent-history skill)
+│       ├── recoll.nix        # services.recoll: full-text index of ~/Documents, ~/Downloads, ~/Media (searchable file types listed inside)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome

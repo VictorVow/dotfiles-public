@@ -399,7 +399,6 @@ in
     NPM_CONFIG_CACHE = "$HOME/.cache/npm";
     GTK2_RC_FILES = "$HOME/.config/gtk-2.0/gtkrc";
     # INPUTRC is set by programs.readline itself (home.preferXdgDirectories, home.nix)
-    RECOLL_CONFDIR = "$HOME/.config/recoll";
     HISTFILE = "$HOME/.local/state/bash/history";
     NODE_REPL_HISTORY = "$HOME/.local/state/node_repl_history";
     PYTHON_HISTORY = "$HOME/.local/state/python_history";

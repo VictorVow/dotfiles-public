@@ -102,7 +102,8 @@ in
     # ── File Management & Backup ──────────────────────────────────────────────
     # rclone — installed by programs.rclone (modules/rclone.nix), which also
     # declaratively manages ~/.config/rclone/rclone.conf and its remotes.
-    recoll   # Full-text desktop search tool
+    # recoll — installed by services.recoll (modules/recoll.nix), which also writes
+    # recoll.conf and runs the indexer on a timer.
     gocryptfs # Encrypted overlay filesystem; required for KDE Plasma Vault
 
     # ── Secrets ───────────────────────────────────────────────────────────────
