@@ -6,7 +6,8 @@
 # (folder + frontmatter name/description, loaded on demand) but scan different dirs:
 #   Claude Code — ~/.claude/skills, project .claude/skills (+ plugin skills)
 #   OpenCode    — ~/.config/opencode/skills, plus ~/.claude/skills and ~/.agents/skills
-#                 (project: .opencode/, .claude/, .agents/ skills dirs)
+#                 (project: .opencode/, .claude/, .agents/ skills dirs). v2 invokes skills
+#                 as `@name`, not `/name` — slash wrappers are generated below.
 #   Codex       — ~/.agents/skills, /etc/codex/skills, bundled ~/.codex/skills/.system
 #                 (project: .agents/skills up to repo root). Does NOT read .claude/.
 #   Antigravity — ~/.gemini/config/skills (all flavours; IDE also ~/.gemini/antigravity/skills,
@@ -68,5 +69,21 @@ in
       ".claude/skills/logseq-cli".source = logseqCliSkill;
       ".agents/skills/logseq-cli".source = logseqCliSkill;
     }
+
+    # ── OpenCode slash commands ─────────────────────────────────────────────────────
+    # OpenCode v2 discovers ~/.claude/skills but never lists skills in the `/` menu (its
+    # own syntax is `@skill-id`). A thin ~/.config/opencode/commands/<name>.md per skill
+    # restores `/<name> [args]` the way Claude Code does it.
+    (lib.listToAttrs (map (name: {
+      name  = ".config/opencode/commands/${name}.md";
+      value.text = ''
+        ---
+        description: Run the ${name} skill
+        ---
+        Load the `${name}` skill with the skill tool and follow its instructions.
+
+        $ARGUMENTS
+      '';
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" "logseq-cli" ])))
   ];
 }
