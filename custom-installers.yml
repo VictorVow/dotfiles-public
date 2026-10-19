@@ -64,6 +64,8 @@
       ansible.builtin.import_tasks: ansible/installers/rustdesk.yml
     - name: AppMan
       ansible.builtin.import_tasks: ansible/installers/appman.yml
+    - name: Tor Browser AppArmor
+      ansible.builtin.import_tasks: ansible/installers/tor-browser-apparmor.yml
     - name: Chromium sandbox
       ansible.builtin.import_tasks: ansible/installers/chromium-suid-sandbox.yml
     - name: Looking Glass

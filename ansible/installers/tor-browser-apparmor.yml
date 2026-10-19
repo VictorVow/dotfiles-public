@@ -1,0 +1,54 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# TOR BROWSER — AppArmor userns profile for the tarball install
+# ════════════════════════════════════════════════════════════════════════
+# Ubuntu ships kernel.apparmor_restrict_unprivileged_userns=1, so a
+# Firefox build with no matching AppArmor profile cannot create user
+# namespaces and its content-process sandbox is degraded. Firefox flags
+# this with the "Linux security warning" (about:support → Sandbox), and
+# Mozilla's fix is a per-install AppArmor profile granting `userns`:
+#   https://support.mozilla.org/kb/linux-security-warning
+# Ubuntu's own /etc/apparmor.d/firefox only matches /usr/lib/firefox and
+# /opt/firefox, so the Tor Browser tarball (unpacked under
+# ~/Documents/ESSENTIALS/Programs/tor-browser, self-updating in place)
+# needs its own. The profile attaches to the real ELF binary, not the
+# `firefox` shell wrapper; child content processes re-exec the same path.
+# Same "narrow exemption, keep global hardening" approach as the AppMan
+# AppImage profile in appman.yml.
+#
+# Run by tag:
+#   ansible-playbook custom-installers.yml --ask-become-pass --tags tor_browser
+# Then restart Tor Browser.
+# To undo: `sudo apparmor_parser -R /etc/apparmor.d/tor-browser-local`
+# and delete the file.
+
+- name: Tor Browser | install AppArmor userns profile
+  ansible.builtin.copy:
+    dest: /etc/apparmor.d/tor-browser-local
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Managed by installs/custom-installers.yml — do not edit by hand.
+      # Grants `userns` to the Tor Browser tarball so Firefox's sandbox
+      # works under kernel.apparmor_restrict_unprivileged_userns=1.
+      abi <abi/4.0>,
+      include <tunables/global>
+
+      profile tor-browser-local /home/*/Documents/ESSENTIALS/Programs/tor-browser/Browser/{firefox.real,updater} flags=(unconfined) {
+        userns,
+
+        include if exists <local/tor-browser-local>
+      }
+  become: yes
+  register: tor_browser_apparmor_profile
+  tags: tor_browser
+
+- name: Tor Browser | reload AppArmor profile
+  ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/tor-browser-local
+  become: yes
+  when: tor_browser_apparmor_profile.changed  # noqa: no-handler — load before next launch
+  changed_when: true
+  tags: tor_browser
