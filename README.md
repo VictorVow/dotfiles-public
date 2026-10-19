@@ -73,6 +73,7 @@ installs/
     ├── archive/              # Previously relevant, only kept for historical purposes
     ├── system/               # Reference docs for this system's config (implemented, in use)
     │   ├── architecture.md   # How the layers fit together and why
+    │   ├── data-stores.md    # Where personal data lives (docs, Logseq, Calibre highlights, Firefox tabs) + the search command for each
     │   └── ...
     ├── research/             # Deep-dive research and comparison docs
     │   ├── git-worktrees.md

@@ -38,7 +38,7 @@ let
   globalContext = ''
     When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
 
-    To search inside the user's documents (PDF, Office, EPUB, etc.) in ~/Documents, ~/Downloads or ~/Media, use Recoll's index: `recollq -b '<terms>'` lists matching paths, `recollq -A '<terms>'` adds snippets, `recollq -f '<name>'` searches by file name. It's refreshed hourly, so very new files may be missing. For code and plain text use `rg`/`fd` instead.
+    To find something in the user's own data (documents, Logseq notes, Calibre highlights, Firefox tabs, past agent sessions), use the `search-personal-data` skill; its map of stores and commands is ~/Projects/installs/docs/system/data-stores.md.
   '';
 
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
