@@ -1,0 +1,37 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# MULLVAD VPN — https://mullvad.net/en/help/install-mullvad-app-linux#ubuntu-debian
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Mullvad | download GPG keyring
+  ansible.builtin.get_url:
+    url: https://repository.mullvad.net/deb/mullvad-keyring.asc
+    dest: /usr/share/keyrings/mullvad-keyring.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['mullvad-vpn'] is not defined
+
+- name: Mullvad | add apt repository
+  ansible.builtin.deb822_repository:
+    name: mullvad
+    types: deb
+    uris: https://repository.mullvad.net/deb/stable
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    architectures: "{{ deb_arch }}"
+    signed_by: /usr/share/keyrings/mullvad-keyring.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['mullvad-vpn'] is not defined
+
+- name: Mullvad | install package
+  ansible.builtin.apt:
+    name: mullvad-vpn
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['mullvad-vpn'] is not defined

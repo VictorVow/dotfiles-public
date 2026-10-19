@@ -13,6 +13,7 @@ installs/
 ├── update.d/                 # update.sh's sourced pieces: lib.sh helpers + one NN-<manager>.sh per step
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
+├── ansible/installers/       # One task file per 3rd-party tool, imported by custom-installers.yml
 ├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root
 ├── inventory.ini             # Explicit localhost inventory for the playbooks
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps

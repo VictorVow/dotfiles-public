@@ -1,0 +1,40 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# CLAUDE DESKTOP — https://code.claude.com/docs/en/desktop-linux
+# Official Anthropic apt repository (Linux beta). Replaces the unofficial
+# aaddrick AppImage that was previously managed via AppMan
+# (appman-appimages.txt). Updates arrive through normal apt upgrades.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Claude Desktop | download Anthropic signing key
+  ansible.builtin.get_url:
+    url: https://downloads.claude.ai/claude-desktop/key.asc
+    dest: /usr/share/keyrings/claude-desktop-archive-keyring.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['claude-desktop'] is not defined
+
+- name: Claude Desktop | add apt repository
+  ansible.builtin.deb822_repository:
+    name: claude-desktop
+    types: deb
+    uris: https://downloads.claude.ai/claude-desktop/apt/stable
+    suites: "stable"
+    components: main
+    architectures: "{{ deb_arch }}"
+    signed_by: /usr/share/keyrings/claude-desktop-archive-keyring.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['claude-desktop'] is not defined
+
+- name: Claude Desktop | install package
+  ansible.builtin.apt:
+    name: claude-desktop
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['claude-desktop'] is not defined

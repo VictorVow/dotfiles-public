@@ -1,0 +1,115 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# LIBRESPRITE —https://github.com/LibreSprite/LibreSprite
+# FOSS (MIT) fork of Aseprite. Replaces pkgs.aseprite: nixpkgs' aseprite
+# builds Aseprite's source-available tree from scratch on every lock bump
+# (slow, and the prebuilt binary upstream sells is paid). LibreSprite ships
+# a prebuilt AppImage from GitHub Releases, zipped as a single asset.
+# Not in AM's (AppMan) catalogue, so this bypasses appman-appimages.txt and
+# installs straight to ~/AppImages, matching that directory's convention
+# for standalone AppImages (see docs/system/declarative-vs-imperative-state.md).
+# Menu entry: a plain .desktop file in ~/.local/share/applications, icon
+# extracted from the AppImage into the hicolor theme (tasks below).
+# ════════════════════════════════════════════════════════════════════════
+
+- name: LibreSprite | check if already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage"
+  register: libresprite_binary
+
+- name: LibreSprite | fetch latest release metadata from GitHub
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/LibreSprite/LibreSprite/releases/latest
+    return_content: yes
+  register: libresprite_release
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | resolve Linux AppImage zip download URL
+  ansible.builtin.set_fact:
+    libresprite_download_url: >-
+      {{ libresprite_release.json.assets
+         | selectattr('name', 'search', 'linux-x86_64\.zip$')
+         | map(attribute='browser_download_url')
+         | first }}
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | download release zip
+  ansible.builtin.get_url:
+    url: "{{ libresprite_download_url }}"
+    dest: /tmp/libresprite.zip
+    mode: '0644'
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | extract AppImage from zip
+  ansible.builtin.unarchive:
+    src: /tmp/libresprite.zip
+    dest: /tmp
+    remote_src: yes
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | ensure ~/AppImages exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/AppImages"
+    state: directory
+    mode: '0755'
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | install AppImage
+  ansible.builtin.copy:
+    src: /tmp/LibreSprite-x86_64.AppImage
+    dest: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage"
+    mode: '0755'
+    remote_src: yes
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | clean up temp files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/libresprite.zip
+    - /tmp/LibreSprite-x86_64.AppImage
+  when: not libresprite_binary.stat.exists
+
+- name: LibreSprite | check if icon already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+  register: libresprite_icon
+
+- name: LibreSprite | extract icon from AppImage
+  ansible.builtin.command:
+    cmd: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage --appimage-extract libresprite.png"
+    chdir: /tmp
+  when: not libresprite_icon.stat.exists
+
+- name: LibreSprite | install icon into hicolor theme
+  ansible.builtin.copy:
+    src: /tmp/squashfs-root/libresprite.png
+    dest: "{{ ansible_facts['env']['HOME'] }}/.local/share/icons/hicolor/256x256/apps/libresprite.png"
+    mode: '0644'
+  when: not libresprite_icon.stat.exists
+
+- name: LibreSprite | clean up extracted icon
+  ansible.builtin.file:
+    path: /tmp/squashfs-root
+    state: absent
+  when: not libresprite_icon.stat.exists
+
+- name: LibreSprite | install .desktop menu entry
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts['env']['HOME'] }}/.local/share/applications/org.libresprite.LibreSprite.desktop"
+    mode: '0644'
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=LibreSprite
+      GenericName=Sprite Editor
+      Comment=Animated sprite editor & pixel art tool
+      Exec={{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage %F
+      Icon=libresprite
+      Terminal=false
+      StartupWMClass=libresprite
+      Categories=Graphics;2DGraphics;RasterGraphics;
+      MimeType=image/x-aseprite;

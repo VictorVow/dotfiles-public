@@ -1,0 +1,38 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# MEGASYNC — https://help.mega.io/installs-apps/desktop/repository
+# MEGA Cloud Drive sync client. nixpkgs builds it from source — official
+# apt repo provides a prebuilt .deb that tracks releases automatically.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: MEGAsync | download Meganz GPG key
+  ansible.builtin.get_url:
+    url: https://mega.nz/linux/repo/Debian_12/Release.key
+    dest: /usr/share/keyrings/meganz.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['megasync'] is not defined
+
+- name: MEGAsync | add apt repository
+  ansible.builtin.deb822_repository:
+    name: megasync
+    types: deb
+    uris: "https://mega.nz/linux/repo/xUbuntu_{{ ansible_facts['distribution_version'] }}/"
+    suites: "./"
+    architectures: "{{ deb_arch }}"
+    signed_by: /usr/share/keyrings/meganz.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['megasync'] is not defined
+
+- name: MEGAsync | install package
+  ansible.builtin.apt:
+    name: megasync
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['megasync'] is not defined

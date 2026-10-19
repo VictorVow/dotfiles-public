@@ -1,0 +1,42 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# DEVIN DESKTOP — https://docs.devin.ai/desktop/getting-started
+# Cognition's agentic IDE (formerly Windsurf). Not in nixpkgs or
+# llm-agents.nix (nixpkgs only has the stale `windsurf`). Official apt repo
+# still uses the old windsurf hostname/naming; the `windsurf` package is
+# now a transitional package pulling in `devin-desktop`. The key is
+# ASCII-armored, so it's saved as .asc and used directly (no dearmor).
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Devin Desktop | download signing key
+  ansible.builtin.get_url:
+    url: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/windsurf.gpg
+    dest: /etc/apt/keyrings/windsurf-stable.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['devin-desktop'] is not defined
+
+- name: Devin Desktop | add apt repository
+  ansible.builtin.deb822_repository:
+    name: windsurf
+    types: deb
+    uris: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt
+    suites: "stable"
+    components: main
+    architectures: "amd64"
+    signed_by: /etc/apt/keyrings/windsurf-stable.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['devin-desktop'] is not defined
+
+- name: Devin Desktop | install package
+  ansible.builtin.apt:
+    name: devin-desktop
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['devin-desktop'] is not defined

@@ -1,0 +1,114 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# CHROMIUM SUID SANDBOX — setuid helpers for Nix ungoogled-chromium + google-chrome
+# ════════════════════════════════════════════════════════════════════════
+# The Nix chromium wrapper expects a setuid-root SUID sandbox helper at
+# /run/wrappers/bin/__chromium-suid-sandbox (NixOS creates this via
+# security.chromiumSuidSandbox; a plain Nix-on-Ubuntu install does not).
+# Without it Chromium aborts at launch, because Ubuntu's AppArmor also
+# clamps unprivileged user namespaces so the namespace sandbox is
+# unavailable too. google-chrome (nix/modules/packages.nix) hits the same
+# issue with its own bundled chrome-sandbox; since Chrome ignores
+# CHROME_DEVEL_SANDBOX in release builds, its setuid helper
+# (__google-chrome-suid-sandbox) is bind-mounted directly over the Nix
+# store's chrome-sandbox path instead — see scripts/chromium-suid-sandbox.sh.
+#
+# Two pieces are needed, mirroring what NixOS' security.wrappers does:
+#   1. A dedicated tmpfs at /run/wrappers that ALLOWS suid + exec. The host
+#      /run is mounted nosuid,noexec, which both strips the setuid bit and
+#      forbids execution — so the helpers cannot live directly under /run.
+#   2. A boot-time oneshot that installs both setuid helpers into it (tmpfs
+#      is wiped on every boot).
+# Run by tag:
+#   ansible-playbook custom-installers.yml --ask-become-pass --tags chromium_sandbox
+# After a chromium/chrome update (home-manager switch):
+#   sudo systemctl restart chromium-suid-sandbox
+
+- name: Chromium sandbox | install suid/exec-capable tmpfs mount for /run/wrappers
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/run-wrappers.mount
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Managed by installs/custom-installers.yml — do not edit by hand.
+      # Dedicated tmpfs that permits setuid + exec (host /run is nosuid,noexec),
+      # so the Chromium SUID sandbox helper can live at /run/wrappers/bin.
+      [Unit]
+      Description=Suid/exec-capable tmpfs for setuid wrapper helpers
+      DefaultDependencies=no
+      Conflicts=umount.target
+      Before=umount.target
+      After=local-fs.target
+
+      [Mount]
+      What=tmpfs
+      Where=/run/wrappers
+      Type=tmpfs
+      Options=rw,nodev,mode=755,size=2M
+
+      [Install]
+      WantedBy=multi-user.target
+  become: yes
+  register: chromium_sandbox_mount
+  tags: chromium_sandbox
+
+- name: Chromium sandbox | install setuid-helper installer script
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/scripts/chromium-suid-sandbox.sh"
+    dest: /usr/local/bin/chromium-suid-sandbox
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  tags: chromium_sandbox
+
+- name: Chromium sandbox | install systemd boot service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/chromium-suid-sandbox.service
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Managed by installs/custom-installers.yml — do not edit by hand.
+      [Unit]
+      Description=Install setuid SUID sandbox helpers for Nix ungoogled-chromium + google-chrome
+      # Needs the suid/exec-capable /run/wrappers tmpfs in place first.
+      Requires=run-wrappers.mount
+      After=run-wrappers.mount
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/local/bin/chromium-suid-sandbox
+
+      [Install]
+      WantedBy=multi-user.target
+  become: yes
+  register: chromium_sandbox_unit
+  tags: chromium_sandbox
+
+- name: Chromium sandbox | reload systemd if units changed
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+  when: chromium_sandbox_mount.changed or chromium_sandbox_unit.changed
+  tags: chromium_sandbox
+
+- name: Chromium sandbox | enable + (re)start tmpfs mount
+  ansible.builtin.systemd:
+    name: run-wrappers.mount
+    enabled: yes
+    state: restarted
+  become: yes
+  tags: chromium_sandbox
+
+- name: Chromium sandbox | enable + (re)start service (installs helper now)
+  ansible.builtin.systemd:
+    name: chromium-suid-sandbox.service
+    enabled: yes
+    state: restarted
+  become: yes
+  tags: chromium_sandbox

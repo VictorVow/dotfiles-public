@@ -1,0 +1,61 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# DOCKER — https://docs.docker.com/engine/install/ubuntu/
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Docker | ensure keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: ansible_facts.packages['docker-ce'] is not defined
+
+- name: Docker | download GPG key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['docker-ce'] is not defined
+
+- name: Docker | add apt repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: stable
+    architectures: "{{ deb_arch }}"
+    signed_by: /etc/apt/keyrings/docker.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['docker-ce'] is not defined
+
+- name: Docker | install packages
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['docker-ce'] is not defined
+
+# Group add runs unconditionally: idempotent, and covers cases where
+# docker was installed externally without this playbook.
+- name: Docker | add user to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: docker
+    append: yes
+  become: yes

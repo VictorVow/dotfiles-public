@@ -1,0 +1,42 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# VSCODE — https://code.visualstudio.com/docs/setup/linux
+# Replaces programs.vscode in nix/modules/programs.nix. The Nix repackaging
+# rebuilt on every lock bump, and ms-vscode.cpptools / ms-python.vscode-pylance
+# are MS-licensed for *official* VSCode only — apt is the right channel.
+# Settings & keybindings are still managed declaratively (xdg.configFile).
+# Extensions are installed via the in-app marketplace.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: VSCode | download Microsoft GPG key
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /usr/share/keyrings/microsoft.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['code'] is not defined
+
+- name: VSCode | add apt repository
+  ansible.builtin.deb822_repository:
+    name: vscode
+    types: deb
+    uris: https://packages.microsoft.com/repos/code
+    suites: "stable"
+    components: main
+    architectures: "{{ deb_arch }}"
+    signed_by: /usr/share/keyrings/microsoft.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['code'] is not defined
+
+- name: VSCode | install package
+  ansible.builtin.apt:
+    name: code
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['code'] is not defined

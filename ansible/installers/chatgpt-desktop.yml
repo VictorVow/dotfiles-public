@@ -1,0 +1,29 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# CHATGPT DESKTOP — https://learn.chatgpt.com/docs/linux/linux-app
+# Official OpenAI .deb. Installing it configures a signed OpenAI apt
+# repository, so later updates arrive through normal apt upgrades.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: ChatGPT Desktop | download .deb package
+  ansible.builtin.get_url:
+    url: "https://persistent.oaistatic.com/codex-app-prod/linux/deb/latest/chatgpt_{{ deb_arch }}.deb"
+    dest: /tmp/chatgpt.deb
+    mode: '0644'
+  when: ansible_facts.packages['chatgpt'] is not defined
+
+# apt-get rather than the apt module's `deb:` — python-apt's .deb check
+# can't resolve versioned virtual Provides, so the t64 rename
+# (libglib2.0-0t64 Provides libglib2.0-0) reads as unsatisfiable.
+- name: ChatGPT Desktop | install .deb
+  ansible.builtin.command: apt-get install -y /tmp/chatgpt.deb
+  become: yes
+  when: ansible_facts.packages['chatgpt'] is not defined
+
+- name: ChatGPT Desktop | clean up temp .deb
+  ansible.builtin.file:
+    path: /tmp/chatgpt.deb
+    state: absent
+  when: ansible_facts.packages['chatgpt'] is not defined

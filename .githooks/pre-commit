@@ -10,7 +10,7 @@ added()  { git diff --cached --name-only -z --diff-filter=A -- "$@"; }
 mapfile -d '' sh     < <(staged '*.sh')
 mapfile -d '' nixf   < <(staged '*.nix')
 mapfile -d '' newnix < <(added '*.nix')
-mapfile -d '' yml    < <(staged 'ansible.yml' 'custom-installers.yml')
+mapfile -d '' yml    < <(staged 'ansible.yml' 'custom-installers.yml' 'ansible/*.yml')
 
 (( ${#sh[@]} + ${#nixf[@]} + ${#yml[@]} )) || exit 0
 

@@ -1,0 +1,67 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# FW-FANCTRL — https://github.com/TamtamHero/fw-fanctrl
+# Framework Laptop fan controller. Upstream install.sh bundles ectool, the
+# systemd service, and the system-sleep hook — none of which the nixpkgs
+# package ships. Idempotent: skipped if /usr/local/bin/fw-fanctrl already
+# exists. install.sh pip-installs the binary to /usr/local/bin, but the unit
+# and sleep hook it writes hardcode /usr/bin/fw-fanctrl (→ 203/EXEC at boot),
+# so a /usr/bin symlink is kept in place on every run.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: fw-fanctrl | check if already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/fw-fanctrl
+  register: fw_fanctrl_bin
+
+- name: fw-fanctrl | install build/runtime prerequisites
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-build
+      - python3-jsonschema
+      - libnotify-bin
+    state: present
+  become: yes
+  when: not fw_fanctrl_bin.stat.exists
+
+- name: fw-fanctrl | clone repository
+  ansible.builtin.git:
+    repo: https://github.com/TamtamHero/fw-fanctrl.git
+    dest: /tmp/fw-fanctrl
+    version: v1.0.4
+    depth: 1
+    force: yes
+  when: not fw_fanctrl_bin.stat.exists
+
+- name: fw-fanctrl | run upstream install.sh
+  ansible.builtin.command:
+    cmd: ./install.sh --no-sudo
+    chdir: /tmp/fw-fanctrl
+  become: yes
+  when: not fw_fanctrl_bin.stat.exists
+
+- name: fw-fanctrl | clean up clone
+  ansible.builtin.file:
+    path: /tmp/fw-fanctrl
+    state: absent
+  when: not fw_fanctrl_bin.stat.exists
+
+- name: fw-fanctrl | link /usr/bin path expected by the unit and sleep hook
+  ansible.builtin.file:
+    src: /usr/local/bin/fw-fanctrl
+    dest: /usr/bin/fw-fanctrl
+    state: link
+  become: yes
+  register: fw_fanctrl_link
+
+- name: fw-fanctrl | (re)start service
+  ansible.builtin.systemd:
+    name: fw-fanctrl
+    state: restarted
+    enabled: yes
+  become: yes
+  when: fw_fanctrl_link.changed or not fw_fanctrl_bin.stat.exists

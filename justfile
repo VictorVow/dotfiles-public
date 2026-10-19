@@ -23,7 +23,7 @@ lint-shell:
     {{dev}} sh -c "git ls-files -z '*.sh' ':!:docs/archive/*' | xargs -0 shellcheck -x -S warning"
 
 lint-ansible:
-    {{dev}} sh -c 'yamllint ansible.yml custom-installers.yml && ansible-lint -q ansible.yml custom-installers.yml'
+    {{dev}} sh -c 'yamllint ansible.yml custom-installers.yml ansible/ && ansible-lint -q ansible.yml custom-installers.yml'
 
 # Point git at the tracked hooks in .githooks/ (once per clone)
 install-hooks:

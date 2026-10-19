@@ -1,0 +1,65 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# DNVM — .NET Version Manager — https://github.com/dn-vm/dnvm
+# selfinstall places the binary at ~/.local/share/dnvm/dnvm.
+# No root needed — installs to user home.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: dnvm | check if already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/share/dnvm/dnvm"
+  register: dnvm_binary
+
+- name: dnvm | fetch latest release metadata from GitHub
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/dn-vm/dnvm/releases/latest
+    return_content: yes
+  register: dnvm_release
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | resolve architecture-specific download URL
+  ansible.builtin.set_fact:
+    dnvm_download_url: >-
+      {{ dnvm_release.json.assets
+         | selectattr('name', 'search', 'linux-' + dnvm_arch + '\.tar\.gz$')
+         | rejectattr('name', 'search', '\.sig$')
+         | map(attribute='browser_download_url')
+         | first }}
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | download release archive
+  ansible.builtin.get_url:
+    url: "{{ dnvm_download_url }}"
+    dest: /tmp/dnvm-latest.tar.gz
+    mode: '0644'
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | create temp extraction directory
+  ansible.builtin.file:
+    path: /tmp/dnvm-extract
+    state: directory
+    mode: '0755'
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | extract archive
+  ansible.builtin.unarchive:
+    src: /tmp/dnvm-latest.tar.gz
+    dest: /tmp/dnvm-extract
+    remote_src: yes
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | run selfinstall
+  ansible.builtin.command:
+    cmd: /tmp/dnvm-extract/dnvm selfinstall
+  when: not dnvm_binary.stat.exists
+
+- name: dnvm | clean up temp files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/dnvm-latest.tar.gz
+    - /tmp/dnvm-extract
+  when: not dnvm_binary.stat.exists

@@ -1,0 +1,34 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# HOMEBREW — https://brew.sh/
+# Shell integration (eval "$(brew shellenv)") is in nix/modules/shell.nix.
+# No root needed — installs to /home/linuxbrew as current user.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Homebrew | check if already installed
+  ansible.builtin.stat:
+    path: /home/linuxbrew/.linuxbrew/bin/brew
+  register: brew_binary
+
+# NONINTERACTIVE=1 suppresses all install prompts.
+- name: Homebrew | run official installer
+  ansible.builtin.shell:
+    cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    creates: /home/linuxbrew/.linuxbrew/bin/brew
+  environment:
+    NONINTERACTIVE: "1"
+  when: not brew_binary.stat.exists
+
+# playbook_dir = installs/; Brewfile is in the same directory.
+- name: Homebrew | check if Brewfile exists
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/Brewfile"
+  register: brewfile
+
+- name: Homebrew | install packages from Brewfile
+  ansible.builtin.command:
+    cmd: "/home/linuxbrew/.linuxbrew/bin/brew bundle install --file={{ playbook_dir }}/Brewfile"
+  when: brewfile.stat.exists
+  changed_when: false

@@ -1,0 +1,46 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# TAILSCALE — https://tailscale.com/kb/1187/install-ubuntu-2204
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Tailscale | download GPG keyring
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['tailscale'] is not defined
+
+- name: Tailscale | add apt repository
+  ansible.builtin.deb822_repository:
+    name: tailscale
+    types: deb
+    uris: https://pkgs.tailscale.com/stable/ubuntu
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    signed_by: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    state: present
+  become: yes
+  when: ansible_facts.packages['tailscale'] is not defined
+
+- name: Tailscale | install package
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['tailscale'] is not defined
+
+# Enable unconditionally: covers tailscale installed by other means with
+# the service never started.
+- name: Tailscale | enable and start tailscaled service
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  become: yes

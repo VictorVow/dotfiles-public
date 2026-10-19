@@ -1,0 +1,38 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# MAINLINE — Ubuntu mainline kernel installer
+# https://github.com/bkw777/mainline
+# PPA: ppa:cappelikan/ppa (upstream-recommended)
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Mainline | download PPA signing key
+  ansible.builtin.get_url:
+    url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3AE27527713D2479DCAFFD58A89D7C1B2F76304D&options=mr'
+    dest: /etc/apt/keyrings/cappelikan-ppa.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when: ansible_facts.packages['mainline'] is not defined
+
+- name: Mainline | add PPA
+  ansible.builtin.deb822_repository:
+    name: cappelikan-ubuntu-ppa
+    types: deb
+    uris: https://ppa.launchpadcontent.net/cappelikan/ppa/ubuntu
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    signed_by: /etc/apt/keyrings/cappelikan-ppa.asc
+    state: present
+  become: yes
+  when: ansible_facts.packages['mainline'] is not defined
+
+- name: Mainline | install from PPA
+  ansible.builtin.apt:
+    name: mainline
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_facts.packages['mainline'] is not defined

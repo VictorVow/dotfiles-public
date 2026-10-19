@@ -1,0 +1,51 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# ANDROID STUDIO — ppa:maarten-fonville/android-studio
+# The Nix path (androidStudioPackages.stable via buildFHSEnv) was reverted
+# because the FHS rootfs rebuild on every lock bump dwarfed every other
+# build in the closure. ANDROID_HOME (set in shell.nix) and the existing
+# SDK in ~/Projects/Dev/Android/Sdk continue to work unchanged.
+# ════════════════════════════════════════════════════════════════════════
+
+- name: Android Studio | check for PPA-managed installation
+  ansible.builtin.stat:
+    path: /opt/android-studio
+  register: android_studio_ppa
+
+- name: Android Studio | download PPA signing key
+  ansible.builtin.get_url:
+    url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xB0B65046D9826D045FAFBA324EE97B1881326419&options=mr'
+    dest: /etc/apt/keyrings/maarten-fonville-android-studio.asc
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+  when:
+    - not android_studio_ppa.stat.exists
+    - ansible_facts.packages['android-studio'] is not defined
+
+- name: Android Studio | add PPA
+  ansible.builtin.deb822_repository:
+    name: maarten-fonville-ubuntu-android-studio
+    types: deb
+    uris: https://ppa.launchpadcontent.net/maarten-fonville/android-studio/ubuntu
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    signed_by: /etc/apt/keyrings/maarten-fonville-android-studio.asc
+    state: present
+  become: yes
+  when:
+    - not android_studio_ppa.stat.exists
+    - ansible_facts.packages['android-studio'] is not defined
+
+- name: Android Studio | install from PPA
+  ansible.builtin.apt:
+    name: android-studio
+    state: present
+    update_cache: yes
+  become: yes
+  when:
+    - not android_studio_ppa.stat.exists
+    - ansible_facts.packages['android-studio'] is not defined
