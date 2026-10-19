@@ -3,6 +3,21 @@
 # Shell environment configuration.
 # Manages PATH, environment variables, aliases, and Bash integration.
 # Also installs AI CLI tools that are not yet packaged in nixpkgs via npm.
+let
+  # npm-globals.txt → [ { pkg; bin; } ]; strips comments/blank lines, bin
+  # defaults to the package name.
+  npmGlobals = lib.pipe (builtins.readFile ../../npm-globals.txt) [
+    (lib.splitString "\n")
+    (map (line: lib.trim (builtins.head (lib.splitString "#" line))))
+    (lib.filter (line: line != ""))
+    (map (line:
+      let words = lib.filter (w: w != "") (lib.splitString " " line);
+      in {
+        pkg = builtins.head words;
+        bin = if builtins.length words > 1 then builtins.elemAt words 1 else builtins.head words;
+      }))
+  ];
+in
 {
   # ── Bash Integration ──────────────────────────────────────────────────────────
 
@@ -497,13 +512,9 @@
         fi
       }
 
-      # AI / LLM CLI tools not available via llm-agents.nix (numtide's flake —
-      # see packages.nix for opencode/copilot-cli, which moved there):
-      _npm_global_install "cline" "cline"                    # Cline LLM CLI
-      _npm_global_install "@continuedev/cli" "continue"      # Continue Dev LLM CLI
-
-      # Other npm CLI tools not in nixpkgs:
-      _npm_global_install "@helgesverre/namecheap-cli" "namecheap"  # Namecheap domains/DNS CLI
+      # Package list lives in npm-globals.txt at the repo root.
+      ${lib.concatMapStringsSep "\n  " ({ pkg, bin }:
+        "_npm_global_install ${lib.escapeShellArg pkg} ${lib.escapeShellArg bin}") npmGlobals}
 
       unset -f _npm_global_install
     fi

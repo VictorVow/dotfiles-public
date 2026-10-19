@@ -7,7 +7,7 @@
 #   1. Nix / Home Manager  — flake.lock update + home-manager switch
 #   2. apt                 — system packages (docker, KDE libs, etc.)
 #   3. Homebrew            — remaining brew packages not in Nix
-#   4. npm globals         — AI CLI tools installed to ~/.npm-global
+#   4. npm globals         — CLIs declared in npm-globals.txt (~/.npm-global)
 #   5. Flatpak             — user Flatpak apps
 #   6. uv tools            — Python CLI tools declared in uv-tools.txt
 #   7. Distrobox           — OS packages inside containers
@@ -678,7 +678,7 @@ if ! command -v npm &>/dev/null; then
   skipped "npm not found — skipping."
   RESULTS["npm globals"]="skipped (no npm)"
 else
-  # These are the AI CLI tools installed to ~/.npm-global in shell.nix.
+  # Declared in npm-globals.txt; installed to ~/.npm-global by shell.nix's activation.
   # npm update -g upgrades ALL packages in the prefix to their latest versions.
   # This is the equivalent of the old ansible `npm install -g <pkg>@latest` loop.
   #

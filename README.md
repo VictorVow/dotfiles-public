@@ -21,6 +21,7 @@ installs/
 ├── arkenfox.sh               # Apply/update arkenfox user.js on a Firefox profile
 ├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
+├── npm-globals.txt           # Global npm CLIs (not in nixpkgs/llm-agents) — installed by the shell.nix activation, upgraded by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
