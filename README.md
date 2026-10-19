@@ -57,6 +57,7 @@ installs/
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
+│   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
 │   ├── logseq-md-to-blocks.py     # Markdown → Logseq block outline (+ --gfw GitHub widgets); used by the logseq-add-md-to-blocks / logseq-research skills
 │   ├── logseq-clear-children.sh   # Remove all child blocks under a Logseq block; used by the logseq-research skill

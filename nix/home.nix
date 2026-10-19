@@ -39,7 +39,7 @@
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
     ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
-    ./modules/ai-secrets.nix # OpenRouter API key for Tray-Links "ai" tray (sops-encrypted)
+    ./modules/ai-secrets.nix # sops-encrypted AI provider keys (OpenRouter → Tray-Links, FreeLLMAPI → OpenCode)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
     ./modules/cass.nix       # cass agent-session search: background index timers (cass itself via Brewfile)
