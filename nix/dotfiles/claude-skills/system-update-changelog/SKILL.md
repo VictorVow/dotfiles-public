@@ -45,7 +45,14 @@ Keep a change only if it affects **how the user works day to day**: something ne
 - Changed startup/tmux layout, update flow, launcher entries
 - Agent CLI version/config switches (e.g. OpenCode v1 → v2), new secrets that unlock a feature
 
-Leave out: refactors, lint/warning fixes with no visible effect, flake/lock bumps, doc-only edits (including research notes and README resyncs), generated state-inventory syncs, and internal backup plumbing unless it changes what the user has to do. If unsure, ask: "would the user notice or need to know this to use their system?"
+Leave out:
+
+- Refactors and file moves/splits, lint/warning fixes with no visible effect, flake/lock bumps
+- Git and repo housekeeping: history rewrites, force-pushes, purged or untracked files, `.gitignore`, remotes, branch cleanup
+- Doc-only edits (including research notes and README resyncs), generated state-inventory syncs
+- Internal backup plumbing, unless it changes what the user has to do
+
+The test is about **using the system**, not maintaining the repos. If unsure, ask: "does this change what the user can run, open or invoke, or how something they use behaves?" If the answer is only "they might need to know it for repo maintenance", leave it out.
 
 ## 4. Write the section
 
