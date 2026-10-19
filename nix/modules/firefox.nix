@@ -11,6 +11,23 @@ let
     Shopping = { id = 4; color = "pink";   icon = "cart";        };
   };
 
+  # Sites that block our normal egress (Mullvad) and go through tinyproxy on
+  # ts-exit instead (Self-Hosted/Egress-proxy). Matches the domain and all its
+  # subdomains. "; DIRECT" falls back to a direct connection off the tailnet.
+  # Alternative: the FoxyProxy extension (same proxy, pattern per domain) if
+  # you want a toolbar toggle to switch this on/off globally or per site.
+  egressProxyDomains = [ "imgur.com" "imgur.io" ];
+  egressProxyPac = pkgs.writeText "egress-proxy.pac" ''
+    function FindProxyForURL(url, host) {
+      var domains = ${builtins.toJSON egressProxyDomains};
+      for (var i = 0; i < domains.length; i++) {
+        if (host === domains[i] || dnsDomainIs(host, "." + domains[i]))
+          return "PROXY 100.x.x.x:8888; DIRECT";
+      }
+      return "DIRECT";
+    }
+  '';
+
   # Settings shared by every managed profile (VERTEX + all 3 others)
   ffBase = {
     "browser.startup.page"                                       = 3;            # restore previous session
@@ -332,6 +349,10 @@ in
         "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads" = false;  # exempt browsing history from the sanitize-on-shutdown sweep so navigation history is preserved
         "privacy.history.custom"                             = true;   # enable "Use custom settings for history" in about:preferences#privacy for granular history control
         "privacy.resistFingerprinting.letterboxing"          = true;   # pad window to resist fingerprinting
+
+        # ── Network ───────────────────────────────────────────────────────────
+        "network.proxy.type"                                 = 2;      # use a PAC file (proxy auto-config)
+        "network.proxy.autoconfig_url"                       = "file://${egressProxyPac}";  # route egressProxyDomains via the ts-exit egress proxy
 
         # ── UI / Toolbar ──────────────────────────────────────────────────────
         "browser.tabs.inTitlebar"                             = 0;      # tabs below title bar
