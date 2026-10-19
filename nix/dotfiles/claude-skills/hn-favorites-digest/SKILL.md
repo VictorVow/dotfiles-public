@@ -1,6 +1,7 @@
 ---
 name: hn-favorites-digest
-description: Work through the user's Hacker News favorites, oldest-posted first (only items posted more than 3 days ago): summarise each article, analyse every comment in its HN discussion for sentiment and notable insights (resources, perspectives, tips, quotes), write the digest into Logseq, then un-favorite the item on HN.
+description: >-
+  Work through the user's Hacker News favorites, oldest-posted first (only items posted more than 3 days ago): summarise each article, analyse every comment in its HN discussion for sentiment and notable insights (resources, perspectives, tips, quotes), write the digest into Logseq, then un-favorite the item on HN.
 argument-hint: "<logseq block uuid | page name> [graph] [auto|manual]"
 allowed_tools:
   - Bash

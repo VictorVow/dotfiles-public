@@ -1,6 +1,7 @@
 ---
 name: firefox-live-debug
-description: Debug the user's live, already-running Firefox session (default profile VERTEX): inspect a tab's DOM, console errors, network requests, run JS, set logpoints, or capture a Gecko profile, by attaching the firefox-devtools MCP over Marionette + WebDriver BiDi. Use when the user asks to look at, debug, or test something in "my Firefox", "my open tab", or "my browser session", or when Firefox itself misbehaves (freezes, memory, extension trouble).
+description: >-
+  Debug the user's live, already-running Firefox session (default profile VERTEX): inspect a tab's DOM, console errors, network requests, run JS, set logpoints, or capture a Gecko profile, by attaching the firefox-devtools MCP over Marionette + WebDriver BiDi. Use when the user asks to look at, debug, or test something in "my Firefox", "my open tab", or "my browser session", or when Firefox itself misbehaves (freezes, memory, extension trouble).
 ---
 
 # Debugging the live Firefox session
