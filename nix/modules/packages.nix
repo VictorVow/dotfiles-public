@@ -514,7 +514,7 @@ in
       '';
     })
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
-    llmAgents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
+    llmAgents.cursor-agent     # Cursor Agent CLI (binary: `cursor-agent`) — binary fetch, cached by numtide
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
 

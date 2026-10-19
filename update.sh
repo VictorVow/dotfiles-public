@@ -48,7 +48,7 @@ DRY_RUN=false
 # Override via env: PIN_AGE_DAYS=21 ./update.sh
 PIN_AGE_DAYS="${PIN_AGE_DAYS:-14}"
 
-# Same idea, but for llm-agents.nix (gemini/codex/opencode/... CLIs). numtide
+# Same idea, but for llm-agents.nix (claude/codex/opencode/... CLIs). numtide
 # rebuilds and republishes its binary cache (cache.numtide.com) daily, so a
 # 1-day floor is enough to reliably hit the cache without going stale for
 # weeks like nixpkgs. Override via env: PIN_AGE_DAYS_LLM_AGENTS=2 ./update.sh

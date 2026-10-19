@@ -37,7 +37,7 @@
     # AI coding tools — own binary cache at cache.numtide.com, rebuilt daily.
     # Age-pinned to a ≥PIN_AGE_DAYS_LLM_AGENTS-day-old commit (see update.sh) so
     # a `nix flake update` never lands on a same-day commit numtide hasn't
-    # published a cache for yet — that forced hms to compile gemini/codex
+    # published a cache for yet — that forced hms to compile its CLIs
     # locally instead of downloading. The pin floor is much shorter than
     # nixpkgs' PIN_AGE_DAYS since numtide's cache catches up within a day.
     # Also intentionally NOT following nixpkgs so the pre-built packages in
