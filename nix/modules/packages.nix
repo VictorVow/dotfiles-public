@@ -1,4 +1,4 @@
-{ pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
+{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -497,11 +497,21 @@ in
     # OpenCode 2 (binary: `opencode2`). llm-agents.nix renames it so it can sit next
     # to v1 (`llmAgents.opencode`, which still tracks 1.x); the alias restores the
     # upstream `opencode` command. Orca detects `opencode2` as its "OpenCode 2" agent.
-    llmAgents.opencode2
-    (pkgs.runCommand "opencode2-as-opencode" { } ''
-      mkdir -p $out/bin
-      ln -s ${llmAgents.opencode2}/bin/opencode2 $out/bin/opencode
-    '')
+    # Both names are wrappers that read FREELLMAPI_API_KEY from its sops file at
+    # launch, so only OpenCode (and its children) get the key — it's not exported
+    # to shells (see "API tokens: whitelist only" in shell.nix).
+    (pkgs.symlinkJoin {
+      name = "opencode2-wrapped";
+      paths = [ llmAgents.opencode2 ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        rm $out/bin/opencode2
+        for bin in opencode2 opencode; do
+          makeWrapper ${llmAgents.opencode2}/bin/opencode2 $out/bin/$bin \
+            --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"'
+        done
+      '';
+    })
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
     llmAgents.gemini-cli       # Google Gemini CLI — was a stray npm-global install (binary: `gemini`)
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's

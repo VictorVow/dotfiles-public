@@ -44,34 +44,75 @@
       # git checkout-fb (shell application) - checkout an arbitrary branch and then remove that remote
       alias.ll = "log --oneline";
       core.editor = "micro";
-      # Commit-identity-only fallback for non-Bash contexts (VS Code, GUIs,
-      # scripts, subshells). Bash overrides `git su` with a function in
-      # shell.nix that also realigns push auth (GITHUB_TOKEN + gh active
-      # account). See docs/system/git-identity-management.md.
-      alias.su =
-        let
-          set1 = "git config user.name 'VictorVow'"
-            + " && git config user.email '12621257+VictorVow@users.noreply.github.com'"
-            + " && git config user.signingkey 'GPGKEY1'"
-            + " && echo 'switched -> VictorVow (identity 1)'";
-          set2 = "git config user.name 'USER2'"
-            + " && git config user.email '22418751+USER2@users.noreply.github.com'"
-            + " && git config user.signingkey 'GPGKEY2'"
-            + " && echo 'switched -> USER2 (identity 2)'";
-          set3 = "git config user.name 'USER3'"
-            + " && git config user.email '11584262+USER3@users.noreply.github.com'"
-            + " && git config user.signingkey 'GPGKEY3'"
-            + " && echo 'switched -> USER3 (identity 3)'";
-        in
-          "!f() { case \"$1\" in"
-          + " 1) ${set1};;"
-          + " 2) ${set2};;"
-          + " 3) ${set3};;"
-          + " \"\") echo \"current: $(git config user.name) <$(git config user.email)>\";;"
-          + " *) echo 'usage: git su [1|2|3]';;"
-          + " esac }; f";
+      # `git su [1|2|3]` — per-repo identity switch, the git-su script below.
+      # A git alias (not a bash function) so it works the same in VS Code,
+      # GUIs and scripts. See docs/system/git-identity-management.md.
+      alias.su = "!git-su";
     };
   };
+
+  # git-su: sets the repo's commit identity AND its push account, both in the
+  # local .git/config. VictorVow (1) is the global default and stays gh's active
+  # account; identities 2/3 get a per-repo credential helper that returns that
+  # account's keyring token (`gh auth token --user`), so pushing as an alt
+  # account never changes push auth (or `gh` commands) anywhere else.
+  home.packages = [
+    (pkgs.writeShellApplication {
+      name = "git-su";
+      text = ''
+        default=VictorVow
+        helper_key=credential.https://github.com.helper
+        id=''${1-}
+
+        case "$id" in
+          1) name=VictorVow;   email=12621257+VictorVow@users.noreply.github.com;   key=GPGKEY1 ;;
+          2) name=USER2;      email=22418751+USER2@users.noreply.github.com;      key=GPGKEY2 ;;
+          3) name=USER3; email=11584262+USER3@users.noreply.github.com; key=GPGKEY3 ;;
+          "")
+            echo "commit identity: $(git config user.name) <$(git config user.email)>"
+            if [ -n "''${GITHUB_TOKEN-}" ]; then
+              echo "push auth: GITHUB_TOKEN env var (overrides everything)"
+            elif local_helper=$(git config --local --get-all "$helper_key" 2>/dev/null | grep -o 'username=[^;]*'); then
+              echo "push auth: ''${local_helper#username=} (this repo only)"
+            else
+              echo "push auth: gh active account ($(gh api user --jq .login 2>/dev/null || echo 'none'))"
+            fi
+            exit 0 ;;
+          *) echo "usage: git su [1|2|3]" >&2; exit 1 ;;
+        esac
+
+        git config user.name       "$name"
+        git config user.email      "$email"
+        git config user.signingkey "$key"
+        echo "commit identity -> $name (identity $id)"
+
+        # Push auth: per-repo helper for alt accounts, none for the default.
+        git config --local --unset-all "$helper_key" 2>/dev/null || true
+        if [ "$name" = "$default" ]; then
+          echo "  push auth -> gh active account (global default)"
+        else
+          # The empty entry resets the global gh helper for this repo only.
+          git config --local --add "$helper_key" ""
+          # shellcheck disable=SC2016  # $1 / $(...) are expanded by git at push time
+          git config --local --add "$helper_key" \
+            '!f() { test "$1" = get || return 0; echo username='"$name"'; echo "password=$(gh auth token --user '"$name"')"; }; f'
+          # Check the keyring token actually works (a stale one still prints).
+          if tok=$(gh auth token --user "$name" 2>/dev/null) \
+             && [ "$(GH_TOKEN=$tok gh api user --jq .login 2>/dev/null)" = "$name" ]; then
+            echo "  push auth -> $name (this repo only)"
+          else
+            echo "  WARN: no working keyring token for $name — run: gh auth login -h github.com (log in as $name in the browser), then gh auth switch -u $default" >&2
+          fi
+        fi
+
+        # Keep the global default as gh's active account.
+        if [ -z "''${GITHUB_TOKEN-}" ] && [ "$(gh api user --jq .login 2>/dev/null)" != "$default" ]; then
+          gh auth switch -u "$default" >/dev/null 2>&1 \
+            && echo "  gh active account -> $default (global default)"
+        fi
+      '';
+    })
+  ];
 
   # Git LFS — large file storage integration
   programs.git.lfs.enable = true;

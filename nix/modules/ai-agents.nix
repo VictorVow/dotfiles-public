@@ -241,8 +241,9 @@ in
   #
   # Secret env vars (API tokens) are intentionally NOT placed in
   # env blocks here — the env block overrides inherited shell values, so an empty string
-  # would shadow the real token exported by bash initExtra (shell.nix). MCP server
-  # processes inherit it from the terminal the agent was launched from.
+  # would shadow a real inherited token. No tokens are exported to shells any
+  # more ("API tokens: whitelist only" in shell.nix): wrap the agent binary
+  # (like opencode in packages.nix) if an MCP server needs one.
 
   programs.mcp = {
     enable = true;

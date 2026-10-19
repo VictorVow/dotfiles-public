@@ -48,19 +48,25 @@ in
       fi
       unset _hm_sess_current
 
-      # ── API tokens: interactive shells only ─────────────────────────────────
-      # Deliberately NOT home.sessionVariables: those reach the Plasma session via
-      # ~/.profile, so every GUI app inherited the tokens (and Flatpak's
-      # flatpak-spawn puts its whole env on its world-readable command line).
-      # Terminal-launched agents/MCP servers still inherit them from here.
-      # Exported once per shell tree so `git su`'s `unset GITHUB_TOKEN` still
-      # carries over to child shells. Values: sops, see `sops` below + ai-secrets.nix.
-      if [ -z "''${__SHELL_SECRETS_LOADED-}" ]; then
-        export LOGSEQ_API_TOKEN="$(cat ${config.sops.secrets.logseq_api_token.path} 2>/dev/null)"     # LogSeq HTTP API token (Settings → HTTP APIs)
-        export GITHUB_TOKEN="$(cat ${config.sops.secrets.github_token.path} 2>/dev/null)"             # GitHub token with repo + read:org scopes
-        export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)" # OpenCode's freellmapi provider
-        export __SHELL_SECRETS_LOADED=1
-      fi
+      # ── API tokens: whitelist only, never exported globally ─────────────────
+      # No token is in the session or shell environment (an exported var reaches
+      # every child process, and e.g. Flatpak's flatpak-spawn copies its whole
+      # env onto its world-readable command line). Instead:
+      #   - gh / git push use the gh keyring (VictorVow; `git su 2|3` sets a per-repo alt account)
+      #   - opencode/opencode2 get FREELLMAPI_API_KEY from a wrapper (packages.nix)
+      #   - one-offs: `with-secret github <cmd>` sets the var for that command only
+      # Secret files are decrypted by sops-nix (see `sops` below + ai-secrets.nix).
+      with-secret() {
+        local var file
+        case "$1" in
+          github)     var=GITHUB_TOKEN;       file=${config.sops.secrets.github_token.path} ;;
+          freellmapi) var=FREELLMAPI_API_KEY; file=${config.sops.secrets.freellmapi_api_key.path} ;;
+          *) echo "usage: with-secret {github|freellmapi} <command> [args...]" >&2; return 1 ;;
+        esac
+        shift
+        [ $# -gt 0 ] || { echo "with-secret: no command given" >&2; return 1; }
+        env "$var=$(cat "$file")" "$@"
+      }
 
       # ── Homebrew (Linux) ────────────────────────────────────────────────────
       # Homebrew is kept for packages not available in nixpkgs.
@@ -284,63 +290,6 @@ in
         esac
       }
 
-      # ── git identity switch (full-axis) ─────────────────────────────────────
-      # Override `git su [N]` so it realigns push-auth state too — clearing
-      # GITHUB_TOKEN in this shell and switching the gh keyring active account
-      # — not just commit identity. All other `git ...` invocations fall
-      # through to real git unchanged. The `programs.git.settings.alias.su`
-      # entry in programs.nix remains as a commit-identity-only fallback for
-      # non-Bash callers (VS Code, GUIs, scripts, subshells) where this
-      # function isn't visible. See docs/system/git-identity-management.md.
-      git() {
-        if [ "$1" = "su" ]; then
-          shift
-          _git_su "$@"
-        else
-          command git "$@"
-        fi
-      }
-
-      _git_su() {
-        local id="$1" name email key current_gh
-        case "$id" in
-          1) name=VictorVow;   email=12621257+VictorVow@users.noreply.github.com;   key=GPGKEY1 ;;
-          2) name=USER2;      email=22418751+USER2@users.noreply.github.com;      key=GPGKEY2 ;;
-          3) name=USER3; email=11584262+USER3@users.noreply.github.com; key=GPGKEY3 ;;
-          "")
-            echo "commit identity: $(command git config user.name) <$(command git config user.email)>"
-            if [ -n "$GITHUB_TOKEN" ]; then
-              echo "push auth: GITHUB_TOKEN env var (gh sees: $(gh api user --jq .login 2>/dev/null || echo '?'))"
-            else
-              echo "push auth: gh keyring (active: $(gh api user --jq .login 2>/dev/null || echo 'none'))"
-            fi
-            return 0 ;;
-          *) echo "usage: git su [1|2|3]" >&2; return 1 ;;
-        esac
-
-        command git config user.name       "$name"
-        command git config user.email      "$email"
-        command git config user.signingkey "$key"
-        echo "commit identity -> $name (identity $id)"
-
-        if [ -n "$GITHUB_TOKEN" ]; then
-          unset GITHUB_TOKEN
-          echo "  unset GITHUB_TOKEN in this shell (was dominating push auth)"
-        fi
-
-        current_gh=$(gh api user --jq .login 2>/dev/null)
-        if [ "$current_gh" != "$name" ]; then
-          # Re-check after switching: a stale keyring token lets `switch`
-          # succeed while `gh api user` still fails.
-          if gh auth switch -u "$name" >/dev/null 2>&1 \
-             && [ "$(gh api user --jq .login 2>/dev/null)" = "$name" ]; then
-            echo "  gh active account -> $name"
-          else
-            echo "  WARN: could not switch gh to $name (not in keyring or token stale) — run: gh auth login -h github.com (log in as $name in the browser)" >&2
-          fi
-        fi
-      }
-
       # ── namecheap: route API calls via the ts-exit forward proxy ────────────
       # Namecheap's API only answers whitelisted egress IPs and Mullvad exits
       # rotate, so send all namecheap traffic through the forward proxy in
@@ -483,16 +432,16 @@ in
     # hooks, CI, scripts) fetch the pinned version silently instead of hanging.
     COREPACK_ENABLE_DOWNLOAD_PROMPT = "0";
 
-    # API tokens (GITHUB_TOKEN, LOGSEQ_API_TOKEN, FREELLMAPI_API_KEY) are NOT
-    # here — they're exported in initExtra so GUI apps don't inherit them.
+    # API tokens are deliberately NOT here — see "API tokens: whitelist only"
+    # in initExtra.
   };
 
   # ── Sops secrets for shell API tokens ────────────────────────────────────────
-  # Same pattern as modules/ai-secrets.nix: explicit stable paths so initExtra
-  # can `cat` them. Edit with: sops nix/secrets/shell.yaml
+  # Same pattern as modules/ai-secrets.nix: explicit stable paths so
+  # `with-secret` (initExtra) can `cat` them. Edit with: sops nix/secrets/shell.yaml
   sops = {
     age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-    secrets = lib.genAttrs [ "github_token" "logseq_api_token" ] (name: {
+    secrets = lib.genAttrs [ "github_token" ] (name: {
       sopsFile = ../secrets/shell.yaml;
       path = "${config.home.homeDirectory}/.config/shell-secrets/${name}";
     });
