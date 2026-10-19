@@ -1,4 +1,4 @@
-{ config, pkgs, lib, tuxManager, ... }:
+{ ... }:
 
 {
   # Home Manager needs to know the user and home directory.

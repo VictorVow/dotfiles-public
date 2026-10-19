@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 # Home Manager program configurations.
 # Using programs.* modules instead of bare packages gives Home Manager the

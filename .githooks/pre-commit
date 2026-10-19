@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Lint only what's staged. Tools come from the flake devShell (nix/flake.nix).
+# Enable once per clone: `just install-hooks`. Bypass: `git commit --no-verify`.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+staged() { git diff --cached --name-only -z --diff-filter=ACMR -- "$@"; }
+added()  { git diff --cached --name-only -z --diff-filter=A -- "$@"; }
+
+mapfile -d '' sh     < <(staged '*.sh')
+mapfile -d '' nixf   < <(staged '*.nix')
+mapfile -d '' newnix < <(added '*.nix')
+mapfile -d '' yml    < <(staged 'ansible.yml' 'custom-installers.yml')
+
+(( ${#sh[@]} + ${#nixf[@]} + ${#yml[@]} )) || exit 0
+
+run() { nix develop ./nix --command "$@"; }
+
+if (( ${#sh[@]} )); then
+  echo "pre-commit: shellcheck"
+  run shellcheck -S warning "${sh[@]}"
+fi
+
+if (( ${#nixf[@]} )); then
+  echo "pre-commit: statix + deadnix"
+  run statix check -c nix/statix.toml nix
+  run deadnix --fail "${nixf[@]}"
+  # nixfmt only for newly added files — existing modules keep their own style.
+  if (( ${#newnix[@]} )); then
+    echo "pre-commit: nixfmt --check (new files)"
+    run nixfmt --check "${newnix[@]}"
+  fi
+  # Eval (not build) the HM config — catches typos/option errors in seconds.
+  echo "pre-commit: evaluating homeConfigurations.boss"
+  nix eval --raw ./nix#homeConfigurations.boss.activationPackage.drvPath >/dev/null
+fi
+
+if (( ${#yml[@]} )); then
+  echo "pre-commit: yamllint + ansible-lint"
+  run yamllint "${yml[@]}"
+  run ansible-lint -q "${yml[@]}"
+fi

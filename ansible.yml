@@ -207,14 +207,10 @@
         name: "{{ item.name }}"
         selection: hold
       loop:
-        - {
-            name: procps,
-            comment: "pgrep, ps, kill — superseded by nix#procps",
-          }
-        - {
-            name: kate,
-            comment: "KDE text editor — superseded by nix#kdePackages.kate",
-          }
+        - name: procps
+          comment: "pgrep, ps, kill — superseded by nix#procps"
+        - name: kate
+          comment: "KDE text editor — superseded by nix#kdePackages.kate"
       become: yes
 
     - name: Purge apt packages fully superseded by Nix

@@ -1,0 +1,3 @@
+# Modules are deliberately split by topic, with `home.*` / `programs.*` keys
+# set in several places — W20 (repeated_keys) would force merging them.
+disabled = [ "repeated_keys" ]

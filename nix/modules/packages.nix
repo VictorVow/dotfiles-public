@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
+{ pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.

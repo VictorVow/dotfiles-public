@@ -1,0 +1,11 @@
+# Tuned to the existing playbook style (yes/no booleans, long shell lines).
+extends: default
+rules:
+  truthy:
+    allowed-values: ["true", "false", "yes", "no"]
+    check-keys: false
+  line-length: disable
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  document-start: disable

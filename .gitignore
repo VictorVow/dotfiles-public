@@ -10,3 +10,6 @@
 # Editor backups
 *~
 *.swp
+
+# Python bytecode
+__pycache__/

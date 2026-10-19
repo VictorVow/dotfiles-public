@@ -65,7 +65,39 @@
     context7 = { url = "github:upstash/context7"; flake = false; };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, ... }: {
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, ... }:
+  let
+    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    # The flake lives in nix/, but sourceInfo is the whole repo — needed so
+    # the checks can see the shell scripts and playbooks at the repo root.
+    repo = self.sourceInfo.outPath;
+    lint = name: tools: script: pkgs.runCommand "check-${name}" { nativeBuildInputs = tools; } ''
+      cd ${repo}
+      ${script}
+      touch $out
+    '';
+  in {
+    # `nix fmt` — for new/touched files only; the existing code keeps its
+    # hand-aligned style, so don't run it over the whole tree.
+    formatter.x86_64-linux = pkgs.nixfmt;
+
+    # Lint tools for `just check` and .githooks/pre-commit.
+    devShells.x86_64-linux.default = pkgs.mkShell {
+      packages = with pkgs; [ just statix deadnix nixfmt shellcheck yamllint ansible-lint ];
+    };
+
+    # `nix flake check` (or `just check`, which adds the Ansible linters).
+    checks.x86_64-linux = {
+      # Full HM build: catches eval errors and broken packages before `hms`.
+      hm-build = self.homeConfigurations."boss".activationPackage;
+      statix = lint "statix" [ pkgs.statix ] "statix check -c nix/statix.toml nix";
+      deadnix = lint "deadnix" [ pkgs.deadnix ] "deadnix --fail nix";
+      shellcheck = lint "shellcheck" [ pkgs.shellcheck pkgs.git pkgs.findutils ] ''
+        find . -name '*.sh' -not -path './docs/archive/*' -print0 \
+          | xargs -0 shellcheck -S warning
+      '';
+    };
+
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
