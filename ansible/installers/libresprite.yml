@@ -83,6 +83,7 @@
     cmd: "{{ ansible_facts['env']['HOME'] }}/AppImages/libresprite.appimage --appimage-extract libresprite.png"
     chdir: /tmp
   when: not libresprite_icon.stat.exists
+  changed_when: true
 
 - name: LibreSprite | install icon into hicolor theme
   ansible.builtin.copy:

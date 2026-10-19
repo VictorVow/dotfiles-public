@@ -17,9 +17,10 @@
 # apt-get rather than the apt module's `deb:` — python-apt's .deb check
 # can't resolve versioned virtual Provides, so the t64 rename
 # (libglib2.0-0t64 Provides libglib2.0-0) reads as unsatisfiable.
-- name: ChatGPT Desktop | install .deb
+- name: ChatGPT Desktop | install .deb  # noqa: command-instead-of-module — see comment above
   ansible.builtin.command: apt-get install -y /tmp/chatgpt.deb
   become: yes
+  changed_when: true
   when: ansible_facts.packages['chatgpt'] is not defined
 
 - name: ChatGPT Desktop | clean up temp .deb

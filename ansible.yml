@@ -63,7 +63,9 @@
     # Snap is not used — all packages come from Nix, apt, or Flatpak.
     # Removing snapd frees ~150 MB RAM (snapd daemon + snap mounts) and
     # prevents Ubuntu from silently installing snap packages behind apt.
-    - name: Remove all installed snaps
+    # noqa below: pipefail would break this — `grep -q` exits early, so
+    # `snap list` gets SIGPIPE and the `if` turns false.
+    - name: Remove all installed snaps  # noqa: risky-shell-pipe
       ansible.builtin.shell: |
         if command -v snap &>/dev/null && snap list 2>/dev/null | grep -qv '^Name'; then
           snap list 2>/dev/null | awk 'NR>1 {print $1}' | while read pkg; do
@@ -612,7 +614,8 @@
       ansible.builtin.systemd:
         daemon_reload: yes
       become: yes
-      when: _nfs_fstab.changed
+      # Inline rather than a handler: must run before the next task.
+      when: _nfs_fstab.changed  # noqa: no-handler
 
     - name: "NFS | enable and start the automount unit"
       ansible.builtin.systemd:
@@ -620,7 +623,7 @@
         enabled: yes
         state: started
       become: yes
-      when: _nfs_fstab.changed
+      when: _nfs_fstab.changed  # noqa: no-handler
 
   handlers:
     - name: Restart systemd-logind
@@ -630,11 +633,13 @@
       become: yes
 
     - name: Reload systemd daemon
-      ansible.builtin.command: systemctl daemon-reload
+      ansible.builtin.systemd:
+        daemon_reload: yes
       become: yes
 
     - name: Update GRUB
       ansible.builtin.command: update-grub
       become: yes
+      changed_when: true
 
 - ansible.builtin.import_playbook: custom-installers.yml

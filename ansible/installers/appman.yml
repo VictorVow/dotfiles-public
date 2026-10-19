@@ -21,9 +21,9 @@
   when: not appman_bin.stat.exists
 
 - name: AppMan | run installer in user mode (menu option 2 = appman)
-  ansible.builtin.shell: |
-    echo 2 | /tmp/AM-INSTALLER
-  args:
+  ansible.builtin.command:
+    cmd: /tmp/AM-INSTALLER
+    stdin: "2"
     creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/appman"
   when: not appman_bin.stat.exists
 
@@ -82,6 +82,7 @@
     NO_COLOR: "1"
   loop: "{{ appimages_declared }}"
   when: item not in appman_installed.stdout
+  changed_when: true  # only runs for apps that aren't installed yet
 
 # ── AppArmor userns profile for AppImages ──────────────────────────────
 #
@@ -151,4 +152,5 @@
 - name: AppMan | reload AppArmor profile
   ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/appman-appimages
   become: yes
-  when: appman_apparmor_profile.changed
+  when: appman_apparmor_profile.changed  # noqa: no-handler — reload before AppImages are used
+  changed_when: true

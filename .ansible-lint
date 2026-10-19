@@ -5,9 +5,3 @@ skip_list:
   - complexity[play]  # custom-installers.yml is one big play by design
   - fqcn[action-core]
 
-# Real findings, kept visible but non-fatal until they're fixed.
-warn_list:
-  - no-changed-when
-  - no-handler
-  - risky-shell-pipe
-  - command-instead-of-module

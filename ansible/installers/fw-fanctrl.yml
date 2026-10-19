@@ -43,6 +43,7 @@
     chdir: /tmp/fw-fanctrl
   become: yes
   when: not fw_fanctrl_bin.stat.exists
+  changed_when: true
 
 - name: fw-fanctrl | clean up clone
   ansible.builtin.file:

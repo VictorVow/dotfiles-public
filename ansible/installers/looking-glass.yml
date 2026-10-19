@@ -44,7 +44,9 @@
 - name: Looking Glass | remove previous kvmfr dkms module
   ansible.builtin.command: dkms remove "kvmfr/{{ kvmfr_version }}" --all
   become: yes
+  register: kvmfr_dkms_remove
   failed_when: false
+  changed_when: kvmfr_dkms_remove.rc == 0
   when: kvmfr_needs_install | bool
   tags: looking_glass
 
@@ -94,6 +96,7 @@
     echo "{{ looking_glass_rev }}" > "/usr/src/kvmfr-{{ kvmfr_version }}/.looking-glass-rev"
   become: yes
   when: kvmfr_needs_install | bool
+  changed_when: true
   tags: looking_glass
 
 - name: Looking Glass | clean up source tarball
@@ -138,7 +141,10 @@
 - name: Looking Glass | reload udev rules
   ansible.builtin.command: udevadm control --reload-rules
   become: yes
-  when: kvmfr_udev_rule.changed
+  # Inline rather than a handler: must run before "load kvmfr module now",
+  # or /dev/kvmfr0 is created under the old rules.
+  when: kvmfr_udev_rule.changed  # noqa: no-handler
+  changed_when: true
   tags: looking_glass
 
 - name: Looking Glass | allow QEMU (AppArmor) to use /dev/kvmfr0
@@ -175,7 +181,7 @@
     name: apparmor
     state: reloaded
   become: yes
-  when: kvmfr_apparmor.changed
+  when: kvmfr_apparmor.changed  # noqa: no-handler — reload before any VM starts
   tags: looking_glass
 
 # Load before libvirtd/any VM starts: if QEMU opens /dev/kvmfr0 first it
