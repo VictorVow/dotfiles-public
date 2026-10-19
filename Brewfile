@@ -15,5 +15,4 @@ brew "dicklesworthstone/tap/cass", trusted: true  # trust this formula only, not
 brew "fvm"                       # Flutter version manager
 brew "git-credential-libsecret"  # Git credential helper using libsecret keyring
 brew "icu4c@76"                  # ICU Unicode library (versioned formula)
-brew "nvm"                       # Node Version Manager
 brew "network-doctor"            # Network troubleshooting https://github.com/heymaikol/network-doctor

@@ -17,7 +17,6 @@
 #   ./update.sh --no-nix           # Skip Nix flake update (faster, uses locked versions)
 #   ./update.sh --no-distrobox     # Skip container OS upgrades
 #   ./update.sh --no-stable-check  # Skip the nixpkgs stable-release upgrade check
-#   ./update.sh --no-gc            # Skip Nix store garbage collection
 #   ./update.sh --dry-run          # Print what would run without executing
 #
 # Cron example (daily at 10:00):
@@ -38,7 +37,6 @@ ulimit -Sn "$(ulimit -Hn)" 2>/dev/null || true
 UPDATE_NIX=true
 UPDATE_DISTROBOX=true
 CHECK_STABLE=true
-GC_NIX=true
 DRY_RUN=false
 
 # Minimum age (in days) of the upstream commit each pinned flake input is
@@ -60,7 +58,6 @@ for arg in "$@"; do
     --no-nix)           UPDATE_NIX=false ;;
     --no-distrobox)     UPDATE_DISTROBOX=false ;;
     --no-stable-check)  CHECK_STABLE=false ;;
-    --no-gc)            GC_NIX=false ;;
     --dry-run)          DRY_RUN=true ;;
     --help|-h)
       grep '^#' "$0" | head -21 | sed 's/^# \?//'
@@ -426,7 +423,7 @@ export NPM_CONFIG_PREFIX="$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.nix-profile/bin:$HOME/.cargo/bin:$PATH"
 
 # ── 1. Nix + Home Manager ────────────────────────────────────────────────────
-step "1/9  Nix + Home Manager"
+step "1/8  Nix + Home Manager"
 
 if ! command -v nix &>/dev/null; then
   warn "nix not found — skipping Nix updates. Run ./bootstrap.sh first."
@@ -643,7 +640,7 @@ else
 fi
 
 # ── 2. apt (system packages) ─────────────────────────────────────────────────
-step "2/9  apt (system packages)"
+step "2/8  apt (system packages)"
 
 if ! command -v apt-get &>/dev/null; then
   warn "apt-get not found — not an apt-based system?"
@@ -658,7 +655,7 @@ else
 fi
 
 # ── 3. Homebrew ───────────────────────────────────────────────────────────────
-step "3/9  Homebrew"
+step "3/8  Homebrew"
 
 if ! command -v brew &>/dev/null; then
   skipped "brew not found — skipping."
@@ -675,7 +672,7 @@ else
 fi
 
 # ── 4. npm global AI CLIs ─────────────────────────────────────────────────────
-step "4/9  npm global packages (AI CLIs)"
+step "4/8  npm global packages (AI CLIs)"
 
 if ! command -v npm &>/dev/null; then
   skipped "npm not found — skipping."
@@ -696,7 +693,7 @@ else
 fi
 
 # ── 5. Flatpak ────────────────────────────────────────────────────────────────
-step "5/9  Flatpak"
+step "5/8  Flatpak"
 
 if ! command -v flatpak &>/dev/null; then
   skipped "flatpak not found — skipping."
@@ -741,7 +738,7 @@ else
 fi
 
 # ── 6. uv tools ───────────────────────────────────────────────────────────────
-step "6/9  uv tools"
+step "6/8  uv tools"
 
 if ! command -v uv &>/dev/null; then
   skipped "uv not found — skipping."
@@ -769,7 +766,7 @@ else
 fi
 
 # ── 7. AppMan (AM) — AppImages ────────────────────────────────────────────────
-step "7/9  AppMan (AM) — AppImages"
+step "7/8  AppMan (AM) — AppImages"
 
 if ! command -v appman &>/dev/null; then
   skipped "appman not found — skipping."
@@ -798,7 +795,7 @@ else
 fi
 
 # ── 8. Distrobox containers ───────────────────────────────────────────────────
-step "8/9  Distrobox containers"
+step "8/8  Distrobox containers"
 
 if ! command -v distrobox &>/dev/null; then
   skipped "distrobox not found — skipping."
@@ -878,23 +875,7 @@ else
   fi
 fi
 
-# ── 9. Nix garbage collection ────────────────────────────────────────────────
-step "9/9  Nix garbage collection"
-
-if ! command -v nix-collect-garbage &>/dev/null; then
-  skipped "nix-collect-garbage not found — skipping."
-  RESULTS["Nix GC"]="skipped (not installed)"
-elif ! $GC_NIX; then
-  skipped "Skipping Nix GC (--no-gc)."
-  RESULTS["Nix GC"]="skipped (--no-gc)"
-else
-  BEFORE=$(df --output=avail /nix 2>/dev/null | tail -1 || echo 0)
-  run_step "Nix GC" nix-collect-garbage --delete-older-than 30d
-  AFTER=$(df --output=avail /nix 2>/dev/null | tail -1 || echo 0)
-  FREED=$(( (AFTER - BEFORE) / 1024 ))
-  [[ $FREED -gt 0 ]] && info "Freed ~${FREED} MiB from /nix."
-  success "Nix garbage collection done."
-fi
+# Nix GC runs on its own weekly timer (nix.gc in nix/modules/services.nix).
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 ELAPSED=$(( $(date +%s) - START_TIME ))
@@ -908,7 +889,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox" "Nix GC"; do
+           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"

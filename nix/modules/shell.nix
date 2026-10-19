@@ -384,7 +384,6 @@
     GRADLE_USER_HOME = "$HOME/.local/share/gradle";
     AWS_SHARED_CREDENTIALS_FILE = "$HOME/.config/aws/credentials";
     AWS_CONFIG_FILE = "$HOME/.config/aws/config";
-    NVM_DIR = "$HOME/.local/share/nvm";
     IPFS_PATH = "$HOME/.local/share/ipfs";
     ANDROID_USER_HOME = "$HOME/.local/share/android";
     ANDROID_AVD_HOME = "$HOME/.local/share/android/avd";
