@@ -76,9 +76,9 @@ Then import each one under its section block:
 ```
 logseq upsert block -g <graph> --target-id <section-db-id> --pos last-child --blocks-file /tmp/logseq-comparisons/for-a.md -o json
 ```
-Known behaviour (CLI as of 2026-10-17):
-- If the section's only child is the user's empty placeholder, the first new block **fills that placeholder** and the rest become its siblings. No empty block is left behind.
-- The command may return `{"status":"error","error":{"code":"add-id-resolution-failed",…}}` even though every block was written. Always verify instead of retrying, since a retry duplicates the blocks.
+Known behaviour (CLI as of 2026-10-19, source checked at `399025dc50`):
+- If the section's **last** child is an empty block and the file has **2+ blocks in total** (children count, since the CLI sends one flattened insert), the first new block **fills that empty block** (taking over its uuid) and the rest become its siblings. With a single-block file the empty placeholder is *not* filled and stays behind, so remove it afterwards.
+- In exactly that placeholder-fill case the command returns `{"status":"error","error":{"code":"add-id-resolution-failed",…}}` even though every block was written. Cause: `--pos last-child` makes the outliner retarget to the last child as a sibling and auto-enable `replace-empty-target?` (`deps/outliner/src/logseq/outliner/core.cljs`, `get-target-block` / `insert-blocks`), so the first block gets the placeholder's uuid; the CLI then looks up the uuid *it* generated for that block (`cli/lib/add.ml`, `resolve_created_ids`), finds nothing, and fails. Always verify instead of retrying, since a retry duplicates the blocks. Sections without an empty last child return `ok` with the ids.
 
 ### 5. Verify
 
