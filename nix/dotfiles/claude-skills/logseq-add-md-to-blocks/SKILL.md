@@ -31,6 +31,21 @@ The user gives a destination: a block (`[[<uuid>]]` or a uuid), or a page name. 
 
    Add `--gfw` (before the input path) to give every block that *starts with* a GitHub link a live Git Forge Watcher widget (`{{renderer :gfw, <encoded-url>}}`; plugin source in `~/Projects/Git/Categories/Logseq-ALL/logseq-plugin-git-forge-watcher`). For a repo link the macro goes on the block's second line. For an issue, pull request or branch link (`/issues/N`, `/pull/N`, `/tree/<branch>`) it goes at the start of the first line (after any heading `#`s), with one space before the rest of the block. Use it whenever the blocks are about GitHub repos, issues or PRs.
 
+   Append a final top-level block identifying the session that wrote the notes — one line, the whole thing in backticks. If `$ORCA_TAB_ID` is set (running in an Orca tab), use the tab id:
+   ```
+   [ -n "$ORCA_TAB_ID" ] && printf -- '- `orcaTabId: %s`\n' "$ORCA_TAB_ID" >> /tmp/logseq-md-to-blocks/blocks.md
+   ```
+   That produces `` `orcaTabId: 2e8c58c3-f010-4b37-84ce-bb6d9ebdb3ea` ``. If it's unset (not running under Orca), use your own agent session id with the `agentSessionID` key instead, e.g. `` `agentSessionID: sudsy-shingle` ``. For Devin, read it from the session locks: each `~/.local/share/devin/cli/session_locks/<session-id>.lock` holds the PID of the `devin acp` process that owns the session, and tool shells are its descendants, so the id is the lock filename matching an ancestor PID:
+   ```
+   pid=$PPID; f=
+   while [ "$pid" -gt 1 ] && [ -z "$f" ]; do
+     f=$(grep -l "^${pid}$" ~/.local/share/devin/cli/session_locks/*.lock 2>/dev/null | head -1)
+     pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+   done
+   [ -n "$f" ] && printf -- '- `agentSessionID: %s`\n' "$(basename "$f" .lock)" >> /tmp/logseq-md-to-blocks/blocks.md
+   ```
+   For Claude Code, the UUID of the current `~/.claude/projects/<dir>/*.jsonl` transcript. Skip the block only when no id can be determined.
+
 5. **Check for side effects.** `[[...]]` and `#tag` in the text create or link pages in Logseq. Run a dry run and check `would-create-pages`:
    ```
    logseq upsert block -g <graph> --target-uuid <uuid> --pos last-child --dry-run --output json --blocks-file /tmp/logseq-md-to-blocks/blocks.md \
