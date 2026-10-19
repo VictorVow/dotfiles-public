@@ -18,11 +18,14 @@
 # Deliberately only deployed to ~/.claude/skills → Claude Code + OpenCode (the primary
 # agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
-# see each skill twice (same-name dedup behaviour unverified).
-{ lib, orca, context7, ... }:
+# see each skill twice (same-name dedup behaviour unverified). Exception: logseq-cli (below).
+{ config, lib, orca, context7, ... }:
 
 let
   skillsDir = ../dotfiles/claude-skills;
+  # Local Logseq checkout the installed `logseq` CLI is built from (its --version Revision).
+  logseqRepo = "${config.home.homeDirectory}/Projects/Git/Categories/Logseq-ALL/logseq";
+  logseqCliSkill = config.lib.file.mkOutOfStoreSymlink "${logseqRepo}/.agents/skills/logseq-cli";
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   skillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
 in
@@ -54,6 +57,16 @@ in
       # the Context7 MCP server). The skill runs `npx ctx7@latest library|docs …`;
       # anonymous use works, CONTEXT7_API_KEY / `ctx7 login` only raise rate limits.
       ".claude/skills/find-docs".source = "${context7}/skills/find-docs";
+
+      # ── Logseq CLI (upstream skill from the local logseq checkout) ──────────────────
+      # Out-of-store symlink (not a flake input — the repo is huge) so the skill tracks
+      # whatever revision the CLI was last built from. Replaces logseq-cli@spellbook
+      # (ai-agents.nix). The other skills in that dir are Logseq-dev only and already
+      # reach Claude in-repo via its .claude/skills -> ../.agents/skills symlink.
+      # Also in ~/.agents/skills: Codex/Devin read it, and `logseq skill show|install`
+      # looks for ~/.agents/skills/logseq-cli/SKILL.md. OpenCode sees it twice.
+      ".claude/skills/logseq-cli".source = logseqCliSkill;
+      ".agents/skills/logseq-cli".source = logseqCliSkill;
     }
   ];
 }

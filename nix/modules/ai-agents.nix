@@ -221,7 +221,8 @@ let
       };
     };
     enabledPlugins = {
-      "logseq-cli@spellbook"            = true;
+      # Superseded by the upstream skill from the local logseq checkout (claude-skills.nix).
+      "logseq-cli@spellbook"            = false;
       "logseq-db-plugin-api@spellbook"  = true;
     };
   });

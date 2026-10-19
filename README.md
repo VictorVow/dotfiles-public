@@ -41,7 +41,7 @@ installs/
 │       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode, shared MCP server registry
 │       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
-│       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input)
+│       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer
