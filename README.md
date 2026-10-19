@@ -41,6 +41,7 @@ installs/
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
 │       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input)
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
+│       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer
 │       ├── services.nix      # systemd user services (Ollama, Jackett) + weekly Nix GC timer
 │       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
