@@ -1,0 +1,12 @@
+# Machine-local agent state stays in .git/info/exclude (written by the
+# claude-md-ignored / direnv-ignored skills). This file is for patterns that
+# should apply to every clone.
+
+# 0SHORTCUTS is a live launcher folder that apps write into — keep runtime and
+# personal data out of git.
+0SHORTCUTS/**/*.db/
+0SHORTCUTS/**/*.csv
+
+# Editor backups
+*~
+*.swp
