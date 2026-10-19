@@ -63,6 +63,7 @@ installs/
 │   ├── logseq-md-to-blocks.py     # Markdown → Logseq block outline (+ --gfw GitHub widgets); used by the logseq-add-md-to-blocks / logseq-research skills
 │   ├── logseq-clear-children.sh   # Remove all child blocks under a Logseq block; used by the logseq-research skill
 │   ├── logseq-tree.py             # Print a Logseq block subtree (db/ids, uuids, raw titles) via queries; used by the logseq-comparisons-update skill
+│   ├── logseq-headings.py         # Re-level the headings in a Logseq block subtree (root level, shift, smallest allowed); used by the hn-favorites-digest skill
 │   ├── hn-favorites.py            # Scan/un-favorite Hacker News favorites + dump full comment threads (uv script, JSON out); used by the hn-favorites-digest skill
 │   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
 │   └── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
