@@ -10,9 +10,10 @@ Adds one section to `~/Projects/installs/CHANGELOG.md` covering the changes in t
 
 ## 1. Work out the time range
 
-- Read `CHANGELOG.md`. Sections are newest first, each headed `## YYYY/MM/DD Day`.
+- Read `CHANGELOG.md`. Sections are newest first, each headed `## YYYY/MM/DD Day`, optionally suffixed with ` [WIP]` while that day is still in progress.
 - **Start** = the day after the newest section's date. If the file is empty or has no sections, start = today.
-- If the newest section is already **today**, update that section: merge the new items into it and don't repeat what's already there.
+- If the newest section is already **today**, update that section: merge the new items into it and don't repeat what's already there. Keep the ` [WIP]` suffix on its heading.
+- If the newest section is for an earlier day, that day is over: remove the ` [WIP]` suffix from its heading when you add the new section.
 - **End** = now. Include uncommitted and staged changes (`git status --short`, `git diff`, `git diff --cached`) as well as commits. Uncommitted work is usually what the user just did with an agent.
 
 ## 2. Gather changes
@@ -56,7 +57,7 @@ The test is about **using the system**, not maintaining the repos. If unsure, as
 
 ## 4. Write the section
 
-- Heading: `## YYYY/MM/DD Day`, using today's date (`date '+%Y/%m/%d %A'`), e.g. `## 2026/10/17 Saturday`.
+- Heading: `## YYYY/MM/DD Day [WIP]`, using today's date (`date '+%Y/%m/%d %A'`), e.g. `## 2026/10/19 Monday [WIP]`. The ` [WIP]` suffix marks that the day isn't over yet and the section may still grow; it comes off once a newer day's section is added.
 - Insert it at the **top** of the file (below any `# Changelog` title or `> ` quote block, which you never edit), with one blank line between sections.
 - Body: a flat bullet list, most notable first. One line per item: **bold name** + a short description of what it does / how to use it. Group closely related items (e.g. a service plus its backup and its Firefox allowlist entry) into one bullet. No hard wrapping.
 - Prefix Self-Hosted items with the service name, e.g. `**FreeLLMAPI** (Self-Hosted): …`.
