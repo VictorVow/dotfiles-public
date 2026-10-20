@@ -521,7 +521,11 @@ in
         export FREELLMAPI_API_KEY
         export XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
                XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache"
-        exec ${llmAgents.opencode}/bin/opencode "$@"
+        # Drop v2's `--standalone` (e.g. from v2-style resume commands): v1 doesn't
+        # know it and prints its help instead of starting.
+        args=()
+        for a in "$@"; do [ "$a" = --standalone ] || args+=("$a"); done
+        exec ${llmAgents.opencode}/bin/opencode "''${args[@]}"
       '') ];
       postBuild = "ln -s opencode1 $out/bin/opencode";
     })
