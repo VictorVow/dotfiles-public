@@ -500,7 +500,7 @@
       become: yes
       failed_when: false # non-fatal: service unit absent if hms hasn't run yet
 
-    # ── Kernel cmdline (zswap + amdgpu external-display fix) ────────────────
+    # ── Kernel cmdline (zswap + amdgpu display fixes) ─────────────────────────
     # zswap: compressed swap cache (zstd) in front of disk swap. Dramatically
     #   reduces swap I/O latency vs plain disk swap.
     #   See: https://chrisdown.name/2026/03/24/zswap-vs-zram-when-to-use-what.html
@@ -512,11 +512,17 @@
     #   stay black until the monitor is unplugged. Disabling SG display routes
     #   framebuffers through carve-out VRAM instead and resolves the black
     #   screen. (Distinct from the 2026-03-30 suspend/lid black-screen fix below.)
-    - name: Enable zswap (zstd) and amdgpu SG-display fix in GRUB
+    # amdgpu.dcdebugmask=0x10: disables Panel Self Refresh on the eDP panel
+    #   (sink reports PSR ver 3 = PSR-SU). With PSR on, the internal display
+    #   flickers on small/partial screen updates. Confirmed 2026-10-19 by
+    #   writing 1 to /sys/kernel/debug/dri/*/eDP-1/disallow_edp_enter_psr,
+    #   which stopped the flicker. If flicker returns, try 0x610 (also
+    #   disables PSR-SU + Panel Replay). Cost: slightly higher idle power.
+    - name: Enable zswap (zstd) and amdgpu SG-display + PSR fixes in GRUB
       ansible.builtin.lineinfile:
         path: /etc/default/grub
         regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd amdgpu.sg_display=0"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash zswap.enabled=1 zswap.compressor=zstd amdgpu.sg_display=0 amdgpu.dcdebugmask=0x10"'
       become: yes
       notify: Update GRUB
 
