@@ -19,7 +19,8 @@
 # Deliberately only deployed to ~/.claude/skills → Claude Code + OpenCode (the primary
 # agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
-# see each skill twice (same-name dedup behaviour unverified). Exception: logseq-cli (below).
+# see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
+# ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
 { config, lib, orca, context7, ... }:
 
 let
@@ -69,6 +70,18 @@ in
       ".claude/skills/logseq-cli".source = logseqCliSkill;
       ".agents/skills/logseq-cli".source = logseqCliSkill;
     }
+
+    # ── Orca native chat (OpenCode) ─────────────────────────────────────────────────
+    # Orca only asks an ACP agent for its commands once the session is live (after the
+    # first message); before that its `/` menu lists the skills it scans itself, and for
+    # OpenCode that's ~/.config/opencode/skills + ~/.agents/skills — ~/.claude/skills
+    # counts as Claude-only. Mirror the skills not already in ~/.agents/skills here.
+    # opencode1 doesn't read this dir (XDG_CONFIG_HOME=~/.opencode1/config); v2 does.
+    (lib.listToAttrs (map (name: {
+      name  = ".config/opencode/skills/${name}";
+      value = { source = skillsDir + "/${name}"; recursive = true; };
+    }) skillNames))
+    { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
 
     # ── OpenCode slash commands ─────────────────────────────────────────────────────
     # OpenCode v2 discovers ~/.claude/skills but never lists skills in the `/` menu (its
