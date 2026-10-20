@@ -542,7 +542,6 @@ in
     # claude-desktop — removed from Nix; the aaddrick flake input rebuilt the
     # .deb on every lock bump. Installed via custom-installers.yml from
     # Anthropic's official apt repository (code.claude.com/docs/en/desktop-linux).
-    jan # ChatBox-like desktop LLM chat app
     streamlink-twitch-gui-bin
     suwayomi-server # which tachidesk-server
     amdgpu_top # Tool to display AMDGPU usage
