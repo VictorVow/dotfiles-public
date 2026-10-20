@@ -42,6 +42,28 @@ let
   devinAuth  = magpiePkg "devin"  "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
   cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
 
+  # Permission set shared by every OpenCode (`opencode`/`opencode1` = v1,
+  # `opencode2` = v2). Written once as v2-style ordered rules (last match wins,
+  # appended after each version's built-in defaults) and rendered into both
+  # schemas below. Pins down where v1 and v2 defaults differ: outside-project
+  # paths (incl. /tmp) are allowed without a prompt (v2 default; v1 asks), and
+  # .env files are denied (v1 default; v2 only asks).
+  # https://opencode.ai/v2/docs/permissions/ · https://opencode.ai/docs/permissions/
+  opencodePermissions = [
+    { action = "external_directory"; resource = "*";              effect = "allow"; }
+    { action = "read";               resource = "*.env";          effect = "deny";  }
+    { action = "read";               resource = "*.env.*";        effect = "deny";  }
+    { action = "read";               resource = "*.env.example";  effect = "allow"; }
+  ];
+  # v1 shape: { <action> = { <pattern> = <effect>; }; }, with v2's renamed
+  # actions mapped back. Nix attrsets serialise with sorted keys, so within an
+  # action the patterns come out alphabetically, not in list order — fine while
+  # the catch-all "*" sorts first (it does: '*' < letters, '/', '.', '~').
+  opencodeV1Action = a: { shell = "bash"; subagent = "task"; }.${a} or a;
+  opencodePermissionV1 = lib.foldl' (acc: r: lib.recursiveUpdate acc {
+    ${opencodeV1Action r.action}.${r.resource} = r.effect;
+  }) { } opencodePermissions;
+
   # Global agent instructions, shared by Claude Code (~/.claude/CLAUDE.md) and
   # OpenCode (~/.config/opencode/AGENTS.md).
   globalContext = ''
@@ -396,6 +418,7 @@ in
     model     = "anthropic/claude-sonnet-4-5";
     # v1's small_model; v2 uses it only for session titles.
     agents.title.model = "anthropic/claude-haiku-4-5";
+    permissions = opencodePermissions;
     # Self-hosted FreeLLMAPI (Self-Hosted/FreeLLMAPI, tailnet-only). Key comes
     # from FREELLMAPI_API_KEY (sops, see modules/ai-secrets.nix). `auto*` let
     # the router pick; any explicit model ID from its Models page also works.
@@ -459,6 +482,7 @@ in
     "$schema" = "https://opencode.ai/config.json";
     model       = "anthropic/claude-sonnet-4-5";
     small_model = "anthropic/claude-haiku-4-5";
+    permission  = opencodePermissionV1;
     provider.freellmapi = {
       name = "FreeLLMAPI";
       npm  = "@ai-sdk/openai-compatible";
