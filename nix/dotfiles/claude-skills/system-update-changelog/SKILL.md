@@ -8,12 +8,16 @@ Adds one section to `~/Projects/installs/CHANGELOG.md` covering the changes in t
 - `~/Projects/installs/` (one git repo)
 - `~/Projects/Git/1MY_REPOS/Self-Hosted/`. This is **not** a git repo itself. Each service subdirectory (`FreeLLMAPI/`, `Orca-server/`, `1-COMMON/`, …) is its own repo. Directories without a `.git` are skipped.
 
+## 0. Commit the user's own edits first
+
+The user edits `CHANGELOG.md` by hand between runs. Their edits are mostly deletions and rewording, and only rarely additions. Before changing anything, check `git -C ~/Projects/installs diff -- CHANGELOG.md` (and `--cached`). If it shows changes, they are the user's: commit only that file on its own first, e.g. `docs(changelog): user updates`, with a body saying these are the user's own edits (deletions/rewording). Don't include other files in the commit. Then treat the committed text as final: don't re-add items they deleted or undo their wording.
+
 ## 1. Work out the time range
 
 - Read `CHANGELOG.md`. Sections are newest first, each headed `## YYYY/MM/DD Day`, optionally suffixed with ` [WIP]` while that day is still in progress.
 - **Start** = the day after the newest section's date. If the file is empty or has no sections, start = today.
 - If the newest section is already **today**, update that section: merge the new items into it and don't repeat what's already there. Keep the ` [WIP]` suffix on its heading.
-- If the newest section is for an earlier day, that day is over: remove the ` [WIP]` suffix from its heading when you add the new section.
+- If the newest section is for an earlier day and still has ` [WIP]`, it was written before that day ended, so it is probably missing that day's later work. First finish it: gather the changes from that day (steps 2–3 with `--since=<that day>T00:00 --until=<next day>T00:00`), merge in what's missing, and drop "(uncommitted)" notes on items that have since been committed. Only then remove its ` [WIP]` suffix and add the new section, whose start is the day after it.
 - **End** = now. Include uncommitted and staged changes (`git status --short`, `git diff`, `git diff --cached`) as well as commits. Uncommitted work is usually what the user just did with an agent.
 
 ## 2. Gather changes
