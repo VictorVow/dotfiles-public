@@ -1,6 +1,6 @@
 ---
 name: logseq-add-md-to-blocks
-description: Import a Markdown file (or notes written from the current conversation) into a Logseq DB graph as a nested block tree (headings, paragraphs, list items, tables, code) under a target block or page, via the logseq CLI.
+description: Import a Markdown file (or notes written from the current conversation) into a Logseq DB graph as a nested block tree (headings, paragraphs, list items, tables, code) under a target block or page, via the logseq CLI. For research outlines specifically, use `logseq-research` instead — it builds on this skill.
 allowed_tools:
   - Bash
   - Read

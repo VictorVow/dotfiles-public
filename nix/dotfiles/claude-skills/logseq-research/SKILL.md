@@ -1,6 +1,6 @@
 ---
 name: logseq-research
-description: Research a topic (usually "what tools/options exist for X") and write the result as a formatted research outline under a block in the user's Logseq graph, building on the user's existing notes there. Iterate on formatting until the user is happy.
+description: Research a topic (usually "what tools/options exist for X") and write the result as a formatted research outline under a block in the user's Logseq graph, building on the user's existing notes there. Imports via `logseq-add-md-to-blocks`. Iterate on formatting until the user is happy.
 allowed_tools:
   - Bash
   - Read
@@ -11,7 +11,7 @@ user_invocable: true
 ---
 The user points at a Logseq block (`[[<uuid>]]`) whose children hold their own notes on a topic, usually a list of tools, and names a child block (often "Claude research") to put your research under.
 
-Uses the `logseq` CLI. See the `logseq-cli` skill for command details and `logseq-add-md-to-blocks` for the import mechanics. Scripts are in `~/Projects/installs/scripts/`.
+Uses the `logseq` CLI. See the `logseq-cli` skill for command details. Import mechanics (graph selection, convert, dry-run, write, verify, session-ID block, `--gfw`) live in `logseq-add-md-to-blocks` — follow that skill for the actual write, not this one. Scripts are in `~/Projects/installs/scripts/`.
 
 ## Steps
 
@@ -50,17 +50,12 @@ Write to `/tmp/logseq-research/<topic>.md`. The user settled on this format (202
 
 ### 4. Convert and import
 
-```
-~/Projects/installs/scripts/logseq-md-to-blocks.py --gfw /tmp/logseq-research/<topic>.md /tmp/logseq-research/blocks.md
-```
-`--gfw` adds `{{renderer :gfw, <url-encoded-link>}}` as the second line of every block that starts with a GitHub link. The user requires this on every standalone GitHub-repo block. Check with `grep -c 'renderer :gfw' blocks.md` (it should equal the number of GitHub tool headings).
+Follow `logseq-add-md-to-blocks` steps 4-8 with these specifics:
 
-Then follow `logseq-add-md-to-blocks` steps 4–6: dry run (`would-create-pages` must be empty), write with `--target-uuid <target> --pos last-child`, and verify. `logseq show` fails on big trees, so check with queries instead:
-```
-logseq query -g <graph> --query '[:find (count ?c) :where [?p :block/uuid #uuid "<target>"] [?c :block/parent ?p]]'
-logseq query -g <graph> --query '[:find ?lvl (count ?g) :where [?p :block/uuid #uuid "<target>"] [?c :block/parent ?p] [?g :block/parent ?c] [(get-else $ ?g :logseq.property/heading 0) ?lvl]]'
-```
-In Logseq the stored title loses the `###`. It becomes `:logseq.property/heading 3`, and the widget macro sits on the title's second line.
+- Input file: `/tmp/logseq-research/<topic>.md`; output `/tmp/logseq-research/blocks.md`
+- Always pass `--gfw` — the user requires the Git Forge Watcher widget on every standalone GitHub-repo block. Check with `grep -c 'renderer :gfw' blocks.md` (should equal the number of GitHub tool headings).
+- Target: the named child block, `--pos last-child`
+- On verify: in Logseq the stored title loses the `###` — it becomes `:logseq.property/heading 3`, and the widget macro sits on the title's second line.
 
 ### 5. Formatting loop
 
