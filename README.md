@@ -22,6 +22,7 @@ installs/
 ├── appman-appimages.txt      # AppImages managed by AppMan
 ├── arkenfox.sh               # Apply/update arkenfox user.js on a Firefox profile
 ├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill
+├── CVLOG.md                  # Skills/experience list grouped by skill, each item dated + backlinked (commit, Logseq block, agent session) — CV/resume reference, written by the system-update-cvlog skill
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── npm-globals.txt           # Global npm CLIs (not in nixpkgs/llm-agents) — installed by the shell.nix activation, upgraded by update.sh
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
