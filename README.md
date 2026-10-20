@@ -38,7 +38,7 @@ installs/
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, htop, gh, direnv, ssh
-│       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode, shared MCP server registry
+│       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode (+ `opencode1` w/ magpie Devin/Cursor plugins), shared MCP server registry
 │       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
 │       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)

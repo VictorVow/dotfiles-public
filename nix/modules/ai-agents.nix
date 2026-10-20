@@ -33,6 +33,15 @@ let
   # this is used instead of the llm-agents overlay.
   llmAgents = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 
+  # magpie-community OpenCode provider plugins, pinned npm tarballs (see the
+  # opencode1 section below). Bump = new version + hash.
+  magpiePkg = name: version: hash: pkgs.fetchzip {
+    url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
+    inherit hash;
+  };
+  devinAuth  = magpiePkg "devin"  "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
+  cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
+
   # Global agent instructions, shared by Claude Code (~/.claude/CLAUDE.md) and
   # OpenCode (~/.config/opencode/AGENTS.md).
   globalContext = ''
@@ -434,6 +443,55 @@ in
   };
 
   xdg.configFile."opencode/AGENTS.md".text = globalContext;
+
+  # OpenCode 1 (`opencode1`, packages.nix) with the magpie-community provider
+  # plugins for Devin and Cursor subscriptions — v1-style plugins that v2 rejects
+  # ("Plugin must export a default definition…"). Sign in with `opencode1 auth login`.
+  # https://github.com/magpie-community/plugins
+  # They also can't be listed under `plugin` even in v1 (1.19): the packages export
+  # a non-function `_internal` (test hooks) and v1 fails with "Plugin export is not
+  # a function". So the pinned npm tarballs are unpacked into the store and local
+  # plugin files re-export only the plugin function.
+  # Same providers/MCP servers as the v2 config above, in v1's schema (`provider` +
+  # npm package, `mcp.<name>` with command arrays). FREELLMAPI_API_KEY comes from
+  # the opencode1 wrapper (packages.nix).
+  home.file.".opencode1/config/opencode/opencode.json".source = jsonFormat.generate "opencode1-config" {
+    "$schema" = "https://opencode.ai/config.json";
+    model       = "anthropic/claude-sonnet-4-5";
+    small_model = "anthropic/claude-haiku-4-5";
+    provider.freellmapi = {
+      name = "FreeLLMAPI";
+      npm  = "@ai-sdk/openai-compatible";
+      options = {
+        baseURL = "https://freellmapi.device.example.com/v1";
+        apiKey  = "{env:FREELLMAPI_API_KEY}";
+      };
+      models = {
+        "auto"       = { name = "FreeLLMAPI auto"; };
+        "auto:fast"  = { name = "FreeLLMAPI auto (fast)"; };
+        "auto:smart" = { name = "FreeLLMAPI auto (smart)"; };
+      };
+    };
+    mcp.freellmapi = {
+      type    = "remote";
+      url     = "https://freellmapi.device.example.com/mcp";
+      oauth   = false;
+      headers.Authorization = "Bearer {env:FREELLMAPI_API_KEY}";
+    };
+    mcp.nixos = {
+      type    = "local";
+      command = [ nixosMcp.command ] ++ nixosMcp.args;
+    };
+    mcp.firefox-devtools = {
+      type    = "local";
+      command = [ firefoxDevtoolsMcp.command ] ++ firefoxDevtoolsMcp.args;
+    };
+  };
+  home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
+    ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
+  home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
+    ''export { CursorAuthPlugin } from "${cursorAuth}/index.mjs"'';
+  home.file.".opencode1/config/opencode/AGENTS.md".text = globalContext;
 
   # ── Claude Code hook scripts ───────────────────────────────────────────────────
   # Managed here so they're version-controlled alongside the rest of the nix config.

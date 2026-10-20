@@ -495,23 +495,35 @@ in
     # package. Same flake source as codex: llm-agents.packages.${system}
     # (cache.numtide.com) — see the `llmAgents` binding above.
     llmAgents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
-    # OpenCode 2 (binary: `opencode2`). llm-agents.nix renames it so it can sit next
-    # to v1 (`llmAgents.opencode`, which still tracks 1.x); the alias restores the
-    # upstream `opencode` command. Orca detects `opencode2` as its "OpenCode 2" agent.
-    # Both names are wrappers that read FREELLMAPI_API_KEY from its sops file at
-    # launch, so only OpenCode (and its children) get the key — it's not exported
-    # to shells (see "API tokens: whitelist only" in shell.nix).
+    # OpenCode 2 (binary: `opencode2`; `opencode` is v1, below). Orca detects
+    # `opencode2` as its "OpenCode 2" agent. A wrapper that reads FREELLMAPI_API_KEY
+    # from its sops file at launch, so only OpenCode (and its children) get the key —
+    # it's not exported to shells (see "API tokens: whitelist only" in shell.nix).
     (pkgs.symlinkJoin {
       name = "opencode2-wrapped";
       paths = [ llmAgents.opencode2 ];
       nativeBuildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         rm $out/bin/opencode2
-        for bin in opencode2 opencode; do
-          makeWrapper ${llmAgents.opencode2}/bin/opencode2 $out/bin/$bin \
-            --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"'
-        done
+        makeWrapper ${llmAgents.opencode2}/bin/opencode2 $out/bin/opencode2 \
+          --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"'
       '';
+    })
+    # OpenCode 1 (binaries: `opencode` and `opencode1`), for the magpie-community Devin/Cursor
+    # provider plugins (config in ai-agents.nix), which are v1-style and don't load
+    # in v2. Fully isolated under ~/.opencode1/{config,data,state,cache}: v2 migrated
+    # the shared opencode.db and its config uses v2-only keys, so v1 must touch neither.
+    (pkgs.symlinkJoin {
+      name = "opencode1-wrapped";
+      paths = [ (pkgs.writeShellScriptBin "opencode1" ''
+        root="$HOME/.opencode1"
+        FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"
+        export FREELLMAPI_API_KEY
+        export XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
+               XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache"
+        exec ${llmAgents.opencode}/bin/opencode "$@"
+      '') ];
+      postBuild = "ln -s opencode1 $out/bin/opencode";
     })
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
     llmAgents.cursor-agent     # Cursor Agent CLI (binary: `cursor-agent`) — binary fetch, cached by numtide

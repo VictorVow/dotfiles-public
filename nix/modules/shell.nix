@@ -53,7 +53,7 @@ in
       # every child process, and e.g. Flatpak's flatpak-spawn copies its whole
       # env onto its world-readable command line). Instead:
       #   - gh / git push use the gh keyring (VictorVow; `git su 2|3` sets a per-repo alt account)
-      #   - opencode/opencode2 get FREELLMAPI_API_KEY from a wrapper (packages.nix)
+      #   - opencode2 gets FREELLMAPI_API_KEY from a wrapper (packages.nix)
       #   - one-offs: `with-secret github <cmd>` sets the var for that command only
       # Secret files are decrypted by sops-nix (see `sops` below + ai-secrets.nix).
       with-secret() {
