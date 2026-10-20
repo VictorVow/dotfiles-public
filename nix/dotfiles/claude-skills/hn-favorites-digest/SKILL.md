@@ -79,7 +79,12 @@ The helper is `~/Projects/installs/scripts/hn-favorites.py` (run it directly; it
 
       If there's only one chunk, steps c and d can be a single subagent: give it both prompts.
 
-   e. **Write to Logseq** by following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/hn-digest/<id>/summary.md` as the input file, `/tmp/hn-digest/<id>/blocks.md` as the output, and the target from step 1 with `--pos first-child` instead of that skill's `last-child` (in every command, dry run included), so the newest digest is always at the top. In particular:
+   e. **Write to Logseq** by following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/hn-digest/<id>/summary.md` as the input file, `/tmp/hn-digest/<id>/blocks.md` as the output, and the target from step 1 with `--pos first-child` instead of that skill's `last-child` (in every command, dry run included), so the newest digest is always at the top. **Do not append that skill's session-id block to `blocks.md`** (its step 4): with `first-child` it lands as a top-level sibling next to the digest instead of inside it. Instead, after the write and `hnf mark`, add the session-id block as the last child of the digest's top block (still keeping that skill's `orcaTabId`/`agentSessionID` line content):
+      ```
+      printf -- '- `agentSessionID: %s`\n' "<id>" > /tmp/hn-digest/<id>/session.md
+      logseq upsert block -g <graph> --target-id <heading block id> --pos last-child --blocks-file /tmp/hn-digest/<id>/session.md
+      ```
+      (Use `orcaTabId` when `$ORCA_TAB_ID` is set; for the id itself and the Devin lock-file lookup, follow that skill's step 4.) In particular:
       - Before converting, skim `summary.md` against that skill's step 3 formatting and link rules and fix anything the subagent got wrong.
       - Convert with `--gfw` when the digest has blocks that start with GitHub links (e.g. in Resources), as that skill says.
       - Do the dry run for every item. If `would-create-pages` isn't empty, find the cause in `summary.md` (`grep -n '\[\[\|#[A-Za-z]'`), fix it, and convert again; only ask the user if you can't fix it.
