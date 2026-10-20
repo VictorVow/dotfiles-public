@@ -413,6 +413,18 @@ in
       oauth   = false;
       headers.Authorization = "Bearer {env:FREELLMAPI_API_KEY}";
     };
+    # Same servers Claude Code gets (see the let block). v2's local format takes
+    # the command and its args as one array. Like every MCP server in v2 they
+    # run under Code Mode (codemode defaults to true): the agent calls them from
+    # scripts via its `execute` tool as tools.<server>.<tool>(...).
+    mcp.servers.nixos = {
+      type    = "local";
+      command = [ nixosMcp.command ] ++ nixosMcp.args;
+    };
+    mcp.servers.firefox-devtools = {
+      type    = "local";
+      command = [ firefoxDevtoolsMcp.command ] ++ firefoxDevtoolsMcp.args;
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
