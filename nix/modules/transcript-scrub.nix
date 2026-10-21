@@ -30,6 +30,7 @@ in
               gitleaks
               python3
               coreutils
+              util-linux # flock
             ]
           )
         }"

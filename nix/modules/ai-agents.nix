@@ -118,7 +118,10 @@ let
     effortLevel         = "medium";
     # Never auto-delete transcripts (default 30d) — full history stays
     # searchable via cass; secrets are handled by scripts/security/ instead.
-    cleanupPeriodDays   = 0;
+    # NB: 0 is invalid (docs: "the minimum is 1; setting 0 fails with a
+    # validation error") and every interactive start shows a Settings Error.
+    # 36500 days ≈ 100 years: the largest value Claude Code accepts.
+    cleanupPeriodDays   = 36500;
     # Render in the fullscreen (alt-screen) renderer by default every session. https://code.claude.com/docs/en/fullscreen
     # Makes copying easier as it eliminates line breaks and doesn't require SHIFT + CTRL + C
     # Equivalent to running `/tui fullscreen` once; toggle live with `/tui default`.
