@@ -153,13 +153,20 @@ for p in to_scan:
 
     content = open(p, "rb").read()
     applied = 0
+    unapplied = []  # hits whose secret wasn't literal text in the file
     for h in hits:
         secret = (h.get("Secret") or "").encode()
         if len(secret) < 8:
-            skipped_short += 1; continue
+            skipped_short += 1
+            unapplied.append(h)
+            continue
         rep = f"[REDACTED:{h['RuleID']}]".encode()
         if secret in content:
             content = content.replace(secret, rep); applied += 1
+        else:
+            # gitleaks decodes base64 etc., so the reported Secret may not
+            # appear verbatim; rewriting is unsafe -> keep the file dirty.
+            unapplied.append(h)
     if applied:
         if dry:
             print(f"dry-run  {applied:3d}  {os.path.relpath(p, os.path.expanduser('~'))}")
@@ -171,12 +178,12 @@ for p in to_scan:
             print(f"scrubbed {applied:3d}  {os.path.relpath(p, os.path.expanduser('~'))}")
         redacted += applied
         scrubbed_paths.append(p)
+    for h in unapplied:
+        print(f"unmatched {h['RuleID']:<35} {os.path.relpath(p, os.path.expanduser('~'))}:{h['StartLine']}"
+              f" (secret not literal in file — manual check needed)", file=sys.stderr)
 
     st = os.stat(p)
-    if dry or applied == 0:
-        still_dirty = hits
-    else:
-        still_dirty = [h for h in hits if len((h.get("Secret") or "").encode()) < 8]
+    still_dirty = hits if dry else unapplied
     state[p] = {"mtime": st.st_mtime, "size": st.st_size,
                 "findings": [{"rule": h["RuleID"], "line": h["StartLine"]}
                              for h in still_dirty]}
