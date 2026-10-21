@@ -25,17 +25,29 @@ ts_defaults() {
   CASS_DATA_DIR="${CASS_DATA_DIR:-$HOME/.local/share/coding-agent-search}"
   FILE_TARGETS=(
     "$HOME/.claude/projects"
+    "$HOME/.claude/history.jsonl"
+    "$HOME/.claude/file-history"
     "$HOME/.config/codex/sessions"
+    "$HOME/.config/codex/history.jsonl"
+    "$HOME/.codex/history.jsonl"
     "$HOME/.gemini"
     "$HOME/.openclaw"
     "$HOME/.copilot/session-state"
     "$HOME/.local/share/devin"
     "$HOME/.local/share/opencode/storage"
     "$HOME/.opencode1/data/opencode/storage"
+    "$HOME/.local/share/opencode/tool-output"
+    "$HOME/.opencode1/data/opencode/tool-output"
+    "$HOME/.local/share/opencode/log"
+    "$HOME/.opencode1/data/opencode/log"
   )
   DB_TARGETS=(
     "$HOME/.local/share/opencode/opencode.db"
     "$HOME/.opencode1/data/opencode/opencode.db"
+    "$HOME/.config/codex/thread_history_1.sqlite"
+    "$HOME/.config/codex/state_5.sqlite"
+    "$HOME/.config/codex/logs_2.sqlite"
+    "$HOME/.local/share/zed/threads/threads.db"
   )
   CASS_DB="$CASS_DATA_DIR/agent_search.db"
 }
@@ -47,7 +59,7 @@ ts_resolve() {
     FILE_TARGETS=(); DB_TARGETS=(); CASS_DB=""
     for t in "$@"; do
       [ -e "$t" ] || continue
-      if [[ "$t" == *.db ]]; then DB_TARGETS+=("$(readlink -f "$t")")
+      if [[ "$t" == *.db || "$t" == *.sqlite ]]; then DB_TARGETS+=("$(readlink -f "$t")")
       else FILE_TARGETS+=("$(readlink -f "$t")"); fi
     done
   else

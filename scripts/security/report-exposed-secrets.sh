@@ -10,9 +10,10 @@
 #
 # Incremental + repeatable: shares a state file with scrub-transcripts.sh at
 # $XDG_STATE_HOME/transcript-scrub/state.json. File entries map to
-# {mtime, size, findings:[{rule,line}]}; opencode v1 sqlite DBs live under
-# "sqlite://<db>" keys carrying a high-water mark on row time_updated plus a
-# dirty-row list — secrets are never persisted, only which files/rows were hit.
+# {mtime, size, findings:[{rule,line}]}; sqlite DBs (opencode v1, codex
+# thread_history_1/state_5/logs_2, zed threads.db) live under "sqlite://<db>"
+# keys carrying a high-water mark on the spec's ts column plus a dirty-cell
+# list — secrets are never persisted, only which files/cells were hit.
 # --full ignores the cache.
 #
 # Read-only: never touches scanned files or DBs.
@@ -83,7 +84,7 @@ for p in to_scan:
 
 prune_state(state, file_targets, db_targets, seen)
 
-# ---------------- opencode v1 sqlite ----------------------------------------
+# ---------------- sqlite (opencode v1, codex, zed) ---------------------------
 db_fresh = []   # pseudo-findings for the report
 import time; now = time.time()
 for db_i, db in enumerate(db_targets):
@@ -96,15 +97,17 @@ for db_i, db in enumerate(db_targets):
     key = f"sqlite://{db}"
     ent = state.get(key, {"hwm": 0, "dirty": []})
     hwm = 0 if full else ent.get("hwm", 0)
-    dirty_rows = {(d["table"], d["id"]) for d in ent.get("dirty", [])}
+    dirty_cells = {(d["table"], str(d["key"]), d["col"])
+                   for d in ent.get("dirty", [])
+                   if "key" in d and "col" in d}
     dump = os.path.join(report_dir, f"rows-{db_i}")
 
     try:
-        row_keys, new_hwm = dump_sqlite_rows(db, dump, hwm, dirty_rows)
+        cell_keys, new_hwm = dump_sqlite_rows(db, dump, hwm, dirty_cells)
     except sqlite3.Error as e:
         print(f"skip {db}: {e}", file=sys.stderr); continue
 
-    if not row_keys:
+    if not cell_keys:
         state[key] = {"hwm": new_hwm, "dirty": ent.get("dirty", [])}
         continue
 
@@ -114,18 +117,21 @@ for db_i, db in enumerate(db_targets):
     if hits is None:
         continue
 
-    # surface findings + mark those rows dirty so the scrubber re-checks them
-    prev_dirty = {(d["table"], d["id"]) for d in ent.get("dirty", [])}
+    # surface findings + mark those cells dirty so the scrubber re-checks them
+    prev_dirty = {(d["table"], str(d["key"]), d["col"])
+                  for d in ent.get("dirty", [])
+                  if "key" in d and "col" in d}
     now_dirty = set(prev_dirty)
     for h in hits:
         fn = h.get("File")
-        if fn in row_keys:
-            table, rid = row_keys[fn]
-            now_dirty.add((table, rid))
-            h["File"] = f"{os.path.basename(db)}:{table}:{rid}"
+        if fn in cell_keys:
+            table, rowkey, col = cell_keys[fn]
+            now_dirty.add((table, str(rowkey), col))
+            h["File"] = f"{os.path.basename(db)}:{table}:{col}:{str(rowkey)[:12]}"
             db_fresh.append(h)
     state[key] = {"hwm": new_hwm,
-                  "dirty": [{"table": t, "id": i} for t, i in sorted(now_dirty)]}
+                  "dirty": [{"table": t, "key": k, "col": c}
+                            for t, k, c in sorted(now_dirty)]}
 
 # ---------------- cass archive (agent_search.db) -----------------------------
 # Dump messages.content per conversation (newer than hwm or still dirty),

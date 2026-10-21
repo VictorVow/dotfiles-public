@@ -33,6 +33,7 @@ in
               python3
               coreutils
               util-linux # flock
+              zstd       # zed threads.db blob de/recompression
             ]
           )
         }"

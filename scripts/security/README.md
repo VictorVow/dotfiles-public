@@ -1,15 +1,15 @@
 # Transcript secret scrubbing
 
-AI coding-agent transcripts (Claude Code `~/.claude/projects/*.jsonl`, Codex `~/.config/codex/sessions/**.jsonl`, Gemini, OpenClaw, Copilot CLI, Devin, OpenCode v1 sqlite + v2 `session_diff` JSON, …) accumulate plaintext secrets whenever an agent reads a `.env`, runs `sops -d`, or cats a key file. cass then mirrors and indexes all of it into `~/.local/share/coding-agent-search/` — the lexical index, the canonical sqlite archive (`agent_search.db`), and `raw-mirror/` verbatim copies — making old secrets retrievable by `cass search` forever.
+AI coding-agent transcripts (Claude Code `~/.claude/projects/*.jsonl` + `history.jsonl` + `file-history/`, Codex `~/.config/codex/sessions/**.jsonl` + `history.jsonl` + sqlite stores, Gemini, OpenClaw, Copilot CLI, Devin, OpenCode v1 sqlite + v2 `session_diff` JSON + `tool-output/` + `log/`, Zed `threads.db`, …) accumulate plaintext secrets whenever an agent reads a `.env`, runs `sops -d`, or cats a key file. cass then mirrors and indexes all of it into `~/.local/share/coding-agent-search/` — the lexical index, the canonical sqlite archive (`agent_search.db`), and `raw-mirror/` verbatim copies — making old secrets retrievable by `cass search` forever.
 
-These two scripts scan all of those stores with gitleaks, rewrite the secrets in place (files) or via `UPDATE … SET data = replace(data, secret, marker)` (opencode v1 sqlite rows), and drop the leaked conversations from the cass archive.
+These two scripts scan all of those stores with gitleaks, rewrite the secrets in place (files) or via per-cell `UPDATE`s (sqlite stores; zed's zstd blobs are decompressed, patched and recompressed), and drop the leaked conversations from the cass archive.
 
 ## Scripts
 
 | Script | What it does |
 | --- | --- |
 | `report-exposed-secrets.sh` | Read-only audit. Prints findings grouped by rule × file/row; exit 1 if any, 2 on scan error. `--quiet` prints just the JSON report path (`$XDG_STATE_HOME/transcript-scrub/last-report.json`, gitleaks `--redact`ed). `--full` forces a rescan. |
-| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite rows via `UPDATE`. Then runs `cass forget` for each scrubbed file and `**/opencode.db*` if any db rows were patched. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. |
+| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite cells via `UPDATE` per the specs in `transcript_common.SQLITE_SPECS`. Then runs `cass forget` for each scrubbed file and `**/opencode.db*` if any db cells were patched. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. |
 
 Both scripts source `transcript-common.sh` (target lists, arg resolution, locking) and import `transcript_common.py` (gitleaks invocation, file/row/conversation dumping, state pruning) — keep the three in sync.
 
@@ -22,14 +22,14 @@ Both scripts source `transcript-common.sh` (target lists, arg resolution, lockin
 ./scrub-transcripts.sh ~/.local/share/opencode/opencode.db  # just the v1 db
 ```
 
-Default file targets: `.claude/projects`, `.config/codex/sessions`, `.gemini`, `.openclaw`, `.copilot/session-state`, `.local/share/devin`, opencode v2 `storage/` dirs (both `~/.local/share/opencode` and `~/.opencode1/data/opencode`). Default sqlite targets: `opencode.db` in both of those opencode data dirs. The cass archive (`agent_search.db`) is scanned too — see below.
+Default file targets: `.claude/projects`, `.claude/history.jsonl`, `.claude/file-history`, `.config/codex/sessions`, `.config/codex/history.jsonl`, `.gemini`, `.openclaw`, `.copilot/session-state`, `.local/share/devin`, opencode v2 `storage/` + `tool-output/` + `log/` dirs (both `~/.local/share/opencode` and `~/.opencode1/data/opencode`). Default sqlite targets: `opencode.db` in both opencode data dirs plus codex `thread_history_1.sqlite`/`state_5.sqlite`/`logs_2.sqlite` and zed `~/.local/share/zed/threads/threads.db` — see `SQLITE_SPECS` in `transcript_common.py` for which columns are scanned. The cass archive (`agent_search.db`) is scanned too — see below.
 
 ## Incremental + repeatable
 
 Both scripts share a state file at `$XDG_STATE_HOME/transcript-scrub/state.json` (usually `~/.local/state/transcript-scrub/state.json`).
 
 - **Files**: state maps path → `{mtime, size, findings:[{rule,line}]}`. Unchanged files with no findings are skipped entirely; changed files are re-scanned. Findings from unchanged files carry forward so the report stays complete.
-- **Sqlite DBs**: state key `sqlite://<db>` → `{hwm, dirty:[{table,id}]}`. `hwm` is a high-water mark on the row's `time_updated` (epoch ms); only rows newer than `hwm`, plus rows still marked `dirty`, are dumped and scanned per run. Patched rows become clean.
+- **Sqlite DBs**: state key `sqlite://<db>` → `{hwm, dirty:[{table,key,col}]}`. `hwm` is a high-water mark on the spec's timestamp column (epoch ms; zed's RFC3339 text is converted); only cells of rows newer than `hwm`, plus cells still marked `dirty`, are dumped and scanned per run. Patched cells become clean. Which tables/columns are scanned is defined per database basename in `transcript_common.SQLITE_SPECS` — unknown sqlite files target nothing.
 - **cass archive**: `cass://<db>` → `{hwm, dirty:[source_path]}` over `conversations.last_message_created_at`; `cass://pending` is a dict `{path_or_glob: "exact"|"glob"}` of `cass forget` jobs awaiting a successful run (failures are retried, never silently dropped).
 - The literal secret is **never** written to state — only which files/rows were hit and by which rule.
 
@@ -48,7 +48,7 @@ cass keeps its own copies — `agent_search.db` (canonical archive + FTS index) 
 ## Caveats
 
 - **Detection limits.** gitleaks only catches secrets matching a known pattern (API keys, tokens, PEM blocks, age keys). An arbitrary password `sops`-decrypted into a transcript won't match. Rotate anything sensitive regardless.
-- **opencode v1 granularity.** The scrubber patches whole `data` JSON blobs in `message`/`part` rows. `REPLACE` on a JSON string value is safe (secrets live inside strings), but the row's other fields are untouched.
+- **Sqlite granularity.** The scrubber patches whole scanned cells (`data`/`item_json` blobs, title/preview text, zed's zstd blob). `REPLACE` on a JSON string value is safe (secrets live inside strings), but the cell's other fields are untouched. Stores not scanned: opencode `snapshot/` dirs (bare git object stores — rewriting blobs would corrupt their hashes; the same content already lives in the working repo and `opencode.db`), codex `queue_1`/`goals_1`/`memories_1`/`codex-dev.db` (no free-text transcript columns), `~/.claude/shell-snapshots/` (ephemeral).
 - **Live sessions.** Files/DBs modified in the last 5 minutes are skipped to avoid racing a live agent; re-run later to catch them.
 - **Partial redaction.** gitleaks reports the secret as the span its regex captured (e.g. `ghp_` + 40 chars). If the file held a longer token, suffix bytes remain — harmless non-secret residue.
 - **Not a substitute for rotation.** A secret in a transcript should be considered burned; scrubbing bounds future exposure, it doesn't undo past exposure.

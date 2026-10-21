@@ -6,11 +6,14 @@
 #
 # Stores handled:
 #   * JSONL/JSON transcript trees (claude, codex, gemini, openclaw, copilot,
-#     devin, opencode v2 session_diff files) — spliced on disk via atomic
-#     rename.
-#   * opencode v1 sqlite (opencode.db: message.data + part.data JSON blobs)
-#     — rows dumped to a temp dir, gitleaks-scanned, and patched back with
-#     UPDATE ... SET data = replace(data, secret, marker).
+#     devin, opencode v2 session_diff files, prompt histories, file-history
+#     snapshots, opencode tool-output + log dirs) — spliced on disk via
+#     atomic rename.
+#   * sqlite stores (opencode v1 message/part data blobs; codex
+#     thread_history_1 item_json, state_5 titles/previews, logs_2 feedback
+#     bodies; zed threads.db zstd blobs) — cells dumped to a temp dir,
+#     gitleaks-scanned, and patched back with UPDATE (zed blobs are
+#     recompressed). Per-store specs live in transcript_common.SQLITE_SPECS.
 #   * cass archive (agent_search.db messages.content) — dumped per
 #     conversation and gitleaks-scanned; hit conversations are dropped with
 #     `cass forget --source-glob '<exact source_path>'`. Forget is used rather
@@ -23,8 +26,8 @@
 # Files whose mtime/size are unchanged since their last clean scan are skipped;
 # files with stored findings are re-scanned so the literal Secret values are
 # fresh (state never stores secrets). For sqlite DBs the state key is
-# "sqlite://<db>" and carries a high-water mark on the row time_updated — only
-# rows newer than the mark (plus rows still marked dirty) are re-scanned.
+# "sqlite://<db>" and carries a high-water mark on the spec's ts column — only
+# rows newer than the mark (plus cells still marked dirty) are re-scanned.
 # The cass archive sits under "cass://<db>" with a hwm on
 # conversations.last_message_created_at; "cass://pending" is a dict of
 # {path_or_glob: "exact"|"glob"} awaiting a successful `cass forget` (retried
@@ -76,7 +79,8 @@ import json, os, sys, subprocess, sqlite3
 sys.path.insert(0, os.environ["DIR"])
 from transcript_common import (gitleaks_scan, collect_targets, prune_state,
                                db_recently_modified, dump_sqlite_rows,
-                               dump_cass_convs, save_state, LIVE_WINDOW_S)
+                               dump_cass_convs, save_state, sqlite_spec,
+                               patch_sqlite_cell, _cell_text, LIVE_WINDOW_S)
 
 report_dir = sys.argv[1]
 file_targets = json.loads(os.environ["FILE_TARGETS_JSON"])
@@ -166,12 +170,14 @@ for p in to_scan:
 
 prune_state(state, file_targets, db_targets, seen)
 
-# ---------------- opencode v1 sqlite targets --------------------------------
-# State key "sqlite://<db>" -> {"hwm": <max row time_updated, epoch ms>,
-#                             "dirty": [{"table":..,"id":..}]}.
-# Each run scans rows newer than hwm plus dirty rows; patched rows become clean.
-db_stats = {"rows_scanned": 0, "rows_patched": 0}
-for db in db_targets:
+# ---------------- sqlite targets (opencode v1, codex, zed) -------------------
+# State key "sqlite://<db>" -> {"hwm": <max row ts, epoch ms>,
+#                             "dirty": [{"table":..,"key":..,"col":..}]}.
+# Each run dumps the spec's value columns for rows newer than hwm plus dirty
+# cells, gitleaks-scans the dump once, and patches hit cells back (zed
+# threads.db blobs are zstd-recompressed). Patched cells become clean.
+db_stats = {"cells_scanned": 0, "cells_patched": 0}
+for db_i, db in enumerate(db_targets):
     if not os.path.exists(db): continue
     if db_recently_modified(db, now):
         print(f"skip     ---  {os.path.basename(db)} (modified <5min ago)", file=sys.stderr)
@@ -179,63 +185,82 @@ for db in db_targets:
     key = f"sqlite://{db}"
     ent = state.get(key, {"hwm": 0, "dirty": []})
     hwm = 0 if full else ent.get("hwm", 0)
-    dirty_rows = {(d["table"], d["id"]) for d in ent.get("dirty", [])}
+    dirty_cells = {(d["table"], str(d["key"]), d["col"])
+                   for d in ent.get("dirty", [])
+                   if "key" in d and "col" in d}
 
     try:
-        row_keys, new_hwm = dump_sqlite_rows(
-            db, os.path.join(report_dir, "rows"), hwm, dirty_rows)
+        cell_keys, new_hwm = dump_sqlite_rows(
+            db, os.path.join(report_dir, f"rows-{db_i}"), hwm, dirty_cells)
     except sqlite3.Error as e:
         print(f"skip     ---  {db} ({e})", file=sys.stderr); continue
 
-    if not row_keys:
+    if not cell_keys:
         state[key] = {"hwm": new_hwm, "dirty": []}
         continue
 
-    # one gitleaks scan over the whole dump dir
-    hits = gitleaks_scan(conf, os.path.join(report_dir, "rows"),
+    hits = gitleaks_scan(conf, os.path.join(report_dir, f"rows-{db_i}"),
                          os.path.join(report_dir, "rows-frag.json"),
                          scan_errors)
     if hits is None:
         continue
-    db_stats["rows_scanned"] += len(row_keys)
+    db_stats["cells_scanned"] += len(cell_keys)
 
-    # group hits per row
-    per_row = {}
+    # group hits per cell
+    per_cell = {}
     for h in hits:
         fn = h.get("File")
-        if fn in row_keys:
-            per_row.setdefault(row_keys[fn], []).append(h)
+        if fn in cell_keys:
+            per_cell.setdefault(cell_keys[fn], []).append(h)
 
     still_dirty = []
-    if not dry and per_row:
+    if not dry and per_cell:
         con = sqlite3.connect(db)
-    for (table, rid), rowhits in per_row.items():
+    for (table, rowkey, col), cellhits in per_cell.items():
+        disp = f"{os.path.basename(db)}:{table}:{col}:{str(rowkey)[:12]}"
         if dry:
-            print(f"dry-run  {len(rowhits):3d}  {os.path.basename(db)}:{table}:{rid[:16]}…")
-            still_dirty.append({"table": table, "id": rid})
-            db_stats["rows_patched"] += len(rowhits)
+            print(f"dry-run  {len(cellhits):3d}  {disp}")
+            still_dirty.append({"table": table, "key": rowkey, "col": col})
+            db_stats["cells_patched"] += len(cellhits)
             continue
-        row = con.execute(f"select data from {table} where id = ?", (rid,)).fetchone()
-        if not row: continue
-        data = row[0] or ""
-        applied = 0
-        for h in rowhits:
+        spec = sqlite_spec(db, table)
+        if not spec:
+            still_dirty.append({"table": table, "key": rowkey, "col": col})
+            continue
+        cur_text = None
+        try:
+            kexpr = "rowid" if spec[3] == "rowid" else spec[3]
+            r = con.execute(f"select {col} from {table} where {kexpr} = ?",
+                            (rowkey,)).fetchone()
+            if r:
+                cur_text = _cell_text(r[0], spec[4])
+        except sqlite3.Error:
+            pass
+        if cur_text is None:
+            still_dirty.append({"table": table, "key": rowkey, "col": col})
+            continue
+        orig = cur_text
+        applied = unapp = 0
+        for h in cellhits:
             secret = h.get("Secret") or ""
             if len(secret.encode()) < 8:
-                skipped_short += 1; continue
+                skipped_short += 1; unapp += 1; continue
             rep = f"[REDACTED:{h['RuleID']}]"
-            if secret in data:
-                data = data.replace(secret, rep); applied += 1
+            if secret in orig:
+                if secret in cur_text:
+                    cur_text = cur_text.replace(secret, rep)
+                applied += 1
+            else:
+                unapp += 1
         if applied:
-            con.execute(f"update {table} set data = ? where id = ?", (data, rid))
-            db_stats["rows_patched"] += applied
-            print(f"scrubbed {applied:3d}  {os.path.basename(db)}:{table}:{rid[:16]}…")
-            # secrets <8 remain -> keep dirty
-            if any(len((h.get("Secret") or "").encode()) < 8 for h in rowhits):
-                still_dirty.append({"table": table, "id": rid})
+            patch_sqlite_cell(con, spec, rowkey, col, cur_text)
+            db_stats["cells_patched"] += applied
+            print(f"scrubbed {applied:3d}  {disp}")
+            if unapp:
+                still_dirty.append({"table": table, "key": rowkey, "col": col})
         else:
-            still_dirty.append({"table": table, "id": rid})
-    if not dry and per_row:
+            still_dirty.append({"table": table, "key": rowkey, "col": col})
+    if not dry and per_cell:
         con.commit(); con.close()
 
     state[key] = {"hwm": new_hwm, "dirty": still_dirty}
@@ -319,7 +344,7 @@ if not dry:
     for p in scrubbed_paths:
         # scrubbed source: forget the archived copy; it re-indexes clean
         pending[p] = "exact"
-    if db_stats["rows_patched"]:
+    if db_stats["cells_patched"]:
         for db in db_targets:
             pending[db + "/*"] = "glob"  # '…/opencode.db/<session>' pseudo-paths
 if pending:
@@ -353,7 +378,7 @@ if cass and pending:
 
 if dry:
     queued = sorted(set(pending) | set(scrubbed_paths))
-    if cass and cass_db and db_stats["rows_patched"]:
+    if cass and cass_db and db_stats["cells_patched"]:
         queued += [db + "/*" for db in db_targets]
     for g in queued:
         print(f"dry-run  ---  cass forget {g}")
@@ -373,8 +398,8 @@ for e in scan_errors:
 
 print(f"\n{redacted} file secrets {'would be ' if dry else ''}redacted "
       f"({skipped_recent} live/recent skipped, {skipped_short} <8-byte skipped); "
-      f"sqlite: {db_stats['rows_scanned']} rows scanned, "
-      f"{db_stats['rows_patched']} secrets {'would be ' if dry else ''}patched; "
+      f"sqlite: {db_stats['cells_scanned']} cells scanned, "
+      f"{db_stats['cells_patched']} secrets {'would be ' if dry else ''}patched; "
       f"cass: {cass_stats['convs_scanned']} conversations scanned")
 if forgotten:
     print(f"cass: forgot {forgotten} conversations")
