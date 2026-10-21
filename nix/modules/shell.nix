@@ -54,18 +54,19 @@ in
       # env onto its world-readable command line). Instead:
       #   - gh / git push use the gh keyring (VictorVow; `git su 2|3` sets a per-repo alt account)
       #   - opencode2 gets FREELLMAPI_API_KEY from a wrapper (packages.nix)
-      #   - one-offs: `with-secret github <cmd>` sets the var for that command only
-      # Secret files are decrypted by sops-nix (see `sops` below + ai-secrets.nix).
+      #   - one-offs: `with-secret github|freellmapi <cmd>` sets the var for that
+      #     command only. github pulls the PAT straight from gh's keyring (no
+      #     plaintext file — there used to be a sops github_token here; removed
+      #     because any same-uid process could cat it). freellmapi cats the sops
+      #     output from ai-secrets.nix.
       with-secret() {
-        local var file
-        case "$1" in
-          github)     var=GITHUB_TOKEN;       file=${config.sops.secrets.github_token.path} ;;
-          freellmapi) var=FREELLMAPI_API_KEY; file=${config.sops.secrets.freellmapi_api_key.path} ;;
+        [ $# -ge 2 ] || { echo "usage: with-secret {github|freellmapi} <command> [args...]" >&2; return 1; }
+        local which="$1"; shift
+        case "$which" in
+          github)     env GITHUB_TOKEN="$(gh auth token)" "$@" ;;
+          freellmapi) env FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path})" "$@" ;;
           *) echo "usage: with-secret {github|freellmapi} <command> [args...]" >&2; return 1 ;;
         esac
-        shift
-        [ $# -gt 0 ] || { echo "with-secret: no command given" >&2; return 1; }
-        env "$var=$(cat "$file")" "$@"
       }
 
       # sops's age identity lives in the Secret Service keyring (KWallet via
@@ -445,15 +446,11 @@ in
   };
 
   # ── Sops secrets for shell API tokens ────────────────────────────────────────
-  # Same pattern as modules/ai-secrets.nix: explicit stable paths so
-  # `with-secret` (initExtra) can `cat` them. Edit with: sops nix/secrets/shell.yaml
-  sops = {
-    # age.keyFile is set centrally in modules/sops-age-key.nix.
-    secrets = lib.genAttrs [ "github_token" ] (name: {
-      sopsFile = ../secrets/shell.yaml;
-      path = "${config.home.homeDirectory}/.config/shell-secrets/${name}";
-    });
-  };
+  # shell.yaml still holds matrix_bot_password (read by Apprise's deploy.yml in
+  # Self-Hosted), but no key is materialised to disk from it here — github_token
+  # was removed since `with-secret github` now uses `gh auth token` instead.
+  # If a future key needs a stable on-disk path, copy the pattern from
+  # modules/ai-secrets.nix. Edit the file with: sops nix/secrets/shell.yaml
 
   # ── Activation: Ensure Flathub user remote is configured ─────────────────────
   # Runs on every `hms`. The --if-not-exists flag makes it idempotent.
