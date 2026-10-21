@@ -686,13 +686,14 @@ in
     executable = true;
   };
 
-  # Same guard for OpenCode — one file serves v1 and v2 (the
-  # `tool.execute.before` hook signature is identical). Auto-loaded from the
-  # plugins dir; no config key needed.
+  # Same guard for OpenCode — v1 and v2 have different plugin APIs (v1:
+  # `export const X = async () => {hooks}`, v2: `export default {id, setup}`),
+  # so two files share the same policy lists rendered by secretGuardSubst.
+  # Auto-loaded from the plugins dir; no config key needed.
   home.file.".config/opencode/plugins/secret-guard.js".source =
     pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard.js secretGuardSubst;
   home.file.".opencode1/config/opencode/plugins/secret-guard.js".source =
-    pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard.js secretGuardSubst;
+    pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard-v1.js secretGuardSubst;
 
   # ── Claude Code: direnv in the Bash tool ───────────────────────────────────────
   # The Bash tool runs non-interactive shells, so direnv's PROMPT_COMMAND hook

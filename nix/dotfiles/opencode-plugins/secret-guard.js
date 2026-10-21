@@ -1,13 +1,21 @@
-// Secret-guard plugin for OpenCode — v1 (`opencode`/`opencode1`) and v2
-// (`opencode2`) share this file; the `tool.execute.before` hook signature is
-// identical in both. Deployed to both config dirs by ai-agents.nix.
+// Secret-guard plugin for OpenCode v2 (`opencode2`).
 //
-// Purpose: the `bash`/`shell` permission doesn't consult the `read` deny
-// list, so `cat ~/.ssh/id_ed25519` passes even though `read` on it is denied.
-// This plugin inspects argv for shell calls and path args for file tools.
-// Limits (same as the Claude Code PreToolUse hook it mirrors): can't catch
-// `bash -c "$(cat …)"`, process substitution, `find -exec`, or agent-written
-// scripts — casual first-instinct reads only.
+// v2's plugin loader requires `export default { id, setup }` where `setup`
+// registers hooks via `ctx.tool.hook("execute.before", handler)` — handler
+// returns a Promise that rejects to deny the call. This is a different API
+// from v1 (`export const X = async () => ({ "tool.execute.before": ... })`),
+// so this file only deploys to ~/.config/opencode/plugins/, not opencode1.
+//
+// Purpose: the `bash` shell permission doesn't consult the `read` deny list,
+// so `cat ~/.ssh/id_ed25519` passes even though `read` on it is denied.
+// v2's `execute` Code Mode tool bypasses `bash` permission checks entirely —
+// it runs JS with execSync/readFileSync, so we scan its `code` arg for
+// shell-command-looking strings and path literals.
+//
+// Limits: argv/string inspection only — `bash -c "$(cat …)"`, process
+// substitution, `find -exec`, computed paths, and agent-written scripts all
+// still get through. The goal is to block routine first-instinct reads, not
+// a motivated agent.
 //
 // The path/command lists are rendered from `secretGuard*` lists in
 // ai-agents.nix — edit there, not here.
@@ -27,9 +35,9 @@ const DECODE_FLAGS = {
   gpg: new Set(["-d", "--decrypt"]),
   gpg2: new Set(["-d", "--decrypt"]),
   age: new Set(["-d", "--decrypt"]),
-  // tar/7z subcommand is bundled positional, matched by first char / word.
-  // Extract AND create modes both read protected sources — `tar cf out.tar
-  // ~/.ssh` reads the dir as surely as extraction does.
+  // tar/7z subcommand is bundled positional; extract AND create modes both
+  // read protected sources — `tar cf out.tar ~/.ssh` reads the dir as surely
+  // as extraction does.
   tar: new Set(["x", "c", "r", "u"]),
   uudecode: new Set(),
   unzip: new Set(),
@@ -41,10 +49,14 @@ const ALWAYS_DECODE = new Set(["uudecode", "unzip", "zip"]);
 const MOVE_CMDS = new Set(["cp", "mv", "rsync", "scp", "install", "ln"]);
 
 const FILE_TOOLS = new Set(["read", "edit", "write", "grep", "glob", "ls"]);
-// Tools whose `path`/`include` args scope CONTENT reads — a parent dir of a
-// protected pattern must be denied. `ls` only lists names, so its `path`
-// is exempt (listing /home/boss shouldn't be blocked by ~/.ssh existing).
+// Tools whose `path`/`include` args scope CONTENT reads — a scope equal to
+// or inside a `**`-protected dir is denied. `ls` only lists names; `pattern`/
+// `filePath` name the file itself.
 const CONTENT_SCOPE_TOOLS = new Set(["grep", "glob"]);
+
+// v2's Code Mode exposes `execute` — runs JS with execSync/readFileSync —
+// which bypasses `bash` permission checks entirely.
+const CODE_TOOLS = new Set(["execute"]);
 
 const HOME = process.env.HOME || "";
 const XDG_RUNTIME = process.env.XDG_RUNTIME_DIR || `/run/user/${process.getuid?.() ?? 1000}`;
@@ -97,6 +109,16 @@ function isProtected(rawPath) {
   });
 }
 
+function isProtectedScope(rawPath) {
+  const n = norm(rawPath).replace(/\/+$/, "");
+  return SECRET_PATH_PATTERNS.some(p => {
+    const np = normPattern(p);
+    if (!np.includes("**")) return false;
+    const head = np.split("**", 1)[0].replace(/\/+$/, "");
+    return head && (n === head || n.startsWith(head + "/"));
+  });
+}
+
 function splitSegments(cmd) {
   return cmd.split(/\|\||&&|[|;\n]|`[^`]*`|\$\(/).map(s => s.trim()).filter(Boolean);
 }
@@ -143,8 +165,6 @@ function checkShell(cmd) {
     } else if (base in DECODE_FLAGS) {
       let decodes = ALWAYS_DECODE.has(base)
         || args.some(a => DECODE_FLAGS[base].has(a));
-      // tar's subcommand is a bundled-positional ("xzf", "tf", …) not a
-      // flag — match by first char. 7z uses separate words ("x", "e").
       if (base === "tar" && positional.length && /^[xcru]/.test(positional[0]))
         decodes = true;
       if (base === "7z" && positional.length && DECODE_FLAGS["7z"].has(positional[0]))
@@ -172,21 +192,32 @@ function checkShell(cmd) {
   }
 }
 
-// A directory arg on a content-reading tool (grep/glob's `path`/`include`)
-// is denied when the scope IS a protected dir or sits inside one — e.g.
-// `/home/boss/.ssh` and `/home/boss/.ssh/subdir` both match `~/.ssh/**`.
-// Scoping *above* the protected dir (`path:/home/boss`) is allowed: grep
-// there may print protected *content* but that's already true of the
-// cwd-default recursive search anyway — the deny just stops explicit
-// targeting.
-function isProtectedScope(rawPath) {
-  const n = norm(rawPath).replace(/\/+$/, "");
-  return SECRET_PATH_PATTERNS.some(p => {
-    const np = normPattern(p);
-    if (!np.includes("**")) return false;
-    const head = np.split("**", 1)[0].replace(/\/+$/, "");
-    return head && (n === head || n.startsWith(head + "/"));
-  });
+// Pull quoted strings out of JS code — anything that looks like a shell
+// command gets argv-checked. Imperfect (string concatenation, template
+// literals with ${} interpolation, and argv built via .split won't be
+// caught), but covers the common `execSync("cmd …")` shape.
+function* iterStrings(code) {
+  const re = /"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|`((?:[^`\\]|\\.)*)`/g;
+  let m;
+  while ((m = re.exec(code))) yield m[1] ?? m[2] ?? m[3];
+}
+
+function checkCode(code) {
+  for (const s of iterStrings(code)) {
+    if (!/\s/.test(s)) continue;          // needs a space to look like a cmd
+    checkShell(s);
+  }
+  for (const s of iterStrings(code)) {
+    if (isProtected(s)) throw new Error(`secret-guard: protected path in code: ${s}`);
+    for (const pat of SECRET_PATH_PATTERNS) {
+      const np = normPattern(pat);
+      if (np.startsWith("/") && np.includes("**")) {
+        const head = np.split("**", 1)[0].replace(/\/+$/, "");
+        if (head && s.includes(head))
+          throw new Error(`secret-guard: code references protected dir ${head}`);
+      }
+    }
+  }
 }
 
 function checkFileArgs(tool, args) {
@@ -194,9 +225,6 @@ function checkFileArgs(tool, args) {
     const v = args?.[k];
     const check = (item) => {
       if (isProtected(item)) throw new Error(`secret-guard: protected path in arg ${k}: ${item}`);
-      // `path`/`include` on content-reading tools scope a directory — also
-      // reject when they name a parent of a `**`-protected dir. `pattern`/
-      // `filePath` name the file itself; `ls` only lists names.
       if (CONTENT_SCOPE_TOOLS.has(tool) && (k === "path" || k === "include") && isProtectedScope(item))
         throw new Error(`secret-guard: arg ${k} scopes into protected dir: ${item}`);
     };
@@ -205,15 +233,25 @@ function checkFileArgs(tool, args) {
   }
 }
 
-export const SecretGuard = async () => ({
-  "tool.execute.before": async (input, output) => {
-    const tool = input?.tool;
-    const args = output?.args ?? {};
-    if (tool === "bash" || tool === "shell") {
-      const cmd = args.command ?? args.cmd ?? "";
-      if (typeof cmd === "string") checkShell(cmd);
-    } else if (FILE_TOOLS.has(tool)) {
-      checkFileArgs(tool, args);
-    }
+// v2 promise-shape plugin: `{id, setup(ctx)}` registers hooks on ctx.tool.
+// `execute.before` hook input is `{tool, input}`; throwing rejects the call.
+export default {
+  id: "secret-guard",
+  setup: async (ctx) => {
+    await ctx.tool.hook("execute.before", async (input) => {
+      const tool = input?.tool;
+      // v2 schema: `{tool, input, sessionID, agent, messageID, id}` — the
+      // tool's arguments live under `.input`, not `.args` (that was v1).
+      const args = input?.input ?? {};
+      if (tool === "bash" || tool === "shell") {
+        const cmd = args.command ?? args.cmd ?? "";
+        if (typeof cmd === "string") checkShell(cmd);
+      } else if (CODE_TOOLS.has(tool)) {
+        const code = args.code ?? "";
+        if (typeof code === "string") checkCode(code);
+      } else if (FILE_TOOLS.has(tool)) {
+        checkFileArgs(tool, args);
+      }
+    });
   },
-});
+};
