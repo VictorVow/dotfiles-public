@@ -16,7 +16,10 @@
 # list — secrets are never persisted, only which files/cells were hit.
 # --full ignores the cache.
 #
-# Read-only: never touches scanned files or DBs.
+# Read-only on transcripts themselves: never edits scanned files or DBs. It
+# does write to the shared state file -- including queueing `cass forget`
+# jobs for archive conversations whose source still exists (missing-source
+# hits are printed for manual review instead, as in the scrubber).
 #
 # Usage:
 #   report-exposed-secrets.sh                  # scan default stores
@@ -169,11 +172,23 @@ if cass_db and os.path.exists(cass_db):
         if hit_paths:
             # pending is a dict {path_or_glob: "exact"|"glob"} shared with the
             # scrubber; keep the format (a bare list would lose the glob flags).
+            # A conversation whose source file is gone has its archive copy as
+            # the last remaining record -- forgetting deletes it for good, so
+            # queue it only when the source still exists (same rule as the
+            # scrubber's `cass review` safeguard).
             pend = state.get("cass://pending", {})
             if isinstance(pend, list):
                 pend = {g: "exact" for g in pend}
             pend = dict(pend)
-            pend.update({p: "exact" for p in hit_paths})
+            for p in hit_paths:
+                source_gone = not os.path.exists(p) and not any(
+                    p.startswith(d + os.sep) for d in db_targets)
+                if source_gone:
+                    print(f"cass review ---  {p} (source gone; "
+                          f"run `cass forget --source-glob '{p}' --apply` "
+                          f"manually if real)", file=sys.stderr)
+                else:
+                    pend[p] = "exact"
             state["cass://pending"] = pend
 
 save_state(state_file, state)

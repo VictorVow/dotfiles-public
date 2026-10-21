@@ -18,8 +18,10 @@
 #     conversation and gitleaks-scanned; hit conversations are dropped with
 #     `cass forget --source-glob '<exact source_path>'`. Forget is used rather
 #     than rewriting because the db is cass-owned (frankensqlite, attestations)
-#     and raw-mirror blobs are content-addressed. Covers conversations whose
-#     source file is already gone.
+#     and raw-mirror blobs are content-addressed. Hit conversations whose
+#     source file is already gone are NOT auto-forgotten (the archive copy is
+#     the last record) -- they're printed as `cass review` lines for a manual
+#     forget, as are report-queued hits.
 #
 # Incremental + repeatable: shares the state file written by
 # report-exposed-secrets.sh ($XDG_STATE_HOME/transcript-scrub/state.json).
@@ -407,4 +409,7 @@ if pending and not dry:
     print(f"cass: {len(pending)} forgets still pending")
 if dry:
     print("(dry-run: nothing changed)")
+
+if scan_errors:
+    sys.exit(2)
 PYEOF

@@ -8,8 +8,8 @@ These two scripts scan all of those stores with gitleaks, rewrite the secrets in
 
 | Script | What it does |
 | --- | --- |
-| `report-exposed-secrets.sh` | Read-only audit. Prints findings grouped by rule × file/row; exit 1 if any, 2 on scan error. `--quiet` prints just the JSON report path (`$XDG_STATE_HOME/transcript-scrub/last-report.json`, gitleaks `--redact`ed). `--full` forces a rescan. |
-| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite cells via `UPDATE` per the specs in `transcript_common.SQLITE_SPECS`. Then runs `cass forget` for each scrubbed file and `**/opencode.db*` if any db cells were patched. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. |
+| `report-exposed-secrets.sh` | Audit: prints findings grouped by rule × file/row; exit 1 if any, 2 on scan error. Never edits transcripts, but writes the shared state file and queues `cass forget` jobs for archive hits whose source still exists (missing-source hits print `cass review` lines instead). `--quiet` prints just the JSON report path (`$XDG_STATE_HOME/transcript-scrub/last-report.json`, gitleaks `--redact`ed). `--full` forces a rescan. |
+| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite cells via `UPDATE` per the specs in `transcript_common.SQLITE_SPECS`. Then runs `cass forget` for each scrubbed source file's exact path and `<db>/*` for each sqlite db with patched cells, plus archive-scan hits. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. Exit 2 on scan error. |
 
 Both scripts source `transcript-common.sh` (target lists, arg resolution, locking) and import `transcript_common.py` (gitleaks invocation, file/row/conversation dumping, state pruning) — keep the three in sync.
 
