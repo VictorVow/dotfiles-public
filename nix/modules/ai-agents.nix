@@ -62,9 +62,29 @@ let
     { action = "read";               resource = "*.env.example";  effect = "allow"; }
     { action = "read";               resource = "*.env.*.example"; effect = "allow"; }
     { action = "read";               resource = "*.env.example.*"; effect = "allow"; }
+    # Key material and cert/key bundles at any depth. SSH's own directory is
+    # covered below; these catch keys kept elsewhere (certs/, secrets/, tmp).
+    { action = "read";               resource = "*.pem";          effect = "deny";  }
+    { action = "read";               resource = "*.key";          effect = "deny";  }
+    { action = "read";               resource = "*.p12";          effect = "deny";  }
+    { action = "read";               resource = "*.pfx";          effect = "deny";  }
+    { action = "read";               resource = "id_*";           effect = "deny";  }
+    # Decrypting secrets is the leak path, not reading ciphertext — the sops
+    # yaml files stay readable so agents can edit recipients/keys structure.
+    { action = "shell";              resource = "sops -d *";              effect = "deny"; }
+    { action = "shell";              resource = "sops --decrypt *";       effect = "deny"; }
+    { action = "shell";              resource = "sops decrypt *";         effect = "deny"; }
+    { action = "shell";              resource = "sops exec-env *";        effect = "deny"; }
+    { action = "shell";              resource = "sops exec-file *";       effect = "deny"; }
+    { action = "shell";              resource = "sops output *";          effect = "deny"; }
+    # Master identity for the repo's sops secrets (shell.nix `sops()` uses this).
+    { action = "shell";              resource = "secret-tool lookup *";   effect = "deny"; }
     { action = "read";               resource = "~/.config/shell-secrets/**"; effect = "deny"; }
     { action = "read";               resource = "~/.config/tray-links/*key*"; effect = "deny"; }
     { action = "read";               resource = "~/.config/sops/**";          effect = "deny"; }
+    # sops age identity materialised to tmpfs at login (sops-age-key.nix).
+    { action = "read";               resource = "//run/user/*/sops-age/**";     effect = "deny"; }
+    { action = "read";               resource = "~/.local/share/keyrings/**"; effect = "deny"; }
     { action = "read";               resource = "~/.ssh/**";                  effect = "deny"; }
     { action = "read";               resource = "~/.gnupg/**";                effect = "deny"; }
   ];
@@ -96,6 +116,9 @@ let
     "$schema"           = "https://json.schemastore.org/claude-code-settings.json";
     includeCoAuthoredBy = false;
     effortLevel         = "medium";
+    # Never auto-delete transcripts (default 30d) — full history stays
+    # searchable via cass; secrets are handled by scripts/security/ instead.
+    cleanupPeriodDays   = 0;
     # Render in the fullscreen (alt-screen) renderer by default every session. https://code.claude.com/docs/en/fullscreen
     # Makes copying easier as it eliminates line breaks and doesn't require SHIFT + CTRL + C
     # Equivalent to running `/tui fullscreen` once; toggle live with `/tui default`.
@@ -245,12 +268,34 @@ let
         "Read(!.env.example)"
         "Read(!.env.*.example)"
         "Read(!.env.example.*)"
+        # Key material at any depth under the cwd — keys kept outside ~/.ssh
+        # (certs/, secrets/, /tmp dumps). Ciphertext like *.crt isn't denied:
+        # public certs hold no secret.
+        "Read(*.pem)"
+        "Read(*.key)"
+        "Read(*.p12)"
+        "Read(*.pfx)"
+        "Read(id_*)"
+        # Decrypting secrets is the leak path. The sops yaml ciphertext stays
+        # readable; edit (`sops file.yaml`) still works and prompts normally.
+        "Bash(sops -d *)"
+        "Bash(sops --decrypt *)"
+        "Bash(sops decrypt *)"
+        "Bash(sops exec-env *)"
+        "Bash(sops exec-file *)"
+        "Bash(sops output *)"
+        # Master identity for the repo's sops secrets (shell.nix `sops()`).
+        "Bash(secret-tool lookup *)"
         # sops-decrypted materialized secrets (ai-secrets.nix, shell.nix)
         "Read(~/.config/shell-secrets/**)"
         # Tray-Links reads this directly via the sops path (ai-secrets.nix)
         "Read(~/.config/tray-links/*key*)"
         # age master key — unlocks every sops secret
         "Read(~/.config/sops/**)"
+        # sops age identity on tmpfs (sops-age-key.nix materialises it at login)
+        "Read(//run/user/*/sops-age/**)"
+        # Login keyring (contains the same identity, plus app secrets)
+        "Read(~/.local/share/keyrings/**)"
         "Read(~/.ssh/**)"
         "Read(~/.gnupg/**)"
       ];
