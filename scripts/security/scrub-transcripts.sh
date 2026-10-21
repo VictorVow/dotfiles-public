@@ -26,11 +26,15 @@
 # "sqlite://<db>" and carries a high-water mark on the row time_updated — only
 # rows newer than the mark (plus rows still marked dirty) are re-scanned.
 # The cass archive sits under "cass://<db>" with a hwm on
-# conversations.last_message_created_at; "cass://pending" stores exact
-# source_path globs awaiting a successful `cass forget` (retried each run).
+# conversations.last_message_created_at; "cass://pending" is a dict of
+# {path_or_glob: "exact"|"glob"} awaiting a successful `cass forget` (retried
+# each run, capped per run since cass rebuilds its index per call).
 #
 # Safety:
-#   * --dry-run prints what would change, touches nothing (files, sqlite, cass).
+#   * --dry-run prints what would change; it still writes the state file so
+#     repeat dry-runs and the next real run stay incremental (clean-scan cache),
+#     but it never edits transcripts, sqlite rows, or the cass archive and
+#     never executes pending cass forgets.
 #   * files/rows touched in the last 5 minutes are skipped (live session?).
 #   * findings whose Secret is <8 bytes are skipped (too risky to splice).
 #
@@ -236,8 +240,19 @@ for db in db_targets:
 
     state[key] = {"hwm": new_hwm, "dirty": still_dirty}
 
-if not dry:
-    save_state(state_file, state)
+def pending_map(state):
+    pend = state.get("cass://pending", {})
+    if isinstance(pend, list):  # migrate the old bare-list format
+        pend = {g: "exact" for g in pend}
+    return dict(pend)
+
+def glob_escape(s):
+    return "".join(f"[{c}]" if c in "*?[" else c for c in s)
+
+# cass accepts ONE --source-glob per call and does not expand {a,b} braces, so
+# batching means capping attempts per run -- each forget rewrites the index --
+# and carrying the rest in cass://pending for the next run.
+MAX_FORGET_ATTEMPTS = 100
 
 # ---------------- cass archive (agent_search.db) ----------------------------
 # Dump messages.content per conversation, gitleaks-scan once, and forget every
@@ -261,63 +276,56 @@ if cass and cass_db and os.path.exists(cass_db):
                               os.path.join(report_dir, "cass-frag.json"),
                               scan_errors)
 
+    hits_by_conv = {}
+    new_forgets = []
     if chits is not None:
-        hits_by_conv = {}
         for h in chits:
             fn = h.get("File")
             if fn in conv_files:
                 hits_by_conv.setdefault(conv_files[fn], []).append(h)
         still_cdirty = []
-    new_forgets = []
-    for spath, convhits in hits_by_conv.items():
-        # A conversation whose source file is gone has its archive copy as
-        # the last remaining record -- forgetting deletes it for good, and
-        # noisy rules (generic-api-key) can false-positive. List it for
-        # manual review instead of auto-deleting on an unattended run.
-        # opencode.db/<session> pseudo-paths exist iff their db does.
-        source_gone = not os.path.exists(spath) and not any(
-            spath.startswith(d + os.sep) for d in db_targets)
-        if source_gone:
-            print(f"cass review ---  {spath} (source gone; {len(convhits)} hits -- "
-                  f"run `cass forget --source-glob '{spath}' --apply` manually if real)",
-                  file=sys.stderr)
-        elif dry:
-            print(f"dry-run  {len(convhits):3d}  cass:{spath}")
-            new_forgets.append(spath)
-        else:
-            new_forgets.append(spath)
-        still_cdirty.append(spath)
-    if not dry:
-        pending = state.get("cass://pending", [])
-        pending.extend(new_forgets)
+        for spath, convhits in hits_by_conv.items():
+            # A conversation whose source file is gone has its archive copy as
+            # the last remaining record -- forgetting deletes it for good, and
+            # noisy rules (generic-api-key) can false-positive. List it for
+            # manual review instead of auto-deleting on an unattended run.
+            # opencode.db/<session> pseudo-paths exist iff their db does.
+            source_gone = not os.path.exists(spath) and not any(
+                spath.startswith(d + os.sep) for d in db_targets)
+            if source_gone:
+                print(f"cass review ---  {spath} (source gone; {len(convhits)} hits -- "
+                      f"run `cass forget --source-glob '{spath}' --apply` manually if real)",
+                      file=sys.stderr)
+            else:
+                if dry:
+                    print(f"dry-run  {len(convhits):3d}  cass:{spath}")
+                new_forgets.append(spath)
+            still_cdirty.append(spath)
         state[ckey] = {"hwm": new_chwm, "dirty": sorted(set(still_cdirty))}
-        if pending:
-            state["cass://pending"] = sorted(set(pending))
+        if new_forgets:
+            pend = pending_map(state)
+            pend.update({p: "exact" for p in new_forgets})
+            state["cass://pending"] = pend
 
-# -- cass forget: scrubbed sources + cass-scan hits, batched ------------------
+# -- cass forget: scrubbed sources + cass-scan hits ---------------------------
 # Forget uses each conversation's full source_path as an exact-match glob
 # (meta chars escaped): basename globs would forget unrelated sessions that
-# share a filename (e.g. copilot's events.jsonl). Pending globs live in the
-# state file so a failed/missing cass retries on the next run. Exact paths are
-# collapsed into ONE brace glob so cass rebuilds its index once per run
-# instead of once per path; non-exact patterns run individually.
-forgotten = 0
-# pending maps glob -> exact (True = escape all meta chars / match one path)
-pending = {g: True for g in state.get("cass://pending", [])}
+# share a filename (e.g. copilot's events.jsonl). Pending is a dict
+# {path_or_glob: "exact"|"glob"} so pre-escaped vs pattern entries survive
+# state round-trips; a failed/missing cass retries on the next run.
+forgotten = attempts = 0
+pending = pending_map(state)
 if not dry:
     for p in scrubbed_paths:
         # scrubbed source: forget the archived copy; it re-indexes clean
-        pending[p] = True
+        pending[p] = "exact"
     if db_stats["rows_patched"]:
         for db in db_targets:
-            pending[db + "/*"] = False  # '…/opencode.db/<session>' pseudo-paths
-    if pending:
-        state["cass://pending"] = sorted(pending)
-    else:
-        state.pop("cass://pending", None)
-
-def glob_escape(s):
-    return "".join(f"[{c}]" if c in "*?[" else c for c in s)
+            pending[db + "/*"] = "glob"  # '…/opencode.db/<session>' pseudo-paths
+if pending:
+    state["cass://pending"] = pending
+else:
+    state.pop("cass://pending", None)
 
 if cass and pending:
     if not os.path.exists(cass_bin):
@@ -327,40 +335,38 @@ if cass and pending:
         print(f"cass: {len(pending)} forgets pending; agent_search.db not a target",
               file=sys.stderr)
     elif not dry:
-        exacts = sorted(g for g, e in pending.items() if e)
-        patterns = sorted(g for g, e in pending.items() if not e)
-        jobs = [("{" + ",".join(glob_escape(g) for g in exacts) + "}", exacts)] \
-            if exacts else []
-        jobs += [(g, [g]) for g in patterns]
-        for pat, globs in jobs:
+        for g in sorted(pending):
+            if attempts >= MAX_FORGET_ATTEMPTS:
+                break
+            attempts += 1
+            pat = glob_escape(g) if pending[g] == "exact" else g
             r = subprocess.run(
                 [cass_bin, "forget", "--source-glob", pat,
                  "--apply", "--db", cass_db, "--json"],
                 capture_output=True, text=True)
             if r.returncode == 0:
-                forgotten += len(globs)
-                for g in globs:
-                    del pending[g]
+                forgotten += 1
+                del pending[g]
             else:
                 print(f"cass forget failed for {pat}: {r.stderr.strip()[:200]}",
                       file=sys.stderr)
 
 if dry:
-    queued = sorted(set(state.get("cass://pending", []))
-                    | set(scrubbed_paths))
-    if cass and cass_db and db_targets:
+    queued = sorted(set(pending) | set(scrubbed_paths))
+    if cass and cass_db and db_stats["rows_patched"]:
         queued += [db + "/*" for db in db_targets]
     for g in queued:
         print(f"dry-run  ---  cass forget {g}")
     print(f"(dry-run: {len(queued)} cass forgets queued)")
 elif pending:
-    state["cass://pending"] = sorted(pending)
+    state["cass://pending"] = pending
 else:
     state.pop("cass://pending", None)
 
-# re-write state now that cass://pending may have changed
-if not dry:
-    save_state(state_file, state)
+# dry-run saves state too: clean files/rows stay cached (dirty entries carry
+# findings, so they're always re-scanned), which keeps repeat dry-runs and the
+# next real run incremental instead of re-scanning everything.
+save_state(state_file, state)
 
 for e in scan_errors:
     print(f"scan error: {e}", file=sys.stderr)

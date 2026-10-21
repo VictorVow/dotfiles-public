@@ -161,8 +161,14 @@ if cass_db and os.path.exists(cass_db):
         still_cdirty = sorted(cdirty & set(conv_files.values()) | hit_paths)
         state[ckey] = {"hwm": new_chwm, "dirty": still_cdirty}
         if hit_paths:
-            pending = set(state.get("cass://pending", [])) | hit_paths
-            state["cass://pending"] = sorted(pending)
+            # pending is a dict {path_or_glob: "exact"|"glob"} shared with the
+            # scrubber; keep the format (a bare list would lose the glob flags).
+            pend = state.get("cass://pending", {})
+            if isinstance(pend, list):
+                pend = {g: "exact" for g in pend}
+            pend = dict(pend)
+            pend.update({p: "exact" for p in hit_paths})
+            state["cass://pending"] = pend
 
 save_state(state_file, state)
 
