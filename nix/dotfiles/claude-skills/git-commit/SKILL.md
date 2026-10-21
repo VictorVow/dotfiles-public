@@ -30,8 +30,12 @@ description: Make a git commit of the changes from this Claude session.
       Promise that resolves to a ChatCompletionResponseMessage object. The OpenAI
       class is exported as a singleton instance named api.
     - fix(README): fixed two small typos
-- Do not `git push` unless the remote is a example.com URL. Check with `git remote -v`
-  first — never infer the remote from commit authors, branch names or repo contents. If the
-  remote is not a example.com URL, then don't push unless it's necessary because a pull
-  request, workflow action or something else in our intended next steps needs the commit pushed first.
+- Check the remote with `git remote -v` — never infer it from commit authors, branch names or
+  repo contents.
+  - If the remote is a example.com URL: always `git push` after committing. Do NOT ask
+    for permission first — pushing to this remote is pre-approved. After pushing, tell the
+    user that the commit was pushed.
+  - If the remote is not a example.com URL, then don't push unless it's necessary
+    because a pull request, workflow action or something else in our intended next steps
+    needs the commit pushed first.
 
