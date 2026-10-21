@@ -49,11 +49,24 @@ let
   # paths (incl. /tmp) are allowed without a prompt (v2 default; v1 asks), and
   # .env files are denied (v1 default; v2 only asks).
   # https://opencode.ai/v2/docs/permissions/ · https://opencode.ai/docs/permissions/
+  # Mirrored in `permissions.deny` for Claude Code below (minus the
+  # external_directory entry, which is opencode-only). v2 evaluates this
+  # ordered list last-match-wins, so the `*.env.example*` allows must come
+  # after the `*.env*` denies. In v1's flattened {pattern: effect} map,
+  # ordering is alphabetical and `*.env.*` < `*.env.example`, so the
+  # example allows still come out on top.
   opencodePermissions = [
     { action = "external_directory"; resource = "*";              effect = "allow"; }
     { action = "read";               resource = "*.env";          effect = "deny";  }
     { action = "read";               resource = "*.env.*";        effect = "deny";  }
     { action = "read";               resource = "*.env.example";  effect = "allow"; }
+    { action = "read";               resource = "*.env.*.example"; effect = "allow"; }
+    { action = "read";               resource = "*.env.example.*"; effect = "allow"; }
+    { action = "read";               resource = "~/.config/shell-secrets/**"; effect = "deny"; }
+    { action = "read";               resource = "~/.config/tray-links/*key*"; effect = "deny"; }
+    { action = "read";               resource = "~/.config/sops/**";          effect = "deny"; }
+    { action = "read";               resource = "~/.ssh/**";                  effect = "deny"; }
+    { action = "read";               resource = "~/.gnupg/**";                effect = "deny"; }
   ];
   # v1 shape: { <action> = { <pattern> = <effect>; }; }, with v2's renamed
   # actions mapped back. Nix attrsets serialise with sorted keys, so within an
@@ -216,6 +229,30 @@ let
         "Bash(wl-copy)"
         "Bash(code:*)"
         "Bash(fc-list)"
+      ];
+      # Deny rules: kept in sync with the opencode `permissions` list above.
+      # A Read deny also covers built-ins that read files (Grep/Glob), the
+      # file commands Claude Code recognizes in Bash (cat, head, tail, sed),
+      # and Bash redirection targets. `!` negations inside the deny list
+      # carve exceptions out of cwd-relative rules only (they can't reach
+      # `~/`- or `//`-anchored rules). Docs: code.claude.com/docs/en/
+      # permissions#read-and-edit
+      deny = [
+        # .env at any depth under the cwd (deny rules match single-segment
+        # names at any depth), except the example/template files.
+        "Read(.env)"
+        "Read(.env.*)"
+        "Read(!.env.example)"
+        "Read(!.env.*.example)"
+        "Read(!.env.example.*)"
+        # sops-decrypted materialized secrets (ai-secrets.nix, shell.nix)
+        "Read(~/.config/shell-secrets/**)"
+        # Tray-Links reads this directly via the sops path (ai-secrets.nix)
+        "Read(~/.config/tray-links/*key*)"
+        # age master key — unlocks every sops secret
+        "Read(~/.config/sops/**)"
+        "Read(~/.ssh/**)"
+        "Read(~/.gnupg/**)"
       ];
     };
     # Devin CLI also reads these but rejects the whole block (no `Notification` event).
