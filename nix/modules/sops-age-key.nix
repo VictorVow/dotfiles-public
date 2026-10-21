@@ -50,12 +50,16 @@ in
     Service = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = pkgs.writeShellScript "sops-age-key-materialise" ''
+      # Write to a temp file then mv over: on re-runs `key` is already 0400,
+      # which a plain `>` redirect can't open for writing.
+      ExecStart        = pkgs.writeShellScript "sops-age-key-materialise" ''
         set -euo pipefail
         d="${runtimeDir}/sops-age"
         install -d -m 700 "$d"
-        ${pkgs.libsecret}/bin/secret-tool lookup service sops-age key identity > "$d/key"
-        chmod 400 "$d/key"
+        tmp="$(mktemp -p "$d" key.XXXXXX)"
+        ${pkgs.libsecret}/bin/secret-tool lookup service sops-age key identity > "$tmp"
+        chmod 400 "$tmp"
+        mv -f "$tmp" "$d/key"
       '';
     };
     Install.WantedBy = [ "default.target" ];
