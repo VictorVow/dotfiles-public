@@ -9,7 +9,7 @@ description: >-
 Two parts work together:
 
 - **`chromium-devtools` MCP** (`chrome-devtools-mcp`, registered in `~/Projects/installs/nix/modules/ai-agents.nix` with `--browserUrl http://127.0.0.1:9223`) provides the tools. Its tools are deferred, so load them with `ToolSearch` query `chromium-devtools` (names look like `mcp__chromium-devtools__list_pages`). If they don't show up, the MCP isn't registered in this session: ask the user to run `hms` and restart the agent. Unlike the Firefox MCP it serves its tool list even when nothing is listening on the port yet — the failure surfaces on the first page-scoped call.
-- **`~/Projects/installs/scripts/chromium-remote-debug.sh`** switches the browser in and out of remote-debug mode. Chromium can only open the CDP port at launch (`--remote-debugging-port`), so the MCP can't attach to a normally started browser.
+- **`~/Projects/installs/scripts/chromium-remote-debug.sh`** switches a browser instance in and out of remote-debug mode. Chromium can only open the CDP port at launch (`--remote-debugging-port`), so the MCP can't attach to a normally started browser. Instances are keyed by `--user-data-dir`: `-u DIR -P PORT` brings up a fully separate debuggable browser (own profile, own port) alongside the real session.
 
 ## 1. Choose the right tool first
 
@@ -17,19 +17,30 @@ Two parts work together:
 |---|---|
 | A web page misbehaves in the user's real (logged-in) session: JS errors, broken layout, failed requests, "what does this page do" | This skill (MCP) |
 | A page must be driven as the user — cookies, login, paywall — in Chromium | This skill (MCP) |
-| A clean-slate / automation browser with no cookies is fine (tests, scraping, throwaway sessions) | Don't touch the user's profile: let the MCP launch its own isolated browser instead (`chrome-devtools-mcp` with no `--browserUrl`, or `--isolated`). Ask the user first if unsure |
+| A clean-slate / automation browser with no cookies is fine (tests, scraping, throwaway sessions, parallel agents) | Use the `chromium-devtools-isolated` MCP — it launches its own throwaway headless browser per MCP process, no port or script needed. Nothing below applies to it |
 | Firefox session | `firefox-live-debug` skill instead |
 | Whole browser frozen or crashing | Chromium has no toolkit playbook like `scripts/firefox-debugging/`; check `chrome://crashes` output, `~/.config/chromium/Crash Reports`, and `journalctl --user` first |
 
 ## 2. Get the session attachable
 
-1. Run `chromium-remote-debug.sh status` — add `-b chrome` or `-b brave` for the other browsers, `-p NAME` for a non-default profile directory (e.g. `-p "Profile 1"`).
+1. Run `chromium-remote-debug.sh status` — add `-b chrome` or `-b brave` for the other browsers, `-p NAME` for a non-default profile directory (e.g. `-p "Profile 1"`), `-u DIR -P PORT` for a non-default instance/port.
 2. If it reports "running normally", **ask the user before running `on`**. It quits the browser (SIGTERM, so the session is saved) and relaunches it with `--remote-debugging-port 9223`. Unsaved form input in open tabs is lost, and the user may be in the middle of something.
 3. `on` waits until `http://127.0.0.1:9223/json/version` answers. If it times out, check `status` again; a session with many windows can be slow to start.
 
 While in remote-debug mode the browser shows a yellow "unsupported flag / debugging" banner on first navigation in some builds, and `navigator.webdriver` is NOT set (that's Puppeteer, not CDP) — but bot-protected sites can still fingerprint an open CDP port, so treat it as time-limited either way.
 
 Port note: this setup deliberately uses **9223**, not Chrome's conventional 9222, so it can't collide with the Firefox BiDi endpoint (`ff-remote-debug.sh` uses 9222) and both can be debuggable at once.
+
+### Multiple instances
+
+One MCP server = one CDP endpoint, so concurrent agents driving *different* browsers each need their own `chrome-devtools-mcp` registration with a different `--browserUrl` (e.g. `chromium-devtools-agent` → `http://127.0.0.1:9224`), plus a matching browser instance:
+
+- `chromium-remote-debug.sh -u ~/.local/state/chrome-agent -P 9224 on` starts a separate, clean-profile Chromium debugging on :9224, alongside the real session. Each `-u` dir is a full instance (own cookies/extensions); each needs a unique `-P` port.
+- `list` shows every running instance and its debug port; `status`/`stop`/`off` accept the same `-u/-P` to act on one instance only — killing the :9224 instance won't touch the :9223 or undebugged session.
+- Multiple agents in **one** browser need no extra setup: tools are `pageId`-scoped and `new_page isolatedContext` gives per-tab cookie isolation.
+- Simplest of all when the real profile isn't needed: `chromium-devtools-isolated` (registered in `ai-agents.nix`, `--isolated --headless --executablePath <nix chromium>`) launches its own throwaway browser on first tool call — nothing to toggle, profile deleted when it closes. Any number of agents can use it concurrently; each MCP process spawns independently.
+
+After bringing an instance up, point tools at the matching MCP server name; the browser behind `chromium-devtools` (:9223) and any `chromium-devtools-agent` (:9224) are different browsers with different pageIds.
 
 ## 3. Rules for working in someone's real session
 
@@ -55,4 +66,4 @@ Console and network buffers only capture events after the MCP attached to that p
 ## 5. Finish
 
 1. Close your own tabs (`close_page`).
-2. Tell the user the browser is still in remote-debug mode and **offer to run `chromium-remote-debug.sh off`** (another quit + relaunch) so the CDP port closes. Don't leave it on silently — an open debugging port is a local privilege boundary: any local process can drive the whole logged-in session.
+2. Tell the user the browser is still in remote-debug mode and **offer to run `chromium-remote-debug.sh off`** (another quit + relaunch) so the CDP port closes. For a throwaway `-u` instance use `stop` (quit without relaunch) — there's nothing to restore. Don't leave it on silently — an open debugging port is a local privilege boundary: any local process can drive everything in that profile.

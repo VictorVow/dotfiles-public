@@ -32,15 +32,32 @@ let
   # Chrome DevTools MCP (Google) — attaches to a running Chromium-family browser
   # over CDP at http://127.0.0.1:9223: tabs, DOM snapshot, console, network,
   # JS eval, performance traces, screencast. The browser must be relaunched with
-  # --remote-debugging-port first (scripts/chromium-remote-debug.sh on); unlike
-  # the Firefox MCP the server starts fine with nothing listening yet and
-  # connects on first tool call. Procedure lives in the chromium-live-debug
-  # skill. --workspace lets its file-writing tools (screenshots, snapshots,
-  # trace dumps) write outside the OS temp dir.
+  # --remote-debugging-port first (scripts/chromium-remote-debug.sh on; -u/-P
+  # for additional per-port instances); unlike the Firefox MCP the server
+  # starts fine with nothing listening yet and connects on first tool call.
+  # One server = one --browserUrl, so a second debuggable browser needs another
+  # registration here. Procedure lives in the chromium-live-debug skill.
+  # --workspace lets its file-writing tools (screenshots, snapshots, trace
+  # dumps) write outside the OS temp dir.
   chromiumDevtoolsMcp = {
     command = "npx";
     args    = [ "-y" "chrome-devtools-mcp@latest"
                 "--browserUrl" "http://127.0.0.1:9223"
+                "--usageStatistics" "false" "--performanceCrux" "false"
+                "--workspace" "/tmp" "--workspace" "/home/boss/Projects" ];
+  };
+
+  # Throwaway-browser variant: no --browserUrl, so the MCP launches its own
+  # Chromium on first tool call. --isolated gives it a temp user-data-dir that
+  # is deleted when the browser closes; --executablePath pins it to the Nix
+  # ungoogled-chromium instead of the default Google "stable" channel lookup.
+  # Clean profile (no cookies/logins) — for automation and testing, not for
+  # driving the user's real session. Drop --headless for a visible window.
+  chromiumDevtoolsMcpIsolated = {
+    command = "npx";
+    args    = [ "-y" "chrome-devtools-mcp@latest"
+                "--isolated" "--headless"
+                "--executablePath" "${pkgs.ungoogled-chromium}/bin/chromium"
                 "--usageStatistics" "false" "--performanceCrux" "false"
                 "--workspace" "/tmp" "--workspace" "/home/boss/Projects" ];
   };
@@ -446,7 +463,9 @@ in
       firefox-devtools = firefoxDevtoolsMcp;
 
       # Chrome DevTools — see chromiumDevtoolsMcp in the let block (also given to Claude Code).
-      chromium-devtools = chromiumDevtoolsMcp;
+      # -isolated launches its own throwaway browser (no --browserUrl, no script needed).
+      chromium-devtools          = chromiumDevtoolsMcp;
+      chromium-devtools-isolated = chromiumDevtoolsMcpIsolated;
 
     };
   };
@@ -459,9 +478,10 @@ in
     package = llmAgents.claude-code;
     # Whole-registry enableMcpIntegration is available but deliberately off; opt in per server.
     mcpServers = {
-      nixos             = nixosMcp;
-      firefox-devtools  = firefoxDevtoolsMcp;
-      chromium-devtools = chromiumDevtoolsMcp;
+      nixos                      = nixosMcp;
+      firefox-devtools           = firefoxDevtoolsMcp;
+      chromium-devtools          = chromiumDevtoolsMcp;
+      chromium-devtools-isolated = chromiumDevtoolsMcpIsolated;
     };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
@@ -628,6 +648,10 @@ in
       type    = "local";
       command = [ chromiumDevtoolsMcp.command ] ++ chromiumDevtoolsMcp.args;
     };
+    mcp.servers.chromium-devtools-isolated = {
+      type    = "local";
+      command = [ chromiumDevtoolsMcpIsolated.command ] ++ chromiumDevtoolsMcpIsolated.args;
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
@@ -684,6 +708,10 @@ in
     mcp.chromium-devtools = {
       type    = "local";
       command = [ chromiumDevtoolsMcp.command ] ++ chromiumDevtoolsMcp.args;
+    };
+    mcp.chromium-devtools-isolated = {
+      type    = "local";
+      command = [ chromiumDevtoolsMcpIsolated.command ] ++ chromiumDevtoolsMcpIsolated.args;
     };
   };
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
