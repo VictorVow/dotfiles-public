@@ -1,0 +1,63 @@
+{ pkgs, ... }:
+
+# The sops-nix age identity is NOT stored as a plaintext file at a persistent
+# path. It lives in the Secret Service keyring (KWallet via ksecretd, see
+# modules/desktop.nix) under the lookup attributes:
+#
+#   service = sops-age
+#   key     = identity
+#
+# At login this oneshot service materialises it into
+# $XDG_RUNTIME_DIR/sops-age/key (tmpfs, 0400, dies on reboot/logout) so
+# sops-nix.service — ordered After this unit — can decrypt nix/secrets/*.yaml.
+#
+# Why: a static ~/.config/sops/age/keys.txt is readable by any process running
+# as this uid (incl. AI agents with file-read access); one read decrypts the
+# whole secrets store. The keyring adds a layer the file didn't have.
+#
+# One-time setup (manual): store the identity once, then delete keys.txt:
+#   secret-tool store --label="sops age identity" service sops-age key identity \
+#     < ~/.config/sops/age/keys.txt
+#   shred -u ~/.config/sops/age/keys.txt
+#
+# Failure mode: wallet locked / no D-Bus session (e.g. `hms` over ssh before
+# graphical login) -> this unit fails and sops-nix fails with it. Unlock/login,
+# then `systemctl --user restart sops-age-key sops-nix`.
+#
+# Interactive `sops` (sops -d, sops nix/secrets/*.yaml) does NOT read this file
+# — it gets SOPS_AGE_KEY from the `sops()` shell function in shell.nix, which
+# queries the keyring directly.
+#
+# The uid is baked in because sops.age.keyFile lands in the sops-nix manifest
+# at eval time — systemd specifiers like %t never get expanded, and HM exposes
+# no home.uid option. 1000 is this machine's first (and only) regular user;
+# shell.nix derives XDG_RUNTIME_DIR the same way at runtime.
+let
+  runtimeDir = "/run/user/1000";
+  keyPath = "${runtimeDir}/sops-age/key";
+in
+{
+  # Single source of truth for the key path — rclone.nix and ai-secrets.nix
+  # both reference this. sops-nix reads the file at ExecStart, by which time
+  # the service below has written it.
+  sops.age.keyFile = keyPath;
+
+  systemd.user.services.sops-age-key = {
+    Unit = {
+      Description = "Materialise sops age identity from Secret Service";
+      Before = [ "sops-nix.service" ];
+    };
+    Service = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "sops-age-key-materialise" ''
+        set -euo pipefail
+        d="${runtimeDir}/sops-age"
+        install -d -m 700 "$d"
+        ${pkgs.libsecret}/bin/secret-tool lookup service sops-age key identity > "$d/key"
+        chmod 400 "$d/key"
+      '';
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+}

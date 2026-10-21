@@ -68,6 +68,15 @@ in
         env "$var=$(cat "$file")" "$@"
       }
 
+      # sops's age identity lives in the Secret Service keyring (KWallet via
+      # ksecretd), not ~/.config/sops/age/keys.txt — see sops-age-key.nix for
+      # why and for the systemd path used by sops-nix.service. Interactive
+      # sops gets it via SOPS_AGE_KEY here so `sops nix/secrets/*.yaml` and
+      # Ansible `sops -d` lookups keep working.
+      sops() {
+        SOPS_AGE_KEY="$(secret-tool lookup service sops-age key identity)" command sops "$@"
+      }
+
       # ── Homebrew (Linux) ────────────────────────────────────────────────────
       # Homebrew is kept for packages not available in nixpkgs.
       # The nix-managed PATH takes priority; Homebrew fills in the gaps.
@@ -439,7 +448,7 @@ in
   # Same pattern as modules/ai-secrets.nix: explicit stable paths so
   # `with-secret` (initExtra) can `cat` them. Edit with: sops nix/secrets/shell.yaml
   sops = {
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    # age.keyFile is set centrally in modules/sops-age-key.nix.
     secrets = lib.genAttrs [ "github_token" ] (name: {
       sopsFile = ../secrets/shell.yaml;
       path = "${config.home.homeDirectory}/.config/shell-secrets/${name}";

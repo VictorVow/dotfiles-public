@@ -38,6 +38,7 @@
     ./modules/gui-apps.nix   # home.programs.* for GUI apps (Rofi, OBS)
     ./modules/shell.nix      # Shell environment, PATH additions, aliases
     ./modules/distrobox.nix  # Declarative distrobox container definitions
+    ./modules/sops-age-key.nix # sops age identity: Secret Service → $XDG_RUNTIME_DIR (sops.age.keyFile)
     ./modules/rclone.nix     # Declarative rclone remotes (sops-encrypted credentials)
     ./modules/ai-secrets.nix # sops-encrypted AI provider keys (OpenRouter → Tray-Links, FreeLLMAPI → OpenCode)
     ./modules/services.nix   # User-level systemd services (ollama, etc.)

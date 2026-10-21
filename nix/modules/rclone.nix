@@ -56,8 +56,9 @@ let
 in
 {
   sops = {
-    # Private age identity (never committed). Matches the recipient in .sops.yaml.
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    # The private age identity path (matching the recipient in .sops.yaml) is
+    # set centrally in modules/sops-age-key.nix — materialised from Secret
+    # Service at login, not a plaintext file.
     defaultSopsFile = ../secrets/rclone.yaml;
     secrets = lib.genAttrs secretNames (_: { });
   };

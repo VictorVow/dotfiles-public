@@ -12,7 +12,8 @@
 # /run/user/<uid>/...
 {
   sops = {
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    # age.keyFile is set centrally in modules/sops-age-key.nix (materialised
+    # from Secret Service at login).
     secrets."openrouter_api_key" = {
       sopsFile = ../secrets/ai.yaml;
       path = "${config.home.homeDirectory}/.config/tray-links/openrouter_api_key";
