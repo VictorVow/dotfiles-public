@@ -45,6 +45,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+CASS_DATA_DIR="${CASS_DATA_DIR:-$HOME/.local/share/coding-agent-search}"
+# raw-mirror is cass-owned + content-addressed; the archive is scanned via
+# agent_search.db (CASS_DB) instead.
 FILE_TARGETS=(
   "$HOME/.claude/projects"
   "$HOME/.config/codex/sessions"
@@ -54,15 +57,15 @@ FILE_TARGETS=(
   "$HOME/.local/share/devin"
   "$HOME/.local/share/opencode/storage"
   "$HOME/.opencode1/data/opencode/storage"
-  "$HOME/.local/share/coding-agent-search/raw-mirror"
 )
 DB_TARGETS=(
   "$HOME/.local/share/opencode/opencode.db"
   "$HOME/.opencode1/data/opencode/opencode.db"
 )
+CASS_DB="$CASS_DATA_DIR/agent_search.db"
 
 if [ "$#" -gt 0 ]; then
-  FILE_TARGETS=(); DB_TARGETS=()
+  FILE_TARGETS=(); DB_TARGETS=(); CASS_DB=""
   for t in "$@"; do
     [ -e "$t" ] || continue
     if [[ "$t" == *.db ]]; then DB_TARGETS+=("$(readlink -f "$t")")
@@ -72,14 +75,18 @@ else
   _f=(); for t in "${FILE_TARGETS[@]}"; do [ -e "$t" ] && _f+=("$(readlink -f "$t")"); done; FILE_TARGETS=("${_f[@]+"${_f[@]}"}")
   _d=(); for t in "${DB_TARGETS[@]}";   do [ -e "$t" ] && _d+=("$(readlink -f "$t")"); done; DB_TARGETS=("${_d[@]+"${_d[@]}"}")
 fi
-[ "${#FILE_TARGETS[@]}" -gt 0 ] || [ "${#DB_TARGETS[@]}" -gt 0 ] || { echo "no transcript stores exist" >&2; exit 2; }
+[ "${#FILE_TARGETS[@]}" -gt 0 ] || [ "${#DB_TARGETS[@]}" -gt 0 ] || [ -n "$CASS_DB" ] || { echo "no transcript stores exist" >&2; exit 2; }
 
 mkdir -p "$STATE_DIR"
 [ -f "$STATE_FILE" ] || echo '{}' > "$STATE_FILE"
+# Serialise with scrub-transcripts.sh: concurrent runs interleave gitleaks
+# invocations and overwrite each other's state file.
+exec 9>"$STATE_DIR/lock"
+flock -n 9 || { echo "another transcript-scrub run is in progress" >&2; exit 2; }
 
 FILE_TARGETS_JSON="$(printf '%s\n' "${FILE_TARGETS[@]+"${FILE_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
 DB_TARGETS_JSON="$(printf '%s\n' "${DB_TARGETS[@]+"${DB_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
-export STATE_FILE FULL REPORT CONF FILE_TARGETS_JSON DB_TARGETS_JSON
+export STATE_FILE FULL REPORT CONF CASS_DB FILE_TARGETS_JSON DB_TARGETS_JSON
 python3 - "$REPORT_DIR" <<'PYEOF'
 import json, os, sys, subprocess, sqlite3
 
@@ -135,13 +142,36 @@ for p in to_scan:
                              for f in hits]}
     fresh.extend(hits)
 
-for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite://")]:
+# Prune state only within the roots we walked this run -- a partial run must
+# not wipe entries belonging to other targets.
+prune_roots = [os.path.realpath(r) for r in file_targets]
+for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite://")
+          and any(os.path.realpath(k) == r or os.path.realpath(k).startswith(r + os.sep)
+                  for r in prune_roots)]:
+    del state[k]
+# Same for sqlite: drop only keys whose db was targeted this run and is gone.
+db_prune = {os.path.realpath(d) for d in db_targets}
+for k in [k for k in list(state) if k.startswith("sqlite://")
+          and os.path.realpath(k[len("sqlite://"):]) in db_prune
+          and not os.path.exists(k[len("sqlite://"):])]:
     del state[k]
 
 # ---------------- opencode v1 sqlite ----------------------------------------
 db_fresh = []   # pseudo-findings for the report
+import time; now = time.time()
 for db in db_targets:
     if not os.path.exists(db): continue
+    # WAL mode: writes land in <db>-wal and the main file's mtime barely moves,
+    # so take the newest of db/-wal/-shm. Skip dumping a DB a live agent may be
+    # writing -- an inconsistent dump yields false findings. Applies under
+    # --full too.
+    db_mtime = max(
+        (os.path.getmtime(f) for f in (db, db + "-wal", db + "-shm")
+         if os.path.exists(f)),
+        default=0)
+    if now - db_mtime < 300:
+        print(f"skip {db}: modified <5min ago (live session?)", file=sys.stderr)
+        continue
     key = f"sqlite://{db}"
     ent = state.get(key, {"hwm": 0, "dirty": []})
     hwm = 0 if full else ent.get("hwm", 0)
@@ -211,6 +241,75 @@ for db in db_targets:
     state[key] = {"hwm": new_hwm,
                   "dirty": [{"table": t, "id": i} for t, i in sorted(now_dirty)]}
 
+# ---------------- cass archive (agent_search.db) -----------------------------
+# Dump messages.content per conversation (newer than hwm or still dirty),
+# gitleaks-scan once, surface hits. Hit convs go into the cass://<db> dirty
+# list AND cass://pending so the scrubber forgets them on its next run.
+cass_db = os.environ.get("CASS_DB", "")
+if cass_db and os.path.exists(cass_db):
+    ckey = f"cass://{cass_db}"
+    cent = state.get(ckey, {"hwm": 0, "dirty": []})
+    chwm = 0 if full else cent.get("hwm", 0)
+    cdirty = set(cent.get("dirty", []))
+
+    try:
+        con = sqlite3.connect(f"file:{cass_db}?mode=ro", uri=True)
+    except sqlite3.Error as e:
+        print(f"skip {cass_db}: {e}", file=sys.stderr); con = None
+    if con:
+        conv_ids = {}
+        new_chwm = chwm
+        for cid, spath, lmc in con.execute(
+                "select id, source_path, last_message_created_at from conversations"):
+            ts = lmc or 0
+            if ts <= chwm and spath not in cdirty:
+                continue
+            if ts > new_chwm: new_chwm = ts
+            conv_ids[cid] = spath
+        cdump = os.path.join(report_dir, "cass-convs")
+        os.makedirs(cdump, exist_ok=True)
+        conv_files = {}
+        for cid, spath in conv_ids.items():
+            rows = [r[0] for r in con.execute(
+                "select content from messages where conversation_id = ? order by idx",
+                (cid,))]
+            fn = os.path.join(cdump, f"conv--{cid}")
+            with open(fn, "w") as fh: fh.write("\n".join(x or "" for x in rows))
+            conv_files[fn] = spath
+        con.close()
+
+        frag = os.path.join(report_dir, "cass-frag.json")
+        if os.path.exists(frag): os.remove(frag)
+        chits = []
+        if conv_files:
+            r = subprocess.run(
+                ["gitleaks", "dir", "--config", conf, "--no-banner",
+                 "--exit-code", "0", "--redact",
+                 "--report-format", "json", "--report-path", frag, cdump],
+                stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+            if r.returncode != 0:
+                scan_errors.append(f"{cass_db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+                chits = None
+            else:
+                try: chits = json.load(open(frag))
+                except Exception as e:
+                    scan_errors.append(f"{cass_db}: unreadable gitleaks report: {e}")
+                    chits = None
+        if chits is not None:
+            hit_paths = set()
+            for h in chits:
+                fn = h.get("File")
+                if fn in conv_files:
+                    spath = conv_files[fn]
+                    hit_paths.add(spath)
+                    h["File"] = f"cass:{spath}"
+                    db_fresh.append(h)
+            still_cdirty = sorted(cdirty & set(conv_ids.values()) | hit_paths)
+            state[ckey] = {"hwm": new_chwm, "dirty": still_cdirty}
+            if hit_paths:
+                pending = set(state.get("cass://pending", [])) | hit_paths
+                state["cass://pending"] = sorted(pending)
+
 with open(state_file + ".tmp", "w") as fh:
     json.dump(state, fh)
 os.replace(state_file + ".tmp", state_file)
@@ -222,7 +321,9 @@ with open(os.path.join(report_dir, "scan-errors.txt"), "w") as fh:
 merged = list(fresh)
 seen_files = {f["File"] for f in fresh}
 for p, ent in state.items():
-    if p.startswith("sqlite://") or p in seen_files: continue
+    # sqlite://, cass:// keys and cass://pending (a list, not a dict) aren't
+    # file entries -- the db findings are already in db_fresh.
+    if "://" in p or p in seen_files or not isinstance(ent, dict): continue
     for fnd in ent.get("findings") or []:
         merged.append({"File": p, "RuleID": fnd["rule"], "StartLine": fnd["line"],
                        "Secret": None})
@@ -230,7 +331,6 @@ merged += db_fresh
 
 with open(os.environ["REPORT"], "w") as fh:
     json.dump(merged, fh)
-print(len(to_scan), file=sys.stderr)
 PYEOF
 
 python3 - "$REPORT" "$QUIET" <<'EOF'

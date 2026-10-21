@@ -6,11 +6,17 @@
 #
 # Stores handled:
 #   * JSONL/JSON transcript trees (claude, codex, gemini, openclaw, copilot,
-#     devin, opencode v2 session_diff files, cass raw-mirror) — spliced on
-#     disk via atomic rename.
+#     devin, opencode v2 session_diff files) — spliced on disk via atomic
+#     rename.
 #   * opencode v1 sqlite (opencode.db: message.data + part.data JSON blobs)
 #     — rows dumped to a temp dir, gitleaks-scanned, and patched back with
 #     UPDATE ... SET data = replace(data, secret, marker).
+#   * cass archive (agent_search.db messages.content) — dumped per
+#     conversation and gitleaks-scanned; hit conversations are dropped with
+#     `cass forget --source-glob '<exact source_path>'`. Forget is used rather
+#     than rewriting because the db is cass-owned (frankensqlite, attestations)
+#     and raw-mirror blobs are content-addressed. Covers conversations whose
+#     source file is already gone.
 #
 # Incremental + repeatable: shares the state file written by
 # report-exposed-secrets.sh ($XDG_STATE_HOME/transcript-scrub/state.json).
@@ -19,11 +25,9 @@
 # fresh (state never stores secrets). For sqlite DBs the state key is
 # "sqlite://<db>" and carries a high-water mark on the row time_updated — only
 # rows newer than the mark (plus rows still marked dirty) are re-scanned.
-#
-# cass: after splicing a source file we run
-#   cass forget --source-glob '**/<basename>' --apply
-# so the archive drops the leaked copy; cass-incremental re-indexes the clean
-# version on its next run. --no-cass skips this.
+# The cass archive sits under "cass://<db>" with a hwm on
+# conversations.last_message_created_at; "cass://pending" stores exact
+# source_path globs awaiting a successful `cass forget` (retried each run).
 #
 # Safety:
 #   * --dry-run prints what would change, touches nothing (files, sqlite, cass).
@@ -34,7 +38,7 @@
 #   scrub-transcripts.sh --dry-run            # preview
 #   scrub-transcripts.sh                      # scrub everything + cass archive
 #   scrub-transcripts.sh DIR|DB [DIR|DB...]   # scrub specific dirs/files/.db
-#   scrub-transcripts.sh --no-cass            # skip the cass forget step
+#   scrub-transcripts.sh --no-cass            # skip all cass work
 #   scrub-transcripts.sh --full               # force rescan of everything
 #
 set -euo pipefail
@@ -61,6 +65,9 @@ while [ $# -gt 0 ]; do
 done
 
 # Default file targets (JSONL/JSON stores) + sqlite targets (opencode v1).
+# cass raw-mirror blobs are NOT scanned: they're content-addressed, so splicing
+# them would corrupt cass's blake3 verification — cass copies are handled via
+# `cass forget` on the conversation + the agent_search.db scan below.
 FILE_TARGETS=(
   "$HOME/.claude/projects"
   "$HOME/.config/codex/sessions"
@@ -70,15 +77,15 @@ FILE_TARGETS=(
   "$HOME/.local/share/devin"
   "$HOME/.local/share/opencode/storage"
   "$HOME/.opencode1/data/opencode/storage"
-  "$HOME/.local/share/coding-agent-search/raw-mirror"
 )
 DB_TARGETS=(
   "$HOME/.local/share/opencode/opencode.db"
   "$HOME/.opencode1/data/opencode/opencode.db"
 )
+CASS_DB="$CASS_DATA_DIR/agent_search.db"
 
 if [ "$#" -gt 0 ]; then
-  FILE_TARGETS=(); DB_TARGETS=()
+  FILE_TARGETS=(); DB_TARGETS=(); CASS_DB=""
   for t in "$@"; do
     [ -e "$t" ] || continue
     if [[ "$t" == *.db ]]; then DB_TARGETS+=("$(readlink -f "$t")")
@@ -88,15 +95,20 @@ else
   _f=(); for t in "${FILE_TARGETS[@]}"; do [ -e "$t" ] && _f+=("$(readlink -f "$t")"); done; FILE_TARGETS=("${_f[@]+"${_f[@]}"}")
   _d=(); for t in "${DB_TARGETS[@]}";   do [ -e "$t" ] && _d+=("$(readlink -f "$t")"); done; DB_TARGETS=("${_d[@]+"${_d[@]}"}")
 fi
-[ "${#FILE_TARGETS[@]}" -gt 0 ] || [ "${#DB_TARGETS[@]}" -gt 0 ] || { echo "no transcript stores exist" >&2; exit 1; }
+[ "$CASS" -eq 1 ] || CASS_DB=""
+[ "${#FILE_TARGETS[@]}" -gt 0 ] || [ "${#DB_TARGETS[@]}" -gt 0 ] || [ -n "$CASS_DB" ] || { echo "no transcript stores exist" >&2; exit 1; }
 
 mkdir -p "$STATE_DIR"
 [ -f "$STATE_FILE" ] || echo '{}' > "$STATE_FILE"
+# Serialise runs: a timer + a manual run would otherwise interleave gitleaks
+# invocations and overwrite each other's state file.
+exec 9>"$STATE_DIR/lock"
+flock -n 9 || { echo "another transcript-scrub run is in progress" >&2; exit 1; }
 
 FILE_TARGETS_JSON="$(printf '%s\n' "${FILE_TARGETS[@]+"${FILE_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
 DB_TARGETS_JSON="$(printf '%s\n' "${DB_TARGETS[@]+"${DB_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
-export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DATA_DIR FILE_TARGETS_JSON DB_TARGETS_JSON
-python3 - "$REPORT_DIR" <<PYEOF
+export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DB FILE_TARGETS_JSON DB_TARGETS_JSON
+python3 - "$REPORT_DIR" <<'PYEOF'
 import json, os, sys, subprocess, sqlite3
 
 report_dir = sys.argv[1]
@@ -108,6 +120,7 @@ conf = os.environ["CONF"]
 dry = os.environ["DRY"] == "1"
 cass = os.environ["CASS"] == "1"
 cass_bin = os.environ["CASS_BIN"]
+cass_db = os.environ["CASS_DB"]
 
 state = json.load(open(state_file))
 import time; now = time.time()
@@ -184,8 +197,17 @@ for p in to_scan:
             tmp = p + ".scrub.tmp"
             with open(tmp, "wb") as fh: fh.write(content)
             os.chmod(tmp, os.stat(p).st_mode & 0o777)
-            os.replace(tmp, p)
-            print(f"scrubbed {applied:3d}  {os.path.relpath(p, os.path.expanduser('~'))}")
+            # re-check mtime+size: a live session may have appended between our
+            # read and now -- replacing would silently drop the new line(s).
+            try: cur = os.stat(p)
+            except OSError: cur = None
+            if cur and (cur.st_mtime, cur.st_size) == (st.st_mtime, st.st_size):
+                os.replace(tmp, p)
+                print(f"scrubbed {applied:3d}  {os.path.relpath(p, os.path.expanduser('~'))}")
+            else:
+                os.remove(tmp)
+                print(f"skip     ---  {os.path.relpath(p, os.path.expanduser('~'))} (changed during scrub)", file=sys.stderr)
+                continue
         redacted += applied
         scrubbed_paths.append(p)
     for h in unapplied:
@@ -198,7 +220,18 @@ for p in to_scan:
                 "findings": [{"rule": h["RuleID"], "line": h["StartLine"]}
                              for h in still_dirty]}
 
-for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite://")]:
+# Prune state only within the roots we walked this run -- a partial run must
+# not wipe entries belonging to other targets.
+prune_roots = [os.path.realpath(r) for r in file_targets]
+for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite://")
+          and any(os.path.realpath(k) == r or os.path.realpath(k).startswith(r + os.sep)
+                  for r in prune_roots)]:
+    del state[k]
+# Same for sqlite: drop only keys whose db was targeted this run and is gone.
+db_prune = {os.path.realpath(d) for d in db_targets}
+for k in [k for k in list(state) if k.startswith("sqlite://")
+          and os.path.realpath(k[len("sqlite://"):]) in db_prune
+          and not os.path.exists(k[len("sqlite://"):])]:
     del state[k]
 
 # ---------------- opencode v1 sqlite targets --------------------------------
@@ -208,8 +241,15 @@ for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite:/
 db_stats = {"rows_scanned": 0, "rows_patched": 0}
 for db in db_targets:
     if not os.path.exists(db): continue
-    if now - os.path.getmtime(db) < 300 and not full:
-        print(f"skip     ---  {db} (modified <5min ago)", file=sys.stderr)
+    # WAL mode: writes land in <db>-wal and the main file's mtime barely moves,
+    # so take the newest of db/-wal/-shm. This is a live-session guard, not a
+    # cache heuristic -- it must apply under --full too.
+    db_mtime = max(
+        (os.path.getmtime(f) for f in (db, db + "-wal", db + "-shm")
+         if os.path.exists(f)),
+        default=0)
+    if now - db_mtime < 300:
+        print(f"skip     ---  {os.path.basename(db)} (modified <5min ago)", file=sys.stderr)
         continue
     key = f"sqlite://{db}"
     ent = state.get(key, {"hwm": 0, "dirty": []})
@@ -312,34 +352,137 @@ for db in db_targets:
 
     state[key] = {"hwm": new_hwm, "dirty": still_dirty}
 
-with open(state_file + ".tmp", "w") as fh:
-    json.dump(state, fh)
-os.replace(state_file + ".tmp", state_file)
+if not dry:
+    with open(state_file + ".tmp", "w") as fh:
+        json.dump(state, fh)
+    os.replace(state_file + ".tmp", state_file)
 
-# -- cass archive: forget conversations whose sources we scrubbed -----------
+# ---------------- cass archive (agent_search.db) ----------------------------
+# Dump messages.content per conversation, gitleaks-scan once, and forget every
+# conversation with a hit. State key "cass://<db>" -> {"hwm": <max conv
+# last_message_created_at>, "dirty": [<source_path>]} — dirty convs are
+# re-scanned until they no longer exist in the archive.
+cass_stats = {"convs_scanned": 0, "convs_forgotten": 0}
+if cass and cass_db and os.path.exists(cass_db):
+    ckey = f"cass://{cass_db}"
+    cent = state.get(ckey, {"hwm": 0, "dirty": []})
+    chwm = 0 if full else cent.get("hwm", 0)
+    cdirty = set(cent.get("dirty", []))
+
+    con = sqlite3.connect(f"file:{cass_db}?mode=ro", uri=True)
+    convs = {}   # source_path -> newest last_message_created_at
+    new_chwm = chwm
+    for cid, spath, lmc in con.execute(
+            "select id, source_path, last_message_created_at from conversations"):
+        ts = lmc or 0
+        if ts <= chwm and spath not in cdirty:
+            continue
+        if ts > new_chwm: new_chwm = ts
+        convs[spath] = ts
+    cdump = os.path.join(report_dir, "cass-convs")
+    os.makedirs(cdump, exist_ok=True)
+    conv_files = {}  # dump-file path -> source_path
+    for cid, spath in con.execute(
+            "select id, source_path from conversations"):
+        if spath not in convs: continue
+        rows = [r[0] for r in con.execute(
+            "select content from messages where conversation_id = ? order by idx",
+            (cid,))]
+        fn = os.path.join(cdump, f"conv--{cid}")
+        with open(fn, "w") as fh: fh.write("\n".join(x or "" for x in rows))
+        conv_files[fn] = spath
+    con.close()
+
+    hits_by_conv = {}
+    if conv_files:
+        frag = os.path.join(report_dir, "cass-frag.json")
+        if os.path.exists(frag): os.remove(frag)
+        r = subprocess.run(
+            ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
+             "--report-format", "json", "--report-path", frag, cdump],
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+        if r.returncode != 0:
+            scan_errors.append(f"{cass_db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+            hits_by_conv = None
+        else:
+            try: chits = json.load(open(frag))
+            except Exception as e:
+                scan_errors.append(f"{cass_db}: unreadable gitleaks report: {e}")
+                chits = None
+            if chits is not None:
+                for h in chits:
+                    fn = h.get("File")
+                    if fn in conv_files:
+                        hits_by_conv.setdefault(conv_files[fn], []).append(h)
+    cass_stats["convs_scanned"] = len(conv_files)
+
+    if hits_by_conv is not None:
+        still_cdirty = []
+        pending = state.get("cass://pending", [])
+        for spath, convhits in hits_by_conv.items():
+            if dry:
+                print(f"dry-run  {len(convhits):3d}  cass:{spath}")
+                still_cdirty.append(spath)
+            else:
+                pending.append(spath)
+                still_cdirty.append(spath)
+        state[ckey] = {"hwm": new_chwm, "dirty": sorted(set(still_cdirty))}
+        if pending:
+            state["cass://pending"] = sorted(set(pending))
+
+# -- cass forget: scrubbed sources + cass-scan hits, exact paths, batched -----
+# Forget uses the conversation's full source_path as an exact-match glob
+# (meta chars escaped): basename globs would forget unrelated sessions that
+# share a filename (e.g. copilot's events.jsonl). Pending globs live in the
+# state file so a failed/missing cass retries on the next run.
 forgotten = 0
-if cass and not dry and scrubbed_paths and os.path.exists(cass_bin):
+# pending maps glob -> exact (True = escape all meta chars / match one path)
+pending = {g: True for g in state.get("cass://pending", [])}
+if not dry:
     for p in scrubbed_paths:
-        dbpath = os.path.join(os.environ["CASS_DATA_DIR"], "agent_search.db")
-        r = subprocess.run(
-            [cass_bin, "forget", "--source-glob", f"**/{os.path.basename(p)}",
-             "--apply", "--db", dbpath, "--json"],
-            capture_output=True, text=True)
-        if r.returncode == 0:
-            forgotten += 1
-        else:
-            print(f"cass forget failed for {p}: {r.stderr.strip()[:200]}", file=sys.stderr)
-    # opencode v1 sessions appear in cass with a '…/opencode.db/…' pseudo-path;
-    # if any db rows were patched, forget the db glob too.
+        # scrubbed source: forget the archived copy; it re-indexes clean
+        pending[p] = True
     if db_stats["rows_patched"]:
-        r = subprocess.run(
-            [cass_bin, "forget", "--source-glob", "**/opencode.db*",
-             "--apply", "--db", dbpath, "--json"],
-            capture_output=True, text=True)
-        if r.returncode == 0:
-            print("cass: forgot opencode.db sessions (re-indexed from scrubbed db)")
-        else:
-            print(f"cass forget failed for opencode.db: {r.stderr.strip()[:200]}", file=sys.stderr)
+        for db in db_targets:
+            pending[db + "/*"] = False  # '…/opencode.db/<session>' pseudo-paths
+
+def glob_escape(s):
+    return "".join(f"[{c}]" if c in "*?[" else c for c in s)
+
+if cass and pending:
+    if not os.path.exists(cass_bin):
+        print(f"cass: {len(pending)} forgets pending; binary not found at {cass_bin}",
+              file=sys.stderr)
+    elif not cass_db:
+        print(f"cass: {len(pending)} forgets pending; agent_search.db not a target",
+              file=sys.stderr)
+    else:
+        for g, exact in sorted(pending.items()):
+            r = subprocess.run(
+                [cass_bin, "forget", "--source-glob",
+                 glob_escape(g) if exact else g,
+                 "--apply", "--db", cass_db, "--json"],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                forgotten += 1
+                del pending[g]
+            else:
+                print(f"cass forget failed for {g}: {r.stderr.strip()[:200]}",
+                      file=sys.stderr)
+
+if dry:
+    for g in sorted(pending):
+        print(f"dry-run  ---  cass forget {g}")
+elif pending:
+    state["cass://pending"] = sorted(pending)
+else:
+    state.pop("cass://pending", None)
+
+# re-write state now that cass://pending may have changed
+if not dry:
+    with open(state_file + ".tmp", "w") as fh:
+        json.dump(state, fh)
+    os.replace(state_file + ".tmp", state_file)
 
 for e in scan_errors:
     print(f"scan error: {e}", file=sys.stderr)
@@ -347,9 +490,12 @@ for e in scan_errors:
 print(f"\n{redacted} file secrets {'would be ' if dry else ''}redacted "
       f"({skipped_recent} live/recent skipped, {skipped_short} <8-byte skipped); "
       f"sqlite: {db_stats['rows_scanned']} rows scanned, "
-      f"{db_stats['rows_patched']} secrets {'would be ' if dry else ''}patched")
+      f"{db_stats['rows_patched']} secrets {'would be ' if dry else ''}patched; "
+      f"cass: {cass_stats['convs_scanned']} conversations scanned")
 if forgotten:
-    print(f"cass: forgot {forgotten} file conversations")
+    print(f"cass: forgot {forgotten} conversations")
+if pending and not dry:
+    print(f"cass: {len(pending)} forgets still pending")
 if dry:
     print("(dry-run: nothing changed)")
 PYEOF
