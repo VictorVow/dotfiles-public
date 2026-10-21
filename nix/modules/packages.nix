@@ -109,6 +109,7 @@ in
     # ── Secrets ───────────────────────────────────────────────────────────────
     sops # Edit/rotate age-encrypted secrets (nix/secrets/*.yaml)
     age  # age-keygen + age backend used by sops (identity in Secret Service, sops-age-key.nix)
+    gitleaks # Secret scanner — used by scripts/security/ to audit + scrub agent transcripts
 
     # ── Terminal / Shell Tools ────────────────────────────────────────────────
     tmux    # Terminal multiplexer (modern) — also configured in programs.nix

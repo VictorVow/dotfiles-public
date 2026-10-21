@@ -1,0 +1,12 @@
+# gitleaks rules for transcript scrubbing. Extends the upstream default ruleset
+# (150+ patterns: sk-ant, ghp_, AKIA, age keys, PEM blocks, ...). Add path or
+# stopword allowlists here as false positives show up.
+[extend]
+useDefault = true
+
+[allowlist]
+  description = "known-safe hits in agent transcripts"
+  paths = [
+    '''\.lock$''',
+    '''/CHANGELOG\.md$''',
+  ]

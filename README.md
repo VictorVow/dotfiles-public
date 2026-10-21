@@ -67,7 +67,8 @@ installs/
 │   ├── logseq-headings.py         # Re-level the headings in a Logseq block subtree (root level, shift, smallest allowed); used by the hn-favorites-digest skill
 │   ├── hn-favorites.py            # Scan/un-favorite Hacker News favorites + dump full comment threads (uv script, JSON out); used by the hn-favorites-digest skill
 │   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
-│   └── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
+│   ├── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
+│   └── security/                  # gitleaks-based audit + in-place scrubbing of secrets leaked into agent transcripts (README = playbook)
 ├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG
 │   ├── 0STARTUP/             # Login/startup scripts: yakuake1.sh orchestrator, sections/*.sh tmux panes, shutdown.sh
 │   ├── 1COMMON/              # Everyday apps; subdirs become [Category] prefixes in vault-launch
