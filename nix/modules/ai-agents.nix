@@ -28,6 +28,23 @@ let
                 "--connect-existing" "--tool-preset" "developer" ];
   };
 
+  # https://github.com/ChromeDevTools/chrome-devtools-mcp
+  # Chrome DevTools MCP (Google) — attaches to a running Chromium-family browser
+  # over CDP at http://127.0.0.1:9223: tabs, DOM snapshot, console, network,
+  # JS eval, performance traces, screencast. The browser must be relaunched with
+  # --remote-debugging-port first (scripts/chromium-remote-debug.sh on); unlike
+  # the Firefox MCP the server starts fine with nothing listening yet and
+  # connects on first tool call. Procedure lives in the chromium-live-debug
+  # skill. --workspace lets its file-writing tools (screenshots, snapshots,
+  # trace dumps) write outside the OS temp dir.
+  chromiumDevtoolsMcp = {
+    command = "npx";
+    args    = [ "-y" "chrome-devtools-mcp@latest"
+                "--browserUrl" "http://127.0.0.1:9223"
+                "--usageStatistics" "false" "--performanceCrux" "false"
+                "--workspace" "/tmp" "--workspace" "/home/boss/Projects" ];
+  };
+
   # llm-agents.nix's own packages output, built against its pinned nixpkgs —
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
@@ -428,6 +445,9 @@ in
       # Firefox DevTools — see firefoxDevtoolsMcp in the let block (also given to Claude Code).
       firefox-devtools = firefoxDevtoolsMcp;
 
+      # Chrome DevTools — see chromiumDevtoolsMcp in the let block (also given to Claude Code).
+      chromium-devtools = chromiumDevtoolsMcp;
+
     };
   };
 
@@ -439,8 +459,9 @@ in
     package = llmAgents.claude-code;
     # Whole-registry enableMcpIntegration is available but deliberately off; opt in per server.
     mcpServers = {
-      nixos            = nixosMcp;
-      firefox-devtools = firefoxDevtoolsMcp;
+      nixos             = nixosMcp;
+      firefox-devtools  = firefoxDevtoolsMcp;
+      chromium-devtools = chromiumDevtoolsMcp;
     };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
@@ -603,6 +624,10 @@ in
       type    = "local";
       command = [ firefoxDevtoolsMcp.command ] ++ firefoxDevtoolsMcp.args;
     };
+    mcp.servers.chromium-devtools = {
+      type    = "local";
+      command = [ chromiumDevtoolsMcp.command ] ++ chromiumDevtoolsMcp.args;
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
@@ -655,6 +680,10 @@ in
     mcp.firefox-devtools = {
       type    = "local";
       command = [ firefoxDevtoolsMcp.command ] ++ firefoxDevtoolsMcp.args;
+    };
+    mcp.chromium-devtools = {
+      type    = "local";
+      command = [ chromiumDevtoolsMcp.command ] ++ chromiumDevtoolsMcp.args;
     };
   };
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =

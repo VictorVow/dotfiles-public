@@ -56,6 +56,7 @@ installs/
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
+│   ├── chromium-remote-debug.sh   # Toggle CDP remote debugging on chromium/chrome/brave for the chromium-devtools MCP (chromium-live-debug skill)
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
