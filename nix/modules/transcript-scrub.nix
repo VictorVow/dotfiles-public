@@ -8,6 +8,8 @@ let
   scrubScript = pkgs.runCommand "scrub-transcripts" { } ''
     mkdir -p $out
     cp ${../../scripts/security/scrub-transcripts.sh} $out/scrub-transcripts.sh
+    cp ${../../scripts/security/transcript-common.sh} $out/transcript-common.sh
+    cp ${../../scripts/security/transcript_common.py} $out/transcript_common.py
     cp ${../../scripts/security/gitleaks-scrub.toml} $out/gitleaks-scrub.toml
     chmod +x $out/scrub-transcripts.sh
   '';

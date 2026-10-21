@@ -43,15 +43,11 @@
 #
 set -euo pipefail
 
-DIR="$(dirname "$0")"
-CONF="$DIR/gitleaks-scrub.toml"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/transcript-scrub"
-STATE_FILE="$STATE_DIR/state.json"
-REPORT_DIR="$(mktemp -d)"
-trap 'rm -rf "$REPORT_DIR"' EXIT
+source "$(dirname "$0")/transcript-common.sh"
+ts_init
+ts_defaults
 REPORT="$REPORT_DIR/report.json"
 CASS_BIN="${CASS_BIN:-/home/linuxbrew/.linuxbrew/bin/cass}"
-CASS_DATA_DIR="${CASS_DATA_DIR:-$HOME/.local/share/coding-agent-search}"
 
 DRY=0 FULL=0 CASS=1
 while [ $# -gt 0 ]; do
@@ -64,52 +60,19 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# Default file targets (JSONL/JSON stores) + sqlite targets (opencode v1).
-# cass raw-mirror blobs are NOT scanned: they're content-addressed, so splicing
-# them would corrupt cass's blake3 verification — cass copies are handled via
-# `cass forget` on the conversation + the agent_search.db scan below.
-FILE_TARGETS=(
-  "$HOME/.claude/projects"
-  "$HOME/.config/codex/sessions"
-  "$HOME/.gemini"
-  "$HOME/.openclaw"
-  "$HOME/.copilot/session-state"
-  "$HOME/.local/share/devin"
-  "$HOME/.local/share/opencode/storage"
-  "$HOME/.opencode1/data/opencode/storage"
-)
-DB_TARGETS=(
-  "$HOME/.local/share/opencode/opencode.db"
-  "$HOME/.opencode1/data/opencode/opencode.db"
-)
-CASS_DB="$CASS_DATA_DIR/agent_search.db"
-
-if [ "$#" -gt 0 ]; then
-  FILE_TARGETS=(); DB_TARGETS=(); CASS_DB=""
-  for t in "$@"; do
-    [ -e "$t" ] || continue
-    if [[ "$t" == *.db ]]; then DB_TARGETS+=("$(readlink -f "$t")")
-    else FILE_TARGETS+=("$(readlink -f "$t")"); fi
-  done
-else
-  _f=(); for t in "${FILE_TARGETS[@]}"; do [ -e "$t" ] && _f+=("$(readlink -f "$t")"); done; FILE_TARGETS=("${_f[@]+"${_f[@]}"}")
-  _d=(); for t in "${DB_TARGETS[@]}";   do [ -e "$t" ] && _d+=("$(readlink -f "$t")"); done; DB_TARGETS=("${_d[@]+"${_d[@]}"}")
-fi
+ts_resolve "$@"
 [ "$CASS" -eq 1 ] || CASS_DB=""
 [ "${#FILE_TARGETS[@]}" -gt 0 ] || [ "${#DB_TARGETS[@]}" -gt 0 ] || [ -n "$CASS_DB" ] || { echo "no transcript stores exist" >&2; exit 1; }
 
-mkdir -p "$STATE_DIR"
-[ -f "$STATE_FILE" ] || echo '{}' > "$STATE_FILE"
-# Serialise runs: a timer + a manual run would otherwise interleave gitleaks
-# invocations and overwrite each other's state file.
-exec 9>"$STATE_DIR/lock"
-flock -n 9 || { echo "another transcript-scrub run is in progress" >&2; exit 1; }
-
-FILE_TARGETS_JSON="$(printf '%s\n' "${FILE_TARGETS[@]+"${FILE_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
-DB_TARGETS_JSON="$(printf '%s\n' "${DB_TARGETS[@]+"${DB_TARGETS[@]}"}" | python3 -c 'import sys,json; print(json.dumps([l.rstrip("\n") for l in sys.stdin if l.strip()]))')"
-export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DB FILE_TARGETS_JSON DB_TARGETS_JSON
+ts_lock || exit 1
+ts_targets_json
+export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DB DIR
 python3 - "$REPORT_DIR" <<'PYEOF'
 import json, os, sys, subprocess, sqlite3
+sys.path.insert(0, os.environ["DIR"])
+from transcript_common import (gitleaks_scan, collect_targets, prune_state,
+                               db_recently_modified, dump_sqlite_rows,
+                               dump_cass_convs, save_state, LIVE_WINDOW_S)
 
 report_dir = sys.argv[1]
 file_targets = json.loads(os.environ["FILE_TARGETS_JSON"])
@@ -127,46 +90,18 @@ import time; now = time.time()
 
 scan_errors = []
 
-def scan_path(p):
-    """gitleaks-scan one file; return findings list, or None on scan error."""
-    frag = os.path.join(report_dir, "frag.json")
-    if os.path.exists(frag): os.remove(frag)
-    r = subprocess.run(
-        ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
-         "--report-format", "json", "--report-path", frag, p],
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
-    if r.returncode != 0:
-        scan_errors.append(f"{p}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
-        return None
-    try: return json.load(open(frag))
-    except Exception as e:
-        scan_errors.append(f"{p}: unreadable gitleaks report: {e}")
-        return None
-
 skipped_recent = skipped_short = redacted = 0
 scrubbed_paths = []
 
 # ---------------- file targets ---------------------------------------------
-seen = set()
-to_scan = []
-for root in file_targets:
-    paths = [root] if os.path.isfile(root) else (
-        os.path.join(d, f) for d, _ds, fs in os.walk(root) for f in fs)
-    for p in paths:
-        if not os.path.isfile(p): continue
-        try: st = os.stat(p)
-        except OSError: continue
-        seen.add(p)
-        ent = state.get(p)
-        if full or not ent or ent["mtime"] != st.st_mtime or ent["size"] != st.st_size \
-           or ent.get("findings"):
-            to_scan.append(p)
+to_scan, seen = collect_targets(file_targets, state, full)
 
 for p in to_scan:
-    if now - os.path.getmtime(p) < 300:
+    if now - os.path.getmtime(p) < LIVE_WINDOW_S:
         skipped_recent += 1
         continue
-    hits = scan_path(p)
+    hits = gitleaks_scan(conf, p, os.path.join(report_dir, "frag.json"),
+                         scan_errors)
     if hits is None:
         continue  # leave previous state untouched
     st = os.stat(p)
@@ -225,19 +160,7 @@ for p in to_scan:
                 "findings": [{"rule": h["RuleID"], "line": h["StartLine"]}
                              for h in still_dirty]}
 
-# Prune state only within the roots we walked this run -- a partial run must
-# not wipe entries belonging to other targets.
-prune_roots = [os.path.realpath(r) for r in file_targets]
-for k in [k for k in list(state) if k not in seen and not k.startswith("sqlite://")
-          and any(os.path.realpath(k) == r or os.path.realpath(k).startswith(r + os.sep)
-                  for r in prune_roots)]:
-    del state[k]
-# Same for sqlite: drop only keys whose db was targeted this run and is gone.
-db_prune = {os.path.realpath(d) for d in db_targets}
-for k in [k for k in list(state) if k.startswith("sqlite://")
-          and os.path.realpath(k[len("sqlite://"):]) in db_prune
-          and not os.path.exists(k[len("sqlite://"):])]:
-    del state[k]
+prune_state(state, file_targets, db_targets, seen)
 
 # ---------------- opencode v1 sqlite targets --------------------------------
 # State key "sqlite://<db>" -> {"hwm": <max row time_updated, epoch ms>,
@@ -246,20 +169,7 @@ for k in [k for k in list(state) if k.startswith("sqlite://")
 db_stats = {"rows_scanned": 0, "rows_patched": 0}
 for db in db_targets:
     if not os.path.exists(db): continue
-    # WAL mode: writes land in <db>-wal and the main file's mtime barely moves,
-    # so take the newest of db/-wal. -shm is excluded: its mtime moves on plain
-    # reads (including our own and cass's indexer), which would skip the db
-    # forever. This is a live-session guard, not a cache heuristic -- it must
-    # apply under --full too.
-    wal = db + "-wal"
-    db_mtime = max(
-        (os.path.getmtime(f) for f in (db, wal) if os.path.exists(f)),
-        default=0)
-    # An empty -wal means everything is already checkpointed into the main db;
-    # reads alone can bump its mtime, so it shouldn't count as "live".
-    if os.path.exists(wal) and os.path.getsize(wal) == 0:
-        db_mtime = os.path.getmtime(db)
-    if now - db_mtime < 300:
+    if db_recently_modified(db, now):
         print(f"skip     ---  {os.path.basename(db)} (modified <5min ago)", file=sys.stderr)
         continue
     key = f"sqlite://{db}"
@@ -268,57 +178,20 @@ for db in db_targets:
     dirty_rows = {(d["table"], d["id"]) for d in ent.get("dirty", [])}
 
     try:
-        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        row_keys, new_hwm = dump_sqlite_rows(
+            db, os.path.join(report_dir, "rows"), hwm, dirty_rows)
     except sqlite3.Error as e:
         print(f"skip     ---  {db} ({e})", file=sys.stderr); continue
-
-    # extract candidate rows: newer than hwm or marked dirty
-    dump = os.path.join(report_dir, "rows")
-    os.makedirs(dump, exist_ok=True)
-    new_hwm = hwm
-    row_keys = {}  # dump-file path -> (table, rowid)
-    for table in ("message", "part"):
-        try:
-            cur = con.execute(
-                f"select id, time_updated, data from {table} where time_updated > ?",
-                (hwm,))
-        except sqlite3.Error:
-            continue
-        for rid, tupd, data in cur.fetchall():
-            ts = tupd or 0
-            if ts > new_hwm: new_hwm = ts
-            fn = os.path.join(dump, f"{table}--{rid}")
-            with open(fn, "w") as fh: fh.write(data or "")
-            row_keys[fn] = (table, rid)
-    # re-extract dirty rows regardless of age
-    for table, rid in dirty_rows:
-        try:
-            r = con.execute(f"select data from {table} where id = ?", (rid,)).fetchone()
-        except sqlite3.Error:
-            r = None
-        if r:
-            fn = os.path.join(dump, f"{table}--{rid}")
-            with open(fn, "w") as fh: fh.write(r[0] or "")
-            row_keys[fn] = (table, rid)
-    con.close()
 
     if not row_keys:
         state[key] = {"hwm": new_hwm, "dirty": []}
         continue
 
     # one gitleaks scan over the whole dump dir
-    frag = os.path.join(report_dir, "rows-frag.json")
-    if os.path.exists(frag): os.remove(frag)
-    r = subprocess.run(
-        ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
-         "--report-format", "json", "--report-path", frag, dump],
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
-    if r.returncode != 0:
-        scan_errors.append(f"{db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
-        continue
-    try: hits = json.load(open(frag))
-    except Exception as e:
-        scan_errors.append(f"{db}: unreadable gitleaks report: {e}")
+    hits = gitleaks_scan(conf, os.path.join(report_dir, "rows"),
+                         os.path.join(report_dir, "rows-frag.json"),
+                         scan_errors)
+    if hits is None:
         continue
     db_stats["rows_scanned"] += len(row_keys)
 
@@ -364,9 +237,7 @@ for db in db_targets:
     state[key] = {"hwm": new_hwm, "dirty": still_dirty}
 
 if not dry:
-    with open(state_file + ".tmp", "w") as fh:
-        json.dump(state, fh)
-    os.replace(state_file + ".tmp", state_file)
+    save_state(state_file, state)
 
 # ---------------- cass archive (agent_search.db) ----------------------------
 # Dump messages.content per conversation, gitleaks-scan once, and forget every
@@ -380,80 +251,48 @@ if cass and cass_db and os.path.exists(cass_db):
     chwm = 0 if full else cent.get("hwm", 0)
     cdirty = set(cent.get("dirty", []))
 
-    con = sqlite3.connect(f"file:{cass_db}?mode=ro", uri=True)
-    convs = {}   # source_path -> newest last_message_created_at
-    new_chwm = chwm
-    for cid, spath, lmc in con.execute(
-            "select id, source_path, last_message_created_at from conversations"):
-        ts = lmc or 0
-        if ts <= chwm and spath not in cdirty:
-            continue
-        if ts > new_chwm: new_chwm = ts
-        convs[spath] = ts
-    cdump = os.path.join(report_dir, "cass-convs")
-    os.makedirs(cdump, exist_ok=True)
-    conv_files = {}  # dump-file path -> source_path
-    for cid, spath in con.execute(
-            "select id, source_path from conversations"):
-        if spath not in convs: continue
-        rows = [r[0] for r in con.execute(
-            "select content from messages where conversation_id = ? order by idx",
-            (cid,))]
-        fn = os.path.join(cdump, f"conv--{cid}")
-        with open(fn, "w") as fh: fh.write("\n".join(x or "" for x in rows))
-        conv_files[fn] = spath
-    con.close()
-
-    hits_by_conv = {}
-    if conv_files:
-        frag = os.path.join(report_dir, "cass-frag.json")
-        if os.path.exists(frag): os.remove(frag)
-        r = subprocess.run(
-            ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
-             "--report-format", "json", "--report-path", frag, cdump],
-            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
-        if r.returncode != 0:
-            scan_errors.append(f"{cass_db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
-            hits_by_conv = None
-        else:
-            try: chits = json.load(open(frag))
-            except Exception as e:
-                scan_errors.append(f"{cass_db}: unreadable gitleaks report: {e}")
-                chits = None
-            if chits is not None:
-                for h in chits:
-                    fn = h.get("File")
-                    if fn in conv_files:
-                        hits_by_conv.setdefault(conv_files[fn], []).append(h)
+    conv_files, new_chwm = dump_cass_convs(
+        cass_db, os.path.join(report_dir, "cass-convs"), chwm, cdirty)
     cass_stats["convs_scanned"] = len(conv_files)
 
-    if hits_by_conv is not None:
+    chits = []
+    if conv_files:
+        chits = gitleaks_scan(conf, os.path.join(report_dir, "cass-convs"),
+                              os.path.join(report_dir, "cass-frag.json"),
+                              scan_errors)
+
+    if chits is not None:
+        hits_by_conv = {}
+        for h in chits:
+            fn = h.get("File")
+            if fn in conv_files:
+                hits_by_conv.setdefault(conv_files[fn], []).append(h)
         still_cdirty = []
-        new_forgets = []
-        for spath, convhits in hits_by_conv.items():
-            # A conversation whose source file is gone has its archive copy as
-            # the last remaining record -- forgetting deletes it for good, and
-            # noisy rules (generic-api-key) can false-positive. List it for
-            # manual review instead of auto-deleting on an unattended run.
-            # opencode.db/<session> pseudo-paths exist iff their db does.
-            source_gone = not os.path.exists(spath) and not any(
-                spath.startswith(d + os.sep) for d in db_targets)
-            if source_gone:
-                print(f"cass review ---  {spath} (source gone; {len(convhits)} hits -- "
-                      f"run `cass forget --source-glob '{spath}' --apply` manually if real)",
-                      file=sys.stderr)
-            elif dry:
-                print(f"dry-run  {len(convhits):3d}  cass:{spath}")
-                new_forgets.append(spath)
-            else:
-                new_forgets.append(spath)
-            still_cdirty.append(spath)
-        if not dry:
-            pending = state.get("cass://pending", [])
-            pending.extend(new_forgets)
-            state[ckey] = {"hwm": new_chwm, "dirty": sorted(set(still_cdirty))}
-            if pending:
-                state["cass://pending"] = sorted(set(pending))
+    new_forgets = []
+    for spath, convhits in hits_by_conv.items():
+        # A conversation whose source file is gone has its archive copy as
+        # the last remaining record -- forgetting deletes it for good, and
+        # noisy rules (generic-api-key) can false-positive. List it for
+        # manual review instead of auto-deleting on an unattended run.
+        # opencode.db/<session> pseudo-paths exist iff their db does.
+        source_gone = not os.path.exists(spath) and not any(
+            spath.startswith(d + os.sep) for d in db_targets)
+        if source_gone:
+            print(f"cass review ---  {spath} (source gone; {len(convhits)} hits -- "
+                  f"run `cass forget --source-glob '{spath}' --apply` manually if real)",
+                  file=sys.stderr)
+        elif dry:
+            print(f"dry-run  {len(convhits):3d}  cass:{spath}")
+            new_forgets.append(spath)
+        else:
+            new_forgets.append(spath)
+        still_cdirty.append(spath)
+    if not dry:
+        pending = state.get("cass://pending", [])
+        pending.extend(new_forgets)
+        state[ckey] = {"hwm": new_chwm, "dirty": sorted(set(still_cdirty))}
+        if pending:
+            state["cass://pending"] = sorted(set(pending))
 
 # -- cass forget: scrubbed sources + cass-scan hits, batched ------------------
 # Forget uses each conversation's full source_path as an exact-match glob
@@ -521,9 +360,7 @@ else:
 
 # re-write state now that cass://pending may have changed
 if not dry:
-    with open(state_file + ".tmp", "w") as fh:
-        json.dump(state, fh)
-    os.replace(state_file + ".tmp", state_file)
+    save_state(state_file, state)
 
 for e in scan_errors:
     print(f"scan error: {e}", file=sys.stderr)
