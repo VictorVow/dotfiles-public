@@ -233,16 +233,16 @@ function checkFileArgs(tool, args) {
   }
 }
 
-// v2 promise-shape plugin: `{id, setup(ctx)}` registers hooks on ctx.tool.
-// `execute.before` hook input is `{tool, input}`; throwing rejects the call.
+// v2 promise-shape plugin: default-exports `{id, setup(ctx)}`; `setup`
+// registers hooks via `ctx.tool.hook("execute.before", handler)` — handler
+// receives a single mutable `event` (`{tool, input, sessionID, agent,
+// messageID, id}`); throwing rejects the call.
 export default {
   id: "secret-guard",
   setup: async (ctx) => {
-    await ctx.tool.hook("execute.before", async (input) => {
-      const tool = input?.tool;
-      // v2 schema: `{tool, input, sessionID, agent, messageID, id}` — the
-      // tool's arguments live under `.input`, not `.args` (that was v1).
-      const args = input?.input ?? {};
+    await ctx.tool.hook("execute.before", async (event) => {
+      const tool = event?.tool;
+      const args = event?.input ?? {};
       if (tool === "bash" || tool === "shell") {
         const cmd = args.command ?? args.cmd ?? "";
         if (typeof cmd === "string") checkShell(cmd);
