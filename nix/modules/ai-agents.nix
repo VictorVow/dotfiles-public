@@ -92,6 +92,52 @@ let
     { action = "read";               resource = "~/.ssh/**";                  effect = "deny"; }
     { action = "read";               resource = "~/.gnupg/**";                effect = "deny"; }
   ];
+  # ── Secret-guard policy (shared by the Claude PreToolUse hook and the
+  #    OpenCode plugin) ─────────────────────────────────────────────────────
+  # `read`/`shell` deny rules can't express "command X on path Y", so these
+  # lists are rendered into bash-secret-guard.py (Claude Code / Devin
+  # PreToolUse) and secret-guard.js (OpenCode v1+v2 `tool.execute.before`).
+  # Limits: argv inspection only — `bash -c "$(cat …)"`, process substitution,
+  # `find -exec`, and agent-written scripts still get through. The goal is to
+  # stop routine first-instinct reads, not a motivated agent.
+  secretGuardPaths = [
+    "*.env" "*.env.*"           # *.env.example* re-allowed inside the scripts
+    "*.pem" "*.key" "*.p12" "*.pfx" "id_*"
+    "~/.config/shell-secrets/**"
+    "~/.config/sops/**"
+    "/run/user/*/sops-age/**"
+    "~/.local/share/keyrings/**"
+    "~/.ssh/**"
+    "~/.gnupg/**"
+  ];
+  secretGuardReaders = [
+    "cat" "head" "tail" "less" "more" "xxd" "od" "hexdump" "strings" "dd"
+    "tee" "file" "stat" "grep" "rg" "awk" "sed" "cut" "column" "nl" "wc"
+    "readelf" "objdump" "nm" "sqlite3" "jq" "yq" "hexyl" "bat" "pv"
+    # compress/decompress — `gzip -dc`/`bzip2 -dc`/`xz -dc`/`zstd -dc` write
+    # the file's content to stdout; blocking in-place too is conservative
+    # but harmless (an agent shouldn't be gzipping secrets at all).
+    "gzip" "gunzip" "bzip2" "bunzip2" "xz" "unxz" "zstd" "unzstd" "lz4" "compress" "uncompress" "zcat" "bzcat" "xzcat" "zstdcat"
+    "gpg-connect-agent" "ssh-keyscan" "ssh-keygen"
+  ];
+  # Interpreters/runners — a protected path anywhere in argv blocks. Decoders
+  # (base64/gpg/age/tar/openssl/…) are deliberately NOT here; they live in the
+  # scripts' DECODE_FLAGS map so `openssl version`, `gpg -k`, `tar tzf` still
+  # work — only actual decode/extract against a protected path is blocked.
+  secretGuardInterpreters = [
+    "python" "python3" "perl" "ruby" "node" "deno" "bun"
+    "bash" "sh" "zsh" "dash" "ksh"
+    "sops" "sops-nix" "age-keygen"
+    "ssh" "ssh-add" "gpg-agent" "ssh-agent"
+    "secret-tool" "kwalletcli" "kwallet-query" "kwalletd6" "kwalletd5"
+  ];
+  # Render the lists as JSON into the scripts (@SECRET_PATH_PATTERNS@ etc.).
+  secretGuardSubst = {
+    SECRET_PATH_PATTERNS = builtins.toJSON secretGuardPaths;
+    SECRET_GUARD_READERS = builtins.toJSON secretGuardReaders;
+    SECRET_GUARD_INTERPRETERS = builtins.toJSON secretGuardInterpreters;
+  };
+
   # v1 shape: { <action> = { <pattern> = <effect>; }; }, with v2's renamed
   # actions mapped back. Nix attrsets serialise with sorted keys, so within an
   # action the patterns come out alphabetically, not in list order — fine while
@@ -314,6 +360,9 @@ let
     hooks = {
       Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
       UserPromptSubmit = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";      }]; }];
+      # Read denies don't cover Bash payloads Claude doesn't parse (xxd, python3
+      # -c, base64 -d, dd, …); the hook inspects argv for protected paths.
+      PreToolUse       = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "python3 ~/.claude/hooks/bash-secret-guard.py"; }]; }];
     };
     statusLine = {
       type    = "command";
@@ -488,7 +537,13 @@ in
     $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
     tmp="$(mktemp)"
     { [ -s "$dest" ] && cat "$dest" || echo '{}'; } \
-      | ${pkgs.jq}/bin/jq '. + { attribution: false }' > "$tmp" \
+      | ${pkgs.jq}/bin/jq '. + { attribution: false,
+          hooks: ((.hooks // {}) + {
+            PreToolUse: ((.hooks.PreToolUse // []) + [{
+              matcher: "Bash",
+              hooks: [{ type: "command", command: "python3 ~/.claude/hooks/bash-secret-guard.py" }]
+            }])
+          }) }' > "$tmp" \
       && $DRY_RUN_CMD install -m 600 "$tmp" "$dest"
     rm -f "$tmp"
   '';
@@ -622,6 +677,22 @@ in
     source     = ../dotfiles/claude-hooks/notify-reset-dedupe.sh;
     executable = true;
   };
+
+  # PreToolUse hook: blocks casual Bash reads of Read-denied paths (see
+  # secretGuard* above). python3 is already in the Claude allowlist.
+  home.file.".claude/hooks/bash-secret-guard.py" = {
+    source = pkgs.replaceVars ../dotfiles/claude-hooks/bash-secret-guard.py
+      secretGuardSubst;
+    executable = true;
+  };
+
+  # Same guard for OpenCode — one file serves v1 and v2 (the
+  # `tool.execute.before` hook signature is identical). Auto-loaded from the
+  # plugins dir; no config key needed.
+  home.file.".config/opencode/plugins/secret-guard.js".source =
+    pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard.js secretGuardSubst;
+  home.file.".opencode1/config/opencode/plugins/secret-guard.js".source =
+    pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard.js secretGuardSubst;
 
   # ── Claude Code: direnv in the Bash tool ───────────────────────────────────────
   # The Bash tool runs non-interactive shells, so direnv's PROMPT_COMMAND hook
