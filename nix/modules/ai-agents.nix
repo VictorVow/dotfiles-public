@@ -80,10 +80,14 @@ let
     # Master identity for the repo's sops secrets (shell.nix `sops()` uses this).
     { action = "shell";              resource = "secret-tool lookup *";   effect = "deny"; }
     { action = "read";               resource = "~/.config/shell-secrets/**"; effect = "deny"; }
-    { action = "read";               resource = "~/.config/tray-links/*key*"; effect = "deny"; }
+    # sops-nix's defaultSymlinkPath — symlink farm into /run/user/*/secrets.d
+    # (tmpfs). Denied here because Bash-read tools can follow it; the tmpfs
+    # targets themselves are covered by //run/user/*/secrets.d/** below.
+    { action = "read";               resource = "~/.config/sops-nix/secrets/**"; effect = "deny"; }
     { action = "read";               resource = "~/.config/sops/**";          effect = "deny"; }
     # sops age identity materialised to tmpfs at login (sops-age-key.nix).
     { action = "read";               resource = "//run/user/*/sops-age/**";     effect = "deny"; }
+    { action = "read";               resource = "//run/user/*/secrets.d/**";    effect = "deny"; }
     { action = "read";               resource = "~/.local/share/keyrings/**"; effect = "deny"; }
     { action = "read";               resource = "~/.ssh/**";                  effect = "deny"; }
     { action = "read";               resource = "~/.gnupg/**";                effect = "deny"; }
@@ -291,12 +295,14 @@ let
         "Bash(secret-tool lookup *)"
         # sops-decrypted materialized secrets (ai-secrets.nix, shell.nix)
         "Read(~/.config/shell-secrets/**)"
-        # Tray-Links reads this directly via the sops path (ai-secrets.nix)
-        "Read(~/.config/tray-links/*key*)"
+        # sops-nix defaultSymlinkPath — symlinks into tmpfs below
+        "Read(~/.config/sops-nix/secrets/**)"
         # age master key — unlocks every sops secret
         "Read(~/.config/sops/**)"
         # sops age identity on tmpfs (sops-age-key.nix materialises it at login)
         "Read(//run/user/*/sops-age/**)"
+        # sops-nix tmpfs secret dir (the targets ~/.config/sops-nix/secrets points at)
+        "Read(//run/user/*/secrets.d/**)"
         # Login keyring (contains the same identity, plus app secrets)
         "Read(~/.local/share/keyrings/**)"
         "Read(~/.ssh/**)"

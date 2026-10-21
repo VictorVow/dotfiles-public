@@ -1,25 +1,25 @@
 { config, ... }:
 
 # Sops-encrypted AI provider keys. ../secrets/ai.yaml is the canonical store:
-# the Tray-Links "ai" tray reads openrouter_api_key via the sops-nix secret
-# below, and FreeLLMAPI's deploy.yml (Self-Hosted repo) decrypts the same file
-# with `sops -d` to render its provider-key config — keys NOT declared under
-# sops.secrets here stay inside the encrypted file (never materialized by
-# home-manager). Same pattern as ../secrets/rclone.yaml (see modules/rclone.nix).
-# Unlike rclone's secrets, tray-links' are read directly by a plain Python
-# script rather than by another Home Manager module, so each declared secret
-# gets an explicit, stable `path` instead of the sops-nix default under
-# /run/user/<uid>/...
+# the Tray-Links "ai" tray reads openrouter_api_key from the sops-nix default
+# symlink dir (~/.config/sops-nix/secrets/, backed by tmpfs under
+# /run/user/<uid>/secrets.d/), and FreeLLMAPI's deploy.yml (Self-Hosted repo)
+# decrypts the same file with `sops -d` to render its provider-key config —
+# keys NOT declared under sops.secrets here stay inside the encrypted file
+# (never materialized by home-manager). Same pattern as ../secrets/rclone.yaml
+# (see modules/rclone.nix): no `path` override, the secret lives only on tmpfs.
 {
   sops = {
     # age.keyFile is set centrally in modules/sops-age-key.nix (materialised
     # from Secret Service at login).
     secrets."openrouter_api_key" = {
       sopsFile = ../secrets/ai.yaml;
-      path = "${config.home.homeDirectory}/.config/tray-links/openrouter_api_key";
     };
     # FreeLLMAPI unified key (dashboard Keys page header), for OpenCode's
-    # `freellmapi` provider (see modules/ai-agents.nix).
+    # `freellmapi` provider (see modules/ai-agents.nix). Kept on the explicit
+    # path because the opencode wrapper and `with-secret freellmapi`
+    # (shell.nix) reference ~/.config/shell-secrets/freellmapi_api_key
+    # directly — unlike rclone/tray-links there's no .path consumer.
     secrets."freellmapi_api_key" = {
       sopsFile = ../secrets/ai.yaml;
       path = "${config.home.homeDirectory}/.config/shell-secrets/freellmapi_api_key";
