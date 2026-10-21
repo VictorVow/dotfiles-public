@@ -521,6 +521,15 @@ in
         export FREELLMAPI_API_KEY
         export XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
                XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache"
+        # Mirror ~/.config into the isolated config root so tools launched from
+        # sessions (gh, marktext, …) see the user's real config — except
+        # `opencode`, whose v1 config must stay separate from v2's.
+        for d in "$HOME"/.config/* "$HOME"/.config/.[!.]*; do
+          [ -e "$d" ] || continue
+          base=''${d##*/}
+          [ "$base" = opencode ] && continue
+          [ -e "$root/config/$base" ] || ln -s "$d" "$root/config/$base"
+        done
         # Drop v2's `--standalone` (e.g. from v2-style resume commands): v1 doesn't
         # know it and prints its help instead of starting.
         args=()
