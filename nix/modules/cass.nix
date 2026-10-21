@@ -25,6 +25,9 @@ let
       Nice = 19;
       IOSchedulingClass = "idle";
       CPUSchedulingPolicy = "idle";
+      # Cap total CPU at ~1/4 of the machine (16 cores); the embedder spawns enough
+      # internal threads to saturate all cores otherwise. Work just takes longer.
+      CPUQuota = "25%";
       TimeoutStartSec = timeout;
     };
   };
