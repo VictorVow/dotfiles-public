@@ -89,15 +89,22 @@ conf = os.environ["CONF"]
 
 state = json.load(open(state_file))
 
+scan_errors = []
+
 def scan_file(p):
     frag = os.path.join(report_dir, "frag.json")
     if os.path.exists(frag): os.remove(frag)
-    subprocess.run(
+    r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
          "--report-format", "json", "--report-path", frag, p],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+    if r.returncode != 0:
+        scan_errors.append(f"{p}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+        return None
     try: return json.load(open(frag))
-    except Exception: return []
+    except Exception as e:
+        scan_errors.append(f"{p}: unreadable gitleaks report: {e}")
+        return None
 
 # ---------------- files -----------------------------------------------------
 to_scan, seen = [], set()
@@ -117,6 +124,8 @@ for root in file_targets:
 fresh = []
 for p in to_scan:
     hits = scan_file(p)
+    if hits is None:
+        continue  # leave previous state untouched
     st = os.stat(p)
     state[p] = {"mtime": st.st_mtime, "size": st.st_size,
                 "findings": [{"rule": f["RuleID"], "line": f["StartLine"]}
@@ -174,12 +183,17 @@ for db in db_targets:
 
     frag = os.path.join(report_dir, "rows-frag.json")
     if os.path.exists(frag): os.remove(frag)
-    subprocess.run(
+    r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
          "--report-format", "json", "--report-path", frag, dump],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+    if r.returncode != 0:
+        scan_errors.append(f"{db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+        continue
     try: hits = json.load(open(frag))
-    except Exception: hits = []
+    except Exception as e:
+        scan_errors.append(f"{db}: unreadable gitleaks report: {e}")
+        continue
 
     # surface findings + mark those rows dirty so the scrubber re-checks them
     prev_dirty = {(d["table"], d["id"]) for d in ent.get("dirty", [])}
@@ -197,6 +211,9 @@ for db in db_targets:
 with open(state_file + ".tmp", "w") as fh:
     json.dump(state, fh)
 os.replace(state_file + ".tmp", state_file)
+
+with open(os.path.join(report_dir, "scan-errors.txt"), "w") as fh:
+    fh.write("\n".join(scan_errors))
 
 # merge: fresh file findings + stored file findings + db findings
 merged = list(fresh)
@@ -234,6 +251,10 @@ print(f"\ntotal: {len(findings)} findings in {len(files)} files/rows")
 print(f"report: {report}")
 EOF
 
+if [ -s "$REPORT_DIR/scan-errors.txt" ]; then
+  sed 's/^/scan error: /' "$REPORT_DIR/scan-errors.txt" >&2
+  exit 2
+fi
 if [ "$(python3 -c "import json;print(len(json.load(open('$REPORT'))))" 2>/dev/null || echo 0)" -gt 0 ]; then
   exit 1
 fi

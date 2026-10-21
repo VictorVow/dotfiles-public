@@ -111,16 +111,23 @@ cass_bin = os.environ["CASS_BIN"]
 state = json.load(open(state_file))
 import time; now = time.time()
 
+scan_errors = []
+
 def scan_path(p):
-    """gitleaks-scan one file; return findings list."""
+    """gitleaks-scan one file; return findings list, or None on scan error."""
     frag = os.path.join(report_dir, "frag.json")
     if os.path.exists(frag): os.remove(frag)
-    subprocess.run(
+    r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
          "--report-format", "json", "--report-path", frag, p],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+    if r.returncode != 0:
+        scan_errors.append(f"{p}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+        return None
     try: return json.load(open(frag))
-    except Exception: return []
+    except Exception as e:
+        scan_errors.append(f"{p}: unreadable gitleaks report: {e}")
+        return None
 
 skipped_recent = skipped_short = redacted = 0
 scrubbed_paths = []
@@ -146,6 +153,8 @@ for p in to_scan:
         skipped_recent += 1
         continue
     hits = scan_path(p)
+    if hits is None:
+        continue  # leave previous state untouched
     st = os.stat(p)
     if not hits:
         state[p] = {"mtime": st.st_mtime, "size": st.st_size, "findings": []}
@@ -248,12 +257,17 @@ for db in db_targets:
     # one gitleaks scan over the whole dump dir
     frag = os.path.join(report_dir, "rows-frag.json")
     if os.path.exists(frag): os.remove(frag)
-    subprocess.run(
+    r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
          "--report-format", "json", "--report-path", frag, dump],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
+    if r.returncode != 0:
+        scan_errors.append(f"{db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
+        continue
     try: hits = json.load(open(frag))
-    except Exception: hits = []
+    except Exception as e:
+        scan_errors.append(f"{db}: unreadable gitleaks report: {e}")
+        continue
     db_stats["rows_scanned"] += len(row_keys)
 
     # group hits per row
@@ -325,6 +339,9 @@ if cass and not dry and scrubbed_paths and os.path.exists(cass_bin):
             print("cass: forgot opencode.db sessions (re-indexed from scrubbed db)")
         else:
             print(f"cass forget failed for opencode.db: {r.stderr.strip()[:200]}", file=sys.stderr)
+
+for e in scan_errors:
+    print(f"scan error: {e}", file=sys.stderr)
 
 print(f"\n{redacted} file secrets {'would be ' if dry else ''}redacted "
       f"({skipped_recent} live/recent skipped, {skipped_short} <8-byte skipped); "
