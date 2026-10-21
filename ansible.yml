@@ -47,6 +47,67 @@
         validate: "visudo -cf %s"
       become: yes
 
+    # ── Hydra assets-host block (remote bundle.js RCE mitigation) ──────────
+    # Stock Hydra Launcher builds fetch + eval `assets.hydralauncher.gg/bundle.js`
+    # in the renderer with full window.electron bridge access — a remote-code
+    # slot controlled by whoever owns/MITMs that CDN. Two-layer local block:
+    #   1. /etc/hosts null-route (primary; survives ECH, needs no refresh)
+    #   2. iptables/ip6tables TLS-SNI string match, applied at boot by a
+    #      oneshot systemd unit (catches raw-IP / DoH-resolved connections;
+    #      matches hostname not IP → no collateral to other Cloudflare sites).
+    # Effect on the app while blocked: catalogue filters + remote playtime
+    # executable-map degrade gracefully; downloads/auth/library unaffected.
+    # See scripts/hydra-block.sh and docs/system/ for details.
+    - name: Install hydra-block script
+      ansible.builtin.copy:
+        src: scripts/hydra-block.sh
+        dest: /usr/local/sbin/hydra-block
+        owner: root
+        group: root
+        mode: "0755"
+      become: yes
+
+    - name: Null-route assets.hydralauncher.gg in /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: "^{{ item.ip }}\\s+assets\\.hydralauncher\\.gg"
+        line: "{{ item.ip }} assets.hydralauncher.gg # hydra-block"
+        state: present
+      loop:
+        - {ip: "0.0.0.0"}
+        - {ip: "::1"}
+      become: yes
+
+    - name: Create hydra-block boot service (iptables SNI match)
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/hydra-block.service
+        content: |
+          [Unit]
+          Description=Block outbound TLS to assets.hydralauncher.gg (SNI match)
+          After=network-pre.target
+          Before=network.target
+          Wants=network-pre.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/hydra-block --enable-fw
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: "0644"
+      become: yes
+      notify: Reload systemd daemon
+
+    - name: Enable and start hydra-block service
+      ansible.builtin.systemd:
+        name: hydra-block
+        enabled: yes
+        state: started
+      become: yes
+
     # ── User groups: evdev access for OBS input-overlay ──────────────────
     # /dev/input/event* is root:input 660 by default, so reading raw
     # keyboard/mouse events (OBS's input-overlay plugin — the key-mon
