@@ -129,7 +129,6 @@ org.kde.koko
 org.kde.kolourpaint
 org.kde.merkuro
 org.keepassxc.KeePassXC
-org.libreoffice.LibreOffice
 org.mozilla.firefox
 org.mozilla.thunderbird_esr
 org.nickvision.tubeconverter
