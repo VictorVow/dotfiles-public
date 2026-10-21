@@ -8,7 +8,7 @@ These two scripts scan all of those stores with gitleaks, rewrite the secrets in
 
 | Script | What it does |
 | --- | --- |
-| `report-exposed-secrets.sh` | Read-only audit. Prints findings grouped by rule × file/row; exit 1 if any. `--quiet` prints just the JSON report path. `--full` forces a rescan. |
+| `report-exposed-secrets.sh` | Read-only audit. Prints findings grouped by rule × file/row; exit 1 if any, 2 on scan error. `--quiet` prints just the JSON report path (`$XDG_STATE_HOME/transcript-scrub/last-report.json`, gitleaks `--redact`ed). `--full` forces a rescan. |
 | `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite rows via `UPDATE`. Then runs `cass forget` for each scrubbed file and `**/opencode.db*` if any db rows were patched. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. |
 
 ```bash

@@ -44,6 +44,7 @@ CONF="$DIR/gitleaks-scrub.toml"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/transcript-scrub"
 STATE_FILE="$STATE_DIR/state.json"
 REPORT_DIR="$(mktemp -d)"
+trap 'rm -rf "$REPORT_DIR"' EXIT
 REPORT="$REPORT_DIR/report.json"
 CASS_BIN="${CASS_BIN:-/home/linuxbrew/.linuxbrew/bin/cass}"
 CASS_DATA_DIR="${CASS_DATA_DIR:-$HOME/.local/share/coding-agent-search}"

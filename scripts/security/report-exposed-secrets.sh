@@ -3,8 +3,10 @@
 # report-exposed-secrets.sh — audit agent transcripts for leaked secrets.
 #
 # Scans the transcript/session stores of local coding agents with gitleaks and
-# prints a grouped summary (rule × file/row) plus the total. The JSON report is
-# kept under a temp dir and its path printed last.
+# prints a grouped summary (rule × file/row) plus the total. The redacted JSON
+# report is written to $XDG_STATE_HOME/transcript-scrub/last-report.json and its
+# path printed last; gitleaks runs with --redact so no plaintext secrets land
+# on disk.
 #
 # Incremental + repeatable: shares a state file with scrub-transcripts.sh at
 # $XDG_STATE_HOME/transcript-scrub/state.json. File entries map to
@@ -30,7 +32,8 @@ CONF="$DIR/gitleaks-scrub.toml"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/transcript-scrub"
 STATE_FILE="$STATE_DIR/state.json"
 REPORT_DIR="$(mktemp -d)"
-REPORT="$REPORT_DIR/report.json"
+trap 'rm -rf "$REPORT_DIR"' EXIT
+REPORT="$STATE_DIR/last-report.json"
 
 QUIET=0 FULL=0
 while [ $# -gt 0 ]; do
@@ -96,7 +99,7 @@ def scan_file(p):
     if os.path.exists(frag): os.remove(frag)
     r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
-         "--report-format", "json", "--report-path", frag, p],
+         "--redact", "--report-format", "json", "--report-path", frag, p],
         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
     if r.returncode != 0:
         scan_errors.append(f"{p}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
@@ -185,7 +188,7 @@ for db in db_targets:
     if os.path.exists(frag): os.remove(frag)
     r = subprocess.run(
         ["gitleaks", "dir", "--config", conf, "--no-banner", "--exit-code", "0",
-         "--report-format", "json", "--report-path", frag, dump],
+         "--redact", "--report-format", "json", "--report-path", frag, dump],
         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, check=False)
     if r.returncode != 0:
         scan_errors.append(f"{db}: gitleaks exited {r.returncode}: {r.stderr.strip()[:200]}")
