@@ -47,7 +47,7 @@
 #   scrub-transcripts.sh --dry-run            # preview
 #   scrub-transcripts.sh                      # scrub everything + cass archive
 #   scrub-transcripts.sh DIR|DB [DIR|DB...]   # scrub specific dirs/files/.db
-#   scrub-transcripts.sh --no-cass            # skip all cass work
+#   scrub-transcripts.sh --defer-cass         # scrub now, run cass forgets next run
 #   scrub-transcripts.sh --full               # force rescan of everything
 #
 set -euo pipefail
@@ -63,7 +63,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY=1; shift ;;
     --full)    FULL=1; shift ;;
-    --no-cass) CASS=0; shift ;;
+    --defer-cass) CASS=0; shift ;;
     --) shift; break ;;
     *) break ;;
   esac

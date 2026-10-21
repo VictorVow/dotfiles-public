@@ -9,7 +9,7 @@ These two scripts scan all of those stores with gitleaks, rewrite the secrets in
 | Script | What it does |
 | --- | --- |
 | `report-exposed-secrets.sh` | Audit: prints findings grouped by rule × file/row; exit 1 if any, 2 on scan error. Never edits transcripts, but writes the shared state file and queues `cass forget` jobs for archive hits whose source still exists (missing-source hits print `cass review` lines instead). `--quiet` prints just the JSON report path (`$XDG_STATE_HOME/transcript-scrub/last-report.json`, gitleaks `--redact`ed). `--full` forces a rescan. |
-| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite cells via `UPDATE` per the specs in `transcript_common.SQLITE_SPECS`. Then runs `cass forget` for each scrubbed source file's exact path and `<db>/*` for each sqlite db with patched cells, plus archive-scan hits. `--dry-run` previews, `--no-cass` skips the cass step, `--full` rescans everything. Exit 2 on scan error. |
+| `scrub-transcripts.sh` | Rewrites each finding's literal secret value to `[REDACTED:<rule>]` — files via atomic tmp+rename (works on read-only files), sqlite cells via `UPDATE` per the specs in `transcript_common.SQLITE_SPECS`. Then runs `cass forget` for each scrubbed source file's exact path and `<db>/*` for each sqlite db with patched cells, plus archive-scan hits. `--dry-run` previews, `--defer-cass` skips the cass work this run (forgets stay queued), `--full` rescans everything. Exit 2 on scan error. |
 
 Both scripts source `transcript-common.sh` (target lists, arg resolution, locking) and import `transcript_common.py` (gitleaks invocation, file/row/conversation dumping, state pruning) — keep the three in sync.
 
@@ -43,7 +43,7 @@ cass keeps its own copies — `agent_search.db` (canonical archive + FTS index) 
 - **Cleanup = `cass forget`, throttled.** The scrubber queues exact `source_path` globs (glob chars escaped, so shared basenames like copilot's `events.jsonl` don't overmatch) for every scrubbed source file, `…/opencode.db/*` when v1 rows were patched, and every conversation the archive scan flagged. cass accepts one `--source-glob` per call and rebuilds its index each time, so a run attempts at most 100 forgets and carries the rest in `cass://pending` for the next run — nothing is dropped, a backlog just takes more than one night.
 - **Missing sources are never auto-forgotten.** When a flagged conversation's source file no longer exists, the archive copy is the last remaining record — forgetting deletes it for good, and noisy rules (e.g. `generic-api-key`) can false-positive. Those are listed as `cass review` lines on stderr for a manual `cass forget` instead.
 - **Re-indexing.** If the source file still exists, `cass-incremental` re-indexes the now-clean version on its next run; conversations with no remaining source are gone for good (which is the point — the db was the only copy of the secret).
-- `--no-cass` skips both the archive scan and the forgets.
+- `--defer-cass` skips both the archive scan and the forgets, but sources scrubbed this run still enter `cass://pending` and are forgotten by the next normal run.
 
 ## Caveats
 
