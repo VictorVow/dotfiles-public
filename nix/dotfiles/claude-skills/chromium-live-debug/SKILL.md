@@ -1,10 +1,12 @@
 ---
 name: chromium-live-debug
 description: >-
-  Debug the user's live, already-running Chromium-family browser session (ungoogled-chromium by default; Google Chrome or Brave via -b): inspect a tab's DOM, console errors, network requests, run JS, record a performance trace or Lighthouse audit, or screencast a page, by attaching the chromium-devtools MCP over the Chrome DevTools Protocol. Use when the user asks to look at, debug, or test something in "my Chromium", "my Chrome tab", or "my browser session" (non-Firefox), or when an agent needs to drive a site in a real logged-in browser.
+  Debug the user's live, already-running Chromium-family browser session (ungoogled-chromium by default; Google Chrome or Brave via -b): inspect a tab's DOM, console errors, network requests, run JS, record a performance trace or Lighthouse audit, or screencast a page, by attaching the chromium-devtools MCP over the Chrome DevTools Protocol. This is the default when an agent needs a real browser to drive a site (prefer `chromium-devtools-isolated` if the user's real profile isn't needed). Use when the user asks to look at, debug, or test something in "my Chromium", "my Chrome tab", or "my browser session" (non-Firefox).
 ---
 
 # Debugging the live Chromium session
+
+> **Chromium is the default for agent-driven browsing.** If an agent needs a real browser, reach for this skill (or `chromium-devtools-isolated` for throwaway sessions). Firefox (`firefox-live-debug`) is for when the user's own Firefox access to a site is broken, or for Firefox browser/extension issues — not for general agent browsing.
 
 Two parts work together:
 
@@ -17,8 +19,9 @@ Two parts work together:
 |---|---|
 | A web page misbehaves in the user's real (logged-in) session: JS errors, broken layout, failed requests, "what does this page do" | This skill (MCP) |
 | A page must be driven as the user — cookies, login, paywall — in Chromium | This skill (MCP) |
+| An agent needs a real browser to drive a site, and the user's real profile/logins are needed | This skill (MCP) |
 | A clean-slate / automation browser with no cookies is fine (tests, scraping, throwaway sessions, parallel agents) | Use the `chromium-devtools-isolated` MCP — it launches its own throwaway headless browser per MCP process, no port or script needed. Nothing below applies to it |
-| Firefox session | `firefox-live-debug` skill instead |
+| Firefox session, or the user's own access to a site is broken specifically in Firefox, or Firefox extension trouble | `firefox-live-debug` skill instead |
 | Whole browser frozen or crashing | Chromium has no toolkit playbook like `scripts/firefox-debugging/`; check `chrome://crashes` output, `~/.config/chromium/Crash Reports`, and `journalctl --user` first |
 
 ## 2. Get the session attachable

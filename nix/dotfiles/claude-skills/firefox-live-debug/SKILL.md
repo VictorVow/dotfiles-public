@@ -1,10 +1,12 @@
 ---
 name: firefox-live-debug
 description: >-
-  Debug the user's live, already-running Firefox session (default profile VERTEX): inspect a tab's DOM, console errors, network requests, run JS, set logpoints, or capture a Gecko profile, by attaching the firefox-devtools MCP over Marionette + WebDriver BiDi. Use when the user asks to look at, debug, or test something in "my Firefox", "my open tab", or "my browser session", or when Firefox itself misbehaves (freezes, memory, extension trouble).
+  Debug the user's live, already-running Firefox session (default profile VERTEX): inspect a tab's DOM, console errors, network requests, run JS, set logpoints, or capture a Gecko profile, by attaching the firefox-devtools MCP over Marionette + WebDriver BiDi. Use when the user asks to look at, debug, or test something in "my Firefox", "my open tab", or "my browser session" (Firefox specifically), when the user's own access to a website is broken in Firefox, or for Firefox browser/extension issues (freezes, memory, extension trouble). If an agent just needs a real browser to drive a site, prefer `chromium-live-debug` or `chromium-devtools-isolated` instead.
 ---
 
 # Debugging the live Firefox session
+
+> **Pick this only when Firefox itself is the subject** — the user's own access to a site is broken in Firefox, the browser or an extension is misbehaving, or the user explicitly says "my Firefox". If an agent simply needs a real browser to drive a site, use `chromium-live-debug` or `chromium-devtools-isolated` instead: Chromium is the default for agent-driven browsing.
 
 Two parts work together:
 
@@ -15,7 +17,8 @@ Two parts work together:
 
 | Symptom | Use |
 |---|---|
-| A web page misbehaves: JS errors, broken layout, failed requests, "what does this page do" | This skill (MCP) |
+| A web page misbehaves *in Firefox specifically*: JS errors, broken layout, failed requests, "what does this page do" | This skill (MCP) |
+| An agent needs to drive a site in a real browser (not Firefox-specific) | `chromium-live-debug` or `chromium-devtools-isolated` instead |
 | Whole browser frozen, RAM climbing, all extension icons blank, crashes | Read `~/Projects/installs/scripts/firefox-debugging/README.md` and follow its playbook (crash dumps, mem-watch, profiler via SIGUSR2). A wedged browser can't serve the MCP anyway, and those steps need no restart into remote-debug mode |
 | Browser is responsive but slow, and you want a profile without restarting twice | MCP `profiler_start` / `profiler_stop` (Firefox ≥ 154), as long as it's already in remote-debug mode |
 | Chrome-context work (about:config prefs, privileged JS, extension internals) | Not available in the public MCP build. Use the toolkit scripts or the profile files. `@mozilla/firefox-devtools-mcp-moz` adds it, but only together with `MOZ_REMOTE_ALLOW_SYSTEM_ACCESS=1`, i.e. full system access from a browser full of untrusted pages. Don't enable it unless the user explicitly asks |
