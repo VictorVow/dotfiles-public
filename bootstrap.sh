@@ -133,21 +133,44 @@ fi
 
 success "Home Manager configuration applied."
 
+# ── Step 5 (lord only): server-side ansible ──────────────────────────────────
+# ansible/lord-ubuntu.yml targets `hosts: lord-ubuntu`, but run from the
+# server itself --connection local makes the same play run in place (no SSH
+# to self needed).
+if [[ "$CONFIG_NAME" == "lord" ]]; then
+  step "Ansible: lord-ubuntu user-level setup (local)"
+
+  ANSIBLE_BIN="$HOME/.nix-profile/bin/ansible-playbook"
+  if [[ ! -x "$ANSIBLE_BIN" ]]; then
+    warn "ansible-playbook not in the new Nix profile — run later:"
+    warn "  ~/.nix-profile/bin/ansible-playbook --connection local $SCRIPT_DIR/ansible/lord-ubuntu.yml"
+  else
+    "$ANSIBLE_BIN" --connection local "$SCRIPT_DIR/ansible/lord-ubuntu.yml"
+    success "Ansible applied."
+  fi
+fi
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}${BOLD}Bootstrap complete!${NC}"
 echo ""
 echo "Next steps:"
 echo "  1. Open a new terminal (or run: source ~/.bashrc) to pick up PATH changes"
-echo "  2. Run the Ansible playbook for system-level packages."
-echo "     ansible-playbook is now available from your Nix profile:"
-echo "       ansible-playbook $SCRIPT_DIR/ansible.yml --ask-become-pass"
-echo "     This installs KDE integration, system services, Docker, Mullvad VPN,"
-echo "     and other tools that require root or system-level setup."
-echo "  3. Set up Flatpak apps (reinstall from ~/.var/app if migrating):"
-echo "       $SCRIPT_DIR/flatpak.sh"
-echo "  4. Check distrobox containers: distrobox list"
-echo "  5. Future updates: update-all"
+if [[ "$CONFIG_NAME" == "lord" ]]; then
+  echo "  2. Provision the sops age key (see docs/system/lord-ubuntu-home.md):"
+  echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"
+  echo "       then add its pubkey to .sops.yaml on the desktop + sops updatekeys"
+else
+  echo "  2. Run the Ansible playbook for system-level packages."
+  echo "     ansible-playbook is now available from your Nix profile:"
+  echo "       ansible-playbook $SCRIPT_DIR/ansible.yml --ask-become-pass"
+  echo "     This installs KDE integration, system services, Docker, Mullvad VPN,"
+  echo "     and other tools that require root or system-level setup."
+  echo "  3. Set up Flatpak apps (reinstall from ~/.var/app if migrating):"
+  echo "       $SCRIPT_DIR/flatpak.sh"
+  echo "  4. Check distrobox containers: distrobox list"
+  echo "  5. Future updates: update-all"
+fi
 echo ""
 echo "  Nix receipt (for uninstall/repair): /nix/receipt.json"
 echo "  Home Manager config:               $NIX_CONFIG_DIR"
