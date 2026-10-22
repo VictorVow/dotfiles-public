@@ -101,12 +101,13 @@ lib.mkMerge [
         # $CREDENTIALS_DIRECTORY (tmpfs, only this unit can see it).
         LoadCredentialEncrypted = "age-key:%h/.config/sops/age/keys.txt.cred";
         # Copy the decrypted credential to the path sops-install-secrets is
-        # baked to read. %d expands to $CREDENTIALS_DIRECTORY; %t is
-        # $XDG_RUNTIME_DIR (/run/user/1000).
+        # baked to read. Specifiers like %d / %t are only expanded on the
+        # Exec* directive line itself, not inside scripts — use the env vars
+        # ($CREDENTIALS_DIRECTORY, $XDG_RUNTIME_DIR) systemd sets instead.
         ExecStartPre = "${pkgs.writeShellScript "sops-age-key-copy" ''
           set -euo pipefail
-          ${pkgs.coreutils}/bin/install -d -m 700 %t/sops-age
-          ${pkgs.coreutils}/bin/install -m 400 %d/age-key %t/sops-age/key
+          ${pkgs.coreutils}/bin/install -d -m 700 "$XDG_RUNTIME_DIR/sops-age"
+          ${pkgs.coreutils}/bin/install -m 400 "$CREDENTIALS_DIRECTORY/age-key" "$XDG_RUNTIME_DIR/sops-age/key"
         ''}";
       };
     };
