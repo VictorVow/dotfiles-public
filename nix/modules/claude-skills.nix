@@ -21,15 +21,28 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ config, lib, orca, context7, ... }:
+{ config, lib, orca, context7, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/claude-skills;
   # Local Logseq checkout the installed `logseq` CLI is built from (its --version Revision).
   logseqRepo = "${config.home.homeDirectory}/Projects/Git/Categories/Logseq-ALL/logseq";
   logseqCliSkill = config.lib.file.mkOutOfStoreSymlink "${logseqRepo}/.agents/skills/logseq-cli";
+  # Skills that only make sense on the desktop: they need a browser, distrobox, the
+  # clipboard/GUI, the Logseq checkout, desktop-only data stores, or they hardcode
+  # ~/Projects/installs / #boss. Left out on servers (lord-ubuntu).
+  desktopOnlySkills = [
+    "chromium-live-debug" "firefox-live-debug" "dbox-status" "md-open" "wl-copy"
+    "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
+    "hn-favorites-digest" "search-personal-data"
+    "nix-switch" "system-update-changelog" "system-update-cvlog"
+  ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
-  skillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
+  allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
+  skillNames =
+    if hostProfile.isServer
+    then lib.subtractLists desktopOnlySkills allSkillNames
+    else allSkillNames;
 in
 {
   home.file = lib.mkMerge [
@@ -59,7 +72,9 @@ in
       # the Context7 MCP server). The skill runs `npx ctx7@latest library|docs …`;
       # anonymous use works, CONTEXT7_API_KEY / `ctx7 login` only raise rate limits.
       ".claude/skills/find-docs".source = "${context7}/skills/find-docs";
+    }
 
+    (lib.mkIf (!hostProfile.isServer) {
       # ── Logseq CLI (upstream skill from the local logseq checkout) ──────────────────
       # Out-of-store symlink (not a flake input — the repo is huge) so the skill tracks
       # whatever revision the CLI was last built from. Replaces logseq-cli@spellbook
@@ -69,7 +84,7 @@ in
       # looks for ~/.agents/skills/logseq-cli/SKILL.md. OpenCode sees it twice.
       ".claude/skills/logseq-cli".source = logseqCliSkill;
       ".agents/skills/logseq-cli".source = logseqCliSkill;
-    }
+    })
 
     # ── Orca native chat (OpenCode) ─────────────────────────────────────────────────
     # Orca only asks an ACP agent for its commands once the session is live (after the
@@ -97,6 +112,7 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" "logseq-cli" ])))
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]
+        ++ lib.optional (!hostProfile.isServer) "logseq-cli")))
   ];
 }
