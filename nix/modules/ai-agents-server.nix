@@ -533,8 +533,9 @@ in
   # Isolated under ~/.opencode1 by the wrapper. Sign in with `opencode1 auth login`.
   home.file.".opencode1/config/opencode/opencode.json".source = jsonFormat.generate "opencode1-config" {
     "$schema" = "https://opencode.ai/config.json";
-    model = "anthropic/claude-sonnet-4-5";
-    small_model = "anthropic/claude-haiku-4-5";
+    # Devin, not anthropic/*: see ai-agents.nix (no Anthropic sign-in → big-pickle fallback).
+    model = "devin/swe-2";
+    small_model = "devin/swe-1.7-lightning";
     permission = opencodePermissionV1;
     provider.freellmapi = {
       name = "FreeLLMAPI";

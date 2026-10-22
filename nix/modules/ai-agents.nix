@@ -675,8 +675,10 @@ in
   # the opencode1 wrapper (packages.nix).
   home.file.".opencode1/config/opencode/opencode.json".source = jsonFormat.generate "opencode1-config" {
     "$schema" = "https://opencode.ai/config.json";
-    model       = "anthropic/claude-sonnet-4-5";
-    small_model = "anthropic/claude-haiku-4-5";
+    # Devin, not anthropic/*: opencode1 has no Anthropic sign-in, so an anthropic default
+    # falls back to the rate-limited free opencode/big-pickle (Orca chats then fail).
+    model       = "devin/swe-2";
+    small_model = "devin/swe-1.7-lightning";
     permission  = opencodePermissionV1;
     provider.freellmapi = {
       name = "FreeLLMAPI";
