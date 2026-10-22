@@ -101,8 +101,8 @@ lib.mkMerge [
         # $XDG_RUNTIME_DIR (/run/user/1000).
         ExecStartPre = "${pkgs.writeShellScript "sops-age-key-copy" ''
           set -euo pipefail
-          install -d -m 700 %t/sops-age
-          install -m 400 %d/age-key %t/sops-age/key
+          ${pkgs.coreutils}/bin/install -d -m 700 %t/sops-age
+          ${pkgs.coreutils}/bin/install -m 400 %d/age-key %t/sops-age/key
         ''}";
       };
     };
