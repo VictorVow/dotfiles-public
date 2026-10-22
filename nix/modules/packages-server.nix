@@ -58,7 +58,7 @@ in
 
     # ── Admin / IaC ────────────────────────────────────────────────────────────
     ansible
-    opentofu
+    opentofu # Terraform — open-source fork, CLI is `tofu`
     google-cloud-sdk
     doctl
 

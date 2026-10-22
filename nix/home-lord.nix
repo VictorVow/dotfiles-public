@@ -34,5 +34,12 @@
   # No desktop.nix, gui-apps.nix, firefox.nix, distrobox.nix, rclone.nix,
   # recoll.nix, gpg-expiry.nix, services.nix, editors.nix — all desktop-coupled.
 
+  # ts-exit (GCE, public IP): Self-Hosted's tracked inventory.ts-exit.yml passes
+  # `-i ~/.ssh/boss-XPS-9380`, which only exists on boss. ssh tries config
+  # IdentityFiles on top of -i, so this lets the same inventory work from here.
+  programs.ssh.settings."ts-exit 35.209.236.10" = {
+    identityFile = "~/.ssh/id_ed25519";
+  };
+
   programs.home-manager.enable = true;
 }
