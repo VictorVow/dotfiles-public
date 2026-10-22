@@ -58,7 +58,7 @@ in
       echo "WARNING: cass download failed — timers will no-op until ~/.local/bin/cass exists" >&2
       exit 0
     }
-    ${pkgs.gnutar}/bin/tar -xzf "$tmp/cass.tar.gz" -C "$tmp"
+    ${pkgs.gnutar}/bin/tar --use-compress-program ${pkgs.gzip}/bin/gzip -xf "$tmp/cass.tar.gz" -C "$tmp"
     install -d -m 755 "$HOME/.local/bin"
     install -m 755 "$tmp/cass" "$bin"
     mkdir -p "$(dirname "$stamp")"
