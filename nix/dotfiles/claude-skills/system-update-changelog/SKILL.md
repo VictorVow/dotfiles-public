@@ -1,9 +1,9 @@
 ---
 name: system-update-changelog
-description: Add a dated section to ~/Projects/installs/CHANGELOG.md summarising the workflow-affecting changes made to the installs repo and the Self-Hosted repos since the last entry.
+description: Add a dated section to ~/Projects/installs/CHANGELOG.md summarising the workflow-affecting changes made to the installs repo and the Self-Hosted repos since the last entry. Entries are written in arrears — today's section is normally only added by tomorrow's run.
 ---
 
-Adds one section to `~/Projects/installs/CHANGELOG.md` covering the changes in two places:
+Adds dated sections to `~/Projects/installs/CHANGELOG.md` — one per covered day — covering the changes in two places:
 
 - `~/Projects/installs/` (one git repo)
 - `~/Projects/Git/1MY_REPOS/Self-Hosted/`. This is **not** a git repo itself. Each service subdirectory (`FreeLLMAPI/`, `Orca-server/`, `1-COMMON/`, …) is its own repo. Directories without a `.git` are skipped.
@@ -15,17 +15,17 @@ The user edits `CHANGELOG.md` by hand between runs. Their edits are mostly delet
 ## 1. Work out the time range
 
 - Read `CHANGELOG.md`. Sections are newest first, each headed `## YYYY/MM/DD Day`, optionally suffixed with ` [WIP]` while that day is still in progress.
-- **Start** = the day after the newest section's date. If the file is empty or has no sections, start = today.
-- If the newest section is already **today**, update that section: merge the new items into it and don't repeat what's already there. Keep the ` [WIP]` suffix on its heading.
-- If the newest section is for an earlier day and still has ` [WIP]`, it was written before that day ended, so it is probably missing that day's later work. First finish it: gather the changes from that day (steps 2–3 with `--since=<that day>T00:00 --until=<next day>T00:00`), merge in what's missing, and drop "(uncommitted)" notes on items that have since been committed. Only then remove its ` [WIP]` suffix and add the new section, whose start is the day after it.
-- **End** = now. Include uncommitted and staged changes (`git status --short`, `git diff`, `git diff --cached`) as well as commits. Uncommitted work is usually what the user just did with an agent.
+- **Start** = the day after the newest section's date (or that day's 00:00 if the newest section is for an earlier day and still has ` [WIP]` — see below). If the file is empty or has no sections, start = today.
+- If the newest section is already **today**, it was created ahead of time — update it: merge in the new items from today so far, don't repeat what's already there, and make sure it carries the ` [WIP]` suffix (add it if missing). Don't add any other sections: today is still in progress, so don't close it out and don't backfill earlier days — they already have sections. Stop here.
+- If the newest section is for an earlier day and still has ` [WIP]`, it was written before that day ended, so it is probably missing that day's later work. Finish it as part of the run: include that day in the range you gather, merge in what's missing under its existing heading, and drop "(uncommitted)" notes on items that have since been committed. Once that day is fully gathered its ` [WIP]` comes off, because the day is over.
+- **End** = end of yesterday. Runs never document the current day: each day's changes are only processed and written up once that day is fully over. Anything changed today (including uncommitted/staged work) is left for a later run — never fold it into an earlier day's section. Work that was changed on a past day but is still uncommitted does belong to that day's section; use file mtimes, reflog dates, or the user's account of when the work happened to attribute it.
 
 ## 2. Gather changes
 
 installs repo:
 
 ```bash
-git -C ~/Projects/installs log --since=<START>T00:00 --format='%h %ad %s%n%b' --date=short --stat
+git -C ~/Projects/installs log --since=<START>T00:00 --until=<END>T23:59 --format='%h %ad %s%n%b' --date=short --stat
 git -C ~/Projects/installs status --short && git -C ~/Projects/installs diff --stat
 ```
 
@@ -34,9 +34,11 @@ Self-Hosted repos:
 ```bash
 cd ~/Projects/Git/1MY_REPOS/Self-Hosted
 for d in */; do [ -d "$d/.git" ] || continue
-  out=$(git -C "$d" log --since=<START>T00:00 --format='  %h %s'); st=$(git -C "$d" status --short)
+  out=$(git -C "$d" log --since=<START>T00:00 --until=<END>T23:59 --format='  %h %ad %s' --date=short); st=$(git -C "$d" status --short)
   [ -n "$out$st" ] && printf '## %s\n%s\n%s\n' "$d" "$out" "$st"; done
 ```
+
+Then split the gathered commits by their commit date and group them per day. Days with no workflow-relevant changes get no section at all.
 
 If a subject line doesn't tell you what changed for the user, read the commit body or the diff (`git show <hash>`). For new services, skills or tools, also read the relevant README or `SKILL.md`.
 
@@ -59,12 +61,13 @@ Leave out:
 
 The test is about **using the system**, not maintaining the repos. If unsure, ask: "does this change what the user can run, open or invoke, or how something they use behaves?" If the answer is only "they might need to know it for repo maintenance", leave it out.
 
-## 4. Write the section
+## 4. Write the sections
 
-- Heading: `## YYYY/MM/DD Day [WIP]`, using today's date (`date '+%Y/%m/%d %A'`), e.g. `## 2026/10/19 Monday [WIP]`. The ` [WIP]` suffix marks that the day isn't over yet and the section may still grow; it comes off once a newer day's section is added.
-- Insert it at the **top** of the file (below any `# Changelog` title or `> ` quote block, which you never edit), with one blank line between sections.
+- Write one section per covered day that has workflow-relevant changes, newest first. Heading: `## YYYY/MM/DD Day`, using the covered day's own date, e.g. `## 2026/10/19 Monday`. Never create a section headed with today's date — if one already exists it keeps its ` [WIP]`; every section you write is for a finished day and carries no suffix.
+- Each day's section lists only changes committed (or, for still-uncommitted work, made) on that day. Don't move a change to a different day's section and don't lump several days into one.
+- Insert the new sections at the **top** of the file (below any `# Changelog` title or `> ` quote block, which you never edit), with one blank line between sections.
 - Body: a flat bullet list, most notable first. One line per item: **bold name** + a short description of what it does / how to use it. Group closely related items (e.g. a service plus its backup and its Firefox allowlist entry) into one bullet. No hard wrapping.
 - Prefix Self-Hosted items with the service name, e.g. `**FreeLLMAPI** (Self-Hosted): …`.
 - No commit hashes, no file paths unless the path is what the user types or opens.
 
-Show the user the new section once it's written. Don't commit unless they ask.
+Show the user the new sections once they're written. Don't commit unless they ask.
