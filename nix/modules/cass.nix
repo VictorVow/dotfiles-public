@@ -48,22 +48,24 @@ in
   home.activation.cassInstall = lib.mkIf hostProfile.isServer (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     stamp="$HOME/.local/share/cass-version"
     bin="$HOME/.local/bin/cass"
-    if [ -x "$bin" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${cassVersion}" ]; then
-      exit 0
+    # NOTE: activation blocks are sourced, not run in a subshell — `exit` would
+    # terminate the whole `activate` script and skip later steps. Use `if/else`
+    # or `return` inside a function instead.
+    if ! { [ -x "$bin" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${cassVersion}" ]; }; then
+      url="https://github.com/Dicklesworthstone/coding_agent_session_search/releases/download/v${cassVersion}/cass-linux-amd64.tar.gz"
+      tmp="$(mktemp -d)"
+      if ${pkgs.curl}/bin/curl -sSfL "$url" -o "$tmp/cass.tar.gz"; then
+        ${pkgs.gnutar}/bin/tar --use-compress-program ${pkgs.gzip}/bin/gzip -xf "$tmp/cass.tar.gz" -C "$tmp"
+        install -d -m 755 "$HOME/.local/bin"
+        install -m 755 "$tmp/cass" "$bin"
+        mkdir -p "$(dirname "$stamp")"
+        printf '%s' "${cassVersion}" > "$stamp"
+        echo "cass ${cassVersion} installed to $bin"
+      else
+        echo "WARNING: cass download failed — timers will no-op until ~/.local/bin/cass exists" >&2
+      fi
+      rm -rf "$tmp"
     fi
-    url="https://github.com/Dicklesworthstone/coding_agent_session_search/releases/download/v${cassVersion}/cass-linux-amd64.tar.gz"
-    tmp="$(mktemp -d)"
-    trap 'rm -rf "$tmp"' EXIT
-    ${pkgs.curl}/bin/curl -sSfL "$url" -o "$tmp/cass.tar.gz" || {
-      echo "WARNING: cass download failed — timers will no-op until ~/.local/bin/cass exists" >&2
-      exit 0
-    }
-    ${pkgs.gnutar}/bin/tar --use-compress-program ${pkgs.gzip}/bin/gzip -xf "$tmp/cass.tar.gz" -C "$tmp"
-    install -d -m 755 "$HOME/.local/bin"
-    install -m 755 "$tmp/cass" "$bin"
-    mkdir -p "$(dirname "$stamp")"
-    printf '%s' "${cassVersion}" > "$stamp"
-    echo "cass ${cassVersion} installed to $bin"
   '');
 
   # Incremental: new/changed sessions every 15 min (indexes lexically; vectors catch up nightly).
