@@ -495,6 +495,15 @@ in
       serverAliveInterval = 60;
       serverAliveCountMax = 10;
     };
+    # Forgejo SSH (container on lord-ubuntu, published on its Tailscale IP).
+    # Remote form: forgejo:ruler/dotfiles.git
+    settings."forgejo" = {
+      hostname       = "100.x.x.x";
+      port           = 2222;
+      user           = "git";
+      identityFile   = "~/.ssh/forgejo_ed25519";
+      identitiesOnly = true;
+    };
   };
 
   # The activation script below converts the HM-managed ssh config symlink
