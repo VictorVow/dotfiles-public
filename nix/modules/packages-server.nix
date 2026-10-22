@@ -64,8 +64,9 @@ in
 
     # ── AI / LLM CLIs ──────────────────────────────────────────────────────────
     # Same llm-agents.nix store paths as desktop (cache.numtide.com). Orca
-    # remote server detects `claude`/`codex`/`opencode2` on PATH.
-    # claude-code and codex come via programs.* in ai-agents-server.nix.
+    # remote server detects `claude`/`codex`/`opencode2`/`opencode`/`antigravity`
+    # on PATH. claude-code and codex come via programs.* in ai-agents-server.nix.
+    llmAgents.antigravity-cli # binaries: `antigravity`, `agy`
     llmAgents.cursor-agent
     llmAgents.copilot-cli
     pkgs-unstable.devin-cli
@@ -80,6 +81,32 @@ in
         makeWrapper ${llmAgents.opencode2}/bin/opencode2 $out/bin/opencode2 \
           --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"'
       '';
+    })
+    # OpenCode 1 (`opencode`/`opencode1`) for the magpie Devin/Cursor plugins —
+    # same isolated ~/.opencode1 wrapper as packages.nix (config in ai-agents-server.nix).
+    (pkgs.symlinkJoin {
+      name = "opencode1-wrapped";
+      paths = [
+        (pkgs.writeShellScriptBin "opencode1" ''
+          root="$HOME/.opencode1"
+          FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"
+          export FREELLMAPI_API_KEY
+          export XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
+                 XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache"
+          # Mirror ~/.config into the isolated root, except v2's `opencode`.
+          for d in "$HOME"/.config/* "$HOME"/.config/.[!.]*; do
+            [ -e "$d" ] || continue
+            base=''${d##*/}
+            [ "$base" = opencode ] && continue
+            [ -e "$root/config/$base" ] || ln -s "$d" "$root/config/$base"
+          done
+          # Drop v2's `--standalone`, which v1 doesn't know.
+          args=()
+          for a in "$@"; do [ "$a" = --standalone ] || args+=("$a"); done
+          exec ${llmAgents.opencode}/bin/opencode "''${args[@]}"
+        '')
+      ];
+      postBuild = "ln -s opencode1 $out/bin/opencode";
     })
   ];
 }

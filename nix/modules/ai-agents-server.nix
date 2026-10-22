@@ -7,8 +7,7 @@
 
 # Server variant of ai-agents.nix — headless lord-ubuntu.
 # Same agent CLIs and global policies as desktop, minus the browser MCPs
-# (firefox-devtools, chromium-devtools — no browsers installed) and the
-# desktop-only OpenCode 1 magpie plugins.
+# (firefox-devtools, chromium-devtools — no browsers installed).
 let
   jsonFormat = pkgs.formats.json { };
 
@@ -247,6 +246,20 @@ let
     "kwalletd6"
     "kwalletd5"
   ];
+  # v1 schema of the same rules — see opencodePermissionV1 in ai-agents.nix.
+  opencodeV1Action = a: { shell = "bash"; subagent = "task"; }.${a} or a;
+  opencodePermissionV1 = lib.foldl' (acc: r: lib.recursiveUpdate acc {
+    ${opencodeV1Action r.action}.${r.resource} = r.effect;
+  }) { } opencodePermissions;
+
+  # magpie-community OpenCode 1 provider plugins — same pins as ai-agents.nix.
+  magpiePkg = name: version: hash: pkgs.fetchzip {
+    url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
+    inherit hash;
+  };
+  devinAuth = magpiePkg "devin" "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
+  cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
+
   secretGuardSubst = {
     SECRET_PATH_PATTERNS = builtins.toJSON secretGuardPaths;
     SECRET_GUARD_READERS = builtins.toJSON secretGuardReaders;
@@ -515,6 +528,50 @@ in
 
   xdg.configFile."opencode/AGENTS.md".text = globalContext;
 
+  # OpenCode 1 (`opencode`/`opencode1`, packages-server.nix) with the magpie
+  # Devin/Cursor plugins — same as desktop ai-agents.nix minus the browser MCPs.
+  # Isolated under ~/.opencode1 by the wrapper. Sign in with `opencode1 auth login`.
+  home.file.".opencode1/config/opencode/opencode.json".source = jsonFormat.generate "opencode1-config" {
+    "$schema" = "https://opencode.ai/config.json";
+    model = "anthropic/claude-sonnet-4-5";
+    small_model = "anthropic/claude-haiku-4-5";
+    permission = opencodePermissionV1;
+    provider.freellmapi = {
+      name = "FreeLLMAPI";
+      npm = "@ai-sdk/openai-compatible";
+      options = {
+        baseURL = "https://freellmapi.device.example.com/v1";
+        apiKey = "{env:FREELLMAPI_API_KEY}";
+      };
+      models = {
+        "auto" = {
+          name = "FreeLLMAPI auto";
+        };
+        "auto:fast" = {
+          name = "FreeLLMAPI auto (fast)";
+        };
+        "auto:smart" = {
+          name = "FreeLLMAPI auto (smart)";
+        };
+      };
+    };
+    mcp.freellmapi = {
+      type = "remote";
+      url = "https://freellmapi.device.example.com/mcp";
+      oauth = false;
+      headers.Authorization = "Bearer {env:FREELLMAPI_API_KEY}";
+    };
+    mcp.nixos = {
+      type = "local";
+      command = [ nixosMcp.command ] ++ nixosMcp.args;
+    };
+  };
+  home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
+    ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
+  home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
+    ''export { CursorAuthPlugin } from "${cursorAuth}/index.mjs"'';
+  home.file.".opencode1/config/opencode/AGENTS.md".text = globalContext;
+
   # Hook scripts — same sources as desktop.
   home.file.".claude/hooks/bash-secret-guard.py" = {
     source = pkgs.replaceVars ../dotfiles/claude-hooks/bash-secret-guard.py secretGuardSubst;
@@ -523,6 +580,8 @@ in
 
   home.file.".config/opencode/plugins/secret-guard.js".source =
     pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard.js secretGuardSubst;
+  home.file.".opencode1/config/opencode/plugins/secret-guard.js".source =
+    pkgs.replaceVars ../dotfiles/opencode-plugins/secret-guard-v1.js secretGuardSubst;
 
   home.file.".claude/direnv-env.sh".text = ''
     if command -v direnv >/dev/null 2>&1; then
