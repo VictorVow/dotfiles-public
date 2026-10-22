@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, hostProfile, ... }:
 
 # Home Manager program configurations.
 # Using programs.* modules instead of bare packages gives Home Manager the
@@ -46,15 +46,23 @@ in
       gpg.program            = "/usr/bin/gpg";
       tag.forceSignAnnotated = false;
 
-      # Credential storage: libsecret (KDE Wallet) with a 12-hour cache
-      credential = {
+      # Credential storage. Desktop: libsecret (KDE Wallet) with a 12-hour cache.
+      # Server (lord-ubuntu): headless, no Secret Service and no
+      # git-credential-libsecret binary (Nix git doesn't ship it), so `git push`
+      # died with "'credential-libsecret' is not a git command". Use the
+      # built-in in-memory cache helper instead (re-enter the password every 12h).
+      credential = if hostProfile.isServer then {
+        helper = "cache --timeout 43200";
+      } else {
         helper          = "libsecret";
         credentialStore = "cache";
         cacheOptions    = "--timeout 43200";
       };
+    } // lib.optionalAttrs (!hostProfile.isServer) {
       # Per-host credential helpers
       "credential \"https://github.com\"".helper      = "libsecret";
       "credential \"https://gist.github.com\"".helper = "libsecret";
+    } // {
       "credential \"https://dev.azure.com\"".useHttpPath = true;
 
       # git checkout-fb (shell application) - checkout an arbitrary branch and then remove that remote
