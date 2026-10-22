@@ -35,11 +35,11 @@
         esac
       }
 
-      # Interactive sops on the server reads the age key from the plaintext
-      # file — no Secret Service. See sops-age-key.nix (server branch).
-      sops() {
-        SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt" command sops "$@"
-      }
+      # Interactive sops on the server: the age key is a TPM-wrapped
+      # credential (~/.config/sops/age/keys.txt.cred), not a plaintext file —
+      # decrypted into sops-nix.service's private dir at runtime. For ad-hoc
+      # `sops -d`, run on the desktop (its keyring is reachable) or pipe a
+      # `systemd-creds decrypt` output via --age /dev/stdin (needs sudo).
 
       # Homebrew (Linux) — installed on the server via ansible/lord-ubuntu.yml
       # (Brewfile.lord, currently just cass). Same guarded shellenv pattern as

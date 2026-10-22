@@ -69,23 +69,56 @@ lib.mkMerge [
   })
 
   # ── Server (lord-ubuntu): no graphical session, no Secret Service ─────────
-  # The age identity lives at ~/.config/sops/age/keys.txt (0600, manually
-  # provisioned once) — the tradeoff the desktop's Secret-Service indirection
-  # exists to avoid. The agent secret-guard rules (ai-agents-server.nix) deny
-  # reads of ~/.config/sops/** so the exposure is bounded.
+  # The age identity is a systemd-creds-encrypted blob bound to the host's
+  # TPM2: ~/.config/sops/age/keys.txt.cred, produced once by
+  #   systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \
+  #     ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred
+  #   shred -u ~/.config/sops/age/keys.txt
+  # (--tpm2-pcrs= empty = bound to the TPM but not to boot PCRs, so kernel
+  # and initrd updates don't break decryption.)
+  #
+  # LoadCredentialEncrypted decrypts the blob into the service's private
+  # credentials dir ($CREDENTIALS_DIRECTORY, tmpfs, only this unit can see
+  # it) at ExecStart; sops-nix reads it via SOPS_AGE_KEY_FILE. The plaintext
+  # never touches disk and isn't readable by any other process or unit —
+  # the server-side equivalent of desktop's Secret-Service indirection.
   (lib.mkIf hostProfile.isServer {
-    sops.age.keyFile = "/home/lord/.config/sops/age/keys.txt";
+    # sops-install-secrets reads the age key path from its baked-in manifest
+    # (ageKeyFile), NOT from SOPS_AGE_KEY_FILE env — so we point keyFile at
+    # a stable path under $XDG_RUNTIME_DIR that a tiny ExecStartPre fills
+    # from the decrypted systemd credential each run. Same convention as
+    # the desktop branch (tmpfs, dies at logout) but the source is a TPM-
+    # wrapped blob instead of Secret Service.
+    sops.age.keyFile = keyPath;
 
-    # Ensure the dir exists with right perms; the key file itself is placed
-    # out-of-band (copy the private key over once, or generate a dedicated
-    # lord keypair and add its public key to .sops.yaml).
-    home.activation.sopsAgeDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    systemd.user.services.sops-nix = {
+      Service = {
+        # systemd-creds decrypts keys.txt.cred into the unit's private
+        # $CREDENTIALS_DIRECTORY (tmpfs, only this unit can see it).
+        LoadCredentialEncrypted = "age-key:%h/.config/sops/age/keys.txt.cred";
+        # Copy the decrypted credential to the path sops-install-secrets is
+        # baked to read. %d expands to $CREDENTIALS_DIRECTORY; %t is
+        # $XDG_RUNTIME_DIR (/run/user/1000).
+        ExecStartPre = "${pkgs.writeShellScript "sops-age-key-copy" ''
+          set -euo pipefail
+          install -d -m 700 %t/sops-age
+          install -m 400 %d/age-key %t/sops-age/key
+        ''}";
+      };
+    };
+
+    # Reminder if the .cred isn't provisioned yet — sops-nix will fail with
+    # "Failed to set up credentials" otherwise, which is less obvious.
+    home.activation.sopsAgeCredCheck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD install -d -m 700 "$HOME/.config/sops/age"
-      if [ ! -f "$HOME/.config/sops/age/keys.txt" ]; then
-        echo "WARNING: ~/.config/sops/age/keys.txt missing — sops decryption will fail." >&2
-        echo "  Generate a dedicated keypair on lord-ubuntu:" >&2
+      if [ ! -f "$HOME/.config/sops/age/keys.txt.cred" ]; then
+        echo "WARNING: ~/.config/sops/age/keys.txt.cred missing — sops-nix will fail." >&2
+        echo "  Generate a dedicated keypair + TPM-wrap it:" >&2
         echo "    age-keygen -o ~/.config/sops/age/keys.txt" >&2
-        echo "  then add the public key to .sops.yaml and run 'sops updatekeys nix/secrets/*.yaml'." >&2
+        echo "    systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \\" >&2
+        echo "      ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred" >&2
+        echo "    shred -u ~/.config/sops/age/keys.txt" >&2
+        echo "  then add the public key to .sops.yaml and 'sops updatekeys nix/secrets/ai.yaml'." >&2
       fi
     '';
   })

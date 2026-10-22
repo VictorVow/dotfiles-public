@@ -1,16 +1,29 @@
-# sops creation rules. The age recipient below is the PUBLIC half of the
-# identity stored in the Secret Service keyring (service=sops-age
-# key=identity; see nix/modules/sops-age-key.nix) — the private key is never
-# committed and never sits at a plaintext path on desktop.
-#
-# To add lord-ubuntu: generate a keypair there
-#   ssh lord@lord-ubuntu 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt && age-keygen -y ~/.config/sops/age/keys.txt'
-# add its public key under `keys:` with a `&lord` anchor, include `- *lord`
-# in the creation_rules age list below, then run:
-#   sops updatekeys nix/secrets/*.yaml
+# sops creation rules. The age recipients below are the PUBLIC halves of
+# per-host identities:
+#   boss — Secret Service keyring on the desktop (service=sops-age
+#          key=identity; see nix/modules/sops-age-key.nix). Private key is
+#          never committed and never sits at a plaintext path.
+#   lord — TPM2-bound systemd credential on lord-ubuntu
+#          (~/.config/sops/age/keys.txt.cred, decrypted by
+#          LoadCredentialEncrypted into sops-nix.service only). Generate +
+#          wrap once on the server:
+#            age-keygen -o ~/.config/sops/age/keys.txt
+#            systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \
+#              ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred
+#            shred -u ~/.config/sops/age/keys.txt
+#          Add the public key below, then `sops updatekeys nix/secrets/ai.yaml`
+#          (ai.yaml is the only file lord is allowed to decrypt).
 keys:
   - &boss age10qg4dmewk0t3khmjmqlske6vn57rxezqn8xs0s8eu0fgz8ndkgmsy5u5qa
+  # - &lord <lord-ubuntu public key — uncomment once generated>
 creation_rules:
+  # Only ai.yaml may be decrypted on lord-ubuntu (freellmapi_api_key for
+  # OpenCode). All other secrets stay boss-only.
+  - path_regex: nix/secrets/ai\.yaml$
+    key_groups:
+      - age:
+          - *boss
+          # - *lord          # uncomment once the lord pubkey is filled in above
   - path_regex: nix/secrets/.*\.yaml$
     key_groups:
       - age:
