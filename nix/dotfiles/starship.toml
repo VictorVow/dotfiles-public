@@ -2,6 +2,7 @@
 
 format = """
 ${custom.first_block_host}\
+${custom.first_block_lord}\
 ${custom.first_block_box}\
 $directory\
 [](fg:color_dark_yellow bg:color_purple)\
@@ -85,8 +86,8 @@ format = '[ $user ]($style)'
 # custom modules use `when` on $CONTAINER_ID (always set by distrobox).
 
 [custom.first_block_host]
-description = "Orange user block - shown on host, hidden inside distrobox"
-when = '[ -z "$CONTAINER_ID" ]'
+description = "Orange user block - shown on host, hidden inside distrobox and for lord user"
+when = '[ -z "$CONTAINER_ID" ] && [ "$USER" != "lord" ]'
 command = '''
 ID=$(. /etc/os-release 2>/dev/null && printf "%s" "$ID")
 case "$ID" in
@@ -100,6 +101,23 @@ printf " %s %s " "$icon" "$USER"
 '''
 style = "bg:color_orange fg:color_fg0"
 format = '[](color_orange)[$output]($style)[](bg:color_dark_yellow fg:color_orange)'
+
+[custom.first_block_lord]
+description = "Blue user block - shown on lord-ubuntu host (USER=lord)"
+when = '[ -z "$CONTAINER_ID" ] && [ "$USER" = "lord" ]'
+command = '''
+ID=$(. /etc/os-release 2>/dev/null && printf "%s" "$ID")
+case "$ID" in
+  ubuntu)  icon="󰕈" ;;
+  fedora)  icon="󰣛" ;;
+  arch|archlinux) icon="󰣇" ;;
+  debian)  icon="󰣚" ;;
+  *)       icon="󰌽" ;;
+esac
+printf " %s %s " "$icon" "$USER"
+'''
+style = "bg:color_blue fg:color_fg0"
+format = '[](color_blue)[$output]($style)[](bg:color_dark_yellow fg:color_blue)'
 
 [custom.first_block_box]
 description = "Dark-blue container block - shown inside distrobox, hidden on host"
