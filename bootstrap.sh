@@ -9,7 +9,8 @@
 #   - You are NOT running as root (Nix is installed as a multi-user daemon)
 #
 # Usage:
-#   ./bootstrap.sh
+#   ./bootstrap.sh          # activates ./nix#boss (desktop)
+#   ./bootstrap.sh lord     # activates ./nix#lord (lord-ubuntu server)
 #
 # After this script completes, also run:
 #   ansible-playbook ansible.yml --ask-become-pass
@@ -42,6 +43,10 @@ fi
 # when the script is invoked from a different working directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_CONFIG_DIR="$SCRIPT_DIR/nix"
+
+# Flake config to activate. Default "boss" (desktop); on lord-ubuntu pass the
+# config name explicitly: ./bootstrap.sh lord
+CONFIG_NAME="${1:-boss}"
 
 if [[ ! -f "$NIX_CONFIG_DIR/flake.nix" ]]; then
   error "Could not find nix/flake.nix in $SCRIPT_DIR"
@@ -86,7 +91,7 @@ else
     success "Nix user environment sourced."
   else
     error "Could not find Nix profile script. You may need to open a new terminal."
-    error "Then re-run: nix run github:nix-community/home-manager -- switch --flake ./nix#boss"
+    error "Then re-run: nix run github:nix-community/home-manager -- switch --flake ./nix#$CONFIG_NAME"
     exit 1
   fi
 fi
@@ -114,7 +119,7 @@ fi
 # ── Step 4: Activate Home Manager ─────────────────────────────────────────────
 step "Home Manager"
 
-FLAKE_REF="$NIX_CONFIG_DIR#boss"
+FLAKE_REF="$NIX_CONFIG_DIR#$CONFIG_NAME"
 
 if command -v home-manager &>/dev/null; then
   info "home-manager found — running switch..."

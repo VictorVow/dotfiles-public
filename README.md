@@ -28,7 +28,8 @@ installs/
 ├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
-│   ├── home.nix              # Top-level Home Manager config, imports modules
+│   ├── home.nix              # Top-level Home Manager config (desktop, user `boss`), imports modules
+│   ├── home-lord.nix         # Headless-server Home Manager config (lord-ubuntu, user `lord`), imports *-server.nix + shared modules
 │   ├── secrets/              # sops-encrypted (age) secrets, safe to commit
 │   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
@@ -37,9 +38,11 @@ installs/
 │   │   ├── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
 │   │   └── claude-skills/    # Own Claude Code skills, one folder per skill (SKILL.md + helpers); auto-linked by claude-skills.nix
 │   └── modules/
-│       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists)
+│       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists) — desktop
+│       ├── packages-server.nix # Headless subset of packages.nix for lord-ubuntu
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, htop, gh, direnv, ssh
 │       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode (+ `opencode1` w/ magpie Devin/Cursor plugins), shared MCP server registry
+│       ├── ai-agents-server.nix # Server variant of ai-agents.nix (no browser MCPs)
 │       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
 │       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)
@@ -50,6 +53,7 @@ installs/
 │       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
 │       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
+│       ├── shell-server.nix  # Server variant of shell.nix (no GUI/Yakuake/Android bits)
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
 │       ├── cass.nix          # systemd user timers keeping the cass agent-session search index fresh (search-agent-history skill)
 │       ├── recoll.nix        # services.recoll: full-text index of ~/Documents, ~/Downloads, ~/Media (searchable file types listed inside)
@@ -110,7 +114,7 @@ installs/
 
 ```bash
 # 1. Install Nix + activate Home Manager configuration
-./bootstrap.sh
+./bootstrap.sh          # desktop (./nix#boss); pass 'lord' on lord-ubuntu
 
 # Open a new terminal, then:
 
@@ -138,3 +142,4 @@ ansible-playbook ansible.yml --ask-become-pass
 - [Limitations](docs/system/limitations.md) — what can't go in Nix and alternatives
 - [Migration to Nix](docs/archive/migration-to-nix.md) — archived: the completed apt/brew/pipx/npm → Nix migration
 - [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)
+- [lord-ubuntu Home Manager](docs/system/lord-ubuntu-home.md) — headless-server config (`./nix#lord`) sharing modules with the desktop

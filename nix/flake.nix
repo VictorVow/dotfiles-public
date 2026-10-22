@@ -103,8 +103,9 @@
 
     # `nix flake check` (or `just check`, which adds the Ansible linters).
     checks.x86_64-linux = {
-      # Full HM build: catches eval errors and broken packages before `hms`.
-      hm-build = self.homeConfigurations."boss".activationPackage;
+      # Full HM builds: catches eval errors and broken packages before `hms`.
+      hm-build       = self.homeConfigurations."boss".activationPackage;
+      hm-build-lord  = self.homeConfigurations."lord".activationPackage;
       statix = lint "statix" [ pkgs.statix ] "statix check -c nix/statix.toml nix";
       deadnix = lint "deadnix" [ pkgs.deadnix ] "deadnix --fail nix";
       shellcheck = lint "shellcheck" [ pkgs.shellcheck pkgs.git pkgs.findutils ] ''
@@ -127,9 +128,34 @@
           config.allowUnfree = true;
         };
         hostProfile = {
+          isServer = false;
           hms = {
             flakePath  = "$HOME/Projects/installs/nix";
             configName = "boss";
+          };
+        };
+      };
+    };
+
+    # lord-ubuntu headless server — see docs/system/lord-ubuntu-home.md.
+    # Reuses the desktop modules where they're headless-safe (shell-apps,
+    # ai-agents-server, cass) via parallel home-lord.nix + *-server.nix modules.
+    homeConfigurations."lord" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+
+      modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
+
+      extraSpecialArgs = {
+        inherit llm-agents tuxManager ie-r delta orca context7;
+        pkgs-unstable = import nixpkgs-unstable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        hostProfile = {
+          isServer = true;
+          hms = {
+            flakePath  = "$HOME/installs/nix";
+            configName = "lord";
           };
         };
       };

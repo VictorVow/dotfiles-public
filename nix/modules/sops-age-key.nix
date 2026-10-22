@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, hostProfile, ... }:
 
 # The sops-nix age identity is NOT stored as a plaintext file at a persistent
 # path. It lives in the Secret Service keyring (KWallet via ksecretd, see
@@ -36,32 +36,57 @@ let
   runtimeDir = "/run/user/1000";
   keyPath = "${runtimeDir}/sops-age/key";
 in
-{
-  # Single source of truth for the key path — rclone.nix and ai-secrets.nix
-  # both reference this. sops-nix reads the file at ExecStart, by which time
-  # the service below has written it.
-  sops.age.keyFile = keyPath;
+lib.mkMerge [
+  # ── Desktop: Secret Service → tmpfs at login ───────────────────────────────
+  (lib.mkIf (!hostProfile.isServer) {
+    # Single source of truth for the key path — rclone.nix and ai-secrets.nix
+    # both reference this. sops-nix reads the file at ExecStart, by which time
+    # the service below has written it.
+    sops.age.keyFile = keyPath;
 
-  systemd.user.services.sops-age-key = {
-    Unit = {
-      Description = "Materialise sops age identity from Secret Service";
-      Before = [ "sops-nix.service" ];
+    systemd.user.services.sops-age-key = {
+      Unit = {
+        Description = "Materialise sops age identity from Secret Service";
+        Before = [ "sops-nix.service" ];
+      };
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        # Write to a temp file then mv over: on re-runs `key` is already 0400,
+        # which a plain `>` redirect can't open for writing.
+        ExecStart        = pkgs.writeShellScript "sops-age-key-materialise" ''
+          set -euo pipefail
+          d="${runtimeDir}/sops-age"
+          install -d -m 700 "$d"
+          tmp="$(mktemp -p "$d" key.XXXXXX)"
+          ${pkgs.libsecret}/bin/secret-tool lookup service sops-age key identity > "$tmp"
+          chmod 400 "$tmp"
+          mv -f "$tmp" "$d/key"
+        '';
+      };
+      Install.WantedBy = [ "default.target" ];
     };
-    Service = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      # Write to a temp file then mv over: on re-runs `key` is already 0400,
-      # which a plain `>` redirect can't open for writing.
-      ExecStart        = pkgs.writeShellScript "sops-age-key-materialise" ''
-        set -euo pipefail
-        d="${runtimeDir}/sops-age"
-        install -d -m 700 "$d"
-        tmp="$(mktemp -p "$d" key.XXXXXX)"
-        ${pkgs.libsecret}/bin/secret-tool lookup service sops-age key identity > "$tmp"
-        chmod 400 "$tmp"
-        mv -f "$tmp" "$d/key"
-      '';
-    };
-    Install.WantedBy = [ "default.target" ];
-  };
-}
+  })
+
+  # ── Server (lord-ubuntu): no graphical session, no Secret Service ─────────
+  # The age identity lives at ~/.config/sops/age/keys.txt (0600, manually
+  # provisioned once) — the tradeoff the desktop's Secret-Service indirection
+  # exists to avoid. The agent secret-guard rules (ai-agents-server.nix) deny
+  # reads of ~/.config/sops/** so the exposure is bounded.
+  (lib.mkIf hostProfile.isServer {
+    sops.age.keyFile = "/home/lord/.config/sops/age/keys.txt";
+
+    # Ensure the dir exists with right perms; the key file itself is placed
+    # out-of-band (copy the private key over once, or generate a dedicated
+    # lord keypair and add its public key to .sops.yaml).
+    home.activation.sopsAgeDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      $DRY_RUN_CMD install -d -m 700 "$HOME/.config/sops/age"
+      if [ ! -f "$HOME/.config/sops/age/keys.txt" ]; then
+        echo "WARNING: ~/.config/sops/age/keys.txt missing — sops decryption will fail." >&2
+        echo "  Generate a dedicated keypair on lord-ubuntu:" >&2
+        echo "    age-keygen -o ~/.config/sops/age/keys.txt" >&2
+        echo "  then add the public key to .sops.yaml and run 'sops updatekeys nix/secrets/*.yaml'." >&2
+      fi
+    '';
+  })
+]

@@ -1,9 +1,13 @@
 # sops creation rules. The age recipient below is the PUBLIC half of the
 # identity stored in the Secret Service keyring (service=sops-age
 # key=identity; see nix/modules/sops-age-key.nix) — the private key is never
-# committed and never sits at a plaintext path. To add another machine,
-# generate an age key there, add its public key here, and run:
-#   sops updatekeys nix/secrets/rclone.yaml
+# committed and never sits at a plaintext path on desktop.
+#
+# To add lord-ubuntu: generate a keypair there
+#   ssh lord@lord-ubuntu 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt && age-keygen -y ~/.config/sops/age/keys.txt'
+# add its public key under `keys:` with a `&lord` anchor, include `- *lord`
+# in the creation_rules age list below, then run:
+#   sops updatekeys nix/secrets/*.yaml
 keys:
   - &boss age10qg4dmewk0t3khmjmqlske6vn57rxezqn8xs0s8eu0fgz8ndkgmsy5u5qa
 creation_rules:

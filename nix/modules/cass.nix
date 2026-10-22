@@ -1,14 +1,18 @@
-{ config, ... }:
+{ config, hostProfile, ... }:
 
-# Background index refresh for cass (coding-agent session search, installed via Brewfile),
-# used by the search-agent-history skill.
+# Background index refresh for cass (coding-agent session search), used by the
+# search-agent-history skill.
 # Declarative equivalent of `cass schedule install` (units mirrored from its --dry-run, cass
 # 0.10.0), with two differences: ExecStart uses the stable brew bin symlink instead of the
 # versioned Cellar path, so `brew upgrade` doesn't break it; and output goes to the journal
 # (`journalctl --user -u cass-incremental`) instead of an appended log file.
 # Don't also run `cass schedule install`: it would write duplicate units under ~/.config/systemd.
 let
-  cass = "/home/linuxbrew/.linuxbrew/bin/cass";
+  # Desktop: brew-installed (Brewfile). Server (lord-ubuntu): no brew — install
+  # the upstream release binary to ~/.local/bin/cass once, then this just calls it.
+  cass = if hostProfile.isServer
+    then "${config.home.homeDirectory}/.local/bin/cass"
+    else "/home/linuxbrew/.linuxbrew/bin/cass";
   dataDir = "${config.home.homeDirectory}/.local/share/coding-agent-search";
 
   # Background priority as cass sets it: only runs when the CPU/disk is otherwise idle.
