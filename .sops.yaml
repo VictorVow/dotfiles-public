@@ -15,7 +15,7 @@
 #          (ai.yaml is the only file lord is allowed to decrypt).
 keys:
   - &boss age10qg4dmewk0t3khmjmqlske6vn57rxezqn8xs0s8eu0fgz8ndkgmsy5u5qa
-  # - &lord <lord-ubuntu public key — uncomment once generated>
+  - &lord age14pvl48v82x4atpc8cfqn2sk4ejkhpxp6nrpahz5xdhhue00a3q8sc32fvd
 creation_rules:
   # Only ai.yaml may be decrypted on lord-ubuntu (freellmapi_api_key for
   # OpenCode). All other secrets stay boss-only.
@@ -23,7 +23,7 @@ creation_rules:
     key_groups:
       - age:
           - *boss
-          # - *lord          # uncomment once the lord pubkey is filled in above
+          - *lord
   - path_regex: nix/secrets/.*\.yaml$
     key_groups:
       - age:
