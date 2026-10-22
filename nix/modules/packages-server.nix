@@ -64,9 +64,9 @@ in
 
     # ── AI / LLM CLIs ──────────────────────────────────────────────────────────
     # Same llm-agents.nix store paths as desktop (cache.numtide.com). Orca
-    # remote server detects `claude`/`codex`/`opencode2`/`opencode`/`antigravity`
+    # remote server detects `claude`/`codex`/`opencode2`/`opencode`/`agy`
     # on PATH. claude-code and codex come via programs.* in ai-agents-server.nix.
-    llmAgents.antigravity-cli # binaries: `antigravity`, `agy`
+    llmAgents.antigravity-cli # binary: `agy`
     llmAgents.cursor-agent
     llmAgents.copilot-cli
     pkgs-unstable.devin-cli

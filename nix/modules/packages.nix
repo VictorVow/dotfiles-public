@@ -495,7 +495,7 @@ in
     # apply to the CLI binary. So this entry installs just the CLI as a plain
     # package. Same flake source as codex: llm-agents.packages.${system}
     # (cache.numtide.com) — see the `llmAgents` binding above.
-    llmAgents.antigravity-cli  # Google Antigravity CLI (binaries: `antigravity`, `agy`)
+    llmAgents.antigravity-cli  # Google Antigravity CLI (binary: `agy`)
     # OpenCode 2 (binary: `opencode2`; `opencode` is v1, below). Orca detects
     # `opencode2` as its "OpenCode 2" agent. A wrapper that reads FREELLMAPI_API_KEY
     # from its sops file at launch, so only OpenCode (and its children) get the key —
