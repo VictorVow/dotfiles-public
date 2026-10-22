@@ -14,11 +14,13 @@ installs/
 ├── ansible.yml               # System-level packages (requires sudo)
 ├── custom-installers.yml     # 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, AppMan, etc.) — imported by ansible.yml
 ├── ansible/installers/       # One task file per 3rd-party tool, imported by custom-installers.yml
+│   └── lord-ubuntu.yml       # User-level setup for lord-ubuntu (brew + Brewfile.lord) — separate playbook, over SSH
 ├── ansible.cfg               # Ansible settings (explicit inventory, no fact injection) — picked up when run from repo root
 ├── inventory.ini             # Explicit localhost inventory for the playbooks
 ├── flatpak.sh                # Set up Flatpak + reinstall Flatpak apps
 ├── flatpak.md                # List of installed Flatpak apps
-├── Brewfile                  # Homebrew packages (Linuxbrew)
+├── Brewfile                  # Homebrew packages (Linuxbrew) — desktop
+├── Brewfile.lord             # Server-scoped brew list (cass) for lord-ubuntu
 ├── appman-appimages.txt      # AppImages managed by AppMan
 ├── arkenfox.sh               # Apply/update arkenfox user.js on a Firefox profile
 ├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill

@@ -21,14 +21,17 @@
     NONINTERACTIVE: "1"
   when: not brew_binary.stat.exists
 
-# playbook_dir = installs/; Brewfile is in the same directory.
+# brewfile_path: full path to the Brewfile to bundle-install. Each caller
+# sets it explicitly — playbook_dir differs between playbooks at the repo
+# root (custom-installers.yml → installs/) and ansible/*.yml → installs/ansible/.
+# Brewfile = desktop list; Brewfile.lord = cass-only for lord-ubuntu.
 - name: Homebrew | check if Brewfile exists
   ansible.builtin.stat:
-    path: "{{ playbook_dir }}/Brewfile"
+    path: "{{ brewfile_path }}"
   register: brewfile
 
 - name: Homebrew | install packages from Brewfile
   ansible.builtin.command:
-    cmd: "/home/linuxbrew/.linuxbrew/bin/brew bundle install --file={{ playbook_dir }}/Brewfile"
+    cmd: "/home/linuxbrew/.linuxbrew/bin/brew bundle install --file={{ brewfile_path }}"
   when: brewfile.stat.exists
   changed_when: false

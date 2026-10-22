@@ -41,6 +41,13 @@
         SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt" command sops "$@"
       }
 
+      # Homebrew (Linux) — installed on the server via ansible/lord-ubuntu.yml
+      # (Brewfile.lord, currently just cass). Same guarded shellenv pattern as
+      # desktop shell.nix.
+      if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+      fi
+
       # User-local PATH additions
       export PATH="$HOME/.cargo/bin:$PATH"
       export NPM_CONFIG_PREFIX="$HOME/.npm-global"

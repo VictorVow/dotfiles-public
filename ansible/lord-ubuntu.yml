@@ -1,0 +1,23 @@
+---
+# ansible/lord-ubuntu.yml — User-level setup for lord-ubuntu (headless server).
+#
+# Runs over SSH as user `lord`, no sudo needed (Homebrew installs to
+# /home/linuxbrew as the current user). Currently only Homebrew + a
+# server-scoped Brewfile; add more installer imports here as lord-ubuntu
+# picks up shared tooling.
+#
+# Run from the desktop:
+#   ansible-playbook ansible/lord-ubuntu.yml
+
+- name: lord-ubuntu user-level setup
+  hosts: lord-ubuntu
+  gather_facts: no
+
+  vars:
+    # playbook_dir for this playbook is installs/ansible/ — Brewfile.lord
+    # sits at the repo root next to Brewfile.
+    brewfile_path: "{{ playbook_dir }}/../Brewfile.lord"
+
+  tasks:
+    - name: Homebrew
+      ansible.builtin.import_tasks: installers/homebrew.yml

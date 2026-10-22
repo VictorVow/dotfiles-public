@@ -1,4 +1,4 @@
-{ config, hostProfile, ... }:
+{ config, ... }:
 
 # Background index refresh for cass (coding-agent session search), used by the
 # search-agent-history skill.
@@ -7,12 +7,12 @@
 # versioned Cellar path, so `brew upgrade` doesn't break it; and output goes to the journal
 # (`journalctl --user -u cass-incremental`) instead of an appended log file.
 # Don't also run `cass schedule install`: it would write duplicate units under ~/.config/systemd.
+#
+# Same brew path on both hosts: desktop uses Brewfile (custom-installers.yml),
+# lord-ubuntu uses Brewfile.lord (ansible/lord-ubuntu.yml) — both install to
+# /home/linuxbrew.
 let
-  # Desktop: brew-installed (Brewfile). Server (lord-ubuntu): no brew — install
-  # the upstream release binary to ~/.local/bin/cass once, then this just calls it.
-  cass = if hostProfile.isServer
-    then "${config.home.homeDirectory}/.local/bin/cass"
-    else "/home/linuxbrew/.linuxbrew/bin/cass";
+  cass = "/home/linuxbrew/.linuxbrew/bin/cass";
   dataDir = "${config.home.homeDirectory}/.local/share/coding-agent-search";
 
   # Background priority as cass sets it: only runs when the CPU/disk is otherwise idle.

@@ -1,0 +1,10 @@
+# Brewfile.lord — server-scoped brew list for lord-ubuntu.
+# Installed by ansible/lord-ubuntu.yml (uses ansible/installers/homebrew.yml
+# with brewfile_path pointing here). Desktop uses Brewfile instead.
+
+tap "dicklesworthstone/tap"
+
+# cass: unified search over local coding-agent session history (not in nixpkgs),
+# used by the search-agent-history skill. Indexes Orca-spawned agent sessions
+# on lord-ubuntu; timers come from nix/modules/cass.nix.
+brew "dicklesworthstone/tap/cass", trusted: true

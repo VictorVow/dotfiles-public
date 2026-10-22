@@ -19,6 +19,9 @@
     looking_glass_rev: 236efcb155f952f5d7d9fcd5891a3060ad254e68
     kvmfr_version: "0.0.12"      # PACKAGE_VERSION in module/dkms.conf at that rev
     kvmfr_static_size_mb: 64     # 2256x1504 needs ~46 MiB → next power of two
+    # Brewfile path for ansible/installers/homebrew.yml — this playbook is at
+    # the repo root so playbook_dir = installs/.
+    brewfile_path: "{{ playbook_dir }}/Brewfile"
 
   tasks:
 
