@@ -69,19 +69,28 @@ lib.mkMerge [
   })
 
   # ── Server (lord-ubuntu): no graphical session, no Secret Service ─────────
-  # The age identity is a systemd-creds-encrypted blob bound to the host's
-  # TPM2: ~/.config/sops/age/keys.txt.cred, produced once by
-  #   systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \
-  #     ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred
+  # The age identity is a systemd-creds blob bound to the host key
+  # (/var/lib/systemd/credential.secret): ~/.config/sops/age/keys.txt.cred,
+  # produced once by
+  #   sudo systemd-creds encrypt --user --uid=1000 --with-key=host \
+  #     --name=age-key ~/.config/sops/age/keys.txt \
+  #     ~/.config/sops/age/keys.txt.cred
   #   shred -u ~/.config/sops/age/keys.txt
-  # (--tpm2-pcrs= empty = bound to the TPM but not to boot PCRs, so kernel
-  # and initrd updates don't break decryption.)
+  #
+  # Constraints systemd-creds doesn't surface clearly:
+  #   - `--user` scope is mandatory — user services reject system-scoped creds
+  #     ("Scope mismatch" / "Wrong medium type").
+  #   - TPM2 is refused under `--user` — `--with-key=host` is the strongest
+  #     key type a user unit can consume.
+  #   - `--name=age-key` must match `LoadCredentialEncrypted`'s name.
+  #   - When encrypting via sudo, `--uid=` has to be the target user.
   #
   # LoadCredentialEncrypted decrypts the blob into the service's private
   # credentials dir ($CREDENTIALS_DIRECTORY, tmpfs, only this unit can see
-  # it) at ExecStart; sops-nix reads it via SOPS_AGE_KEY_FILE. The plaintext
-  # never touches disk and isn't readable by any other process or unit —
-  # the server-side equivalent of desktop's Secret-Service indirection.
+  # it) at ExecStart; sops-install-secrets then reads the age key from a
+  # stable path ExecStartPre copies it to. The plaintext never touches disk
+  # and isn't readable by any other process or unit — the server-side
+  # equivalent of desktop's Secret-Service indirection.
   (lib.mkIf hostProfile.isServer {
     # sops-install-secrets reads the age key path from its baked-in manifest
     # (ageKeyFile), NOT from SOPS_AGE_KEY_FILE env — so we point keyFile at
@@ -118,10 +127,11 @@ lib.mkMerge [
       $DRY_RUN_CMD install -d -m 700 "$HOME/.config/sops/age"
       if [ ! -f "$HOME/.config/sops/age/keys.txt.cred" ]; then
         echo "WARNING: ~/.config/sops/age/keys.txt.cred missing — sops-nix will fail." >&2
-        echo "  Generate a dedicated keypair + TPM-wrap it:" >&2
+        echo "  Generate a dedicated keypair + host-key-wrap it (user-scoped, named age-key):" >&2
         echo "    age-keygen -o ~/.config/sops/age/keys.txt" >&2
-        echo "    systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \\" >&2
-        echo "      ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred" >&2
+        echo "    sudo systemd-creds encrypt --user --uid=\$(id -u) --with-key=host \\" >&2
+        echo "      --name=age-key ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred" >&2
+        echo "    sudo chown \$USER ~/.config/sops/age/keys.txt.cred" >&2
         echo "    shred -u ~/.config/sops/age/keys.txt" >&2
         echo "  then add the public key to .sops.yaml and 'sops updatekeys nix/secrets/ai.yaml'." >&2
       fi

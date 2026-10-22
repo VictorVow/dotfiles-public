@@ -3,13 +3,15 @@
 #   boss — Secret Service keyring on the desktop (service=sops-age
 #          key=identity; see nix/modules/sops-age-key.nix). Private key is
 #          never committed and never sits at a plaintext path.
-#   lord — TPM2-bound systemd credential on lord-ubuntu
+#   lord — host-key-bound user credential on lord-ubuntu
 #          (~/.config/sops/age/keys.txt.cred, decrypted by
 #          LoadCredentialEncrypted into sops-nix.service only). Generate +
 #          wrap once on the server:
 #            age-keygen -o ~/.config/sops/age/keys.txt
-#            systemd-creds encrypt --with-key=tpm2 --tpm2-pcrs= \
+#            sudo systemd-creds encrypt --user --uid=$(id -u) \
+#              --with-key=host --name=age-key \
 #              ~/.config/sops/age/keys.txt ~/.config/sops/age/keys.txt.cred
+#            sudo chown $USER ~/.config/sops/age/keys.txt.cred
 #            shred -u ~/.config/sops/age/keys.txt
 #          Add the public key below, then `sops updatekeys nix/secrets/ai.yaml`
 #          (ai.yaml is the only file lord is allowed to decrypt).
