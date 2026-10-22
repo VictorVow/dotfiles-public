@@ -41,5 +41,10 @@
     identityFile = "~/.ssh/id_ed25519";
   };
 
+  # Auto-trust every .envrc under Self-Hosted (no `direnv allow` per repo).
+  # Trade-off: this includes upstream fork checkouts (RSSHub-repo, headscale, …),
+  # so an .envrc that arrives by `git pull` there runs without asking.
+  programs.direnv.config.whitelist.prefix = [ "/home/lord/Projects/Self-Hosted" ];
+
   programs.home-manager.enable = true;
 }
