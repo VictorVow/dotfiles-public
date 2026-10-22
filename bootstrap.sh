@@ -57,9 +57,15 @@ fi
 # ── Step 1: Install Nix (Determinate Systems declarative installer) ───────────
 step "Nix Package Manager"
 
+# Set when this run installs Nix: shells (and a tmux server) started before
+# now have a PATH without the Nix profile dirs, so `hms` in them fails with
+# `home-manager: line N: nix: command not found`. See "Refresh existing shells".
+NIX_FRESH_INSTALL=0
+
 if command -v nix &>/dev/null; then
   success "Nix is already installed ($(nix --version))"
 else
+  NIX_FRESH_INSTALL=1
   info "Installing Nix via the Determinate Systems declarative installer..."
   info "This creates a receipt at /nix/receipt.json for reproducible state tracking."
   info "See https://github.com/DeterminateSystems/nix-installer for details."
@@ -195,12 +201,25 @@ if [[ "$CONFIG_NAME" == "lord" ]]; then
   fi
 fi
 
+# ── Refresh existing shells ──────────────────────────────────────────────────
+# A running tmux server hands its own (pre-Nix) environment to every new
+# pane, so "open a new terminal" isn't enough inside tmux. Push this script's
+# PATH (now including the Nix profile dirs) into the server's global env.
+# Panes that are already open still need `exec bash`.
+if [[ "$NIX_FRESH_INSTALL" -eq 1 ]] && command -v tmux &>/dev/null \
+   && tmux info &>/dev/null; then
+  tmux set-environment -g PATH "$PATH"
+  success "Updated the running tmux server's PATH (new panes will find nix)."
+fi
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}${BOLD}Bootstrap complete!${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Open a new terminal (or run: source ~/.bashrc) to pick up PATH changes"
+echo "  1. Run 'exec bash' in every shell that was open before this script"
+echo "     (including tmux panes and terminals inside agents like Claude Code)."
+echo "     Otherwise hms fails there with 'nix: command not found'."
 if [[ "$CONFIG_NAME" == "lord" ]]; then
   echo "  2. Provision the sops age key (see docs/system/lord-ubuntu-home.md):"
   echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"

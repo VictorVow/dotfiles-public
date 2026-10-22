@@ -118,7 +118,7 @@ installs/
 # 1. Install Nix + activate Home Manager configuration
 ./bootstrap.sh          # desktop (./nix#boss); pass 'lord' on lord-ubuntu
 
-# Open a new terminal, then:
+# Run `exec bash` in every shell opened before the Nix install (tmux panes too), then:
 
 # 2. Install system-level packages + 3rd-party tools (Docker, Tailscale, Mullvad, Homebrew, etc.)
 ansible-playbook ansible.yml --ask-become-pass
