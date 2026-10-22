@@ -75,7 +75,52 @@ else
   success "Nix installed."
 fi
 
-# ── Step 2: Source the Nix environment ────────────────────────────────────────
+# ── Step 2: Declare cache.numtide.com on the daemon ───────────────────────────
+step "Nix daemon substituters"
+
+# nix/flake.nix's llm-agents input ships pre-built binaries on
+# cache.numtide.com, and update.d/10-nix.sh age-pins that input
+# (PIN_AGE_DAYS_LLM_AGENTS) to commits numtide has already published. None of
+# that helps unless the *daemon* knows to query the cache — a flake's own
+# nixConfig block isn't trusted for substituters — so declare it here in the
+# daemon's nix.custom.conf. Without this, every llm-agents tool builds locally.
+#
+# The substituter list itself lives in $NIX_CONFIG_DIR/nix.custom.conf so
+# new caches can be added repo-side instead of editing this script.
+NIX_CUSTOM_CONF="/etc/nix/nix.custom.conf"
+REPO_CUSTOM_CONF="$NIX_CONFIG_DIR/nix.custom.conf"
+
+if [[ ! -f "$REPO_CUSTOM_CONF" ]]; then
+  warn "$REPO_CUSTOM_CONF missing — skipping daemon substituter setup."
+elif [[ ! -f "$NIX_CUSTOM_CONF" ]]; then
+  info "Creating $NIX_CUSTOM_CONF from repo copy (needs sudo)..."
+  sudo install -m 644 "$REPO_CUSTOM_CONF" "$NIX_CUSTOM_CONF"
+  sudo systemctl restart nix-daemon.service \
+    || warn "Could not restart nix-daemon — restart it manually before building."
+  success "$NIX_CUSTOM_CONF initialised."
+else
+  # Idempotent append of any substituter/key lines not already present.
+  appended=0
+  while IFS= read -r line; do
+    # Skip blanks/comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    if ! sudo grep -qxF "$line" "$NIX_CUSTOM_CONF" 2>/dev/null; then
+      info "Adding: $line"
+      echo "$line" | sudo tee -a "$NIX_CUSTOM_CONF" >/dev/null
+      appended=1
+    fi
+  done < "$REPO_CUSTOM_CONF"
+  if [[ "$appended" -eq 1 ]]; then
+    info "Restarting nix-daemon to pick up new substituters..."
+    sudo systemctl restart nix-daemon.service \
+      || warn "Could not restart nix-daemon — restart it manually before building."
+    success "Substituters updated."
+  else
+    success "Substituters already declared."
+  fi
+fi
+
+# ── Step 3: Source the Nix environment ────────────────────────────────────────
 step "Sourcing Nix environment"
 
 NIX_DAEMON_PROFILE="/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
@@ -102,7 +147,7 @@ if ! command -v nix &>/dev/null; then
   exit 1
 fi
 
-# ── Step 3: Verify flakes are enabled (Determinate Systems enables them by default)
+# ── Step 4: Verify flakes are enabled (Determinate Systems enables them by default)
 step "Checking flakes support"
 
 if nix flake --help &>/dev/null 2>&1; then
@@ -116,7 +161,7 @@ else
   fi
 fi
 
-# ── Step 4: Activate Home Manager ─────────────────────────────────────────────
+# ── Step 5: Activate Home Manager ─────────────────────────────────────────────
 step "Home Manager"
 
 FLAKE_REF="$NIX_CONFIG_DIR#$CONFIG_NAME"
@@ -133,7 +178,7 @@ fi
 
 success "Home Manager configuration applied."
 
-# ── Step 5 (lord only): server-side ansible ──────────────────────────────────
+# ── Step 6 (lord only): server-side ansible ──────────────────────────────────
 # ansible/lord-ubuntu.yml targets `hosts: lord-ubuntu`, but run from the
 # server itself --connection local makes the same play run in place (no SSH
 # to self needed).
