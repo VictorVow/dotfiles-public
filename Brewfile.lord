@@ -1,10 +1,12 @@
 # Brewfile.lord — server-scoped brew list for lord-ubuntu.
 # Installed by ansible/lord-ubuntu.yml (uses ansible/installers/homebrew.yml
 # with brewfile_path pointing here). Desktop uses Brewfile instead.
+#
+# NOTE: the dicklesworthstone/tap cass formula has no Linux URL block, so
+# `brew bundle` fails on Ubuntu 26.04 — cass is installed by
+# nix/modules/cass.nix's activation script instead (fetches the release
+# tarball into ~/.local/bin/cass). Add brews here only after checking they
+# ship a Linux bottle.
 
-tap "dicklesworthstone/tap"
-
-# cass: unified search over local coding-agent session history (not in nixpkgs),
-# used by the search-agent-history skill. Indexes Orca-spawned agent sessions
-# on lord-ubuntu; timers come from nix/modules/cass.nix.
-brew "dicklesworthstone/tap/cass", trusted: true
+# (empty for now — kept so homebrew still runs, and as a placeholder for
+# future server-side brews that do ship a Linux bottle.)

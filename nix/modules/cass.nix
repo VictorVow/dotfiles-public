@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, lib, hostProfile, ... }:
 
 # Background index refresh for cass (coding-agent session search), used by the
 # search-agent-history skill.
@@ -8,11 +8,16 @@
 # (`journalctl --user -u cass-incremental`) instead of an appended log file.
 # Don't also run `cass schedule install`: it would write duplicate units under ~/.config/systemd.
 #
-# Same brew path on both hosts: desktop uses Brewfile (custom-installers.yml),
-# lord-ubuntu uses Brewfile.lord (ansible/lord-ubuntu.yml) — both install to
-# /home/linuxbrew.
+# Binary path: desktop uses brew (/home/linuxbrew/.linuxbrew/bin/cass via
+# Brewfile). Server (lord-ubuntu) skips brew — the upstream tap's cass.rb
+# doesn't ship a generic Linux URL so `brew bundle` fails on Ubuntu 26.04 —
+# and instead the release tarball is fetched once by the activation script
+# below into ~/.local/bin/cass. Update by bumping cassVersion + re-running hms.
 let
-  cass = "/home/linuxbrew/.linuxbrew/bin/cass";
+  cassVersion = "0.10.0";  # bump alongside the desktop's `brew upgrade cass`
+  cass = if hostProfile.isServer
+    then "${config.home.homeDirectory}/.local/bin/cass"
+    else "/home/linuxbrew/.linuxbrew/bin/cass";
   dataDir = "${config.home.homeDirectory}/.local/share/coding-agent-search";
 
   # Background priority as cass sets it: only runs when the CPU/disk is otherwise idle.
@@ -37,6 +42,30 @@ let
   };
 in
 {
+  # Server-only: fetch the upstream release tarball once and drop the binary
+  # at ~/.local/bin/cass. Runs only when the binary is missing or the version
+  # stamp doesn't match — safe to re-run.
+  home.activation.cassInstall = lib.mkIf hostProfile.isServer (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    stamp="$HOME/.local/share/cass-version"
+    bin="$HOME/.local/bin/cass"
+    if [ -x "$bin" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${cassVersion}" ]; then
+      exit 0
+    fi
+    url="https://github.com/Dicklesworthstone/coding_agent_session_search/releases/download/v${cassVersion}/cass-linux-amd64.tar.gz"
+    tmp="$(mktemp -d)"
+    trap 'rm -rf "$tmp"' EXIT
+    ${pkgs.curl}/bin/curl -sSfL "$url" -o "$tmp/cass.tar.gz" || {
+      echo "WARNING: cass download failed — timers will no-op until ~/.local/bin/cass exists" >&2
+      exit 0
+    }
+    ${pkgs.gnutar}/bin/tar -xzf "$tmp/cass.tar.gz" -C "$tmp"
+    install -d -m 755 "$HOME/.local/bin"
+    install -m 755 "$tmp/cass" "$bin"
+    mkdir -p "$(dirname "$stamp")"
+    printf '%s' "${cassVersion}" > "$stamp"
+    echo "cass ${cassVersion} installed to $bin"
+  '');
+
   # Incremental: new/changed sessions every 15 min (indexes lexically; vectors catch up nightly).
   systemd.user.services.cass-incremental = mkService "cass incremental index refresh" "incremental" "30min";
   systemd.user.timers.cass-incremental = {
