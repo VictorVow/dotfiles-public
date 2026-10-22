@@ -93,6 +93,9 @@ lib.mkMerge [
 
     systemd.user.services.sops-nix = {
       Service = {
+        # sops-install-secrets needs XDG_RUNTIME_DIR to find the secrets dir;
+        # sops-nix's own `Environment=PATH=` list doesn't include it.
+        Environment = [ "XDG_RUNTIME_DIR=%t" ];
         # systemd-creds decrypts keys.txt.cred into the unit's private
         # $CREDENTIALS_DIRECTORY (tmpfs, only this unit can see it).
         LoadCredentialEncrypted = "age-key:%h/.config/sops/age/keys.txt.cred";
