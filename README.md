@@ -38,7 +38,7 @@ installs/
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
 │   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
 │   │   ├── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
-│   │   └── claude-skills/    # Own Claude Code skills, one folder per skill (SKILL.md + helpers); auto-linked by claude-skills.nix
+│   │   └── agent-skills/    # Own skills in the Agent Skills spec format (agentskills.io), one folder per skill (SKILL.md + helpers); auto-linked by agent-skills.nix
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists) — desktop
 │       ├── packages-server.nix # Headless subset of packages.nix for lord-ubuntu
@@ -47,7 +47,7 @@ installs/
 │       ├── ai-agents-server.nix # Server variant of ai-agents.nix (no browser MCPs)
 │       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
-│       ├── claude-skills.nix # Claude Code user skills: links dotfiles/claude-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)
+│       ├── agent-skills.nix # Agent Skills spec skills: links dotfiles/agent-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer

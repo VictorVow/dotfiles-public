@@ -62,7 +62,7 @@
     delta.inputs.nixpkgs.follows = "nixpkgs";
 
     # Orca agent skills (skills/orca-cli, skills/orchestration) — source only,
-    # linked into ~/.claude/skills by modules/claude-skills.nix. Shorter pin
+    # linked into ~/.claude/skills by modules/agent-skills.nix. Shorter pin
     # window than the others: the Orca app (AppMan) updates freely, and the
     # skills shouldn't lag its CLI by long.
     orca = {
@@ -72,7 +72,7 @@
     };
 
     # Context7 find-docs skill (skills/find-docs, drives `npx ctx7@latest`) — source only,
-    # linked by modules/claude-skills.nix. Replaces the Context7 MCP server.
+    # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
       url = "github:upstash/context7/6b636d3c35e051a1a653a236afb7f612c02a1ad3";

@@ -33,7 +33,7 @@
     ./modules/shell-apps.nix # home.programs.* for shell/CLI apps
     ./modules/ai-agents.nix  # Claude Code, Codex, OpenCode, MCP server registry, statusline
     ./modules/editors.nix    # Neovim, micro, VS Code/VSCodium settings, MarkText
-    ./modules/claude-skills.nix # Claude Code user skills (dotfiles/claude-skills + Orca skills from flake input)
+    ./modules/agent-skills.nix # Claude Code user skills (dotfiles/agent-skills + Orca skills from flake input)
     ./modules/firefox.nix    # Firefox: profiles, shared settings, search engines, cookie policy
     ./modules/gui-apps.nix   # home.programs.* for GUI apps (Rofi, OBS)
     ./modules/shell.nix      # Shell environment, PATH additions, aliases

@@ -21,7 +21,7 @@
     ./modules/ai-secrets.nix # same sops ai.yaml → FREELLMAPI_API_KEY for opencode wrapper
     ./modules/cass.nix # agent-session index timers (needs ~/.local/bin/cass, see module)
     ./modules/transcript-scrub.nix # daily gitleaks scrub of agent transcripts
-    ./modules/claude-skills.nix # ~/.claude/skills — desktop-only skills filtered out via hostProfile.isServer
+    ./modules/agent-skills.nix # ~/.claude/skills — desktop-only skills filtered out via hostProfile.isServer
   ];
 
   # Non-NixOS Linux (Ubuntu 26.04 on lord-ubuntu).
