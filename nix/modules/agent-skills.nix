@@ -36,7 +36,7 @@ let
   desktopOnlySkills = [
     "chromium-live-debug" "firefox-live-debug" "process-firefox-synced-tabs" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
-    "hn-favorites-digest" "search-personal-data"
+    "process-hacker-news-favourites" "search-personal-data"
     "nix-switch"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
