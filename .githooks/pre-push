@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+remote="$1"
+
+[ -z "$remote" ] && exit 0
+
+git fetch "$remote" --quiet
