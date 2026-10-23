@@ -177,6 +177,7 @@ in
     policies.Cookies.Allow = [
       "http://localhost:8384"
       "http://localhost:8193"
+      "http://100.x.x.x:6768"
       # Headscale
       "https://aiometadata.device.example.com"
       "https://calibre.device.example.com"
