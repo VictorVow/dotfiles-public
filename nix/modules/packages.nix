@@ -205,6 +205,7 @@ in
     git-lfs  # Git extension for large file storage (binary assets, models, etc.)
     git-filter-repo # Rewrite git history (successor to git filter-branch / BFG)
     gh       # Official GitHub CLI
+    glab     # Official GitLab CLI
     forgejo-cli # `fj` — Forgejo client CLI (repos, issues, PRs) via the API
                 # Logged in to git.device.example.com (token in ~/.local/share/forgejo-cli/keys.json)
     # `forgejo` — the Forgejo admin CLI can't talk to a remote instance (it reads
