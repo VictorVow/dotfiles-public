@@ -29,13 +29,14 @@ let
   logseqRepo = "${config.home.homeDirectory}/Projects/Git/Categories/Logseq-ALL/logseq";
   logseqCliSkill = config.lib.file.mkOutOfStoreSymlink "${logseqRepo}/.agents/skills/logseq-cli";
   # Skills that only make sense on the desktop: they need a browser, distrobox, the
-  # clipboard/GUI, the Logseq checkout, desktop-only data stores, or they hardcode
-  # ~/Projects/installs / #boss. Left out on servers (lord-ubuntu).
+  # clipboard/GUI, the Logseq checkout, or desktop-only data stores. Left out on
+  # servers (lord-ubuntu). system-update-* used to be here but their SKILL.md now
+  # resolves ~/installs vs ~/Projects/installs per host.
   desktopOnlySkills = [
     "chromium-live-debug" "firefox-live-debug" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
     "hn-favorites-digest" "search-personal-data"
-    "nix-switch" "system-update-changelog" "system-update-cvlog"
+    "nix-switch"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));

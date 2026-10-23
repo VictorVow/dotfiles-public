@@ -3,15 +3,24 @@ name: system-update-cvlog
 description: Update ~/Projects/installs/CVLOG.md, the user's running list of skills and experience (grouped by skill/category, each item dated and backlinked to a git commit, Logseq block or agent session), from the work done in the installs repo, the Self-Hosted repos, Logseq and agent sessions since the last update. It's the reference for writing a CV/resume later.
 ---
 
-Updates `~/Projects/installs/CVLOG.md`, a list of the skills and experience the user has built up. It isn't a CV itself: it's the raw material the user will pick from when writing one later, so each item must say what was done and point back to the evidence.
+Updates the installs repo's `CVLOG.md`, a list of the skills and experience the user has built up. It isn't a CV itself: it's the raw material the user will pick from when writing one later, so each item must say what was done and point back to the evidence.
 
-Sources:
+## 0. Resolve paths and available sources for this host
 
-- `~/Projects/installs/` (one git repo)
-- `~/Projects/Git/1MY_REPOS/` (the user's own projects). This is **not** a git repo itself. Under `Self-Hosted/` each service subdirectory (`FreeLLMAPI/`, `Orca-server/`, `1-COMMON/`, …) is its own repo, but some are grouped one level deeper (`Miruyomi/Miruyomi-Server`, `Headscale-server/Headscale-deploy`, `Proxy-Frontends/Reddit`, `MediaManager/…`); `System-Tray-App/` holds more repos the same way. Some of these nested dirs are upstream clones or forks: count only commits by the user (author `Victor`/`VictorVow`/`USER3`/`USER2`).
-- The user's GitHub pull requests to other projects (`gh search prs --author VictorVow`)
-- The Logseq graph `logseq-apex` (notes, research, projects the user wrote up)
-- Past agent sessions in the cass index (debugging and diagnosis work that never produced a commit)
+The repo lives in different places per host — pick whichever exists:
+
+- installs repo: `~/Projects/installs` (desktop `boss`) or `~/installs` (lord-ubuntu)
+- Own-projects root: `~/Projects/Git/1MY_REPOS` (desktop) or `~/Projects` (lord-ubuntu, where `Self-Hosted/` sits directly inside)
+
+`CVLOG.md` sits at the root of whichever installs path resolved. Below, `$INSTALLS` and `$MY_REPOS` mean those resolved dirs.
+
+Sources (skip whichever aren't reachable on this host):
+
+- `$INSTALLS` (one git repo) — always present
+- `$MY_REPOS/Self-Hosted/` and `$MY_REPOS/System-Tray-App/` — service subdirectories (`FreeLLMAPI/`, `Orca-server/`, `1-COMMON/`, …) are their own repos, some grouped one level deeper (`Miruyomi/Miruyomi-Server`, `Headscale-server/Headscale-deploy`, `Proxy-Frontends/Reddit`, `MediaManager/…`). Some nested dirs are upstream clones or forks: count only commits by the user (author `Victor`/`VictorVow`/`USER3`/`USER2`).
+- The user's GitHub pull requests to other projects (`gh search prs --author VictorVow`) — needs `gh` on PATH and authenticated
+- The Logseq graph `logseq-apex` — desktop only; on lord-ubuntu the `logseq` CLI isn't installed, so skip this source
+- Past agent sessions in the cass index — needs `cass` on PATH (on lord-ubuntu it's `~/.local/bin/cass`); the server's index only covers server-spawned sessions, so also `ssh boss@<desktop> cass …` is out of scope — just query the local index
 
 ## File format
 
@@ -61,13 +70,13 @@ Sources:
 installs repo:
 
 ```bash
-git -C ~/Projects/installs log --since=<START>T00:00 --format='%h %ad %s%n%b' --date=short --stat
+git -C "$INSTALLS" log --since=<START>T00:00 --format='%h %ad %s%n%b' --date=short --stat
 ```
 
 Own repos (top-level and one level nested):
 
 ```bash
-cd ~/Projects/Git/1MY_REPOS
+cd "$MY_REPOS"
 for d in Self-Hosted/*/ Self-Hosted/*/*/ System-Tray-App/*/; do [ -e "$d/.git" ] || continue
   out=$(git -C "$d" log --since=<START>T00:00 --author='Victor\|VictorVow\|USER3\|USER2\|boss' --format='  %h %ad %s' --date=short)
   [ -n "$out" ] && printf '## %s\n%s\n' "$d" "$out"; done
