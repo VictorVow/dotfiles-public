@@ -32,10 +32,11 @@ description: Make a git commit of the changes from this Claude session.
     - fix(README): fixed two small typos
 - Check the remote with `git remote -v` — never infer it from commit authors, branch names or
   repo contents.
-  - If the remote is a example.com URL: always `git push` after committing. Do NOT ask
+  - Pre-approved remotes: a example.com URL, or the `forgejo:` SSH alias (e.g. `forgejo:ruler/dotfiles.git` — the self-hosted Forgejo on lord-ubuntu, alias defined in `nix/modules/shell-apps.nix` of the installs repo).
+  - If the remote is pre-approved: always `git push` after committing. Do NOT ask
     for permission first — pushing to this remote is pre-approved. After pushing, tell the
     user that the commit was pushed.
-  - If the remote is not a example.com URL, then don't push unless it's necessary
+  - If the remote is not pre-approved, then don't push unless it's necessary
     because a pull request, workflow action or something else in our intended next steps
     needs the commit pushed first.
 
