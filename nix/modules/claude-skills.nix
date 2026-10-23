@@ -99,11 +99,12 @@ in
     { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
 
     # ── OpenCode slash commands ─────────────────────────────────────────────────────
-    # OpenCode v2 discovers ~/.claude/skills but never lists skills in the `/` menu (its
-    # own syntax is `@skill-id`). A thin ~/.config/opencode/commands/<name>.md per skill
-    # restores `/<name> [args]` the way Claude Code does it.
-    (lib.listToAttrs (map (name: {
-      name  = ".config/opencode/commands/${name}.md";
+    # OpenCode (v1 and v2) discovers ~/.claude/skills but never lists skills in the `/`
+    # menu (v2's own syntax is `@skill-id`). A thin commands/<name>.md per skill restores
+    # `/<name> [args]` the way Claude Code does it — for v2 in ~/.config/opencode and for
+    # opencode1 in its isolated ~/.opencode1/config/opencode.
+    (lib.listToAttrs (lib.concatMap (dir: map (name: {
+      name  = "${dir}/commands/${name}.md";
       value.text = ''
         ---
         description: Run the ${name} skill
@@ -113,6 +114,7 @@ in
         $ARGUMENTS
       '';
     }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]
-        ++ lib.optional (!hostProfile.isServer) "logseq-cli")))
+        ++ lib.optional (!hostProfile.isServer) "logseq-cli"))
+      [ ".config/opencode" ".opencode1/config/opencode" ]))
   ];
 }
