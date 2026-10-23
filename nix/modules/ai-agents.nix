@@ -19,8 +19,8 @@ let
   # Firefox DevTools MCP (Mozilla) — attaches to the live, already-running Firefox over
   # Marionette + WebDriver BiDi: tabs, DOM snapshot, console, network, JS eval,
   # logpoints, Gecko profiler. Connects lazily on first tool call, so it's inert until
-  # the profile is relaunched in remote-debug mode (scripts/firefox-debugging/
-  # ff-remote-debug.sh on). Procedure lives in the firefox-live-debug skill.
+  # the profile is relaunched in remote-debug mode (ff-remote-debug.sh on,
+  # bundled in the firefox-live-debug skill's scripts/). Procedure lives there.
   # Public package: chrome-context/prefs tools are only in @mozilla/firefox-devtools-mcp-moz.
   firefoxDevtoolsMcp = {
     command = "npx";
@@ -32,8 +32,9 @@ let
   # Chrome DevTools MCP (Google) — attaches to a running Chromium-family browser
   # over CDP at http://127.0.0.1:9223: tabs, DOM snapshot, console, network,
   # JS eval, performance traces, screencast. The browser must be relaunched with
-  # --remote-debugging-port first (scripts/chromium-remote-debug.sh on; -u/-P
-  # for additional per-port instances); unlike the Firefox MCP the server
+  # --remote-debugging-port first (chromium-remote-debug.sh on, bundled in the
+  # chromium-live-debug skill's scripts/; -u/-P for additional per-port
+  # instances); unlike the Firefox MCP the server
   # starts fine with nothing listening yet and connects on first tool call.
   # One server = one --browserUrl, so a second debuggable browser needs another
   # registration here. Procedure lives in the chromium-live-debug skill.

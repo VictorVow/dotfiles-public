@@ -24,7 +24,7 @@ The user gives a destination: a block (`[[<uuid>]]` or a uuid), or a page name. 
 4. **Convert** the Markdown into a block outline:
    ```
    mkdir -p /tmp/logseq-md-to-blocks
-   ~/Projects/installs/scripts/logseq-md-to-blocks.py <input.md> /tmp/logseq-md-to-blocks/blocks.md
+   scripts/logseq-md-to-blocks.py <input.md> /tmp/logseq-md-to-blocks/blocks.md
    ```
    Headings become parent blocks (nested by level). Paragraphs and list items become one block each. Tables and code fences stay whole as one block. A list, table or code block after a paragraph ending in ":" nests under it. Skim the output (`cut -c1-110`) and check that the structure looks right.
 

@@ -8,7 +8,7 @@ compatibility: "Requires Claude Code OAuth credentials at ~/.claude/.credentials
 Run the bundled script and print its output verbatim — no extra commentary:
 
 ```
-python3 ~/.claude/skills/usage/usage.py
+python3 scripts/usage.py
 ```
 
 The script reads the OAuth access token from `~/.claude/.credentials.json`,

@@ -13,7 +13,7 @@ compatibility: "Requires a running Firefox with remote debugging and the firefox
 Two parts work together:
 
 - **`firefox-devtools` MCP** (`@mozilla/firefox-devtools-mcp`, registered in `~/Projects/installs/nix/modules/ai-agents.nix` with `--connect-existing --tool-preset developer`) provides the tools. Its tools are deferred, so load them with `ToolSearch` query `firefox-devtools` (names look like `mcp__firefox-devtools__list_pages`). If they don't show up, the MCP isn't registered in this session: ask the user to run `hms` and restart Claude Code.
-- **`~/Projects/installs/scripts/firefox-debugging/ff-remote-debug.sh`** switches the profile in and out of remote-debug mode. Firefox can only start Marionette/BiDi at launch, so the MCP can't attach to a normally started Firefox.
+- **`scripts/ff-remote-debug.sh`** switches the profile in and out of remote-debug mode. Firefox can only start Marionette/BiDi at launch, so the MCP can't attach to a normally started Firefox.
 
 ## 0. Profile mode: real or temp
 
@@ -37,13 +37,13 @@ This skill accepts an argument: `/firefox-live-debug real` or `/firefox-live-deb
 |---|---|
 | A web page misbehaves *in Firefox specifically*: JS errors, broken layout, failed requests, "what does this page do" | This skill (MCP) |
 | An agent needs to drive a site in a real browser (not Firefox-specific) | `chromium-live-debug` or `chromium-devtools-isolated` instead |
-| Whole browser frozen, RAM climbing, all extension icons blank, crashes | Read `~/Projects/installs/scripts/firefox-debugging/README.md` and follow its playbook (crash dumps, mem-watch, profiler via SIGUSR2). A wedged browser can't serve the MCP anyway, and those steps need no restart into remote-debug mode |
+| Whole browser frozen, RAM climbing, all extension icons blank, crashes | Read `references/debugging-playbook.md` and follow its playbook (crash dumps, mem-watch, profiler via SIGUSR2). A wedged browser can't serve the MCP anyway, and those steps need no restart into remote-debug mode |
 | Browser is responsive but slow, and you want a profile without restarting twice | MCP `profiler_start` / `profiler_stop` (Firefox ≥ 154), as long as it's already in remote-debug mode |
 | Chrome-context work (about:config prefs, privileged JS, extension internals) | Not available in the public MCP build. Use the toolkit scripts or the profile files. `@mozilla/firefox-devtools-mcp-moz` adds it, but only together with `MOZ_REMOTE_ALLOW_SYSTEM_ACCESS=1`, i.e. full system access from a browser full of untrusted pages. Don't enable it unless the user explicitly asks |
 
 ## 2. Locate the tab first (Sidebery tree)
 
-Before touching the MCP, find the target tab without restarting anything. `~/Projects/installs/scripts/firefox-debugging/ff-sidebery-tree.py` reads the live sessionstore + Sidebery's `storage.local` and prints the tree exactly as the user sees it in the sidebar — panels in order, `parentId` trees, ▸ folded groups, 💤 discarded tabs, container names.
+Before touching the MCP, find the target tab without restarting anything. `scripts/ff-sidebery-tree.py` reads the live sessionstore + Sidebery's `storage.local` and prints the tree exactly as the user sees it in the sidebar — panels in order, `parentId` trees, ▸ folded groups, 💤 discarded tabs, container names.
 
 ```
 ff-sidebery-tree.py <substring>        # panel → tree, matches keep parent chain

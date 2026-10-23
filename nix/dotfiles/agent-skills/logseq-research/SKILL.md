@@ -7,7 +7,7 @@ compatibility: "Requires the logseq CLI and a running Logseq DB graph"
 ---
 The user points at a Logseq block (`[[<uuid>]]`) whose children hold their own notes on a topic, usually a list of tools, and names a child block (often "Claude research") to put your research under.
 
-Uses the `logseq` CLI. See the `logseq-cli` skill for command details. Import mechanics (graph selection, convert, dry-run, write, verify, session-ID block, `--gfw`) live in `logseq-add-md-to-blocks` — follow that skill for the actual write, not this one. Scripts are in `~/Projects/installs/scripts/`.
+Uses the `logseq` CLI. See the `logseq-cli` skill for command details. Import mechanics (graph selection, convert, dry-run, write, verify, session-ID block, `--gfw`) live in `logseq-add-md-to-blocks` — follow that skill for the actual write, not this one. The bundled helper is `scripts/logseq-clear-children.sh`.
 
 ## Steps
 
@@ -57,7 +57,7 @@ Follow `logseq-add-md-to-blocks` steps 4-8 with these specifics:
 
 Report the outcome and the current formatting choices, and ask for changes. If the user wants a new format:
 - If they say they deleted the blocks, confirm the target has 0 children (the count query above).
-- If they ask *you* to delete them: `~/Projects/installs/scripts/logseq-clear-children.sh --dry-run <graph> <target>` first, check that the titles are yours (the user may have edited blocks in that subtree, which is expected), then run it without `--dry-run`.
+- If they ask *you* to delete them: `scripts/logseq-clear-children.sh --dry-run <graph> <target>` first, check that the titles are yours (the user may have edited blocks in that subtree, which is expected), then run it without `--dry-run`.
 - Edit the Markdown, re-convert, dry-run, write, verify. Look at any blocks the user edited by hand (`logseq show --uuid`); they show the format they want.
 
 ### 6. Record new formatting choices

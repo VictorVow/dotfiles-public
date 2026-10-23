@@ -10,12 +10,12 @@ Searches the [cass](https://github.com/Dicklesworthstone/coding_agent_session_se
 - **boss** (desktop) — `cass` on PATH via brew; index at `~/.local/share/coding-agent-search`, with MiniLM semantic vectors
 - **lord-ubuntu** — `~/.local/bin/cass` (upstream tarball, same version); index at the same path, covering sessions spawned on the server (Orca `orca-ide serve`, direct SSH runs)
 
-Use the bundled `cass-remote.sh` next to this file to pick a host. It handles the SSH dispatch, BatchMode, ConnectTimeout and `timeout` wrapper:
+Use the bundled `scripts/cass-remote.sh` to pick a host. It handles the SSH dispatch, BatchMode, ConnectTimeout and `timeout` wrapper:
 
 ```bash
-<skill-dir>/cass-remote.sh boss        search "…" --json
-<skill-dir>/cass-remote.sh lord-ubuntu search "…" --json
-<skill-dir>/cass-remote.sh local       sessions --json   # 'local' = run on PATH
+scripts/cass-remote.sh boss        search "…" --json
+scripts/cass-remote.sh lord-ubuntu search "…" --json
+scripts/cass-remote.sh local       sessions --json   # 'local' = run on PATH
 ```
 
 On lord-ubuntu itself the skill runs locally — `boss` would be the SSH leg instead. Aliases `local`/`desktop`/`server` are accepted on either side.

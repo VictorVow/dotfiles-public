@@ -13,7 +13,7 @@ compatibility: "Requires a Chromium-family browser with --remote-debugging-port 
 Two parts work together:
 
 - **`chromium-devtools` MCP** (`chrome-devtools-mcp`, registered in `~/Projects/installs/nix/modules/ai-agents.nix` with `--browserUrl http://127.0.0.1:9223`) provides the tools. Its tools are deferred, so load them with `ToolSearch` query `chromium-devtools` (names look like `mcp__chromium-devtools__list_pages`). If they don't show up, the MCP isn't registered in this session: ask the user to run `hms` and restart the agent. Unlike the Firefox MCP it serves its tool list even when nothing is listening on the port yet — the failure surfaces on the first page-scoped call.
-- **`~/Projects/installs/scripts/chromium-remote-debug.sh`** switches a browser instance in and out of remote-debug mode. Chromium can only open the CDP port at launch (`--remote-debugging-port`), so the MCP can't attach to a normally started browser. Instances are keyed by `--user-data-dir`: `-u DIR -P PORT` brings up a fully separate debuggable browser (own profile, own port) alongside the real session.
+- **`scripts/chromium-remote-debug.sh`** switches a browser instance in and out of remote-debug mode. Chromium can only open the CDP port at launch (`--remote-debugging-port`), so the MCP can't attach to a normally started browser. Instances are keyed by `--user-data-dir`: `-u DIR -P PORT` brings up a fully separate debuggable browser (own profile, own port) alongside the real session.
 
 ## 0. Profile mode: real or temp
 
@@ -38,7 +38,7 @@ This skill accepts an argument: `/chromium-live-debug real` or `/chromium-live-d
 | An agent needs a real browser to drive a site, and the user's real profile/logins are needed | This skill (MCP) |
 | A clean-slate / automation browser with no cookies is fine (tests, scraping, throwaway sessions, parallel agents) | Use the `chromium-devtools-isolated` MCP — it launches its own throwaway headless browser per MCP process, no port or script needed. Nothing below applies to it |
 | Firefox session, or the user's own access to a site is broken specifically in Firefox, or Firefox extension trouble | `firefox-live-debug` skill instead |
-| Whole browser frozen or crashing | Chromium has no toolkit playbook like `scripts/firefox-debugging/`; check `chrome://crashes` output, `~/.config/chromium/Crash Reports`, and `journalctl --user` first |
+| Whole browser frozen or crashing | Chromium has no toolkit playbook like `firefox-live-debug`'s; check `chrome://crashes` output, `~/.config/chromium/Crash Reports`, and `journalctl --user` first |
 
 ## 2. Get the session attachable
 

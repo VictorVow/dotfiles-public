@@ -62,18 +62,11 @@ installs/
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
-│   ├── chromium-remote-debug.sh   # Toggle CDP remote debugging on chromium/chrome/brave instances for the chromium-devtools MCP (chromium-live-debug skill)
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
-│   ├── logseq-md-to-blocks.py     # Markdown → Logseq block outline (+ --gfw GitHub widgets); used by the logseq-add-md-to-blocks / logseq-research skills
-│   ├── logseq-clear-children.sh   # Remove all child blocks under a Logseq block; used by the logseq-research skill
-│   ├── logseq-tree.py             # Print a Logseq block subtree (db/ids, uuids, raw titles) via queries; used by the logseq-comparisons-update skill
-│   ├── logseq-headings.py         # Re-level the headings in a Logseq block subtree (root level, shift, smallest allowed); used by the hn-favorites-digest skill
-│   ├── hn-favorites.py            # Scan/un-favorite Hacker News favorites + dump full comment threads (uv script, JSON out); used by the hn-favorites-digest skill
-│   ├── firefox-debugging/         # Toolkit for diagnosing a misbehaving Firefox profile (README = playbook)
 │   ├── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
 │   └── security/                  # gitleaks-based audit + in-place scrubbing of secrets leaked into agent transcripts (README = playbook)
 ├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG

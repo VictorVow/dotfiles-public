@@ -21,7 +21,7 @@ The user points at a comparison block (`[[<uuid>]]`) in their Logseq graph. It c
 
 `<A>` and `<B>` can each be a **block reference** (`[[<uuid>]]`, shown resolved in `logseq show`) or **plain text**. The comparison often sits under one option's `Pros/Cons > Comparisons` block.
 
-Uses the `logseq` CLI. See the `logseq-cli` skill for command details. Scripts are in `~/Projects/installs/scripts/`.
+Uses the `logseq` CLI. See the `logseq-cli` skill for command details. The bundled helper is `scripts/logseq-tree.py`.
 
 ## Steps
 

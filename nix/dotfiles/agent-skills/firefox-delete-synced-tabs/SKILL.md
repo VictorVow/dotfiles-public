@@ -13,7 +13,7 @@ This skill uses the `firefox-devtools` MCP (Marionette + BiDi on the live VERTEX
 
 ## 1. Preconditions
 
-1. `~/Projects/installs/scripts/firefox-debugging/ff-remote-debug.sh status`
+1. `scripts/ff-remote-debug.sh status`
 2. If "running normally": **ask the user** before `... on` — it restarts Firefox (SIGTERM + relaunch, tabs restored, unsaved form input lost, robot-mode indicator visible while on).
 3. If the MCP can't connect (`ECONNREFUSED 127.0.0.1:2828`), that's the same problem — resolve via the toggle before proceeding.
 
