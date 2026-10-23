@@ -13,6 +13,22 @@ Two parts work together:
 - **`firefox-devtools` MCP** (`@mozilla/firefox-devtools-mcp`, registered in `~/Projects/installs/nix/modules/ai-agents.nix` with `--connect-existing --tool-preset developer`) provides the tools. Its tools are deferred, so load them with `ToolSearch` query `firefox-devtools` (names look like `mcp__firefox-devtools__list_pages`). If they don't show up, the MCP isn't registered in this session: ask the user to run `hms` and restart Claude Code.
 - **`~/Projects/installs/scripts/firefox-debugging/ff-remote-debug.sh`** switches the profile in and out of remote-debug mode. Firefox can only start Marionette/BiDi at launch, so the MCP can't attach to a normally started Firefox.
 
+## 0. Profile mode: real or temp
+
+This skill accepts an argument: `/firefox-live-debug real` or `/firefox-live-debug temp`. **If none was given, ask the user** which profile to work in before launching anything:
+
+- **`real`** — the user's normal profile (VERTEX by default; `-p NAME` for others). Follow §2 (`status` → ask → `on`); all §3 real-session rules apply.
+- **`temp`** — a throwaway profile dir in its own window. `ff-remote-debug.sh` has no `-u` equivalent, so launch it manually:
+  ```
+  mkdir -p /tmp/opencode/firefox-<task>
+  setsid firefox -no-remote --profile /tmp/opencode/firefox-<task> \
+      --marionette --remote-debugging-port 9222 >/dev/null 2>&1 &
+  ```
+  Wait until Marionette (:2828) and BiDi (:9222) listen (`ss -ltn`). Caveats: the `firefox-devtools` MCP can only hold **one** connection, and ports :2828/:9222 must be free — the real Firefox must **not** be in remote-debug mode at the same time, and BiDi won't drive two sessions from one MCP anyway. If the real session is already debuggable, run the task there or ask before toggling it `off`.
+  - §3's "don't touch the user's tabs" rules don't apply — there are none — but untrusted-content and no-submitting-forms rules still do.
+  - When done: `close_firefox_session`, kill the temp Firefox (`pkill -f -- "--profile /tmp/opencode/firefox-<task>"` or quit via the window), then `rm -rf` the dir.
+  - For "just drive a site" tasks a temp Chromium (`/chromium-live-debug temp`) is usually easier — keep Firefox temp mode for Firefox-specific tasks.
+
 ## 1. Choose the right tool first
 
 | Symptom | Use |
@@ -54,4 +70,4 @@ The console and network buffers only capture events after the MCP connected. To 
 ## 5. Finish
 
 1. Close your own tabs and call `close_firefox_session`.
-2. Tell the user Firefox is still in remote-debug mode and **offer to run `ff-remote-debug.sh off`** (another quit + relaunch) so `navigator.webdriver` goes back to normal. Don't leave it on silently.
+2. **Real profile:** tell the user Firefox is still in remote-debug mode and **offer to run `ff-remote-debug.sh off`** (another quit + relaunch) so `navigator.webdriver` goes back to normal. **Temp profile:** kill the temp process and `rm -rf` the profile dir — nothing to restore. Don't leave remote-debug on silently.

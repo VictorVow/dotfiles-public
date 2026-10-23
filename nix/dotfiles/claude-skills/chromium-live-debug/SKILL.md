@@ -13,6 +13,20 @@ Two parts work together:
 - **`chromium-devtools` MCP** (`chrome-devtools-mcp`, registered in `~/Projects/installs/nix/modules/ai-agents.nix` with `--browserUrl http://127.0.0.1:9223`) provides the tools. Its tools are deferred, so load them with `ToolSearch` query `chromium-devtools` (names look like `mcp__chromium-devtools__list_pages`). If they don't show up, the MCP isn't registered in this session: ask the user to run `hms` and restart the agent. Unlike the Firefox MCP it serves its tool list even when nothing is listening on the port yet — the failure surfaces on the first page-scoped call.
 - **`~/Projects/installs/scripts/chromium-remote-debug.sh`** switches a browser instance in and out of remote-debug mode. Chromium can only open the CDP port at launch (`--remote-debugging-port`), so the MCP can't attach to a normally started browser. Instances are keyed by `--user-data-dir`: `-u DIR -P PORT` brings up a fully separate debuggable browser (own profile, own port) alongside the real session.
 
+## 0. Profile mode: real or temp
+
+This skill accepts an argument: `/chromium-live-debug real` or `/chromium-live-debug temp`. **If none was given, ask the user** which profile to work in before launching anything:
+
+- **`real`** — the user's normal profile (their cookies, logins, tabs). Follow §2 (`status` → ask → `on`); all §3 real-session rules apply.
+- **`temp`** — a throwaway user-data-dir in its own visible window. Skip §2's toggle and launch:
+  ```
+  chromium-remote-debug.sh -u /tmp/opencode/chromium-<task> -P 9223 on
+  ```
+  The `chromium-devtools` MCP is pinned to :9223, so this only works if the **real session is not already in remote-debug mode** (check `chromium-remote-debug.sh status`/`list` first — one MCP = one CDP endpoint). If the real session is on :9223, either run the task there or ask before switching it `off`.
+  - §3's "don't touch the user's tabs" rules don't apply — there are none — but untrusted-content and no-submitting-forms rules still do.
+  - When done: `chromium-remote-debug.sh -u <dir> -P 9223 stop` then `rm -rf` the dir (see §5).
+  - If no visible window or user interaction is needed, `chromium-devtools-isolated` is simpler (headless, own MCP, zero setup).
+
 ## 1. Choose the right tool first
 
 | Situation | Use |
@@ -69,4 +83,4 @@ Console and network buffers only capture events after the MCP attached to that p
 ## 5. Finish
 
 1. Close your own tabs (`close_page`).
-2. Tell the user the browser is still in remote-debug mode and **offer to run `chromium-remote-debug.sh off`** (another quit + relaunch) so the CDP port closes. For a throwaway `-u` instance use `stop` (quit without relaunch) — there's nothing to restore. Don't leave it on silently — an open debugging port is a local privilege boundary: any local process can drive everything in that profile.
+2. **Real profile:** tell the user the browser is still in remote-debug mode and **offer to run `chromium-remote-debug.sh off`** (another quit + relaunch) so the CDP port closes. **Temp profile:** run `chromium-remote-debug.sh -u <dir> -P 9223 stop` (quit without relaunch — nothing to restore) and `rm -rf` the profile dir. Don't leave remote-debug on silently — an open debugging port is a local privilege boundary: any local process can drive everything in that profile.
