@@ -257,7 +257,16 @@ let
     url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
     inherit hash;
   };
-  devinAuth = magpiePkg "devin" "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
+  # devin's package is my fork's branch until the OpenCode 2 port lands
+  # upstream (magpie-community/plugins#266): the npm tarball has no v2
+  # default export, so the plugin only loaded in opencode1.
+  devinAuthSrc = pkgs.fetchFromGitHub {
+    owner  = "VictorVow";
+    repo   = "magpie-plugins";
+    rev    = "168284ea6aa4df8e72b3bb625581dfd3d6d2bff7"; # devin-opencode-v2
+    hash   = "sha256-Ps9+C5yvAqniRUkTVISHa37Pn6qQbLR9iJt0gaflGuI=";
+  };
+  devinAuth = "${devinAuthSrc}/packages/devin";
   cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
 
   secretGuardSubst = {
@@ -568,7 +577,7 @@ in
     };
   };
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
-    ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
+    ''export { default, DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
     ''export { CursorAuthPlugin } from "${cursorAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/AGENTS.md".text = globalContext;
