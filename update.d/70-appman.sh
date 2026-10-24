@@ -27,6 +27,8 @@ else
 
   # `appman -u` self-updates AM and upgrades every managed AppImage. Runs
   # non-interactively (no TTY prompts), matching the rest of update.sh.
-  run_step "appman update" appman -u
+  # --disable-notifications comments out the notify-send calls in each app's
+  # AM-updater so upgrades don't fire a desktop notification per app.
+  run_step "appman update" appman -u --disable-notifications
   success "AppMan done."
 fi
