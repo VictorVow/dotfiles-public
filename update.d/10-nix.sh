@@ -119,7 +119,7 @@ else
         "context7 upstash/context7 ${PIN_AGE_DAYS_SOURCE}"
         "rea morluto/rea ${PIN_AGE_DAYS_SOURCE}"
         "orca stablyai/orca ${PIN_AGE_DAYS_ORCA}"
-        "rea morluto/rea ${PIN_AGE_DAYS_SOURCE}"
+        "impeccable pbakaus/impeccable ${PIN_AGE_DAYS_SOURCE}"
       )
       for spec in "${pin_specs[@]}"; do
         read -r in_name repo_path age_days <<< "$spec"

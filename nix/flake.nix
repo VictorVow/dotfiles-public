@@ -101,6 +101,17 @@
       flake = false;
     };
 
+    # Impeccable design skill (github:pbakaus/impeccable) — source only.
+    # agent-skills.nix links its per-harness builds (.claude/.opencode/.agents
+    # skills/impeccable) into the matching skill dirs. The skill itself is
+    # instructions + scripts; its engine binary self-downloads on first run to
+    # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
+    impeccable = {
+      # channel: main
+      url = "github:pbakaus/impeccable/6af45ac9a5eb8792f033d3242f52e99812fd91fa";
+      flake = false;
+    };
+
     # Own Logseq fork (github.com/VictorVow/logseq) — source only, tracked at its `fork`
     # branch. agent-skills.nix links .agents/skills/logseq-cli from it into
     # ~/.claude/skills + ~/.agents/skills, so the skill tracks the same branch the
@@ -113,7 +124,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # Independently-pinned nixos-unstable HEAD (see the input comment), passed
@@ -159,7 +170,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea pkgs-latest;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
@@ -185,7 +196,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;

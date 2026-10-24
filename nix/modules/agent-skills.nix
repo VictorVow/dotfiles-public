@@ -22,7 +22,7 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ lib, orca, context7, logseq-fork, rea, hostProfile, ... }:
+{ lib, orca, context7, logseq-fork, rea, impeccable, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/agent-skills;
@@ -38,6 +38,11 @@ let
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
+  # Impeccable (github:pbakaus/impeccable, flake = false input) — design skill whose
+  # flagship /impeccable live mode drives a real browser, so it ships desktop-only.
+  # Each harness build differs (command syntax + bundled agent TOMLs), so we link the
+  # matching per-harness copy rather than one generic folder.
+  withImpeccable = !hostProfile.isServer;
   skillNames =
     if hostProfile.isServer
     then lib.subtractLists desktopOnlySkills allSkillNames
@@ -88,6 +93,17 @@ in
       ".agents/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
     }
 
+    # ── Impeccable design skill (github:pbakaus/impeccable, flake = false input) ──
+    # Desktop-only: /impeccable live drives a real browser. Per-harness builds:
+    # the .claude copy goes to ~/.claude/skills (Claude Code + OpenCode v2), the
+    # .agents copy to ~/.agents/skills (Codex + Devin CLI; OpenCode dedups by
+    # name). The engine binary self-downloads to ~/.impeccable/bin/ on first run —
+    # nothing writable is needed inside the store path.
+    (lib.optionalAttrs withImpeccable {
+      ".claude/skills/impeccable".source = "${impeccable}/.claude/skills/impeccable";
+      ".agents/skills/impeccable".source = "${impeccable}/.agents/skills/impeccable";
+    })
+
     # ── Orca native chat (OpenCode) ─────────────────────────────────────────────────
     # Orca only asks an ACP agent for its commands once the session is live (after the
     # first message); before that its `/` menu lists the skills it scans itself, and for
@@ -100,6 +116,12 @@ in
     }) skillNames))
     { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
     { ".config/opencode/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything"; }
+    # OpenCode-flavoured build for Orca's pre-session `/` menu scan of
+    # ~/.config/opencode/skills — v2 would dedup it against the .claude copy
+    # anyway, and this one carries OpenCode's allowed-tools frontmatter.
+    (lib.optionalAttrs withImpeccable {
+      ".config/opencode/skills/impeccable".source = "${impeccable}/.opencode/skills/impeccable";
+    })
 
     # ── OpenCode slash commands ─────────────────────────────────────────────────────
     # OpenCode (v1 and v2) discovers ~/.claude/skills but never lists skills in the `/`
@@ -117,7 +139,8 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ] ++ extra))
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]
+                      ++ lib.optionals withImpeccable [ "impeccable" ] ++ extra))
       [ { dir = ".config/opencode";           extra = [ "reverse-engineer-anything" ]; }
         { dir = ".opencode1/config/opencode"; extra = [ ]; } ]))
   ];

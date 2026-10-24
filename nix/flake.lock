@@ -152,6 +152,23 @@
         "type": "github"
       }
     },
+    "impeccable": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792135187,
+        "narHash": "sha256-xnBTDKfoz+Uhr4Rrr5p7krdwnmC8TtMcw+VBT/1bT7k=",
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "rev": "6af45ac9a5eb8792f033d3242f52e99812fd91fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "rev": "6af45ac9a5eb8792f033d3242f52e99812fd91fa",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -328,6 +345,7 @@
         "delta": "delta",
         "home-manager": "home-manager",
         "ie-r": "ie-r",
+        "impeccable": "impeccable",
         "llm-agents": "llm-agents",
         "logseq-fork": "logseq-fork",
         "nixpkgs": "nixpkgs_4",
