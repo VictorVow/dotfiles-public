@@ -109,17 +109,18 @@ let
     url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
     inherit hash;
   };
-  # devin's package is my fork's branch until the OpenCode 2 port lands
-  # upstream (magpie-community/plugins#266): the npm tarball has no v2
-  # default export, so the plugin only loaded in opencode1.
-  devinAuthSrc = pkgs.fetchFromGitHub {
+  devinAuth  = magpiePkg "devin"  "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
+  cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
+  # opencode2's devin plugin is my fork's branch until the OpenCode 2 port
+  # lands upstream (magpie-community/plugins#266): the npm tarball has no v2
+  # default export. opencode1 keeps the upstream tarball above.
+  devinAuthV2Src = pkgs.fetchFromGitHub {
     owner  = "VictorVow";
     repo   = "magpie-plugins";
     rev    = "168284ea6aa4df8e72b3bb625581dfd3d6d2bff7"; # devin-opencode-v2
     hash   = "sha256-Ps9+C5yvAqniRUkTVISHa37Pn6qQbLR9iJt0gaflGuI=";
   };
-  devinAuth = "${devinAuthSrc}/packages/devin";
-  cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
+  devinAuthV2 = "${devinAuthV2Src}/packages/devin";
 
   # Permission set shared by every OpenCode (`opencode`/`opencode1` = v1,
   # `opencode2` = v2). Written once as v2-style ordered rules (last match wins,
@@ -784,8 +785,12 @@ in
       enabled = false;
     };
   };
+  # opencode2 reads plugin files from ~/.config/opencode/plugins/; the fork
+  # has the v2 default export the upstream tarball lacks (#266).
+  xdg.configFile."opencode/plugins/devin-auth.js".text =
+    ''export { default } from "${devinAuthV2}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
-    ''export { default, DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
+    ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
     ''export { CursorAuthPlugin } from "${cursorAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/AGENTS.md".text = globalContext;
