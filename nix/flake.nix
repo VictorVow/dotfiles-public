@@ -79,6 +79,15 @@
       flake = false;
     };
 
+    # REA reverse-engineer-anything skill (.agents/skills/reverse-engineer-anything,
+    # github:morluto/rea) — source only, linked by modules/agent-skills.nix.
+    # The repo's other .agents/skills/rea-* skills are for developing REA itself.
+    rea = {
+      # channel: main
+      url = "github:morluto/rea/0c7b6d834af2d044b23196e0e522cc2468327a1e";
+      flake = false;
+    };
+
     # Own Logseq fork (github.com/VictorVow/logseq) — source only, tracked at its `fork`
     # branch. agent-skills.nix links .agents/skills/logseq-cli from it into
     # ~/.claude/skills + ~/.agents/skills, so the skill tracks the same branch the
@@ -91,7 +100,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # The flake lives in nix/, but sourceInfo is the whole repo — needed so
@@ -131,7 +140,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
@@ -157,7 +166,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;

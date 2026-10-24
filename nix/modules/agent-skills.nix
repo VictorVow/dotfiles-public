@@ -22,7 +22,7 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ lib, orca, context7, logseq-fork, hostProfile, ... }:
+{ lib, orca, context7, logseq-fork, rea, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/agent-skills;
@@ -79,6 +79,13 @@ in
       # ~/.agents/skills/logseq-cli/SKILL.md. OpenCode sees it twice.
       ".claude/skills/logseq-cli".source = "${logseq-fork}/.agents/skills/logseq-cli";
       ".agents/skills/logseq-cli".source = "${logseq-fork}/.agents/skills/logseq-cli";
+
+      # ── REA reverse-engineering skill (github:morluto/rea, flake = false input) ──
+      # Instructions for the `rea` MCP server registered in ai-agents.nix
+      # (`npx rea-agents@latest --mcp`). Also in ~/.agents/skills so Codex/Devin
+      # see it; OpenCode dedups by name.
+      ".claude/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
+      ".agents/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
     }
 
     # ── Orca native chat (OpenCode) ─────────────────────────────────────────────────
@@ -92,6 +99,7 @@ in
       value = { source = skillsDir + "/${name}"; recursive = true; };
     }) skillNames))
     { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
+    { ".config/opencode/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything"; }
 
     # ── OpenCode slash commands ─────────────────────────────────────────────────────
     # OpenCode (v1 and v2) discovers ~/.claude/skills but never lists skills in the `/`
@@ -108,7 +116,7 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]))
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" "reverse-engineer-anything" ]))
       [ ".config/opencode" ".opencode1/config/opencode" ]))
   ];
 }

@@ -289,6 +289,23 @@
         "type": "github"
       }
     },
+    "rea": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792191499,
+        "narHash": "sha256-FtAro40YsT2oFPoCL70hd1YokQtJrs4Xb9lbtQfWhAw=",
+        "owner": "morluto",
+        "repo": "rea",
+        "rev": "0c7b6d834af2d044b23196e0e522cc2468327a1e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "morluto",
+        "repo": "rea",
+        "rev": "0c7b6d834af2d044b23196e0e522cc2468327a1e",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "context7": "context7",
@@ -300,6 +317,7 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "orca": "orca",
+        "rea": "rea",
         "sops-nix": "sops-nix",
         "tuxManager": "tuxManager"
       }

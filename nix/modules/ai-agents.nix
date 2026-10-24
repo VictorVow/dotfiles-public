@@ -63,6 +63,41 @@ let
                 "--workspace" "/tmp" "--workspace" "/home/boss/Projects" ];
   };
 
+  # https://github.com/morluto/rea
+  # REA — reverse engineering across binaries, JS/Electron apps, .NET, firmware,
+  # captures, etc. `rea --mcp` serves the stdio MCP; the reverse-engineer-anything
+  # skill (agent-skills.nix) drives it. Deep native analysis needs a provider
+  # (Hopper/Ghidra/IDA — not installed); static JS/.NET inspection works without one.
+  #
+  # ── Adapting upstream install instructions ────────────────────────────────────
+  # AI projects like this ship a one-shot installer (`npx <pkg> setup`,
+  # `npx skills add …`) that writes agent config imperatively. Don't run them —
+  # they fight this module's declarative files. Instead, translate what the
+  # installer WOULD do into Nix:
+  #   1. Find what the installer writes (run it with --dry-run/--json if it has
+  #      one, or read its docs/source): usually an MCP server entry, a skill
+  #      folder, and maybe a slash command.
+  #   2. MCP server → add a <name>Mcp attrset here ({ command = "npx";
+  #      args = [ "-y" "<pkg>@latest" <server-flag> ]; }) and reference it from
+  #      programs.mcp.servers, programs.claude-code.mcpServers, and both
+  #      opencode.json blocks below — one entry, four consumers. Prefer
+  #      `npx -y <pkg>@latest <mcp-flag>` over installing the CLI globally:
+  #      the package is fetched lazily on agent start and always current; add
+  #      to npm-globals.txt instead only if the startup latency matters.
+  #   3. Skill folder → flake = false input pinned to a SHA + channel comment
+  #      in flake.nix, linked in agent-skills.nix (never copy the SKILL.md in
+  #      by hand — it would go stale silently). Add the input to pin_specs and
+  #      REVIEW_INPUTS in update.sh so it advances with the other sources.
+  #   4. Anything else the installer manages (agents, permissions, hooks) → the
+  #      matching programs.* option or a home.file/activation block here.
+  #   5. Skip the installer's "restart your agent" step — hms + a new session
+  #      covers it. If the project also has a CLI worth keeping, npm-globals.txt
+  #      is the non-Nix escape hatch for tools missing from nixpkgs/llm-agents.
+  reaMcp = {
+    command = "npx";
+    args    = [ "-y" "rea-agents@latest" "--mcp" ];
+  };
+
   # llm-agents.nix's own packages output, built against its pinned nixpkgs —
   # matches numtide's binary cache (cache.numtide.com). See home.nix for why
   # this is used instead of the llm-agents overlay.
@@ -468,6 +503,9 @@ in
       chromium-devtools          = chromiumDevtoolsMcp;
       chromium-devtools-isolated = chromiumDevtoolsMcpIsolated;
 
+      # REA — see reaMcp in the let block (also given to Claude Code).
+      rea = reaMcp;
+
     };
   };
 
@@ -483,6 +521,7 @@ in
       firefox-devtools           = firefoxDevtoolsMcp;
       chromium-devtools          = chromiumDevtoolsMcp;
       chromium-devtools-isolated = chromiumDevtoolsMcpIsolated;
+      rea                        = reaMcp;
     };
 
     # ── Global context — creates ~/.claude/CLAUDE.md (loaded in every project) ────
@@ -653,6 +692,10 @@ in
       type    = "local";
       command = [ chromiumDevtoolsMcpIsolated.command ] ++ chromiumDevtoolsMcpIsolated.args;
     };
+    mcp.servers.rea = {
+      type    = "local";
+      command = [ reaMcp.command ] ++ reaMcp.args;
+    };
   };
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
@@ -715,6 +758,10 @@ in
     mcp.chromium-devtools-isolated = {
       type    = "local";
       command = [ chromiumDevtoolsMcpIsolated.command ] ++ chromiumDevtoolsMcpIsolated.args;
+    };
+    mcp.rea = {
+      type    = "local";
+      command = [ reaMcp.command ] ++ reaMcp.args;
     };
   };
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =

@@ -64,7 +64,7 @@ PIN_AGE_DAYS_ORCA="${PIN_AGE_DAYS_ORCA:-2}"
 
 # Inputs whose source feeds instructions straight into Claude (skills). When
 # they move, print a compare link so the diff can be skimmed.
-REVIEW_INPUTS=" orca context7 "
+REVIEW_INPUTS=" orca context7 rea "
 
 for arg in "$@"; do
   case "$arg" in
@@ -188,7 +188,7 @@ printf "  %-30s %s\n" "----" "------"
 for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "age-pin llm-agents" "age-pin sops-nix" "age-pin tuxManager" "age-pin ie-r" \
-           "age-pin delta" "age-pin context7" "age-pin orca" \
+            "age-pin delta" "age-pin context7" "age-pin rea" "age-pin orca" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
            "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
