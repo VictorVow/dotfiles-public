@@ -175,6 +175,23 @@
         "type": "github"
       }
     },
+    "logseq-fork": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792411977,
+        "narHash": "sha256-QgdYJHb/6QqsZxs1T9NG+9gmL4clnjgwgxn6Y1FXg2Q=",
+        "owner": "VictorVow",
+        "repo": "logseq",
+        "rev": "399025dc502ec70cce42a0928cdbebf877a896f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "VictorVow",
+        "repo": "logseq",
+        "rev": "399025dc502ec70cce42a0928cdbebf877a896f6",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1785734586,
@@ -279,6 +296,7 @@
         "home-manager": "home-manager",
         "ie-r": "ie-r",
         "llm-agents": "llm-agents",
+        "logseq-fork": "logseq-fork",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "orca": "orca",

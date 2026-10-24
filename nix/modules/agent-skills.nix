@@ -22,13 +22,10 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ config, lib, orca, context7, hostProfile, ... }:
+{ lib, orca, context7, logseq-fork, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/agent-skills;
-  # Local Logseq checkout the installed `logseq` CLI is built from (its --version Revision).
-  logseqRepo = "${config.home.homeDirectory}/Projects/Git/Categories/Logseq-ALL/logseq";
-  logseqCliSkill = config.lib.file.mkOutOfStoreSymlink "${logseqRepo}/.agents/skills/logseq-cli";
   # Skills that only make sense on the desktop: they need a browser, distrobox, the
   # clipboard/GUI, the Logseq checkout, or desktop-only data stores. Left out on
   # servers (lord-ubuntu). system-update-* used to be here but their SKILL.md now
@@ -74,19 +71,15 @@ in
       # the Context7 MCP server). The skill runs `npx ctx7@latest library|docs …`;
       # anonymous use works, CONTEXT7_API_KEY / `ctx7 login` only raise rate limits.
       ".claude/skills/find-docs".source = "${context7}/skills/find-docs";
-    }
 
-    (lib.mkIf (!hostProfile.isServer) {
-      # ── Logseq CLI (upstream skill from the local logseq checkout) ──────────────────
-      # Out-of-store symlink (not a flake input — the repo is huge) so the skill tracks
-      # whatever revision the CLI was last built from. Replaces logseq-cli@spellbook
-      # (ai-agents.nix). The other skills in that dir are Logseq-dev only and already
-      # reach Claude in-repo via its .claude/skills -> ../.agents/skills symlink.
-      # Also in ~/.agents/skills: Codex/Devin read it, and `logseq skill show|install`
-      # looks for ~/.agents/skills/logseq-cli/SKILL.md. OpenCode sees it twice.
-      ".claude/skills/logseq-cli".source = logseqCliSkill;
-      ".agents/skills/logseq-cli".source = logseqCliSkill;
-    })
+      # ── Logseq CLI (own fork, github:VictorVow/logseq @ fork, flake = false input) ───
+      # Same source the locally-built `logseq` binary is compiled from, so the skill
+      # always documents the CLI actually installed. Also in ~/.agents/skills:
+      # Codex/Devin read it, and `logseq skill show|install` looks for
+      # ~/.agents/skills/logseq-cli/SKILL.md. OpenCode sees it twice.
+      ".claude/skills/logseq-cli".source = "${logseq-fork}/.agents/skills/logseq-cli";
+      ".agents/skills/logseq-cli".source = "${logseq-fork}/.agents/skills/logseq-cli";
+    }
 
     # ── Orca native chat (OpenCode) ─────────────────────────────────────────────────
     # Orca only asks an ACP agent for its commands once the session is live (after the
@@ -115,8 +108,7 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]
-        ++ lib.optional (!hostProfile.isServer) "logseq-cli"))
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]))
       [ ".config/opencode" ".opencode1/config/opencode" ]))
   ];
 }

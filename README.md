@@ -47,7 +47,7 @@ installs/
 │       ├── ai-agents-server.nix # Server variant of ai-agents.nix (no browser MCPs)
 │       ├── ai-secrets.nix    # sops-encrypted AI provider keys (nix/secrets/ai.yaml)
 │       ├── editors.nix       # Neovim, micro, VS Code/VSCodium settings, MarkText
-│       ├── agent-skills.nix # Agent Skills spec skills: links dotfiles/agent-skills/* + Orca skills (flake input) + logseq-cli (local logseq checkout)
+│       ├── agent-skills.nix # Agent Skills spec skills: links dotfiles/agent-skills/* + Orca skills + logseq-cli (flake inputs) + ~/.agents/skills/ mirror
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer

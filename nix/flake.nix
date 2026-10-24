@@ -78,9 +78,20 @@
       url = "github:upstash/context7/6b636d3c35e051a1a653a236afb7f612c02a1ad3";
       flake = false;
     };
+
+    # Own Logseq fork (github.com/VictorVow/logseq) — source only, tracked at its `fork`
+    # branch. agent-skills.nix links .agents/skills/logseq-cli from it into
+    # ~/.claude/skills + ~/.agents/skills, so the skill tracks the same branch the
+    # locally-built `logseq` CLI is compiled from. Advances via update.sh like the
+    # other source-only inputs.
+    logseq-fork = {
+      # channel: fork
+      url = "github:VictorVow/logseq/399025dc502ec70cce42a0928cdbebf877a896f6";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # The flake lives in nix/, but sourceInfo is the whole repo — needed so
@@ -120,7 +131,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
@@ -146,7 +157,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;
