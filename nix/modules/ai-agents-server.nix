@@ -257,7 +257,7 @@ let
     url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
     inherit hash;
   };
-  devinAuth = magpiePkg "devin" "0.1.20" "sha256-qHX4DcXfqHKqCRWU9z4E/2gnopeeOHHnadhNV3bzcAk=";
+  devinAuth = magpiePkg "devin" "0.1.23" "sha256-Our5aQV5QOLkKnsRA9pEEo9f3/ODspGFsxEg26TyK9Q=";
   # opencode2's devin plugin is my fork's branch until the OpenCode 2 port
   # lands upstream (magpie-community/plugins#266): the npm tarball has no v2
   # default export. opencode1 keeps the upstream tarball above.
@@ -498,8 +498,10 @@ in
   # FREELLMAPI_API_KEY.
   xdg.configFile."opencode/opencode.json".source = jsonFormat.generate "opencode-config" {
     "$schema" = "https://opencode.ai/config.json";
-    model = "anthropic/claude-sonnet-4-5";
-    agents.title.model = "anthropic/claude-haiku-4-5";
+    # Devin, as in opencode1's config below — served by the fork's v2 plugin
+    # (plugins/devin-auth.js) until the port lands upstream (#266).
+    model = "devin/swe-2";
+    agents.title.model = "devin/swe-1.7-lightning";
     permissions = opencodePermissions;
     providers.freellmapi = {
       name = "FreeLLMAPI";
