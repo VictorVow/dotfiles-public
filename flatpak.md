@@ -70,7 +70,6 @@ io.github.nozwock.Packet
 io.github.peazip.PeaZip
 io.github.pieterdd.RcloneShuttle
 io.github.pwr_solaar.solaar
-io.github.qwersyk.Newelle
 io.github.radiolamp.mangojuice
 io.github.seadve.Kooha
 io.github.seadve.Mousai
@@ -129,7 +128,6 @@ org.kde.koko
 org.kde.kolourpaint
 org.kde.merkuro
 org.keepassxc.KeePassXC
-org.mozilla.firefox
 org.mozilla.thunderbird_esr
 org.nickvision.tubeconverter
 org.nicotine_plus.Nicotine
@@ -170,3 +168,7 @@ gg.hydralauncher.hydra
 ## launcher.moe
 
 moe.celica.BabyloniaTerminal
+
+## nowcaption
+
+io.github.Techlm77.NowCaption
