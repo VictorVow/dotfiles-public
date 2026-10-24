@@ -16,6 +16,17 @@
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/e7439b6b14ad3cc35d05608ebca9bce01a25f5f8";
 
+    # Bleeding-edge nixpkgs for individual packages that need a newer version
+    # than the age-pinned `nixpkgs-unstable` above can offer — used when a
+    # feature lands in unstable but hasn't reached the age-pin yet (currently
+    # just scrcpy 5.x). Tracks the nixos-unstable branch HEAD; bump alone with:
+    #   nix flake update nixpkgs-latest --flake ~/Projects/installs/nix
+    # Exposed to modules as `pkgs-latest`. Not advanced by update.sh's regular
+    # age-pin cycle unless added there — bump deliberately, and expect Hydra
+    # cache misses (possible local source builds) on fresh bumps.
+    # channel: nixos-unstable
+    nixpkgs-latest.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     home-manager = {
       # channel: release-26.05
       url = "github:nix-community/home-manager/db7d5e2332710f5abb088f6b5de927d7f9511b35";
@@ -100,7 +111,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # The flake lives in nix/, but sourceInfo is the whole repo — needed so
@@ -144,6 +155,10 @@
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        pkgs-latest = import nixpkgs-latest {
           system = "x86_64-linux";
           config.allowUnfree = true;
         };

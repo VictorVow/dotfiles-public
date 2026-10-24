@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
+{ config, pkgs, lib, pkgs-unstable, pkgs-latest, llm-agents, tuxManager, ie-r, delta, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -65,7 +65,13 @@ in
 
     # ── Android / Mobile ─────────────────────────────────────────────────────
     android-tools  # Provides adb and fastboot
-    scrcpy         # Mirror and control Android devices over USB/network
+    pkgs-latest.scrcpy  # Mirror and control Android devices over USB/network.
+                        # pkgs-latest: wanted a 5.x feature sooner; both stable and
+                        # the age-pinned unstable still ship 4.1. scrcpy 5.0.1 merged
+                        # into nixpkgs on 2026-10-10, so it exits the 14-day age-pin
+                        # cooldown on 2026-10-24 — after an update-all run on/after
+                        # that date lands it in nixpkgs-unstable, switch this back to
+                        # pkgs-unstable.scrcpy.
     waydroid         # Android container for Linux (binary via Nix; service wired up by ansible.yml)
     waydroid-helper  # Waydroid extension manager: install ARM translation (libhoudini/libndk),
                      # Magisk, GApps helpers. Usage: sudo waydroid-helper (requires root to patch images)
