@@ -54,7 +54,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/63b55656560b3f6692fb91398b08fe225427a796";
+    llm-agents.url = "github:numtide/llm-agents.nix/ee8a4fdb09d22f73bd3c9d0a03c49e2eab8cbb6b";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -78,7 +78,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/d053ff97ab3613a3813eb76604de1435f02607ae";
+      url = "github:stablyai/orca/6af21633e995668aa659144e2cb46416643580a0";
       flake = false;
     };
 
@@ -86,7 +86,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/e0041949fdb3b49b304d98715dde35be51b7c3d1";
+      url = "github:upstash/context7/6b636d3c35e051a1a653a236afb7f612c02a1ad3";
       flake = false;
     };
 
@@ -95,7 +95,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/926e18b3fcb334c21d60685546ba8145d35d344e";
+      url = "github:morluto/rea/dc2e8117b60c4481372ed89b077e6c1cf81ee653";
       flake = false;
     };
 
