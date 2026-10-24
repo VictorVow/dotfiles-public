@@ -19,8 +19,9 @@
 #   ./update.sh --no-stable-check  # Skip the nixpkgs stable-release upgrade check
 #   ./update.sh --dry-run          # Print what would run without executing
 #
-# Cron example (daily at 10:00):
-#   0 10 * * * /home/boss/Projects/installs/update.sh >/dev/null 2>&1
+# Runs unattended daily via the update-all systemd user timer
+# (nix/modules/services.nix); root steps are NOPASSWD via ansible.yml.
+#   systemctl --user start update-all.service   # trigger a background run now
 #
 # Every run is logged to ~/.local/state/update-all/update.log (5 MB cap, then
 # rotated to update.log.1).
@@ -133,6 +134,17 @@ UPDATE_D="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/update.d"
 # shellcheck source=update.d/lib.sh
 source "$UPDATE_D/lib.sh"
 
+# ── Single instance ───────────────────────────────────────────────────────────
+# The login tmux pane (0SHORTCUTS/0STARTUP) and the update-all systemd timer
+# can both start a run; two at once would fight over flake.lock, apt's lock,
+# brew, etc. The lock is held by the process doing the work (the script(1)
+# wrapper above has already exec'd/exited by now) and released on exit.
+exec {UPDATE_LOCK_FD}>"$(dirname "$UPDATE_LOG")/update.lock"
+if ! flock -n "$UPDATE_LOCK_FD"; then
+  warn "Another update.sh run is already in progress — exiting."
+  exit 0
+fi
+
 # ── Setup ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FLAKE_DIR="$SCRIPT_DIR/nix"
@@ -222,6 +234,11 @@ done
 if [[ ${#FAILED[@]} -gt 0 ]]; then
   warn "Some steps failed: ${FAILED[*]}"
   warn "Check the output above for details."
+  # Nobody is watching a background (timer/cron) run — raise a notification.
+  if [[ ! -t 1 ]] && ! $DRY_RUN && command -v notify-send &>/dev/null; then
+    notify-send -u critical -a update-all "update-all: ${#FAILED[@]} step(s) failed" \
+      "${FAILED[*]}"$'\n\n'"Log: $UPDATE_LOG" || true
+  fi
 fi
 
 success "All updates complete."

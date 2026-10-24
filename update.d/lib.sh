@@ -55,6 +55,15 @@ run_step() {
   fi
 }
 
+# sudo for the root steps. Their exact command lines are NOPASSWD in
+# /etc/sudoers.d/update-all (ansible.yml), so they never prompt. Without a TTY
+# (the systemd timer) use -n so a sudoers mismatch fails the step instead of
+# hanging on a password prompt nobody can answer; interactive runs keep the
+# prompt as a fallback.
+as_root() {
+  if [[ -t 0 ]]; then sudo "$@"; else sudo -n "$@"; fi
+}
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 # Query GitHub for the highest nixos-XX.YY branch name (e.g. "nixos-25.11").

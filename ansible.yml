@@ -47,6 +47,29 @@
         validate: "visudo -cf %s"
       become: yes
 
+    # ── sudo: passwordless root steps for update.sh ─────────────────────
+    # Lets update-all run unattended (the update-all systemd user timer in
+    # nix/modules/services.nix). Only these exact command lines are allowed —
+    # sudo matches arguments literally, so any other apt-get/systemctl/env
+    # invocation still asks for a password. Keep in sync with
+    # update.d/20-apt.sh and update.d/10-nix.sh. (`:` and `=` must be
+    # backslash-escaped inside sudoers arguments.)
+    - name: Passwordless sudo for update.sh's root steps
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/update-all
+        content: |
+          Cmnd_Alias UPDATE_ALL = \
+            /usr/bin/apt-get update -qq, \
+            /usr/bin/env DEBIAN_FRONTEND\=noninteractive /usr/bin/apt-get upgrade -y --with-new-pkgs -o Dpkg\:\:Options\:\:\=--force-confdef -o Dpkg\:\:Options\:\:\=--force-confold, \
+            /usr/bin/env DEBIAN_FRONTEND\=noninteractive /usr/bin/apt-get autoremove -y, \
+            /usr/bin/systemctl restart chromium-suid-sandbox.service
+          boss ALL=(root) NOPASSWD: UPDATE_ALL
+        owner: root
+        group: root
+        mode: "0440"
+        validate: "visudo -cf %s"
+      become: yes
+
     # ── Hydra assets-host block (remote bundle.js RCE mitigation) ──────────
     # Stock Hydra Launcher builds fetch + eval `assets.hydralauncher.gg/bundle.js`
     # in the renderer with full window.electron bridge access — a remote-code

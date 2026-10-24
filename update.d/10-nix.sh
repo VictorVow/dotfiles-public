@@ -205,7 +205,7 @@ else
           && "$CHROMIUM_HELPER_AFTER" != "$CHROMIUM_HELPER_BEFORE" ]]; then
       info "Chromium changed — refreshing SUID sandbox helper (needs sudo)."
       run_step "chromium-suid-sandbox restart" \
-        sudo systemctl restart chromium-suid-sandbox.service
+        as_root /usr/bin/systemctl restart chromium-suid-sandbox.service
     else
       skipped "Chromium unchanged — SUID sandbox helper still current."
       RESULTS["chromium-suid-sandbox restart"]="✓ unchanged"
