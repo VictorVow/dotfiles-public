@@ -472,11 +472,22 @@ let
           repo   = "kerim/spellbook";
         };
       };
+      # CLI-Anything's .claude-plugin/marketplace.json at repo root makes the repo
+      # itself a marketplace — declarative `/plugin marketplace add HKUDS/CLI-Anything`.
+      cli-anything = {
+        source = {
+          source = "github";
+          repo   = "HKUDS/CLI-Anything";
+        };
+      };
     };
     enabledPlugins = {
       # Superseded by the upstream skill from the local logseq checkout (agent-skills.nix).
       "logseq-cli@spellbook"            = false;
       "logseq-db-plugin-api@spellbook"  = true;
+      # /cli-anything (+ :refine/:test/:validate/:list) — the 7-phase CLI generator.
+      # OpenCode gets the same commands via agent-skills.nix; `cli-hub` is in uv-tools.txt.
+      "cli-anything@cli-anything"       = true;
     };
   });
 

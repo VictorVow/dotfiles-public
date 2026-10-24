@@ -112,6 +112,17 @@
       flake = false;
     };
 
+    # CLI-Anything (github:HKUDS/CLI-Anything) — source only. agent-skills.nix links
+    # its cli-hub-meta-skill into the skill dirs and its opencode-commands/ + HARNESS.md
+    # into the OpenCode commands dirs; ai-agents.nix registers the repo as a Claude
+    # Code plugin marketplace and enables the cli-anything plugin. The companion
+    # `cli-hub` binary is the cli-anything-hub PyPI package in uv-tools.txt.
+    cli-anything = {
+      # channel: main
+      url = "github:HKUDS/CLI-Anything/34f519533bc175d2fe287ab8316b0dd99bb9cc43";
+      flake = false;
+    };
+
     # Own Logseq fork (github.com/VictorVow/logseq) — source only, tracked at its `fork`
     # branch. agent-skills.nix links .agents/skills/logseq-cli from it into
     # ~/.claude/skills + ~/.agents/skills, so the skill tracks the same branch the
@@ -124,7 +135,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # Independently-pinned nixos-unstable HEAD (see the input comment), passed
@@ -170,7 +181,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable pkgs-latest;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
@@ -196,7 +207,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;

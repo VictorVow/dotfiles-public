@@ -34,6 +34,23 @@
         "type": "github"
       }
     },
+    "cli-anything": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790042488,
+        "narHash": "sha256-7l0VNER4czrpTk3aocmvzHM5XPnSf9Bz7RSrcw97ank=",
+        "owner": "HKUDS",
+        "repo": "CLI-Anything",
+        "rev": "34f519533bc175d2fe287ab8316b0dd99bb9cc43",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HKUDS",
+        "repo": "CLI-Anything",
+        "rev": "34f519533bc175d2fe287ab8316b0dd99bb9cc43",
+        "type": "github"
+      }
+    },
     "context7": {
       "flake": false,
       "locked": {
@@ -341,6 +358,7 @@
     },
     "root": {
       "inputs": {
+        "cli-anything": "cli-anything",
         "context7": "context7",
         "delta": "delta",
         "home-manager": "home-manager",

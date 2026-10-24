@@ -10,3 +10,4 @@
 
 claude-code-log  # Convert Claude Code transcript JSONL into readable HTML (not in nixpkgs)
 fanficfare       # Fanfiction downloader; nixpkgs lags upstream and site adapters break often
+cli-anything-hub # `cli-hub` CLI: browse/install/manage CLI-Anything agent harnesses (not in nixpkgs)

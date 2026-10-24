@@ -22,7 +22,7 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ lib, orca, context7, logseq-fork, rea, impeccable, hostProfile, ... }:
+{ lib, orca, context7, logseq-fork, rea, impeccable, cli-anything, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/agent-skills;
@@ -91,6 +91,12 @@ in
       # see it; OpenCode dedups by name.
       ".claude/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
       ".agents/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
+
+      # ── CLI-Hub meta-skill (github:HKUDS/CLI-Anything, flake = false input) ──────
+      # Lets agents discover/install harnesses via the `cli-hub` CLI (uv-tools.txt).
+      # Declarative equivalent of `npx skills add HKUDS/CLI-Anything --skill
+      # cli-hub-meta-skill -g -y`. Server-safe: the skill itself only runs `cli-hub`.
+      ".claude/skills/cli-hub-meta-skill".source = "${cli-anything}/cli-hub-meta-skill";
     }
 
     # ── Impeccable design skill (github:pbakaus/impeccable, flake = false input) ──
@@ -116,6 +122,7 @@ in
     }) skillNames))
     { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
     { ".config/opencode/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything"; }
+    { ".config/opencode/skills/cli-hub-meta-skill".source = "${cli-anything}/cli-hub-meta-skill"; }
     # OpenCode-flavoured build for Orca's pre-session `/` menu scan of
     # ~/.config/opencode/skills — v2 would dedup it against the .claude copy
     # anyway, and this one carries OpenCode's allowed-tools frontmatter.
@@ -143,5 +150,22 @@ in
                       ++ lib.optionals withImpeccable [ "impeccable" ] ++ extra))
       [ { dir = ".config/opencode";           extra = [ "reverse-engineer-anything" ]; }
         { dir = ".opencode1/config/opencode"; extra = [ ]; } ]))
+
+    # ── CLI-Anything OpenCode commands (github:HKUDS/CLI-Anything, flake = false input) ──
+    # Upstream's OpenCode install copies opencode-commands/*.md + the shared HARNESS.md
+    # methodology spec into the commands dir — same files for v2 and opencode1 (their
+    # frontmatter uses v1-style agent/model keys that v2 ignores). Gives /cli-anything,
+    # /cli-anything-refine, /cli-anything-test, /cli-anything-validate, /cli-anything-list.
+    (lib.listToAttrs (lib.concatMap (dir:
+      map (name: {
+        name  = "${dir}/commands/${name}";
+        value.source = "${cli-anything}/opencode-commands/${name}";
+      }) [ "cli-anything.md" "cli-anything-refine.md" "cli-anything-test.md"
+           "cli-anything-validate.md" "cli-anything-list.md" ]
+      ++ [ {
+        name  = "${dir}/commands/HARNESS.md";
+        value.source = "${cli-anything}/cli-anything-plugin/HARNESS.md";
+      } ])
+      [ ".config/opencode" ".opencode1/config/opencode" ]))
   ];
 }

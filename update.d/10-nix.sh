@@ -120,6 +120,7 @@ else
         "rea morluto/rea ${PIN_AGE_DAYS_SOURCE}"
         "orca stablyai/orca ${PIN_AGE_DAYS_ORCA}"
         "impeccable pbakaus/impeccable ${PIN_AGE_DAYS_SOURCE}"
+        "cli-anything HKUDS/CLI-Anything ${PIN_AGE_DAYS_SOURCE}"
       )
       for spec in "${pin_specs[@]}"; do
         read -r in_name repo_path age_days <<< "$spec"
