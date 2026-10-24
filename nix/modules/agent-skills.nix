@@ -105,8 +105,9 @@ in
     # OpenCode (v1 and v2) discovers ~/.claude/skills but never lists skills in the `/`
     # menu (v2's own syntax is `@skill-id`). A thin commands/<name>.md per skill restores
     # `/<name> [args]` the way Claude Code does it — for v2 in ~/.config/opencode and for
-    # opencode1 in its isolated ~/.opencode1/config/opencode.
-    (lib.listToAttrs (lib.concatMap (dir: map (name: {
+    # opencode1 in its isolated ~/.opencode1/config/opencode. reverse-engineer-anything
+    # is v2-only: opencode1 has the REA MCP server disabled (ai-agents.nix).
+    (lib.listToAttrs (lib.concatMap ({ dir, extra }: map (name: {
       name  = "${dir}/commands/${name}.md";
       value.text = ''
         ---
@@ -116,7 +117,8 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" "reverse-engineer-anything" ]))
-      [ ".config/opencode" ".opencode1/config/opencode" ]))
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ] ++ extra))
+      [ { dir = ".config/opencode";           extra = [ "reverse-engineer-anything" ]; }
+        { dir = ".opencode1/config/opencode"; extra = [ ]; } ]))
   ];
 }

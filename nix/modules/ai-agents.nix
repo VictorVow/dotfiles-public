@@ -723,7 +723,11 @@ in
     # falls back to the rate-limited free opencode/big-pickle (Orca chats then fail).
     model       = "devin/swe-2";
     small_model = "devin/swe-1.7-lightning";
-    permission  = opencodePermissionV1;
+    # REA's skill drives its MCP tools, which are disabled here (see mcp.rea below);
+    # `deny` hides it from the agent's skill list (still found via ~/.claude/skills).
+    permission  = lib.recursiveUpdate opencodePermissionV1 {
+      skill."reverse-engineer-anything" = "deny";
+    };
     provider.freellmapi = {
       name = "FreeLLMAPI";
       npm  = "@ai-sdk/openai-compatible";
@@ -759,9 +763,16 @@ in
       type    = "local";
       command = [ chromiumDevtoolsMcpIsolated.command ] ++ chromiumDevtoolsMcpIsolated.args;
     };
+    # Disabled: v1 has no Code Mode, so every MCP tool schema goes inline in every
+    # request. REA's ~200 tools put the baseline at ~231k tokens, past swe-2's
+    # compaction threshold (262k context − 32k output reserve) — every step then
+    # auto-compacted into an endless "Continue if you have next steps…" loop
+    # (anomalyco/opencode#48827, closed as v1 won't-fix). Use REA from Claude Code
+    # or opencode2 (Code Mode) instead.
     mcp.rea = {
       type    = "local";
       command = [ reaMcp.command ] ++ reaMcp.args;
+      enabled = false;
     };
   };
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
