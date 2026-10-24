@@ -31,7 +31,7 @@ let
   # servers (lord-ubuntu). system-update-* used to be here but their SKILL.md now
   # resolves ~/installs vs ~/Projects/installs per host.
   desktopOnlySkills = [
-    "chromium-live-debug" "firefox-live-debug" "process-firefox-synced-tabs" "dbox-status" "md-open" "wl-copy"
+    "chromium-live-debug" "firefox-live-debug" "firefox-extension-development" "process-firefox-synced-tabs" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
     "process-hacker-news-favourites" "search-personal-data"
     "nix-switch"
