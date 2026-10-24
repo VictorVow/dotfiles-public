@@ -92,6 +92,7 @@ At the end of an auto run, or when the user stops a manual one: each tab process
 
 - Close your `about:firefoxview` tab, call `close_firefox_session`.
 - If you toggled remote-debug on for this, offer `ff-remote-debug.sh off` (another restart) — don't leave it on silently.
+- In `auto` mode only: end the run by loading the `git-commit` skill and committing any repo changes this session made (skip if there are none). In `manual` mode don't commit unless the user asks.
 
 ## Notes / limits
 
