@@ -11,10 +11,14 @@ if ! command -v brew &>/dev/null; then
 else
   # brew update: fetches latest formula definitions
   # brew upgrade: upgrades installed formulae to latest versions
-  run_step "brew update + upgrade" bash -c "brew update && brew upgrade"
+  run_step "Homebrew" bash -c "brew update && brew upgrade"
 
   # Sync declared state: install new entries, remove unlisted ones.
-  run_step "brew bundle sync" brew bundle install --cleanup --force-cleanup --file="$SCRIPT_DIR/Brewfile"
+  # (`install --cleanup` was removed upstream; cleanup is its own subcommand.)
+  run_step "brew bundle sync" bash -c "
+    brew bundle install --file='$SCRIPT_DIR/Brewfile' && \
+    brew bundle cleanup --force --file='$SCRIPT_DIR/Brewfile'
+  "
 
   success "Homebrew done."
 fi

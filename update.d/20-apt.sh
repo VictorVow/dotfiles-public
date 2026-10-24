@@ -20,6 +20,6 @@ else
       as_root "${noninteractive[@]}" /usr/bin/apt-get upgrade -y --with-new-pkgs "${keep_conf[@]}" &&
       as_root "${noninteractive[@]}" /usr/bin/apt-get autoremove -y
   }
-  run_step "apt update + upgrade" _apt_upgrade
+  run_step "apt" _apt_upgrade
   success "apt done."
 fi

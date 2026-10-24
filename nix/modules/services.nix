@@ -19,6 +19,18 @@ let
       fi
     done
   '';
+  # OnFailure handler for update-all. update.sh exits 1 when any step failed
+  # (and also on a crash), so pull the "Some steps failed: …" summary line out
+  # of that run's journal; fall back to a generic message for a crash.
+  updateAllFailedNotify = pkgs.writeShellScript "update-all-failed-notify" ''
+    failed=$(/usr/bin/journalctl --user -u update-all.service --invocation=0 -o cat \
+      | ${pkgs.gnugrep}/bin/grep -o 'Some steps failed: .*' \
+      | ${pkgs.gnused}/bin/sed 's/\x1b\[[0-9;]*m//g' | ${pkgs.coreutils}/bin/tail -1)
+    ${pkgs.libnotify}/bin/notify-send -u critical -a update-all "update-all failed" \
+      "''${failed:-update.sh exited with an error}
+
+journalctl --user -u update-all"
+  '';
 in
 {
   systemd.user.services.ollama = {
@@ -73,8 +85,8 @@ in
   # Daily unattended update-all. apt + the chromium-suid-sandbox restart are
   # NOPASSWD via /etc/sudoers.d/update-all (ansible.yml); update.sh uses
   # `sudo -n` without a TTY, so a missing rule fails the step instead of
-  # hanging. Failed steps raise a notification from update.sh itself; a crash
-  # of the whole script triggers update-all-failed. Output goes to the journal
+  # hanging. update.sh exits 1 if any step failed, which triggers the
+  # update-all-failed notification. Output goes to the journal
   # and ~/.local/state/update-all/update.log.
   systemd.user.services.update-all = {
     Unit = {
@@ -94,10 +106,10 @@ in
     };
   };
   systemd.user.services.update-all-failed = {
-    Unit.Description = "Notify that update-all crashed";
+    Unit.Description = "Notify that update-all failed";
     Service = {
       Type = "oneshot";
-      ExecStart = ''${pkgs.libnotify}/bin/notify-send -u critical -a update-all "update-all crashed" "journalctl --user -u update-all"'';
+      ExecStart = "${updateAllFailedNotify}";
     };
   };
   systemd.user.timers.update-all = {

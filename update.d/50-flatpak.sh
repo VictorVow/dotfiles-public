@@ -10,7 +10,7 @@ if ! command -v flatpak &>/dev/null; then
   RESULTS["Flatpak"]="skipped (not installed)"
 else
   # Update user-installed Flatpak apps. --noninteractive avoids prompts in cron.
-  run_step "flatpak update" \
+  run_step "Flatpak" \
     flatpak update --user --noninteractive --assumeyes
 
   # Snapshot installed Flatpak app IDs to flatpak.md, grouped by remote.

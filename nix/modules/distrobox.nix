@@ -9,9 +9,11 @@
 # Container creation and package installs are each gated by a sentinel file so
 # `home-manager switch` is a no-op on normal runs.
 #
-# Package installs run via `podman exec --user root` to bypass the nosuid
-# restriction on container overlay filesystems (which prevents sudo from
-# working in non-interactive activation hook contexts).
+# Package installs run via `podman exec --user root`. That was originally a
+# workaround for container rootfs being mounted nosuid (sudo inside the
+# container couldn't gain root); storage.conf below no longer sets nosuid, so
+# in-container sudo — and `distrobox upgrade`, used by update.sh — works, but
+# the root exec path is kept as it needs no sudo at all.
 #
 # To enter a container interactively:
 #   distrobox enter fedora
@@ -33,9 +35,32 @@
 #   distrobox enter arch -- distrobox-export --app logitune
 #
 {
+  # Rootless podman storage. Overlay mounts are nodev but deliberately NOT
+  # nosuid: with nosuid every container rootfs ignores setuid, so sudo inside
+  # a distrobox fails ("effective uid is not 0 … nosuid") and
+  # `distrobox upgrade` breaks. Rootless setuid only reaches container root,
+  # i.e. this user's unprivileged subuids on the host. Applies to a container
+  # the next time it starts.
+  xdg.configFile."containers/storage.conf".text = ''
+    [storage]
+    driver = "overlay"
+    graphroot = "''${HOME}/.local/share/containers/storage"
+    runroot = "''${XDG_RUNTIME_DIR}/containers"
+
+    [storage.options.overlay]
+    mountopt = "nodev"
+  '';
+
   home.activation.distroboxContainers =
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      DISTROBOX="${pkgs.distrobox}/bin/distrobox"
+    lib.hm.dag.entryAfter [ "writeBoundary" "installPackages" ] ''
+      # Invoke distrobox through the profile symlink, NOT ''${pkgs.distrobox}:
+      # `distrobox create` bind-mounts distrobox-init/-export/-host-exec from
+      # the directory it was run from (deliberately unresolved), and podman
+      # keeps that path as given. A /nix/store path dies when distrobox is
+      # upgraded and the old one is GC'd ("crun: cannot stat …/distrobox-init");
+      # ~/.nix-profile/bin always points at the current version. Needs
+      # installPackages first so the profile is up to date.
+      DISTROBOX="$HOME/.nix-profile/bin/distrobox"
       PODMAN="${pkgs.podman}/bin/podman"
 
       # Activation runs with a stripped PATH; add required tools.

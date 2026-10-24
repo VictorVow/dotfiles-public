@@ -202,7 +202,7 @@ for key in "nixpkgs stable upgrade" \
            "age-pin llm-agents" "age-pin sops-nix" "age-pin tuxManager" "age-pin ie-r" \
             "age-pin delta" "age-pin context7" "age-pin rea" "age-pin orca" \
            "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew install new" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
+           "apt" "Homebrew" "brew bundle sync" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"
@@ -234,11 +234,6 @@ done
 if [[ ${#FAILED[@]} -gt 0 ]]; then
   warn "Some steps failed: ${FAILED[*]}"
   warn "Check the output above for details."
-  # Nobody is watching a background (timer/cron) run — raise a notification.
-  if [[ ! -t 1 ]] && ! $DRY_RUN && command -v notify-send &>/dev/null; then
-    notify-send -u critical -a update-all "update-all: ${#FAILED[@]} step(s) failed" \
-      "${FAILED[*]}"$'\n\n'"Log: $UPDATE_LOG" || true
-  fi
 fi
 
 success "All updates complete."

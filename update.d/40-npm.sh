@@ -18,7 +18,7 @@ else
   # If you specifically need the nightly build, uncomment the yt-dlp block at
   # the bottom of this file.
   info "Updating AI CLI tools in $NPM_CONFIG_PREFIX ..."
-  run_step "npm update -g" \
+  run_step "npm globals" \
     npm update --global --prefix "$NPM_CONFIG_PREFIX"
   success "npm global packages done."
 fi
