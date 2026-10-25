@@ -11,10 +11,10 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/7c8764b7c7b09b34f632464276218ef9090eaa11";
+    nixpkgs.url = "github:NixOS/nixpkgs/6fcc160353f63555b560f25588925133c8f61f2a";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/7fd4004d0511991fff3a0524856a9be09e28c5f0";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/6510408d147d8c5e6d76043e899e9251756f6a75";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -39,7 +39,7 @@
     # at activation. Used by modules/rclone.nix for rclone remote credentials.
     sops-nix = {
       # channel: master
-      url = "github:Mic92/sops-nix/44931708c62937c2b1bf7953902989fa5bb9ee1b";
+      url = "github:Mic92/sops-nix/a1438ca361b05d1e70854d5495abcb34fdf6ff47";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/ee8a4fdb09d22f73bd3c9d0a03c49e2eab8cbb6b";
+    llm-agents.url = "github:numtide/llm-agents.nix/53a2d94ce3b88753200be9a0549d8978b031fa60";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/6af21633e995668aa659144e2cb46416643580a0";
+      url = "github:stablyai/orca/d9dc87b2fb08ba52930378941ff470b69d23523d";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/dc2e8117b60c4481372ed89b077e6c1cf81ee653";
+      url = "github:morluto/rea/c12d9eda87aa5a022ee7e18ea96d8d03bfd12e96";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/6af45ac9a5eb8792f033d3242f52e99812fd91fa";
+      url = "github:pbakaus/impeccable/9304afa97f89b30609e4c538584fb3e0cd4df013";
       flake = false;
     };
 
