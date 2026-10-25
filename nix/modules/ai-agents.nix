@@ -109,18 +109,20 @@ let
     url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
     inherit hash;
   };
-  devinAuth  = magpiePkg "devin"  "0.1.23" "sha256-Our5aQV5QOLkKnsRA9pEEo9f3/ODspGFsxEg26TyK9Q=";
   cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
-  # opencode2's devin plugin is my fork's branch until the OpenCode 2 port
-  # lands upstream (magpie-community/plugins#266): the npm tarball has no v2
-  # default export. opencode1 keeps the upstream tarball above.
-  devinAuthV2Src = pkgs.fetchFromGitHub {
+  # Both OpenCodes' devin plugin is my fork's branch until its fixes land
+  # upstream: the OpenCode 2 port (magpie-community/plugins#266; the npm
+  # tarball has no v2 default export) and metadata.cli saved as the string
+  # "true" (devin-v1-cli-string, on top of #266) — OpenCode 1 drops an
+  # auth.json entry with a non-string metadata value, and its requests then
+  # 404 at the plugin's placeholder baseURL.
+  devinAuthSrc = pkgs.fetchFromGitHub {
     owner  = "VictorVow";
     repo   = "magpie-plugins";
-    rev    = "168284ea6aa4df8e72b3bb625581dfd3d6d2bff7"; # devin-opencode-v2
-    hash   = "sha256-Ps9+C5yvAqniRUkTVISHa37Pn6qQbLR9iJt0gaflGuI=";
+    rev    = "31a3f918e889fb381ac915d99553dbaf55be5696"; # devin-v1-cli-string
+    hash   = "sha256-FIEyZJkxsAW2TYofojRGOi9HLpHkwneViTBffeSYMxk=";
   };
-  devinAuthV2 = "${devinAuthV2Src}/packages/devin";
+  devinAuth = "${devinAuthSrc}/packages/devin";
 
   # Permission set shared by every OpenCode (`opencode`/`opencode1` = v1,
   # `opencode2` = v2). Written once as v2-style ordered rules (last match wins,
@@ -801,7 +803,7 @@ in
   # opencode2 reads plugin files from ~/.config/opencode/plugins/; the fork
   # has the v2 default export the upstream tarball lacks (#266).
   xdg.configFile."opencode/plugins/devin-auth.js".text =
-    ''export { default } from "${devinAuthV2}/index.mjs"'';
+    ''export { default } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
     ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =

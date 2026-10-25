@@ -14,10 +14,7 @@ description: >-
 
 ## How auth works (don't fix what isn't broken)
 
-All OpenCode Devin access goes through the magpie/fork `devin-auth` plugin
-(`~/.config/opencode/plugins/devin-auth.js` for v2, `~/.opencode1/config/opencode/plugins/devin-auth.js` for v1),
-whose `cli` sign-in method stores `metadata.cli: true` and **re-reads
-`credentials.toml` on every request** (`live()` in the plugin). So:
+All OpenCode Devin access goes through the magpie/fork `devin-auth` plugin (`~/.config/opencode/plugins/devin-auth.js` for v2, `~/.opencode1/config/opencode/plugins/devin-auth.js` for v1), whose `cli` sign-in method stores `metadata.cli: "true"` and **re-reads `credentials.toml` on every request** (`live()` in the plugin). So:
 
 - The only file that matters is `~/.local/share/devin/credentials.toml` — where `devin auth login` writes.
 - Saved keys in `auth.json` (v1) and the `credential` table in `opencode.db` (v2) are only fallbacks + account metadata; the `cli` flag makes them self-updating. **Don't hand-edit them** unless the `cli` flag is missing.
@@ -46,8 +43,8 @@ SSH: `ssh lord@lord-ubuntu '<cmd>'` (user `lord`, not `boss`; tailnet ACL).
      (v1 resolves `credentials.toml` via `$XDG_DATA_HOME/devin/`; the wrapper sets `XDG_DATA_HOME=~/.opencode1/data`.)
 3. **Copy canonical → lord-ubuntu:**
    `cat ~/.local/share/devin/credentials.toml | ssh lord@lord-ubuntu 'umask 077 && cat > ~/.local/share/devin/credentials.toml'`
-4. **Check the v2 `cli` flag on both hosts** — `sqlite3 <db> "SELECT value FROM credential WHERE integration_id='devin';"` (db: `~/.local/share/opencode/opencode.db`, same path on lord) — the JSON `value` should contain `"methodID":"cli"` and `metadata.cli: true`. If it does, v2 is done (reads the file live). If it's a `browser` method or `cli` is absent/false, tell the user to run `opencode2 auth login` → "Devin CLI's sign-in" on that host.
-5. **Same for v1 `auth.json`** (`~/.opencode1/data/opencode/auth.json`, both hosts): `devin.metadata.cli` should be true. If missing → `opencode1 auth login` → "Devin CLI's sign-in".
+4. **Check the v2 `cli` flag on both hosts** — `sqlite3 <db> "SELECT value FROM credential WHERE integration_id='devin';"` (db: `~/.local/share/opencode/opencode.db`, same path on lord) — the JSON `value` should contain `"methodID":"cli"` and a truthy `metadata.cli` (`"true"`; older sign-ins saved the boolean `true`, which v2 also accepts). If it does, v2 is done (reads the file live). If it's a `browser` method or `cli` is absent/false, tell the user to run `opencode2 auth login` → "Devin CLI's sign-in" on that host.
+5. **Same for v1 `auth.json`** (`~/.opencode1/data/opencode/auth.json`, both hosts): `devin.metadata.cli` must be the **string** `"true"`. v1 only accepts string metadata values: with the boolean `true` (or any non-string value) it silently drops the whole `devin` entry, `opencode1 auth list` no longer shows `devin`, and every request 404s with `Not Found: default backend - 404` (it goes to the plugin's placeholder `https://server.codeium.com/devin/v1` instead of through its fetch). So never set it with `jq '.devin.metadata.cli = true'`; use `jq '.devin.metadata.cli = "true"'` (back the file up first, keep it `600`), then confirm `opencode1 auth list` shows `devin api`. If the entry is missing entirely → `opencode1 auth login` → "Devin CLI's sign-in". Running v1 processes (TUI panes, Orca's `opencode acp`) load auth at startup, so restart them after a change.
 6. **Verify:** `ssh lord@lord-ubuntu 'devin auth status'` and `devin auth status` locally both show "Logged in (via Devin)".
 
 ## Notes
