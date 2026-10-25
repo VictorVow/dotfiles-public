@@ -257,8 +257,14 @@ let
     url = "https://registry.npmjs.org/@magpie-community/opencode-${name}-auth/-/opencode-${name}-auth-${version}.tgz";
     inherit hash;
   };
-  # Both OpenCodes' devin plugin is my fork's branch (#266 + metadata.cli as
-  # a string) — see ai-agents.nix.
+  # Both OpenCodes' devin plugin is my fork's branch (OpenCode 2 port +
+  # metadata.cli as a string) — see ai-agents.nix for why.
+  # Unpin once BOTH https://github.com/magpie-community/plugins/pull/396 and
+  # https://github.com/magpie-community/plugins/pull/397 are merged and a devin
+  # release after 0.1.23 containing both is on npm; then replace devinAuthSrc +
+  # devinAuth with:
+  #   devinAuth = magpiePkg "devin" "<that version>" "<hash>";
+  # (same change as in ai-agents.nix).
   devinAuthSrc = pkgs.fetchFromGitHub {
     owner  = "VictorVow";
     repo   = "magpie-plugins";

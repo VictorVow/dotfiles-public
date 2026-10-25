@@ -111,11 +111,23 @@ let
   };
   cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
   # Both OpenCodes' devin plugin is my fork's branch until its fixes land
-  # upstream: the OpenCode 2 port (magpie-community/plugins#266; the npm
-  # tarball has no v2 default export) and metadata.cli saved as the string
-  # "true" (devin-v1-cli-string, on top of #266) — OpenCode 1 drops an
-  # auth.json entry with a non-string metadata value, and its requests then
-  # 404 at the plugin's placeholder baseURL.
+  # upstream: the OpenCode 2 port (issue magpie-community/plugins#266; the
+  # npm tarball has no v2 default export) and metadata.cli saved as the
+  # string "true" (devin-v1-cli-string, on top of the port) — OpenCode 1
+  # drops an auth.json entry with a non-string metadata value, and its
+  # requests then 404 at the plugin's placeholder baseURL.
+  #
+  # Unpin once BOTH of these are merged into magpie-community/plugins main:
+  #   - https://github.com/magpie-community/plugins/pull/396 (v1 metadata.cli fix)
+  #   - https://github.com/magpie-community/plugins/pull/397 (OpenCode 2 support)
+  # and a devin release after 0.1.23 that contains both is on npm (publish.yml
+  # only publishes when packages/devin/package.json's version is bumped on main;
+  # check `npm view @magpie-community/opencode-devin-auth versions`). Then
+  # replace devinAuthSrc + devinAuth below with the npm tarball:
+  #   devinAuth = magpiePkg "devin" "<that version>" "<hash>";
+  # (hash: `nix store prefetch-file --unpack <tarball url>`, or build once with
+  # lib.fakeHash), and make the same change in ai-agents-server.nix.
+  # If only one PR merges, keep the fork pin: the other fix is still fork-only.
   devinAuthSrc = pkgs.fetchFromGitHub {
     owner  = "VictorVow";
     repo   = "magpie-plugins";
