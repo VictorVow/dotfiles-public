@@ -123,6 +123,16 @@
       flake = false;
     };
 
+    # Cloudflare security-audit skill (github:cloudflare/security-audit-skill) —
+    # source only. agent-skills.nix links skills/security-audit into the skill
+    # dirs. Multi-phase security audit workflow; runs its zero-dep .cjs
+    # validators with plain node. Server-safe: audits read source only.
+    security-audit-skill = {
+      # channel: main
+      url = "github:cloudflare/security-audit-skill";
+      flake = false;
+    };
+
     # Own Logseq fork (github.com/VictorVow/logseq) — source only, tracked at its `fork`
     # branch. agent-skills.nix links .agents/skills/logseq-cli from it into
     # ~/.claude/skills + ~/.agents/skills, so the skill tracks the same branch the
@@ -135,7 +145,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # Independently-pinned nixos-unstable HEAD (see the input comment), passed
@@ -181,7 +191,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything pkgs-latest;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
@@ -207,7 +217,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;

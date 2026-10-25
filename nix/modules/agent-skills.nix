@@ -22,7 +22,7 @@
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
 # see each skill twice (same-name dedup behaviour unverified). Exceptions: logseq-cli, and the
 # ~/.config/opencode/skills mirror for Orca's pre-session `/` menu (both below).
-{ lib, orca, context7, logseq-fork, rea, impeccable, cli-anything, hostProfile, ... }:
+{ lib, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, hostProfile, ... }:
 
 let
   skillsDir = ../dotfiles/agent-skills;
@@ -92,6 +92,14 @@ in
       ".claude/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
       ".agents/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything";
 
+      # ── Cloudflare security-audit (github:cloudflare/security-audit-skill, flake = false input) ──
+      # Declarative equivalent of `npx skills add cloudflare/security-audit-skill
+      # --skill security-audit --global`. Multi-phase audit workflow + zero-dep
+      # node validators. Server-safe (source-only audits). Also in
+      # ~/.agents/skills so Codex/Devin see it; OpenCode dedups by name.
+      ".claude/skills/security-audit".source = "${security-audit-skill}/skills/security-audit";
+      ".agents/skills/security-audit".source = "${security-audit-skill}/skills/security-audit";
+
       # ── CLI-Hub meta-skill (github:HKUDS/CLI-Anything, flake = false input) ──────
       # Lets agents discover/install harnesses via the `cli-hub` CLI (uv-tools.txt).
       # Declarative equivalent of `npx skills add HKUDS/CLI-Anything --skill
@@ -123,6 +131,7 @@ in
     { ".config/opencode/skills/find-docs".source = "${context7}/skills/find-docs"; }
     { ".config/opencode/skills/reverse-engineer-anything".source = "${rea}/.agents/skills/reverse-engineer-anything"; }
     { ".config/opencode/skills/cli-hub-meta-skill".source = "${cli-anything}/cli-hub-meta-skill"; }
+    { ".config/opencode/skills/security-audit".source = "${security-audit-skill}/skills/security-audit"; }
     # OpenCode-flavoured build for Orca's pre-session `/` menu scan of
     # ~/.config/opencode/skills — v2 would dedup it against the .claude copy
     # anyway, and this one carries OpenCode's allowed-tools frontmatter.
@@ -146,7 +155,7 @@ in
 
         $ARGUMENTS
       '';
-    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" ]
+    }) (skillNames ++ [ "orca-cli" "orchestration" "find-docs" "security-audit" ]
                       ++ lib.optionals withImpeccable [ "impeccable" ] ++ extra))
       [ { dir = ".config/opencode";           extra = [ "reverse-engineer-anything" ]; }
         { dir = ".opencode1/config/opencode"; extra = [ ]; } ]))
