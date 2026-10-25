@@ -143,9 +143,17 @@
       url = "github:VictorVow/logseq/399025dc502ec70cce42a0928cdbebf877a896f6";
       flake = false;
     };
+
+    # Notifications desktop receiver — Home Manager module + the notify CLI from
+    # the self-hosted Notifications repo on Forgejo (tailnet-only, public so a
+    # git+https fetch needs no token). Imported in home.nix as
+    # notifications.homeManagerModules.desktop.
+    notifications = {
+      url = "git+https://git.device.example.com/self-hosted/Notifications.git";
+    };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, notifications, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # Independently-pinned nixos-unstable HEAD (see the input comment), passed
@@ -191,7 +199,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill pkgs-latest;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill notifications pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {

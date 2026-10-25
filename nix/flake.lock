@@ -322,6 +322,21 @@
         "type": "github"
       }
     },
+    "notifications": {
+      "locked": {
+        "lastModified": 1792935902,
+        "narHash": "sha256-NaxTJgx9uMT4eAFdEac0nuQkffmIcMgxXczMHrnfDoc=",
+        "ref": "refs/heads/main",
+        "rev": "8167edc810f7d3dc2b6a08111504d95b4caf1339",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://git.device.example.com/self-hosted/Notifications.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.device.example.com/self-hosted/Notifications.git"
+      }
+    },
     "orca": {
       "flake": false,
       "locked": {
@@ -369,6 +384,7 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-latest": "nixpkgs-latest",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "notifications": "notifications",
         "orca": "orca",
         "rea": "rea",
         "security-audit-skill": "security-audit-skill",

@@ -1,4 +1,4 @@
-{ ... }:
+{ notifications, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
@@ -45,9 +45,20 @@
     ./modules/gpg-expiry.nix # Weekly check for GPG keys near expiry
     ./modules/cass.nix       # cass agent-session search: background index timers (cass itself via Brewfile)
     ./modules/transcript-scrub.nix # Daily gitleaks scrub of secrets in agent transcripts (scripts/security/)
+    notifications.homeManagerModules.desktop # KDE notifications + notify CLI from the Notifications hub
     ./modules/recoll.nix     # Recoll full-text document index (~/Documents, ~/Downloads, ~/Media) + hourly timer
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
   ];
+
+  # KDE desktop notifications from the Notifications hub on lord-ubuntu:
+  # a systemd user service runs `ntfy subscribe desktop-boss` and turns each
+  # message into a notify-send popup (with Click/view-action buttons). The
+  # `notify` CLI for sending is on PATH. Receivers/routes live in
+  # Self-Hosted/Notifications/notifications.yml.
+  services.notifications-desktop = {
+    enable = true;
+    topic = "desktop-boss";
+  };
 
   # Tell Home Manager this is a non-NixOS Linux system.
   # This auto-enables targets.genericLinux.gpu, which creates
