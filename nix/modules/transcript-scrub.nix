@@ -14,12 +14,12 @@ let
     chmod +x $out/scrub-transcripts.sh
   '';
 
-  # Apprise endpoint on lord-ubuntu (tailnet). The `matrix-scrub` tag routes
-  # to the dedicated "Transcript scrub" room; falls back to nothing if the
-  # tag isn't rendered (MATRIX_SCRUB_ROOM unset) — curl still exits 0.
-  appriseUrl = "https://apprise.device.example.com/notify/apprise";
+  # Notifications hub on lord-ubuntu (tailnet), source `transcript-scrub`.
+  # Where it lands (the "Transcript scrub" Matrix room, the feed) is declared
+  # in Self-Hosted/Notifications/notifications.yml.
+  hubUrl = "https://notifications.device.example.com/transcript-scrub";
 
-  # Posts a one-line summary to Matrix. Reads the scrubber's own journal since
+  # Posts a short summary to the hub. Reads the scrubber's own journal since
   # invocation for the stats line. $1 = title, $2 = extra body text.
   notifyScript = pkgs.writeShellScript "transcript-scrub-notify" ''
     set -u
@@ -30,19 +30,18 @@ let
       | ${pkgs.coreutils}/bin/tail -6 || true)
     body="$extra
 $stats"
-    ${pkgs.curl}/bin/curl -sSf -m 20 -X POST \
-      -d "title=$title" \
-      --data-urlencode "body=$body" \
-      -d "tag=matrix-scrub" \
-      "${appriseUrl}" >/dev/null || \
-      echo "apprise notify failed" >&2
+    ${pkgs.curl}/bin/curl -sSf -m 20 \
+      -H "Title: $title" \
+      --data-binary "$body" \
+      "${hubUrl}" >/dev/null || \
+      echo "notifications hub post failed" >&2
   '';
 in
 {
   # Daily incremental scrub: only files/rows newer than the state high-water
   # mark hit gitleaks, so the run is cheap. Runs before cass-nightly (03:00)
   # so forget+re-index lands inside the same nightly window.
-  # Success + failure both land in the "Transcript scrub" Matrix room.
+  # Success + failure both go to the Notifications hub (→ "Transcript scrub" room).
   systemd.user.services.transcript-scrub = {
     Unit = {
       Description = "Scrub leaked secrets from agent transcripts";
