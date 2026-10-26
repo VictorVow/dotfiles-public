@@ -139,4 +139,5 @@ ansible-playbook ansible.yml --ask-become-pass
 - [Migration to Nix](docs/archive/migration-to-nix.md) — archived: the completed apt/brew/pipx/npm → Nix migration
 - [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)
 - [lord-ubuntu Home Manager](docs/system/lord-ubuntu-home.md) — headless-server config (`./nix#lord`) sharing modules with the desktop
+- [lord-ubuntu disk migration](docs/system/lord-ubuntu-disk-migration.md) — runbook for swapping the NVMe via live `pvmove` (near-zero downtime, no config changes)
 - [Adding a new host](docs/system/bootstrap-new-host.md) — repeatable checklist for bringing another machine into the flake
