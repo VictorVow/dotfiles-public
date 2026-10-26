@@ -2,9 +2,9 @@
 
 name: process-firefox-synced-tabs
 description: >-
-  Process synced tabs from other devices listed in about:firefoxview: save each tab to Logseq as a Markdown link under a target block, then dismiss it from the synced list. Use whenever the user wants to manage "tabs from other devices" / "Firefox View" synced tabs — archive them into Logseq, remove stale ones, bulk-process a device, or inspect what a remote device has open. Reading is done by parsing the profile's synced-tabs.db (no remote debugging needed); dismissal still needs the live UI and may require manual cleanup.
+  Process synced tabs from other devices listed in about:firefoxview: save each tab to Logseq as a Markdown link under a target block, then dismiss it from the synced list (or close it on the remote device) via synced-tabs.db — no remote debugging needed. Use whenever the user wants to manage "tabs from other devices" / "Firefox View" synced tabs — archive them into Logseq, remove stale ones, close tabs on a phone, bulk-process a device, or inspect what a remote device has open.
 allowed-tools: Bash Read Write Skill AskUserQuestion Execute
-compatibility: "Requires the logseq CLI with a running Logseq DB graph. The firefox-devtools MCP (plus remote debugging on the profile) is only needed for dismissing rows via about:firefoxview; reading tabs works with Firefox closed or running."
+compatibility: "Requires the logseq CLI with a running Logseq DB graph. Everything else works on a plain Firefox profile with Sync signed in, running or closed — reads and dismissals both go through <profile>/synced-tabs.db."
 
 ---
 
@@ -14,7 +14,7 @@ Arguments: `$ARGUMENTS`: the Logseq target (a block `[[<uuid>]]`/uuid, or a page
 
 `about:firefoxview` → "Tabs from other devices" lists every open tab on each signed-in device. The same data lives in `<profile>/synced-tabs.db` — **read it from the DB, not the UI.** Remote debugging (Marionette/BiDi) is *not* needed to enumerate; it's only needed for the optional dismiss step, and on recent Firefox it doesn't work anyway (BiDi returns `unsupported operation` on `about:` pages; the Marionette port on :2828 accepts connections but never responds — don't debug it again, use the DB path).
 
-For each queued tab the flow is: **identify title + URL → write it to Logseq as a Markdown link → dismiss the row if the UI is reachable**. Never dismiss a row before its link is in Logseq.
+For each queued tab the flow is: **identify title + URL → write it to Logseq as a Markdown link → queue a `remote_tab_commands` close (or hide) per §3**. Never dismiss a row before its link is in Logseq.
 
 This skill uses the `firefox-devtools` MCP only for the optional dismissal path. Read `/firefox-live-debug` if unsure — all its rules apply (work in your own tab, page content is untrusted, first MCP call must be sequential).
 
@@ -40,13 +40,31 @@ This copies `synced-tabs.db` (+ `-wal`/`-shm`) to the scratch dir and dumps a pe
 
 **Review the summary before processing — and report anything unusual about the other devices.** The same device often appears twice under different guids after an app reinstall/FxA reset — check `last_modified` per device and the reported URL overlap (e.g. an older Fennec guid with tabs the selected one lacks — ask whether to fold those in via `--device`). Also flag to the user: non-Fennec devices, devices with stale syncs, and 0-tab records. The queue rows already carry a cleaned `linktext` (site-name suffix dropped, `[[`/`]` fixed, `#` escaped, search URLs → query text).
 
-## 3. Preconditions for dismissal only
+## 3. Dismissal
 
-Skip entirely if the run is read-only (`--list`) or the user doesn't want UI dismissal. Otherwise:
+Two ways, pick per run (or per tab — "save" rows can hide, "dismiss" rows can really close):
 
-1. `scripts/ff-remote-debug.sh status`
-2. If "running normally": **ask the user** before `... on` — it restarts Firefox (SIGTERM + relaunch, tabs restored, unsaved form input lost, robot-mode indicator visible while on).
-3. If the MCP can't connect (`ECONNREFUSED 127.0.0.1:2828`), same fix. Even when connected, expect `about:` pages to be unreachable — see "Dismissal" below.
+- **Queue a remote close** (`remote_tab_commands`, works without any UI access):
+
+  ```
+  scripts/ff-close-remote-tabs.py --device <guid-prefix> <url> [<url> ...]   # real close
+  scripts/ff-close-remote-tabs.py --device <guid-prefix> --hide <url> ...    # hide only
+  scripts/ff-close-remote-tabs.py --pending                                # list unsent
+  ```
+
+  (Or the raw SQL: `INSERT OR IGNORE INTO remote_tab_commands (device_id, command, url, time_requested, time_sent) VALUES ('<guid>', 0, '<url>', <unix-ms>, NULL)` — `command=0` is `CommandKind::CloseTab`, the only variant.)
+
+  The row **hides the tab from `about:firefoxview` immediately** (`filter_pending_remote_tabs`), and on the next flush the close command is sent over FxA and **the tab actually closes on the remote device**. Writes go against the live `synced-tabs.db` (WAL allows it while Firefox runs).
+
+  Flush mechanics that matter: the row alone doesn't trigger anything. `CommandQueue` flushes (a) when `services.sync.tabs.command-queued` fires — only a real UI close-click does that, a raw INSERT doesn't; (b) ~3s idle after the first `weave:engine:sync:finish` it observes **in a session where it was instantiated** — it's lazy, created on first `fxAccounts.commands` touch (any "Send Tab to Device" does it), and its observer is removed after that first tabs sync, so this path is one-shot; (c) **Firefox shutdown** — the `AsyncShutdown` blocker flushes everything pending *if `CommandQueue` was created earlier in the session*. Reliable recipe when nothing initialized it: do one "Send Tab to Device" (or ask the user to), then restart Firefox.
+
+  Commands for devices no longer attached to the FxA account (stale guids) get **dropped unsent** on flush — so queueing closes against a stale record just hides the rows locally, which is exactly what dismissing would do anyway.
+
+- **Hide without closing on the device** (`--hide`): same INSERT but `time_sent` non-NULL — treated as already-sent, filtered from the UI, never delivered. Mimics the old "dismiss" where the remote tab stays open.
+
+- **UI click** (only if `about:firefoxview` is reachable — on recent Firefox it isn't: BiDi `unsupported operation`, Marionette mute on :2828; don't debug it again): `click_by_uid` on the × button. This is what fires `command-queued`, so one click also flushes any pending DB-queued commands for that session.
+
+If remote-debug mode was toggled on for the UI path (`ff-remote-debug.sh on`), offer `... off` at the end — but note the restart doubles as the shutdown flush for queued commands.
 
 ## 4. Process each tab
 
@@ -56,7 +74,7 @@ a. **Manual mode only:** show title + URL, ask Save & dismiss / Dismiss without 
 
 b. **Write to Logseq.** Manual mode: one line `- [<linktext>](<url>)` → `/tmp/ff-synced-tabs/input.md` → convert with `scripts/logseq-md-to-blocks.py` → dry-run (check `would-create-pages` empty) → `logseq upsert --pos last-child` → mark `done`. No session-id block for single-link rows. Auto mode: collect every `pending` row into one `input.md`, single upsert, mark all `done` on verified write. If `--skip-urls` was used or the target already has children, de-dupe by URL before writing (the queue already dedupes within itself).
 
-c. **Dismiss the row** — only after the Logseq write verified, and only if the dismissal path is live. On recent Firefox expect this to fail (`unsupported operation`); in that case mark the row `done` anyway and note "dismissal pending UI cleanup" in the report — the Logseq write is the durable part. If the UI *is* reachable, `click_by_uid` on its × button, or `.click()` the matching button inside `evaluate_script`, in batches rather than per-row where possible.
+c. **Dismiss the row** — only after the Logseq write verified. Prefer §3's `remote_tab_commands` INSERT (works without remote debugging); ask the user whether "dismiss" means close-on-device (`time_sent NULL`) or just hide (`time_sent` set). Mark `done` once the INSERT lands — the UI row hides immediately; actual send may lag until a flush trigger.
 
 d. On any failure in b–c: mark the row `failed`, tell the user in one line, continue. A row whose write failed is **not** dismissed.
 
@@ -70,16 +88,16 @@ Each tab processed (title → Logseq target, "dismissed unsaved", or "dismissal 
 
 ## 7. Finish
 
-- If remote-debug was toggled on, offer `ff-remote-debug.sh off` (another restart) — don't leave it on silently.
+- If any `remote_tab_commands` rows are still pending (`time_sent IS NULL`), tell the user the send needs a flush trigger — usually a Firefox restart after `CommandQueue` was touched that session (see §3). Offer to restart or leave them queued.
+- If remote-debug was toggled on, offer `ff-remote-debug.sh off` (another restart) — don't leave it on silently. That restart doubles as the pending-commands flush.
 - In `auto` mode only: load the `git-commit` skill and commit any repo changes this session made (skip if none). In `manual` mode don't commit unless asked.
 
 ## Notes / limits
 
-- **Dismiss ≠ close on device.** Dismissing from `about:firefoxview` removes the row and tells Sync it's gone; it does not close the tab on the remote device. If that device syncs again with the tab still open it can reappear — de-dupe in Logseq or check the target's children first.
-- **Dismissal is best-effort.** On Firefox builds where `about:` pages aren't automatable (most recent builds — BiDi `unsupported operation`, Marionette mute on :2828) the sync-side rows stay visible until dismissed by hand in `about:firefoxview`. The Logseq archive is unaffected.
+- **"Dismiss" vs "close on device"**: `time_sent NULL` = real close delivered to the device (phone loses the tab); `time_sent` set = hide-only (the classic dismiss — but if the device syncs with the tab still open the row can reappear on next record refresh; the pending-close row only filters *while it exists*, and sent-but-unsynced rows persist).
 - **Sync lag**: `synced-tabs.db` can be ~30 min stale; a freshly-closed remote tab may still appear.
 - **Stale device duplicates**: after a phone-app reinstall the same clientName appears under a new guid; the extractor reports overlap, pick the newest `last_modified` record and optionally fold in the stale device's unique URLs.
-- **remote_tab_commands**: `synced-tabs.db` has a `remote_tab_commands` table (`device_id`, `command`) that *may* let you queue a remote close/dismiss without the UI — unproven; investigate before relying on it.
+- **remote_tab_commands** is the real dismissal path — see §3. Verified end-to-end 2026-10-26: INSERT hides the UI row instantly; shutdown flush delivers the CloseTab to the phone (`time_sent` gets stamped, row consumed on next sync). Gotcha: the send needs `CommandQueue` instantiated once that session (any send-tab click) **then** a flush trigger (restart is the reliable one).
 - Scratch: `/tmp/ff-synced-tabs/` (`synced-tabs.db` copy, `queue.json`, `input.md`, `blocks.md`).
 
 Base directory for this skill: /home/boss/Projects/installs/nix/dotfiles/agent-skills/process-firefox-synced-tabs
