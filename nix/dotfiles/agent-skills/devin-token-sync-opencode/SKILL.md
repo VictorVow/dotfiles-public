@@ -35,7 +35,7 @@ SSH: `ssh lord@lord-ubuntu '<cmd>'` (user `lord`, not `boss`; tailnet ACL).
 
 ## Procedure
 
-1. **Confirm the source token is fresh.** `devin auth status` on boss should say "Logged in". If not, stop — the user must `devin auth login` first.
+1. **Confirm the source token is fresh.** `devin auth status` on boss should say "Logged in" *and* the "User / team info" section must not show `Invalid token` — "Logged in" only means the file parses, not that the server accepts it. Also `grep REDACTED ~/.local/share/devin/credentials.toml` must find nothing (see Notes: the nightly scrub once redacted it). If either check fails, stop — the user must `devin auth login` first.
 2. **Check the v1 symlink on both hosts** (`ls -la .../data/devin/credentials.toml`):
    - boss: `~/.opencode1/data/devin/credentials.toml` should be a symlink → `~/.local/share/devin/credentials.toml`.
    - lord-ubuntu: same check over ssh. If it's a regular file (or 0 bytes), replace it:
@@ -53,3 +53,4 @@ SSH: `ssh lord@lord-ubuntu '<cmd>'` (user `lord`, not `boss`; tailnet ACL).
 - Permissions: file is `600`; keep it that way (`umask 077` on the remote side does it).
 - lord-ubuntu's canonical file can be *newer-looking* than boss's but hold an old session-id — compare md5 or the JWT's `session_id`, not mtime.
 - If the user only needs one host, run just that half — the procedure is per-host independent.
+- **Token "expires" after ~24h / at 02:00?** That was the nightly `transcript-scrub` timer (02:00, both hosts), not Devin: its targets used to include all of `~/.local/share/devin`, so gitleaks replaced the JWT in `credentials.toml` with `devin-session-token$[REDACTED:jwt]` (file shrinks to ~176 bytes). Fixed 2026-10-26 by narrowing the target to `~/.local/share/devin/cli` in `scripts/security/transcript-common.sh`. If it recurs, check that target list (and `systemctl --user cat transcript-scrub.service` → the deployed store copy) before re-syncing. `credentials.toml.bak.*` files may hold the redacted token too — don't restore from them.

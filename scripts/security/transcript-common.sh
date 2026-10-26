@@ -33,7 +33,7 @@ ts_defaults() {
     "$HOME/.gemini"
     "$HOME/.openclaw"
     "$HOME/.copilot/session-state"
-    "$HOME/.local/share/devin"
+    "$HOME/.local/share/devin/cli"   # not the parent: credentials.toml + mcp/oauth hold live tokens
     "$HOME/.local/share/opencode/storage"
     "$HOME/.opencode1/data/opencode/storage"
     "$HOME/.local/share/opencode/tool-output"

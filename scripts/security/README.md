@@ -22,7 +22,7 @@ Both scripts source `transcript-common.sh` (target lists, arg resolution, lockin
 ./scrub-transcripts.sh ~/.local/share/opencode/opencode.db  # just the v1 db
 ```
 
-Default file targets: `.claude/projects`, `.claude/history.jsonl`, `.claude/file-history`, `.config/codex/sessions`, `.config/codex/history.jsonl`, `.gemini`, `.openclaw`, `.copilot/session-state`, `.local/share/devin`, opencode v2 `storage/` + `tool-output/` + `log/` dirs (both `~/.local/share/opencode` and `~/.opencode1/data/opencode`). Default sqlite targets: `opencode.db` in both opencode data dirs plus codex `thread_history_1.sqlite`/`state_5.sqlite`/`logs_2.sqlite` and zed `~/.local/share/zed/threads/threads.db` — see `SQLITE_SPECS` in `transcript_common.py` for which columns are scanned. The cass archive (`agent_search.db`) is scanned too — see below.
+Default file targets: `.claude/projects`, `.claude/history.jsonl`, `.claude/file-history`, `.config/codex/sessions`, `.config/codex/history.jsonl`, `.gemini`, `.openclaw`, `.copilot/session-state`, `.local/share/devin/cli` (not the whole `devin/` dir — `credentials.toml` and `mcp/oauth` hold live tokens the scrub would redact), opencode v2 `storage/` + `tool-output/` + `log/` dirs (both `~/.local/share/opencode` and `~/.opencode1/data/opencode`). Default sqlite targets: `opencode.db` in both opencode data dirs plus codex `thread_history_1.sqlite`/`state_5.sqlite`/`logs_2.sqlite` and zed `~/.local/share/zed/threads/threads.db` — see `SQLITE_SPECS` in `transcript_common.py` for which columns are scanned. The cass archive (`agent_search.db`) is scanned too — see below.
 
 ## Incremental + repeatable
 
