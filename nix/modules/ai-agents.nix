@@ -759,8 +759,19 @@ in
 
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
     "$schema" = "https://opencode.ai/v2/cli.json";
-    # Rebind the command palette from the default ctrl+p to ctrl+o.
-    keybinds."command.palette.show" = "ctrl+o";
+    keybinds = {
+      # Rebind the command palette from the default ctrl+p to ctrl+o.
+      "command.palette.show" = "ctrl+o";
+      # Transcript density: <leader> is ctrl+x. No per-block folding exists
+      # (unlike Orca's UI) — these toggle/cycle whole classes of content.
+      "session.verbosity.cycle"             = "<leader>v"; # full → summary → minimal
+      "session.toggle.exploration_grouping" = "<leader>u"; # grouped vs flat tool calls
+      "session.toggle.thinking"             = "<leader>i"; # show/hide reasoning
+    };
+    session = {
+      thinking = "hide";   # reasoning blocks hidden unless toggled
+      grouping = "auto";   # group related tool calls into summary rows (default, explicit)
+    };
   };
 
   xdg.configFile."opencode/AGENTS.md".text = globalContext;
