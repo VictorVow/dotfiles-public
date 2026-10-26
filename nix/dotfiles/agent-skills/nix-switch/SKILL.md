@@ -9,3 +9,4 @@ compatibility: "Requires Nix Home Manager"
 2. If you see "warning: Git tree <filepath> has uncommitted changes" then just ignore that warning.
 3. If it failed, show the full error and suggest a fix.
 4. Don't run `home-manager news` unless it's part of the update.sh script.
+5. If the switch succeeded, end the run by loading the `git-commit` skill and committing the flake changes (e.g. `flake.nix`, `flake.lock`, modules, dotfiles) produced by the switch. If the working tree is clean, say so instead of making an empty commit.
