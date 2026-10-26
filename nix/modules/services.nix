@@ -122,17 +122,6 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  # Weekly Nix GC — the only GC (update.sh no longer runs one). Only expires
-  # this user's profile generations, but the collection itself frees anything
-  # unreferenced.
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-    persistent = true;
-    randomizedDelaySec = "1h";
-  };
-
   home.packages = [ pkgs.ollama-vulkan ];
 
 }

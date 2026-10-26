@@ -186,7 +186,8 @@ source "$UPDATE_D/70-appman.sh"
 # shellcheck source=update.d/80-distrobox.sh
 source "$UPDATE_D/80-distrobox.sh"
 
-# Nix GC runs on its own weekly timer (nix.gc in nix/modules/services.nix).
+# Nix GC + Docker prune run on their own weekly timer (weekly-cleanup.timer
+# in nix/modules/weekly-cleanup.nix).
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 ELAPSED=$(( $(date +%s) - START_TIME ))
