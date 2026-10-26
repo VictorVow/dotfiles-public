@@ -54,17 +54,17 @@
     "context7": {
       "flake": false,
       "locked": {
-        "lastModified": 1792248259,
-        "narHash": "sha256-IEgLbuHETE1DBsY1BMhIqanTMmkQ6BAeV1ils9BW1FE=",
+        "lastModified": 1792397316,
+        "narHash": "sha256-U4ZwnRllp0jxlR4zMyNRaZXyS6HvhzEVwZvqlhMwtSU=",
         "owner": "upstash",
         "repo": "context7",
-        "rev": "6b636d3c35e051a1a653a236afb7f612c02a1ad3",
+        "rev": "ae4871e9a8cbed00bc0f4a40b0b5b61e2d37378c",
         "type": "github"
       },
       "original": {
         "owner": "upstash",
         "repo": "context7",
-        "rev": "6b636d3c35e051a1a653a236afb7f612c02a1ad3",
+        "rev": "ae4871e9a8cbed00bc0f4a40b0b5b61e2d37378c",
         "type": "github"
       }
     },
@@ -172,17 +172,17 @@
     "impeccable": {
       "flake": false,
       "locked": {
-        "lastModified": 1792310047,
-        "narHash": "sha256-LAR3iLU94TA6gqBGwKlaHcSPbbDMVafDELJxMh/Jt1g=",
+        "lastModified": 1792371554,
+        "narHash": "sha256-ZdkKSwa3hEoB9EA/bnCDzilYrIf9Wd46YuUH1BTITm0=",
         "owner": "pbakaus",
         "repo": "impeccable",
-        "rev": "9304afa97f89b30609e4c538584fb3e0cd4df013",
+        "rev": "0665bd812ae0908fcab17b96fd4f840defb882d9",
         "type": "github"
       },
       "original": {
         "owner": "pbakaus",
         "repo": "impeccable",
-        "rev": "9304afa97f89b30609e4c538584fb3e0cd4df013",
+        "rev": "0665bd812ae0908fcab17b96fd4f840defb882d9",
         "type": "github"
       }
     },
@@ -195,17 +195,17 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792835552,
-        "narHash": "sha256-0EthGjCBH0UEPrU78omXpEbvRqKjCBZeC8fi+kIBy+o=",
+        "lastModified": 1792920017,
+        "narHash": "sha256-a4mZGtaldWR0DIsFbLgj9DI/5lVGbKDgQ6tbb2vWPfo=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "53a2d94ce3b88753200be9a0549d8978b031fa60",
+        "rev": "ea188d2f072e0ec8d5b71245e228803672801a22",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "53a2d94ce3b88753200be9a0549d8978b031fa60",
+        "rev": "ea188d2f072e0ec8d5b71245e228803672801a22",
         "type": "github"
       }
     },
@@ -324,11 +324,11 @@
     },
     "notifications": {
       "locked": {
-        "lastModified": 1792936291,
-        "narHash": "sha256-gRrr+TeZqM1k//iaPTg/4GUcH9Uv7q8F/1Pii/4mKrI=",
+        "lastModified": 1792939782,
+        "narHash": "sha256-xJSzqXGZeAFF5/FjhLAaUqml4KTYtROoNNuiLEF5xN8=",
         "ref": "refs/heads/main",
-        "rev": "97284be971cff5ef685dc27eacd87a0256e75f45",
-        "revCount": 3,
+        "rev": "0d2fb138d386743c7e3ffc6e2f083da8d9a2da5b",
+        "revCount": 4,
         "type": "git",
         "url": "https://git.device.example.com/self-hosted/Notifications.git"
       },
@@ -340,34 +340,34 @@
     "orca": {
       "flake": false,
       "locked": {
-        "lastModified": 1792751291,
-        "narHash": "sha256-WxBu79pIA/KmrBVKt8M08fSEo/zRUAvcyMargy3I2Lg=",
+        "lastModified": 1792835827,
+        "narHash": "sha256-0uSaPis33bppW5+8jBXoZnKhS4lnEOhTvobFsFj0ERA=",
         "owner": "stablyai",
         "repo": "orca",
-        "rev": "d9dc87b2fb08ba52930378941ff470b69d23523d",
+        "rev": "30733ac703b43f35bfa2a7c0339a09b316e69b99",
         "type": "github"
       },
       "original": {
         "owner": "stablyai",
         "repo": "orca",
-        "rev": "d9dc87b2fb08ba52930378941ff470b69d23523d",
+        "rev": "30733ac703b43f35bfa2a7c0339a09b316e69b99",
         "type": "github"
       }
     },
     "rea": {
       "flake": false,
       "locked": {
-        "lastModified": 1792314784,
-        "narHash": "sha256-o12rFTkc99YTGdsPcM0Rkt47pWDW+UNQXp07Bt50Lcc=",
+        "lastModified": 1792404687,
+        "narHash": "sha256-HeXw+hm0SSiijkf7ho4SjbtY2e4HZZbz1iXL71/Uank=",
         "owner": "morluto",
         "repo": "rea",
-        "rev": "c12d9eda87aa5a022ee7e18ea96d8d03bfd12e96",
+        "rev": "69fe86c5c7c31082d1846842b3afd00343499d75",
         "type": "github"
       },
       "original": {
         "owner": "morluto",
         "repo": "rea",
-        "rev": "c12d9eda87aa5a022ee7e18ea96d8d03bfd12e96",
+        "rev": "69fe86c5c7c31082d1846842b3afd00343499d75",
         "type": "github"
       }
     },

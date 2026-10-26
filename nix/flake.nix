@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/53a2d94ce3b88753200be9a0549d8978b031fa60";
+    llm-agents.url = "github:numtide/llm-agents.nix/ea188d2f072e0ec8d5b71245e228803672801a22";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/d9dc87b2fb08ba52930378941ff470b69d23523d";
+      url = "github:stablyai/orca/30733ac703b43f35bfa2a7c0339a09b316e69b99";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/6b636d3c35e051a1a653a236afb7f612c02a1ad3";
+      url = "github:upstash/context7/ae4871e9a8cbed00bc0f4a40b0b5b61e2d37378c";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/c12d9eda87aa5a022ee7e18ea96d8d03bfd12e96";
+      url = "github:morluto/rea/69fe86c5c7c31082d1846842b3afd00343499d75";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/9304afa97f89b30609e4c538584fb3e0cd4df013";
+      url = "github:pbakaus/impeccable/0665bd812ae0908fcab17b96fd4f840defb882d9";
       flake = false;
     };
 
