@@ -367,16 +367,38 @@ if cass and pending:
                 break
             attempts += 1
             pat = glob_escape(g) if pending[g] == "exact" else g
-            r = subprocess.run(
-                [cass_bin, "forget", "--source-glob", pat,
-                 "--apply", "--db", cass_db, "--json"],
-                capture_output=True, text=True)
+            try:
+                r = subprocess.run(
+                    [cass_bin, "forget", "--source-glob", pat,
+                     "--apply", "--db", cass_db, "--json"],
+                    capture_output=True, text=True, timeout=300)
+            except subprocess.TimeoutExpired:
+                print(f"cass forget timed out for {pat} (300s)", file=sys.stderr)
+                continue
             if r.returncode == 0:
                 forgotten += 1
                 del pending[g]
             else:
-                print(f"cass forget failed for {pat}: {r.stderr.strip()[:200]}",
-                      file=sys.stderr)
+                # cass exits non-zero when the delete committed but a
+                # post-delete index/rollup rebuild failed ("forgot N
+                # conversation(s) but failed to rebuild ..."). The forget is
+                # durable; a later cass index/doctor run repairs the index, so
+                # treat it as forgotten rather than retrying forever. stderr may
+                # carry cass log lines before the JSON, so scan them all.
+                kind = ""
+                for line in r.stderr.splitlines():
+                    try:
+                        kind = json.loads(line).get("error", {}).get("kind", "")
+                    except ValueError:
+                        continue
+                    if kind:
+                        break
+                if kind in ("archive-fts-rebuild", "archive-analytics-rebuild"):
+                    forgotten += 1
+                    del pending[g]
+                else:
+                    print(f"cass forget failed for {pat}: {r.stderr.strip()[:200]}",
+                          file=sys.stderr)
 
 if dry:
     queued = sorted(set(pending) | set(scrubbed_paths))
