@@ -87,7 +87,56 @@ Verify afterwards in `about:addons` that the extension shows the new version.
   be installed permanently via `about:addons` → gear → "Install Add-on From File".
   DevEdition runs alongside regular Firefox.
 
-## 5. Resetting extension data
+## 5. Testing on Android (`web-ext run` + adb)
+
+`web-ext run --target=firefox-android` pushes the extension to a phone over adb
+and installs it as a **temporary add-on in the app's main profile** (not a
+throwaway profile). It live-reloads on source changes while the watcher runs —
+keep the command running in the background for the whole test session (a
+`timeout` kills the watcher and the add-on disappears on the next app restart).
+
+Phone prerequisites:
+
+- USB debugging enabled; `adb devices` on the host shows the device id.
+- In the Firefox app: **Settings → Developer Tools → "Remote Debugging via USB"**.
+  If Developer Tools is missing, unlock it via Settings → About → tap the
+  Firefox logo ~5×.
+- At least one tab open in the app — web-ext can't load the extension otherwise.
+
+Run it:
+
+```
+adb devices                                   # get <device-id>
+adb shell pm list packages | grep -i mozilla  # list installed Firefox APK ids
+web-ext run -s <source-dir> --target=firefox-android \
+  --android-device=<device-id> --firefox-apk=<package>
+```
+
+Which `--firefox-apk` to use:
+
+- `org.mozilla.firefox_beta` — Beta. Accepts debug installs, matches release
+  behavior most closely. Good default.
+- `org.mozilla.fenix` — Nightly. Same debug support, and the only channel with
+  the custom add-on collection menu (persistent install of any AMO-listed
+  extension). More churn, updates ~daily.
+- `org.mozilla.fennec_fdroid` — Fennec F-Droid, also debuggable.
+- `org.mozilla.firefox` — release. Locked to the curated extension list; debug
+  installs effectively don't work.
+
+Notes:
+
+- The temp add-on is removed when the debug session ends or the app restarts —
+  expected.
+- web-ext logs `You can connect to this Android device on TCP port XXXXX` — the
+  device then shows up in desktop `about:debugging` for inspecting the
+  extension's pages/console while it runs.
+- `Old artifacts directories have been found` warning → rerun with
+  `--adb-remove-old-artifacts`.
+- Touch/pointer-event bugs usually also reproduce on desktop without a device:
+  F12 → Responsive Design Mode (Ctrl+Shift+M) → enable touch simulation. Much
+  faster loop; reach for the phone only for confirmation.
+
+## 6. Resetting extension data
 
 - Open the extension's background page console:
   `about:debugging#/runtime/this-firefox` → pick the extension → **Inspect**.
