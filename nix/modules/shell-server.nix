@@ -126,7 +126,9 @@
       la = "eza -la";
       lt = "eza --tree";
 
-      cwd = "pwd";
+      # Print the path and copy it to the local terminal's clipboard via OSC52
+      # (works over SSH; needs a terminal/mux that forwards OSC52).
+      cwd = ''printf '%s\n' "$PWD"; printf '\e]52;c;%s\a' "$(printf %s "$PWD" | base64 | tr -d '\n')"'';
     };
   };
 

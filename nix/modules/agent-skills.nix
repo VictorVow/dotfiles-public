@@ -29,12 +29,11 @@ let
   # Skills that only make sense on the desktop: they need a browser, distrobox, the
   # clipboard/GUI, the Logseq checkout, or desktop-only data stores. Left out on
   # servers (lord-ubuntu). system-update-* used to be here but their SKILL.md now
-  # resolves ~/installs vs ~/Projects/installs per host.
+  # resolves ~/installs vs ~/Projects/installs per host; same for nix-switch.
   desktopOnlySkills = [
     "chromium-live-debug" "firefox-live-debug" "firefox-extension-development" "process-firefox-synced-tabs" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
     "process-hacker-news-favourites" "search-personal-data"
-    "nix-switch"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
