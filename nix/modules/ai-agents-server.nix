@@ -555,10 +555,12 @@ in
     };
   };
 
+  xdg.configFile."opencode/cli.json".force = true;
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
     "$schema" = "https://opencode.ai/v2/cli.json";
     # Mirror of ai-agents.nix (desktop). Keep the keybinds/session block identical.
     keybinds = {
+      leader = "ctrl+x"; # default, made explicit; <leader> below refers to this
       "command.palette.show" = "ctrl+o";
       "session.verbosity.cycle"             = "<leader>v";
       "session.toggle.exploration_grouping" = "<leader>u";
@@ -567,6 +569,7 @@ in
     session = {
       thinking = "hide";
       grouping = "auto";
+      verbosity = "low";
     };
   };
 

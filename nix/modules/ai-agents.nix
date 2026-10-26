@@ -757,9 +757,13 @@ in
     };
   };
 
+  # force: the running TUI rewrites cli.json when settings change in the UI
+  # (replacing the nix symlink with a real file); don't let activation fail on it.
+  xdg.configFile."opencode/cli.json".force = true;
   xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
     "$schema" = "https://opencode.ai/v2/cli.json";
     keybinds = {
+      leader = "ctrl+x"; # default, made explicit; <leader> below refers to this
       # Rebind the command palette from the default ctrl+p to ctrl+o.
       "command.palette.show" = "ctrl+o";
       # Transcript density: <leader> is ctrl+x. No per-block folding exists
@@ -771,6 +775,8 @@ in
     session = {
       thinking = "hide";   # reasoning blocks hidden unless toggled
       grouping = "auto";   # group related tool calls into summary rows (default, explicit)
+      # TUI persists this back into cli.json when cycled via <leader>v.
+      verbosity = "low";
     };
   };
 
