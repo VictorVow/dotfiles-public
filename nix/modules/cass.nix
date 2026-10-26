@@ -26,6 +26,9 @@ let
     Unit = {
       Description = description;
       Documentation = "https://github.com/Dicklesworthstone/coding_agent_session_search";
+      # Oneshot with a long timeout: a restart on hms would kill a mid-write index run
+      # and block the switch until the new run finishes. Apply from the next fire instead.
+      X-SwitchMethod = "keep-old";
     };
     Service = {
       Type = "oneshot";

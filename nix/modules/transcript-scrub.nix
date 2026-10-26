@@ -46,6 +46,10 @@ in
     Unit = {
       Description = "Scrub leaked secrets from agent transcripts";
       OnFailure = [ "transcript-scrub-failed.service" ];
+      # Don't let hms restart a changed oneshot: sd-switch would kill an in-flight
+      # run and then block the switch until the restarted scrub finishes (≤30min).
+      # The new unit simply applies from the next timer fire.
+      X-SwitchMethod = "keep-old";
     };
     Service = {
       Type = "oneshot";
