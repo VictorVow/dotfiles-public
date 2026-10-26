@@ -4,6 +4,7 @@ description: Make a git commit of the changes from this Claude session.
 
 ---
 - `git add` only the files touched by this session. If there are no files touched by this session then give a summary of what files have been changed outside of this session and give a commit message suggestion.
+- Make a single commit by default, but split the work into multiple commits when that's more appropriate (e.g. unrelated changes, or changes that logically belong in separate commits per Conventional Commits type/scope).
 - If executed not in a git repo, then check the child directories for which contain git repos.
 - git commit messages should follow the Conventional Commit structure i.e.
 <type>[optional scope]: <description>
@@ -29,3 +30,4 @@ description: Make a git commit of the changes from this Claude session.
   - Pre-approved remotes: a example.com URL, or the `forgejo:` SSH alias (e.g. `forgejo:ruler/dotfiles.git` — the self-hosted Forgejo on lord-ubuntu, alias defined in `nix/modules/shell-apps.nix` of the installs repo).
   - If the remote is pre-approved: always `git push` after committing. Do NOT ask for permission first — pushing to this remote is pre-approved. After pushing, tell the user that the commit was pushed.
   - If the remote is not pre-approved, then don't push unless it's necessary because a pull request, workflow action or something else in our intended next steps needs the commit pushed first.
+- When finished, report to the user for each commit made: the commit hash (short), the full commit message, and whether it was pushed.
