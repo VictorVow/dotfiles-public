@@ -445,6 +445,26 @@ let
       };
     }
   );
+
+  # jq-merged into ~/.config/opencode/cli.json — the file is runtime-mutable
+  # (TUI writes back UI-changed settings), so a read-only symlink won't work.
+  # Mirror of ai-agents.nix (desktop) — keep the settings identical.
+  opencodeCliSettings = builtins.toJSON {
+    "$schema" = "https://opencode.ai/v2/cli.json";
+    keybinds = {
+      leader = "ctrl+x";
+      "command.palette.show" = "ctrl+o";
+      "session.verbosity.cycle"             = "<leader>v";
+      "session.toggle.exploration_grouping" = "<leader>u";
+      "session.toggle.thinking"             = "<leader>i";
+    };
+    session = {
+      thinking = "hide";
+      grouping = "auto";
+      verbosity = "low";
+    };
+  };
+
 in
 {
   # MCP registry — nixos only. freellmapi is wired into OpenCode directly below
@@ -555,23 +575,17 @@ in
     };
   };
 
-  xdg.configFile."opencode/cli.json".force = true;
-  xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
-    "$schema" = "https://opencode.ai/v2/cli.json";
-    # Mirror of ai-agents.nix (desktop). Keep the keybinds/session block identical.
-    keybinds = {
-      leader = "ctrl+x"; # default, made explicit; <leader> below refers to this
-      "command.palette.show" = "ctrl+o";
-      "session.verbosity.cycle"             = "<leader>v";
-      "session.toggle.exploration_grouping" = "<leader>u";
-      "session.toggle.thinking"             = "<leader>i";
-    };
-    session = {
-      thinking = "hide";
-      grouping = "auto";
-      verbosity = "low";
-    };
-  };
+  # Mirror of ai-agents.nix (desktop) — keep the settings identical.
+  home.activation.opencodeCliSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.config/opencode/cli.json"
+    if [ -L "$dest" ]; then $DRY_RUN_CMD rm "$dest"; fi
+    $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
+    tmp="$(mktemp)"
+    { [ -s "$dest" ] && cat "$dest" || echo '{}'; } \
+      | ${pkgs.jq}/bin/jq '. * ${opencodeCliSettings}' > "$tmp" \
+      && $DRY_RUN_CMD install -m 600 "$tmp" "$dest"
+    rm -f "$tmp"
+  '';
 
   xdg.configFile."opencode/AGENTS.md".text = globalContext;
 

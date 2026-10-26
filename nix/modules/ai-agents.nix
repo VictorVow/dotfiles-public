@@ -520,6 +520,29 @@ let
     };
   });
 
+  # jq-merged into ~/.config/opencode/cli.json by home.activation below —
+  # the file is runtime-mutable (TUI writes back UI-changed settings, Orca's
+  # status plugin entry), so a read-only symlink won't work.
+  opencodeCliSettings = builtins.toJSON {
+    "$schema" = "https://opencode.ai/v2/cli.json";
+    keybinds = {
+      leader = "ctrl+x"; # default, made explicit; <leader> below refers to this
+      # Rebind the command palette from the default ctrl+p to ctrl+o.
+      "command.palette.show" = "ctrl+o";
+      # Transcript density: no per-block folding exists (unlike Orca's UI) —
+      # these toggle/cycle whole classes of content.
+      "session.verbosity.cycle"             = "<leader>v"; # full → summary → minimal
+      "session.toggle.exploration_grouping" = "<leader>u"; # grouped vs flat tool calls
+      "session.toggle.thinking"             = "<leader>i"; # show/hide reasoning
+    };
+    session = {
+      thinking = "hide";   # reasoning blocks hidden unless toggled
+      grouping = "auto";   # group related tool calls into summary rows
+      # TUI persists this back when cycled via <leader>v; keep our default.
+      verbosity = "low";
+    };
+  };
+
 in
 
 # AI coding agents: Claude Code, Codex, OpenCode, and the shared MCP server registry.
@@ -757,28 +780,21 @@ in
     };
   };
 
-  # force: the running TUI rewrites cli.json when settings change in the UI
-  # (replacing the nix symlink with a real file); don't let activation fail on it.
-  xdg.configFile."opencode/cli.json".force = true;
-  xdg.configFile."opencode/cli.json".source = jsonFormat.generate "opencode-cli" {
-    "$schema" = "https://opencode.ai/v2/cli.json";
-    keybinds = {
-      leader = "ctrl+x"; # default, made explicit; <leader> below refers to this
-      # Rebind the command palette from the default ctrl+p to ctrl+o.
-      "command.palette.show" = "ctrl+o";
-      # Transcript density: <leader> is ctrl+x. No per-block folding exists
-      # (unlike Orca's UI) — these toggle/cycle whole classes of content.
-      "session.verbosity.cycle"             = "<leader>v"; # full → summary → minimal
-      "session.toggle.exploration_grouping" = "<leader>u"; # grouped vs flat tool calls
-      "session.toggle.thinking"             = "<leader>i"; # show/hide reasoning
-    };
-    session = {
-      thinking = "hide";   # reasoning blocks hidden unless toggled
-      grouping = "auto";   # group related tool calls into summary rows (default, explicit)
-      # TUI persists this back into cli.json when cycled via <leader>v.
-      verbosity = "low";
-    };
-  };
+  # cli.json is runtime-mutable — the TUI writes back settings changed in its
+  # UI (e.g. session.verbosity when cycled, Orca's tui.js plugin entry) and a
+  # read-only nix symlink would block that. Same pattern as devinSettings
+  # above: merge our keys with jq into whatever is already there instead of
+  # replacing the file, so TUI-persisted keys survive a home-manager switch.
+  home.activation.opencodeCliSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/.config/opencode/cli.json"
+    if [ -L "$dest" ]; then $DRY_RUN_CMD rm "$dest"; fi
+    $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
+    tmp="$(mktemp)"
+    { [ -s "$dest" ] && cat "$dest" || echo '{}'; } \
+      | ${pkgs.jq}/bin/jq '. * ${opencodeCliSettings}' > "$tmp" \
+      && $DRY_RUN_CMD install -m 600 "$tmp" "$dest"
+    rm -f "$tmp"
+  '';
 
   xdg.configFile."opencode/AGENTS.md".text = globalContext;
 
