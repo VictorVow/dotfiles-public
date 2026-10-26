@@ -83,9 +83,18 @@ def main():
     db = copy_db(profile_dir, args.scratch)
 
     con = sqlite3.connect(db)
+    # sanity: schema is what we expect (table + a JSON record per device)
+    cols = {r[1] for r in con.execute("PRAGMA table_info(tabs)")}
+    if not {"guid", "record", "last_modified"} <= cols:
+        sys.exit(f"error: tabs schema changed (cols={sorted(cols)}); "
+                 "update ff-synced-tabs.py for the new layout")
     devices = []
     for guid, rec, lm in con.execute("SELECT guid, record, last_modified FROM tabs"):
-        r = json.loads(rec)
+        try:
+            r = json.loads(rec)
+        except json.JSONDecodeError:
+            sys.exit(f"error: record for {guid[:8]} isn't JSON "
+                     f"(starts {rec[:60]!r}) — schema changed?")
         tabs = []
         for t in r.get("tabs", []):
             url = (t.get("urlHistory") or [""])[0]
@@ -98,6 +107,10 @@ def main():
             "last_modified": lm, "tabs": tabs,
         })
     con.close()
+
+    if not devices:
+        sys.exit("error: 0 device records in synced-tabs.db — "
+                 "is Sync signed in? Has the layout changed?")
 
     # summary: per-device + pairwise URL overlap
     print(f"{len(devices)} device records")
