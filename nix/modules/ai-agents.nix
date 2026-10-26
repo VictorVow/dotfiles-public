@@ -494,6 +494,15 @@ let
           repo   = "HKUDS/CLI-Anything";
         };
       };
+      # Ponytail (github:DietrichGebert/ponytail) — "lazy senior dev" ruleset:
+      # skills + hooks + /ponytail* commands. Declarative `/plugin marketplace
+      # add DietrichGebert/ponytail`. Mirrored on lord (ai-agents-server.nix).
+      ponytail = {
+        source = {
+          source = "github";
+          repo   = "DietrichGebert/ponytail";
+        };
+      };
     };
     enabledPlugins = {
       # Superseded by the upstream skill from the local logseq checkout (agent-skills.nix).
@@ -502,6 +511,12 @@ let
       # /cli-anything (+ :refine/:test/:validate/:list) — the 7-phase CLI generator.
       # OpenCode gets the same commands via agent-skills.nix; `cli-hub` is in uv-tools.txt.
       "cli-anything@cli-anything"       = true;
+      # Always-on ruleset + mode switching (/ponytail lite|full|ultra|off) +
+      # /ponytail-review, -audit, -debt, -gain, -help. Its hooks run `node`
+      # (nodejs_24 on both hosts). The v5.3+ "band" is Claude-Code-only and
+      # coexists with statusline.py — it writes to ~/.config/ponytail/, not
+      # the statusLine setting.
+      "ponytail@ponytail"               = true;
     };
   });
 
@@ -677,6 +692,13 @@ in
   # v1 → v2 key mapping: https://opencode.ai/v2/docs/migrate-v1/
   xdg.configFile."opencode/opencode.json".source = jsonFormat.generate "opencode-config" {
     "$schema" = "https://opencode.ai/config.json";
+    # Ponytail (github:DietrichGebert/ponytail) — lazy-senior-dev ruleset with
+    # hooks + /ponytail* commands. Declarative `opencode plugin add
+    # @dietrichgebert/ponytail`; v2 fetches the npm package at runtime into
+    # ~/.config/opencode/node_modules (left unmanaged, like Orca's TUI plugin).
+    # Mirrored on lord (ai-agents-server.nix). Not added to opencode1 — its
+    # v1 `plugin` key fetches the same package but it's a fallback runtime.
+    plugins   = [ "@dietrichgebert/ponytail" ];
     # Devin, as in opencode1's config below — served by the fork's v2 plugin
     # (plugins/devin-auth.js) until the port lands upstream (#266).
     model     = "devin/swe-2";

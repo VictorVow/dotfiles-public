@@ -428,6 +428,21 @@ let
         type = "command";
         command = "python3 ~/.claude/statusline/statusline.py";
       };
+      # Ponytail plugin (github:DietrichGebert/ponytail) — lazy-senior-dev
+      # ruleset + /ponytail* commands, same as desktop ai-agents.nix.
+      # Declarative `/plugin marketplace add` + `/plugin install`; its hooks
+      # run `node` (nodejs_24 in packages-server.nix).
+      extraKnownMarketplaces = {
+        ponytail = {
+          source = {
+            source = "github";
+            repo   = "DietrichGebert/ponytail";
+          };
+        };
+      };
+      enabledPlugins = {
+        "ponytail@ponytail" = true;
+      };
     }
   );
 in
@@ -502,6 +517,9 @@ in
   # FREELLMAPI_API_KEY.
   xdg.configFile."opencode/opencode.json".source = jsonFormat.generate "opencode-config" {
     "$schema" = "https://opencode.ai/config.json";
+    # Ponytail plugin — same as desktop ai-agents.nix; v2 fetches the npm
+    # package at runtime into ~/.config/opencode/node_modules.
+    plugins = [ "@dietrichgebert/ponytail" ];
     # Devin, as in opencode1's config below — served by the fork's v2 plugin
     # (plugins/devin-auth.js) until the port lands upstream (#266).
     model = "devin/swe-2";
