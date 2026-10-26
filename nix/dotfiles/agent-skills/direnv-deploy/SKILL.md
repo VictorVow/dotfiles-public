@@ -1,6 +1,6 @@
 ---
 name: direnv-deploy
-description: Set up (or upgrade) nix-direnv in this repo with a top-level flake.nix, optionally kept out of git via .git/info/exclude. Repos under ~/Projects/Git/1MY_REPOS/Self-Hosted share the central 1-COMMON flake instead of getting their own flake.
+description: Set up (or upgrade) nix-direnv in this repo with a top-level flake.nix, optionally kept out of git via .git/info/exclude. Repos under ~/Projects/Git/1MY_REPOS/Self-Hosted share the central 1-COMMON flake instead of getting their own flake. This should probably be the go-to skill whenever the environment lacks a particular package — put it in the repo's flake instead of installing it ad hoc.
 metadata:
   argument-hint: "[ignore|exclude|plain]"
 compatibility: "Requires nix-direnv and nix flakes"
