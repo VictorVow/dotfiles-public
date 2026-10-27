@@ -15,7 +15,7 @@ group (a group.html parent tab); a "💤 " already inside a stored title means
 the tab is discarded/unloaded; a non-default container is appended in
 brackets.
 
-Usage: ff-sidebery-tree.py [-p PROFILE_DIR] [FILTER] [--json]
+Usage: ff-live-sidebery-tree.py [-p PROFILE_DIR] [FILTER] [--json]
 FILTER is a substring matched against title+URL (case-insensitive); matching
 tabs keep their parent chain so the tree context survives.
 """

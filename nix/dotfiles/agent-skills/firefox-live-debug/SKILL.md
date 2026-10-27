@@ -43,12 +43,12 @@ This skill accepts an argument: `/firefox-live-debug real` or `/firefox-live-deb
 
 ## 2. Locate the tab first (Sidebery tree)
 
-Before touching the MCP, find the target tab without restarting anything. `scripts/ff-sidebery-tree.py` reads the live sessionstore + Sidebery's `storage.local` and prints the tree exactly as the user sees it in the sidebar — panels in order, `parentId` trees, ▸ folded groups, 💤 discarded tabs, container names.
+Before touching the MCP, find the target tab without restarting anything. `scripts/ff-live-sidebery-tree.py` reads the live sessionstore + Sidebery's `storage.local` and prints the tree exactly as the user sees it in the sidebar — panels in order, `parentId` trees, ▸ folded groups, 💤 discarded tabs, container names.
 
 ```
-ff-sidebery-tree.py <substring>        # panel → tree, matches keep parent chain
-ff-sidebery-tree.py --json             # raw nodes: id, title, url, panelId, parentId, ctx
-ff-sidebery-tree.py                    # full tree (long — 2k tabs; prefer a filter)
+ff-live-sidebery-tree.py <substring>        # panel → tree, matches keep parent chain
+ff-live-sidebery-tree.py --json             # raw nodes: id, title, url, panelId, parentId, ctx
+ff-live-sidebery-tree.py                    # full tree (long — 2k tabs; prefer a filter)
 ```
 
 `id` is the WebExtensions tab ID; match it to a page after attaching via `list_pages` on title+URL (BiDi uses different IDs). The tree is also the only way to see discarded/lazy tabs, which `list_pages` may not report.
