@@ -52,10 +52,16 @@ The user will provide a YouTube URL and optionally either an output file path or
    - A "Misc" or "Other Topics" subsection for brief tangents
 
 6. **Output** — two modes:
-   - **Logseq target given:** don't write a `.md` file. Load the `logseq-add-md-to-blocks` skill and import the summary as child blocks under the given block, following that skill's steps (the summary Markdown is the input you'd otherwise write to `/tmp/logseq-md-to-blocks/input.md`). Fit it to the target per that skill's rules: if the target block is itself titled with the video, drop the H1 since the title is already there. Then add the thumbnail as an image block under the same target:
-     ```
-     logseq upsert asset -g <graph> --path /tmp/youtube-summary.<ext> --target-uuid <uuid> --pos last-child
-     ```
+   - **Logseq target given:** don't write a `.md` file. Load the `logseq-add-md-to-blocks` skill and import the summary as child blocks under the given block, following that skill's steps (the summary Markdown is the input you'd otherwise write to `/tmp/logseq-md-to-blocks/input.md`). Fit it to the target per that skill's rules: if the target block is itself titled with the video, drop the H1 since the title is already there.
+     - If the target block is **empty** (no title text — common when the user just made a placeholder block), put the video link on the target itself and strip the link from the summary:
+       ```
+       logseq upsert block -g <graph> --uuid <uuid> --content '[Title — Channel](<URL>)'
+       ```
+       In that case the first imported block is just the date and duration, e.g. `16 Jul 2026, ~64 min` — no `**Source:**` prefix, no link (it lives on the parent block), and no parentheses (it's a standalone block, not an inline suffix).
+     - Then add the thumbnail as the first image block under the same target:
+       ```
+       logseq upsert asset -g <graph> --path /tmp/youtube-summary.<ext> --target-uuid <uuid> --pos first-child
+       ```
    - **Otherwise:** write the summary to the path the user specified. If no path was given, save it into `/tmp/youtube-summary/` as a Markdown file, then **open** it with `md path/to/file`.
 
 7. **Clean up** the temp files:
