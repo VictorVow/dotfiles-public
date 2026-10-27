@@ -82,10 +82,30 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  # RustDesk's --server spawns a `rustdesk --tray` icon once per (re)start;
-  # Tray-Launcher owns GUI access instead. hide-tray is a builtin option only
-  # loadable via a cryptographically signed custom.txt, so we pkill the
-  # process on a timer. pkill exits 1 when nothing matches — that's fine.
+  # Suppress RustDesk's own tray icon — Tray-Launcher owns GUI access instead.
+  #
+  # Why this exists:
+  # - `rustdesk --server` (user-level, spawned by the root rustdesk.service)
+  #   unconditionally runs `pkill -f 'rustdesk --tray'` then `run_me --tray`
+  #   at every start — src/core_main.rs, the `--server` arm in rustdesk 1.5.0.
+  #   There is no user-facing off switch for this.
+  # - `hide-tray` IS a real option (base::config::keys::OPTION_HIDE_TRAY,
+  #   checked in src/tray.rs::start_tray()), but it's a *builtin* setting.
+  #   Builtin settings are only populated from `custom.txt` next to the exe,
+  #   which must be ed25519-signed against RustDesk's hardcoded public key
+  #   (src/common.rs::read_custom_client) — unsigned configs are dropped.
+  #   Adding it to ~/.config/rustdesk/RustDesk2.toml does nothing (that file
+  #   only feeds user options, and gets rewritten anyway).
+  # - --server restarts periodically (should_start_server watchdog, roughly
+  #   hourly), and each restart spawns a fresh --tray, so a one-shot kill at
+  #   login is not enough — this timer re-kills every 60s.
+  # - Killing --tray does not affect remote sessions: it's purely the
+  #   StatusNotifier icon + "Open"/"Stop service" menu. The GUI window is
+  #   opened separately by Tray-Launcher.
+  # Why /usr/bin/pkill -f with an anchored full path: `pkill -f 'rustdesk
+  # --tray'` self-matches the invoking shell's own cmdline; the anchored
+  # pattern can't. pkill exits 1 when nothing matches — expected between
+  # spawns — hence SuccessExitStatus.
   systemd.user.services.rustdesk-tray-killer = {
     Unit = {
       Description = "Kill rustdesk --tray (Tray-Launcher takes over GUI access)";
