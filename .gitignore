@@ -16,3 +16,6 @@ __pycache__/
 
 # nix build output symlink
 /result
+
+# web-ext signing upload-tracking file
+.amo-upload-uuid

@@ -53,6 +53,8 @@ ff-live-sidebery-tree.py                    # full tree (long — 2k tabs; prefe
 
 `id` is the WebExtensions tab ID; match it to a page after attaching via `list_pages` on title+URL (BiDi uses different IDs). The tree is also the only way to see discarded/lazy tabs, which `list_pages` may not report.
 
+**Closing tabs needs no MCP at all:** `scripts/ff-close-tabs.py {list|close} <url>...` lists/closes live tabs by exact URL — discarded ones included — through the **FF Tab Closer** add-on (`tab-closer/`: a 2-command background script + native-messaging host, registered by `tabCloserHost` in `nix/modules/firefox.nix`; host socket `$XDG_RUNTIME_DIR/ff-tab-closer.sock`). Works while Firefox runs normally. The add-on is AMO-signed (unlisted) and installed by hand in VERTEX via `about:addons` → Install Add-on From File; to change it, bump `version` in `tab-closer/manifest.json` and re-sign per `/firefox-extension-development` (`web-ext sign --channel unlisted -s tab-closer --ignore-files host.py`).
+
 ## 3. Get the session attachable
 
 1. Run `ff-remote-debug.sh status` (add `-p NAME` for profiles other than VERTEX).

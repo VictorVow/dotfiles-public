@@ -28,6 +28,21 @@ let
     }
   '';
 
+  # Native-messaging host for the FF Tab Closer add-on (firefox-live-debug/tab-closer/):
+  # lets scripts/ff-close-tabs.py list/close live tabs by URL, unloaded ones included.
+  # The add-on itself is installed by hand (AMO-signed XPI), like every other extension.
+  tabCloserHost = pkgs.runCommand "ff-tab-closer-host" { } ''
+    install -Dm755 ${../dotfiles/agent-skills/firefox-live-debug/tab-closer/host.py} $out/bin/ff-tab-closer-host
+    substituteInPlace $out/bin/ff-tab-closer-host \
+      --replace-fail '#!/usr/bin/env python3' '#!${pkgs.python3}/bin/python3'
+    mkdir -p $out/lib/mozilla/native-messaging-hosts
+    cat > $out/lib/mozilla/native-messaging-hosts/tab_closer.json <<EOF
+    {"name": "tab_closer", "description": "FF Tab Closer agent bridge",
+     "path": "$out/bin/ff-tab-closer-host", "type": "stdio",
+     "allowed_extensions": ["ff-tab-closer@example.com"]}
+    EOF
+  '';
+
   # Settings shared by every managed profile (VERTEX + all 3 others)
   ffBase = {
     "browser.startup.page"                                       = 3;            # restore previous session
@@ -166,7 +181,7 @@ in
     # Fix: write policies.json directly to your tarball Firefox's distribution/ directory via home.file.
     package = pkgs-unstable.firefox;
     configPath = ".mozilla/firefox"; # new 2026 default: "${config.xdg.configHome}/mozilla/firefox";
-    nativeMessagingHosts = [ pkgs.kdePackages.plasma-browser-integration ];
+    nativeMessagingHosts = [ pkgs.kdePackages.plasma-browser-integration tabCloserHost ];
 
     # Cookie exceptions — populated from xsy8besa.PRIME permissions.sqlite.
     # Sites listed in Allow keep their cookies even with sanitizeOnShutdown.
