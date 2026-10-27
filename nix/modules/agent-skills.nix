@@ -46,6 +46,37 @@ let
     if hostProfile.isServer
     then lib.subtractLists desktopOnlySkills allSkillNames
     else allSkillNames;
+  # Pull the `description:` value out of a SKILL.md's frontmatter so the generated
+  # opencode command stubs show it in the `/` menu. Handles both `description: text`
+  # and folded `description: >-` (continuation lines joined with spaces). Only the
+  # leading frontmatter block is scanned, so a stray "description:" in the body
+  # can't leak in.
+  skillDesc = name:
+    let
+      text      = builtins.readFile (skillsDir + "/${name}/SKILL.md");
+      fm        = lib.head (lib.splitString "---" (lib.removePrefix "---\n" text));
+      lines     = lib.splitString "\n" fm;
+      # index of the "description:" line
+      isDesc    = l: lib.hasPrefix "description:" l;
+      idx       = lib.lists.findFirstIndex isDesc null lines;
+      dropUntil = i: lib.drop i lines;
+      first     = lib.head (dropUntil idx);
+      after     = lib.removePrefix "description:" first;
+      # folded scalar: `>-` or `>` (possibly with a trailing `-`/`+` chomper)
+      isFolded  = lib.match "^[ ]*>-?[+]?[ ]*$" after != null;
+      rest      = lib.tail (dropUntil idx);
+      # continuation lines = indented (or empty) lines right after `description:`
+      stopAt    = lib.lists.findFirstIndex (l: !(lib.hasPrefix " " l || l == "")) (lib.length rest) rest;
+      conts     = lib.take stopAt rest;
+      inline    = lib.trim after;
+      folded    = lib.trim (lib.concatStringsSep " " (map lib.trim conts));
+    in
+      if idx == null then "Run the ${name} skill"
+      else if isFolded then folded
+      else inline;
+  # YAML-safe double-quoted form of a command description (descriptions contain
+  # ": " and quotes, so they can't be emitted as plain scalars).
+  yamlQuote = s: "\"" + lib.replaceStrings [ "\\" "\"" ] [ "\\\\" "\\\"" ] s + "\"";
 in
 {
   home.file = lib.mkMerge [
@@ -148,7 +179,7 @@ in
       name  = "${dir}/commands/${name}.md";
       value.text = ''
         ---
-        description: Run the ${name} skill
+        description: ${yamlQuote (if lib.elem name skillNames then skillDesc name else "Run the ${name} skill")}
         ---
         Load the `${name}` skill with the skill tool and follow its instructions.
 
