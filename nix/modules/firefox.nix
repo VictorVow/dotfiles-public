@@ -334,6 +334,13 @@ in
       "https://z-library.sk"
     ];
 
+    # Per-site permission grants (about:preferences → Permissions exceptions).
+    # Autoplay.Allow = the site's "Audio and Video" permission set to Allow,
+    # overriding `media.autoplay.default = 5` (block all) for these origins.
+    policies.Permissions.Autoplay.Allow = [
+      "https://www.pornhub.com"
+    ];
+
     # Copied from /home/boss/.mozilla/firefox/xsy8besa.PRIME
     # to /home/boss/.mozilla/firefox/VERTEX
     profiles.VERTEX = {
