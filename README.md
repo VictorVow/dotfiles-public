@@ -68,6 +68,7 @@ installs/
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
+│   ├── migration/                 # Disk migration runbook (README) + scripts: swap lord-ubuntu's root disk, optionally converting ext4 → btrfs
 │   ├── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
 │   └── security/                  # gitleaks-based audit + in-place scrubbing of secrets leaked into agent transcripts (README = playbook)
 ├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG
@@ -139,5 +140,5 @@ ansible-playbook ansible.yml --ask-become-pass
 - [Migration to Nix](docs/archive/migration-to-nix.md) — archived: the completed apt/brew/pipx/npm → Nix migration
 - [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)
 - [lord-ubuntu Home Manager](docs/system/lord-ubuntu-home.md) — headless-server config (`./nix#lord`) sharing modules with the desktop
-- [lord-ubuntu disk migration](docs/system/lord-ubuntu-disk-migration.md) — runbook for swapping the NVMe via live `pvmove` (near-zero downtime, no config changes)
+- [lord-ubuntu disk migration](scripts/migration/README.md) — runbook + scripts for swapping the root NVMe: live `pvmove` (ext4) or the scripted btrfs conversion (Path B, used 2026-10-27)
 - [Adding a new host](docs/system/bootstrap-new-host.md) — repeatable checklist for bringing another machine into the flake
