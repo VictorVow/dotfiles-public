@@ -8,7 +8,20 @@ compatibility: "Requires the logseq CLI with a running Logseq DB graph. Everythi
 
 ---
 
-Arguments: `$ARGUMENTS`: the Logseq target (a block `[[<uuid>]]`/uuid, or a page name), optionally a graph name, optionally device guid prefixes to include (or `all` for every device; default is Fennec only), and optionally the mode, `auto` or `manual`. Ask for the target if it's missing. If no mode is given, ask (text question if AskUserQuestion is unavailable — options "Manual (Recommended)" / "Auto").
+## Arguments
+
+`$ARGUMENTS` is a space-separated list; every argument is recognised by its shape, so order doesn't matter.
+
+| Argument | Required | Values | Default |
+|----------|----------|--------|---------|
+| Logseq target | yes | `[[<uuid-or-page-name>]]` or a bare uuid | — ask if missing |
+| Graph name | no | a Logseq DB graph name | the `electron` one in `logseq server list` |
+| Device filter | no | `all`, or one/more device-guid prefixes | Fennec (phone) only |
+| Mode | no | `manual` or `auto` | ask (options "Manual (Recommended)" / "Auto") |
+
+Logseq targets must be `[[…]]`-wrapped — a bare page name (e.g. `Inbox`) is not accepted, write `[[Inbox]]` instead. `$ARGUMENTS` splits on spaces, so re-join everything between a word starting `[[` and the word ending `]]` into one target first. Any other bare word that isn't `auto`/`manual`/`all`: if it consists only of hex chars (`0-9a-f`, case-insensitive) it's a device-guid prefix; otherwise it's the graph name.
+
+Example: `/process-firefox-synced-tabs [[<uuid>]] all manual` — every device, review each tab.
 
 # Process synced tabs
 

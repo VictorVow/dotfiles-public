@@ -5,7 +5,14 @@ allowed-tools: Bash Read Write
 compatibility: "Requires the logseq CLI and a running Logseq DB graph"
 
 ---
-The user gives a block (`[[<uuid>]]` or a uuid), optionally a graph. You work on all of its children; the block itself is left alone.
+## Arguments
+
+| Argument | Required | Values | Default |
+|----------|----------|--------|---------|
+| Root block | yes | `[[<uuid>]]` or a bare uuid — you work on all of its children; the block itself is left alone | — ask if missing |
+| Graph name | no | a Logseq DB graph name | picked per `logseq-add-md-to-blocks` steps 1–2 |
+
+Example: `/logseq-enrich-blocks [[6adfc842-…]]`.
 
 The bundled script is `scripts/logseq-enrich.py` (`dump`, `index`, `related`, `apply`; run it without arguments for usage). It shares its link rules with `logseq-add-md-to-blocks` through that skill's `scripts/logseq_links.py`, and the tree printer `logseq-tree.py` lives there too (`~/.claude/skills/logseq-add-md-to-blocks/scripts/logseq-tree.py`). Scratch files go to `/tmp/logseq-enrich/<root-uuid>/`.
 

@@ -19,11 +19,17 @@ If a Self-Hosted repo genuinely needs extra tools that 1-COMMON doesn't provide 
 
 ## Mode
 
-Argument: `$ARGUMENTS`
+## Argument
 
-- `ignore` or `exclude` → **exclude** mode: `.envrc`, `flake.nix`, `flake.lock` **and** `.direnv/` are all listed in `.git/info/exclude` so they never show up in git.
-- `plain` → **plain** mode: only `.direnv/` (the nix-direnv cache holding the built packages) is listed in `.git/info/exclude`; `.envrc`, `flake.nix` and `flake.lock` are left visible to git so they can be committed. `.direnv/` is excluded in *both* modes — the difference is only which of the other files join it.
-- No argument → ask with the AskUserQuestion tool whether to exclude the direnv files from git (options: "Exclude from git" / "Plain (commit-able)"). If an existing setup is detected (below), put its current mode first and mark it "(Recommended)"; otherwise put "Exclude from git" first as the recommended option.
+One optional word in `$ARGUMENTS` picks the git-visibility mode. `.direnv/` (the nix-direnv cache holding the built packages) is excluded in *both* modes — the difference is only which of the other files join it:
+
+| Argument | Mode | In `.git/info/exclude` | Visible to git (commit-able) |
+|----------|------|------------------------|------------------------------|
+| `ignore` or `exclude` | exclude | `.envrc`, `flake.nix`, `flake.lock`, `.direnv/` | — |
+| `plain` | plain | `.direnv/` only | `.envrc`, `flake.nix`, `flake.lock` |
+| *(none)* | ask | — | — |
+
+No argument → ask with the AskUserQuestion tool whether to exclude the direnv files from git (options: "Exclude from git" / "Plain (commit-able)"). If an existing setup is detected (below), put its current mode first and mark it "(Recommended)"; otherwise put "Exclude from git" first as the recommended option.
 
 ## Detect an existing setup
 
