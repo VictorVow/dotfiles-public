@@ -33,10 +33,10 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
 2. **List the playlist:** `wsp list "<playlist>"`. It prints `{_id, playlistName, videos[]}` in playlist order, each entry `{playlistItemId, videoId, title, author, lengthSeconds, url}`. If the list is empty, report that and stop. Keep the `_id` — `remove` also accepts names but `_id` is unambiguous. `wsp playlists` lists every playlist (names, counts) if the name lookup fails.
 
-   **Logseq output (any target other than `md`): find or create the playlist group block.** All videos go under one H3 block titled with the playlist name, as the first child of the target. First look for an existing one: `logseq show -g <graph> --uuid <target-uuid>` (or the `logseq-tree.py` helper if `show` fails) and check whether a child already titled `<playlistName>` exists. If not, create it:
+   **Logseq output (any target other than `md`): find or create the playlist group block.** All videos go under one H2 block titled with the playlist name, as the first child of the target. First look for an existing one: `logseq show -g <graph> --uuid <target-uuid>` (or the `logseq-tree.py` helper if `show` fails) and check whether a child already titled `<playlistName>` exists. If not, create it:
    ```
    logseq upsert block -g <graph> --target-uuid <target-uuid> --pos first-child \
-     --content "### <playlistName>" --output json
+     --content "## <playlistName>" --output json
    ```
    Note its block id (`group id`). Re-use it across videos and across runs — never create a second group block for the same playlist. Don't collapse it; the per-video blocks inside are collapsed instead.
 
@@ -55,11 +55,11 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
       - *Markdown files (target `md`):* the summary is already `/tmp/freetube-playlist/<Playlist>/summary-<playlistItemId>.md`. Open it with `md <path>` so the user can read it (skip in auto mode).
       - *Logseq:* write the summary as child blocks under the **group block** from step 2 (not the run's target directly), following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/freetube-playlist/<Playlist>/blocks-<playlistItemId>.md` as the output file and `--pos first-child` on every command (newest summary at the top of the group). Do **not** append that skill's session-id top-level block — with `first-child` it lands as a sibling inside the group; instead append it as the last child of this summary's heading block after writing (same trick as `process-hacker-news-favourites` step 4e). Re-level with `scripts/../process-hacker-news-favourites/scripts/logseq-headings.py <graph> <heading block db id> --root-level 3 --shift 0` (title → H3, sections keep their written levels) and collapse the video's top block (`logseq upsert block -g <graph> --id <heading block db id> --update-properties '{:block/collapsed? true}'`).
 
-      **Heading levels are intentionally non-sequential.** The tree below jumps H3 → H2 — that's fine, not a bug. In Logseq the user "zooms" into a block to hide its parents, so when zoomed into a video title the sections should render at comfortable levels (H2, not tiny H4+), and when zoomed out the visual mismatch doesn't matter. Always keep each heading at the level the summary Markdown wrote it; only the video-title block gets forced to H3 to match the group heading. **Do not copy the HN digest's `--shift -1 --max-level 4`** and do not shift children at all — a positive shift squashes every section to the same small level and destroys exactly the zoom-level readability this is for.
+      **Heading levels are intentionally non-sequential.** The tree below jumps H2 → H3 → H2 — that's fine, not a bug. In Logseq the user "zooms" into a block to hide its parents, so when zoomed into a video title the sections should render at comfortable levels (H2, not tiny H4+), and when zoomed out the visual mismatch doesn't matter. Always keep each heading at the level the summary Markdown wrote it; only the video-title block gets forced to H3 to match the group heading. **Do not copy the HN digest's `--shift -1 --max-level 4`** and do not shift children at all — a positive shift squashes every section to the same small level and destroys exactly the zoom-level readability this is for.
 
       The resulting tree under the target:
       ```
-      H3  <playlistName>            ← group block, created once in step 2
+      H2  <playlistName>            ← group block, created once in step 2
           H3  <video title>         ← one per video, collapsed
               H2  Summary / topic sections…   ← H2 on purpose (zoom-in readability)
           H3  <video title>
