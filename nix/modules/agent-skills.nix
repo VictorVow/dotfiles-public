@@ -32,7 +32,7 @@ let
   # resolves ~/installs vs ~/Projects/installs per host; same for nix-switch.
   desktopOnlySkills = [
     "chromium-live-debug" "firefox-live-debug" "firefox-extension-development" "process-firefox-synced-tabs" "dbox-status" "md-open" "wl-copy"
-    "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-research"
+    "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-enrich-blocks" "logseq-research"
     "process-hacker-news-favourites" "search-personal-data"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
