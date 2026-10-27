@@ -21,6 +21,13 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
 2. **List the playlist:** `wsp list "<playlist>"`. It prints `{_id, playlistName, videos[]}` in playlist order, each entry `{playlistItemId, videoId, title, author, lengthSeconds, url}`. If the list is empty, report that and stop. Keep the `_id` — `remove` also accepts names but `_id` is unambiguous. `wsp playlists` lists every playlist (names, counts) if the name lookup fails.
 
+   **Logseq target given: find or create the playlist group block.** All videos go under one H3 block titled with the playlist name, as the first child of the target. First look for an existing one: `logseq show -g <graph> --uuid <target-uuid>` (or the `logseq-tree.py` helper if `show` fails) and check whether a child already titled `<playlistName>` exists. If not, create it:
+   ```
+   logseq upsert block -g <graph> --target-uuid <target-uuid> --pos first-child \
+     --content "### <playlistName>" --output json
+   ```
+   Note its block id (`group id`). Re-use it across videos and across runs — never create a second group block for the same playlist. Don't collapse it; the per-video blocks inside are collapsed instead.
+
 3. **Track state** in `/tmp/freetube-playlist/<Playlist>/` (one dir per playlist): after each video is written, `touch` a marker file `<playlistItemId>.done` so a re-run can skip it (`test -f`). On a fresh run, check markers against the `wsp list` output before processing each video.
 
 4. **Process the next video** (the first one in the list without a `.done` marker), then come back here for the next.
@@ -34,7 +41,16 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
    c. **Output**, depending on the mode chosen above:
       - *Markdown files:* the summary is already `/tmp/freetube-playlist/<Playlist>/summary-<playlistItemId>.md`. Open it with `md <path>` so the user can read it (skip in auto mode).
-      - *Logseq:* write the summary as child blocks under the target, following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/freetube-playlist/<Playlist>/blocks-<playlistItemId>.md` as the output file and `--pos first-child` on every command (newest summary at the top). Do **not** append that skill's session-id top-level block — with `first-child` it lands as a sibling; instead append it as the last child of this summary's heading block after writing (same trick as `process-hacker-news-favourites` step 4e). Each video is its own top block; don't group them under a shared heading. Re-level with `scripts/../process-hacker-news-favourites/scripts/logseq-headings.py <graph> <heading block db id> --root-level 3 --shift -1 --max-level 4` and collapse the top block (`logseq upsert block -g <graph> --id <heading block db id> --update-properties '{:block/collapsed? true}'`).
+      - *Logseq:* write the summary as child blocks under the **group block** from step 2 (not the run's target directly), following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/freetube-playlist/<Playlist>/blocks-<playlistItemId>.md` as the output file and `--pos first-child` on every command (newest summary at the top of the group). Do **not** append that skill's session-id top-level block — with `first-child` it lands as a sibling inside the group; instead append it as the last child of this summary's heading block after writing (same trick as `process-hacker-news-favourites` step 4e). Re-level with `scripts/../process-hacker-news-favourites/scripts/logseq-headings.py <graph> <heading block db id> --root-level 3 --shift -1 --max-level 4` and collapse the video's top block (`logseq upsert block -g <graph> --id <heading block db id> --update-properties '{:block/collapsed? true}'`).
+
+      The resulting tree under the target:
+      ```
+      H3  <playlistName>            ← group block, created once in step 2
+          H3  <video title>         ← one per video, collapsed
+              H2  Summary / topic sections…
+          H3  <video title>
+              …
+      ```
       - Skim the summary Markdown against `logseq-add-md-to-blocks` step 3's link/title rules first (no bare URLs, escape `#` as `\#`, no leading `[[`).
 
    d. If the write succeeded, `touch /tmp/freetube-playlist/<Playlist>/<playlistItemId>.done`.
