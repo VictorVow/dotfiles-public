@@ -6,7 +6,19 @@ allowed-tools: Bash Read Write Agent Skill AskUserQuestion
 compatibility: "Requires a reachable WatchSync server (tailnet), FreeTube's settings.db with watchSyncToken, yt-dlp, and — for Logseq output — the logseq CLI and a running DB graph"
 
 ---
-Arguments: `$ARGUMENTS` = the FreeTube playlist name (e.g. `Comedy`, or a playlist `_id` like `watchLater`). Remaining words: a Logseq target (a block `[[<uuid>]]`/uuid or a page name) to write summaries under, and/or the mode `auto` or `manual`. Defaults: no Logseq target → Markdown files in `/tmp/freetube-playlist/<Playlist>/`; no mode → ask with AskUserQuestion (options "Manual (Recommended)" / "Auto"). Ask for the playlist name if it's missing.
+## Arguments
+
+`$ARGUMENTS` is a space-separated list. The **playlist name comes first**; each remaining word resolves by shape: `auto`/`manual` → mode; `md`, `[[…]]`, or a bare uuid → target.
+
+| # | Argument | Required | Values | Default |
+|---|----------|----------|--------|---------|
+| 1 | Playlist name | yes | FreeTube playlist name (e.g. `Comedy`) or `_id` (e.g. `watchLater`) | — ask with AskUserQuestion if missing |
+| 2 | Target | no | `md` → Markdown files in `/tmp/freetube-playlist/<Playlist>/`; `[[<uuid-or-page-name>]]` or a bare uuid → Logseq under that block/page | `[[6ae08f34-7109-48d2-9064-d9a3775b0c2d]]` (the user's videos block) |
+| 3 | Mode | no | `manual` or `auto` | ask with AskUserQuestion (options "Manual (Recommended)" / "Auto") |
+
+Logseq targets **must be `[[…]]`-wrapped** — a bare page name (e.g. `Inbox`) is not accepted, write `[[Inbox]]` instead. Page names with spaces work (`[[My Page]]`): `$ARGUMENTS` splits on spaces, so re-join everything between a word starting `[[` and the word ending `]]` into one target first. A bare word that isn't `md`/`auto`/`manual`/uuid/part of a `[[…]]` span is an error: tell the user, don't guess.
+
+Examples: `/process-freetube-playlist Comedy` (Logseq → default block, mode asked), `/process-freetube-playlist Comedy md auto` (Markdown files, unattended), `/process-freetube-playlist watchLater [[Inbox]] manual`.
 
 The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run --script`). It prints JSON. Below, `wsp` means that script. It reads the WatchSync URL, the SYNC_TOKEN (from FreeTube's own `settings.db` — `WATCHSYNC_TOKEN` env overrides), and the `ftproc` clientId (see Notes).
 
@@ -17,11 +29,11 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
 ## Steps
 
-1. **Load `youtube-summary`** with the Skill tool, once, at the start — step 4b follows it. If a Logseq target was given, also load `logseq-add-md-to-blocks` and use its steps 1–2 to pick the graph and check the target.
+1. **Load `youtube-summary`** with the Skill tool, once, at the start — step 4b follows it. Unless the target is `md` (Markdown output), also load `logseq-add-md-to-blocks` and use its steps 1–2 to pick the graph and check the target (the default `[[6ae08f34-7109-48d2-9064-d9a3775b0c2d]]` if none was given).
 
 2. **List the playlist:** `wsp list "<playlist>"`. It prints `{_id, playlistName, videos[]}` in playlist order, each entry `{playlistItemId, videoId, title, author, lengthSeconds, url}`. If the list is empty, report that and stop. Keep the `_id` — `remove` also accepts names but `_id` is unambiguous. `wsp playlists` lists every playlist (names, counts) if the name lookup fails.
 
-   **Logseq target given: find or create the playlist group block.** All videos go under one H3 block titled with the playlist name, as the first child of the target. First look for an existing one: `logseq show -g <graph> --uuid <target-uuid>` (or the `logseq-tree.py` helper if `show` fails) and check whether a child already titled `<playlistName>` exists. If not, create it:
+   **Logseq output (any target other than `md`): find or create the playlist group block.** All videos go under one H3 block titled with the playlist name, as the first child of the target. First look for an existing one: `logseq show -g <graph> --uuid <target-uuid>` (or the `logseq-tree.py` helper if `show` fails) and check whether a child already titled `<playlistName>` exists. If not, create it:
    ```
    logseq upsert block -g <graph> --target-uuid <target-uuid> --pos first-child \
      --content "### <playlistName>" --output json
@@ -39,8 +51,8 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
       - If the video has no English subtitles at all, or yt-dlp can't reach it (deleted/private video): mark it `failed` (step 4f) and move on — don't try Invidious or other fallbacks unless the user asks.
       - Use `https://youtu.be/<videoId>` as the URL and keep the FreeTube `title` as the H1 when yt-dlp's title lookup fails or returns "NA".
 
-   c. **Output**, depending on the mode chosen above:
-      - *Markdown files:* the summary is already `/tmp/freetube-playlist/<Playlist>/summary-<playlistItemId>.md`. Open it with `md <path>` so the user can read it (skip in auto mode).
+   c. **Output**, depending on the target:
+      - *Markdown files (target `md`):* the summary is already `/tmp/freetube-playlist/<Playlist>/summary-<playlistItemId>.md`. Open it with `md <path>` so the user can read it (skip in auto mode).
       - *Logseq:* write the summary as child blocks under the **group block** from step 2 (not the run's target directly), following `logseq-add-md-to-blocks` steps 4–7 (convert, dry run, write, verify), with `/tmp/freetube-playlist/<Playlist>/blocks-<playlistItemId>.md` as the output file and `--pos first-child` on every command (newest summary at the top of the group). Do **not** append that skill's session-id top-level block — with `first-child` it lands as a sibling inside the group; instead append it as the last child of this summary's heading block after writing (same trick as `process-hacker-news-favourites` step 4e). Re-level with `scripts/../process-hacker-news-favourites/scripts/logseq-headings.py <graph> <heading block db id> --root-level 3 --shift -1 --max-level 4` and collapse the video's top block (`logseq upsert block -g <graph> --id <heading block db id> --update-properties '{:block/collapsed? true}'`).
 
       The resulting tree under the target:
