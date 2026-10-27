@@ -6,7 +6,7 @@ Usage: logseq-tree.py <graph> <block-uuid|db-id> [max-depth]
 `logseq show` fails ("fetch failed") on some blocks, e.g. ones whose breadcrumb
 contains a {{renderer :gfw ...}} macro, so this walks the tree with queries
 instead. Children are sorted by :block/order. Newlines in titles print as " ⏎ ".
-Used by the logseq-comparisons-update skill.
+Shared by the logseq-comparisons-update and logseq-enrich-blocks skills.
 """
 import json
 import subprocess

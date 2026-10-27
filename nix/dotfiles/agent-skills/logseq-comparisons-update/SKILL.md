@@ -21,14 +21,14 @@ The user points at a comparison block (`[[<uuid>]]`) in their Logseq graph. It c
 
 `<A>` and `<B>` can each be a **block reference** (`[[<uuid>]]`, shown resolved in `logseq show`) or **plain text**. The comparison often sits under one option's `Pros/Cons > Comparisons` block.
 
-Uses the `logseq` CLI. See the `logseq-cli` skill for command details. The bundled helper is `scripts/logseq-tree.py`.
+Uses the `logseq` CLI. See the `logseq-cli` skill for command details. The tree helper `logseq-tree.py` is shared from the `logseq-add-md-to-blocks` skill: `~/.claude/skills/logseq-add-md-to-blocks/scripts/logseq-tree.py` (written as `logseq-tree.py` below).
 
 ## Steps
 
 ### 1. Find the graph and the comparison block
 
 - Graph: `logseq server list` → the graph whose `owner-source` is `electron` (usually `logseq-apex`).
-- Dump the comparison block's subtree with `scripts/logseq-tree.py <graph> <uuid>`. It prints `[db-id uuid] title` per block, with refs left as raw `[[uuid]]`. `logseq show` fails ("fetch failed") on blocks whose breadcrumb contains a `{{renderer :gfw …}}` macro, so use the script when that happens.
+- Dump the comparison block's subtree with `logseq-tree.py <graph> <uuid>`. It prints `[db-id uuid] title` per block, with refs left as raw `[[uuid]]`. `logseq show` fails ("fetch failed") on blocks whose breadcrumb contains a `{{renderer :gfw …}}` macro, so use the script when that happens.
 - Note the db/ids of `For <A>`, `For <B>`, `Similarities` and `Unclear`, and whether each has only an empty placeholder child or already has content. Keep existing content and add to it; don't overwrite it.
 - Read the ancestors as well (`logseq show --uuid` prints the breadcrumb). If the comparison sits under one option's Pros/Cons, read that option's Pros, Cons and Unclear too. They are the user's main notes on it.
 
@@ -78,7 +78,7 @@ Known behaviour (CLI as of 2026-10-19, source checked at `399025dc50`):
 
 ### 5. Verify
 
-- `scripts/logseq-tree.py <graph> <comparison-uuid>`: check every section, look for duplicates and confirm no empty blocks remain.
+- `logseq-tree.py <graph> <comparison-uuid>`: check every section, look for duplicates and confirm no empty blocks remain.
 - Check that refs resolved to real references (not plain text): `logseq query -g <graph> --query '[:find (pull ?b [:db/id {:block/refs [:db/id]}]) :in $ [?b ...]]' --inputs '[[<id1> <id2>]]'`.
 - Report a short summary of each section to the user, say what came from research and what from their notes, and list anything inferred rather than verified. Mention the spurious CLI error if it happened.
 

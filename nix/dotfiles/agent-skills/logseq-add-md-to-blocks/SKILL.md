@@ -7,6 +7,14 @@ compatibility: "Requires the logseq CLI and a running Logseq DB graph"
 ---
 The user gives a destination: a block (`[[<uuid>]]` or a uuid), or a page name. Usually also a Markdown file; without one ("document this here"), you write the Markdown yourself from the conversation. Optionally a graph name.
 
+## Shared helpers
+
+Other Logseq skills (`logseq-enrich-blocks`, `logseq-comparisons-update`, `process-firefox-synced-tabs`) reuse this skill's scripts, so the rules below live in one place:
+- `scripts/logseq_links.py`: `linktext()` (the link-text rules in step 3), `relink()` (apply them to a block's leading link) and `gfw_block()` (the `--gfw` widget placement in step 4). Import it from a sibling skill's script with `sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../logseq-add-md-to-blocks/scripts"))`.
+- `scripts/logseq-tree.py <graph> <uuid|db-id> [max-depth]`: prints a subtree with db-ids, uuids and full titles, using queries. Use it when `logseq show` fails with `fetch failed` (e.g. on blocks with a gfw macro in the breadcrumb).
+
+When a rule here changes, change `logseq_links.py` to match.
+
 ## Steps
 
 1. **Pick the graph.** If the user named one, use it. Otherwise (no graph named, or "current graph"), run `logseq server list` and use the graph whose `owner-source` is `electron` (the one open in the desktop app). Only ask if there's more than one such graph, or none.
@@ -19,7 +27,7 @@ The user gives a destination: a block (`[[<uuid>]]` or a uuid), or a page name. 
 
    When the content comes from the conversation, re-check each claim before writing it down, especially config keys, flags, paths and anything that was a guess or recalled from memory: check the current docs, `--help`, or the files themselves. Notes outlive the conversation, so a wrong claim does more damage there. If re-checking shows something you told the user was wrong, say so in your report.
 
-   Write every link as a Markdown link whose text is the target's own title, not a bare URL: the issue or PR title for an issue or PR, the repo name for a repo, the page title for anything else, without the site-name suffix (`Policies | OpenCode` → `Policies`, `Models.dev - An open-source database of AI models` → `Models.dev`). Look titles up rather than paraphrasing them, e.g. `gh issue view N -R owner/repo --json title -q .title` (`gh pr view` for PRs). Put your own notes (why it matters, how it relates) after the link. With `--gfw`, don't write anything the widget already shows: no open/closed/merged state, and for repos no stars, last-commit age or issue/PR counts. For example: `- [Plan mode in chat UI](https://github.com/stablyai/orca/issues/11548) — user request from Discord`. Refer to issues and PRs as "PR 123" or "issue 123", never `#123`, which Logseq turns into a tag. Titles need two fixes before they go in link text: drop issue-template prefixes like `[Feature]:` or `[Bug]:` (a `]` inside the link text stops `--gfw` from recognising the link, and a leading `[[` becomes a page link), and escape any `#` in the title as `\#`.
+   Write every link as a Markdown link whose text is the target's own title, not a bare URL: the issue or PR title for an issue or PR, the repo name for a repo, the page title for anything else, without the site-name suffix (`Policies | OpenCode` → `Policies`, `Models.dev - An open-source database of AI models` → `Models.dev`). Look titles up rather than paraphrasing them, e.g. `gh issue view N -R owner/repo --json title -q .title` (`gh pr view` for PRs). Put your own notes (why it matters, how it relates) after the link. With `--gfw`, don't write anything the widget already shows: no open/closed/merged state, and for repos no stars, last-commit age or issue/PR counts. For example: `- [Plan mode in chat UI](https://github.com/stablyai/orca/issues/11548) — user request from Discord`. Refer to issues and PRs as "PR 123" or "issue 123", never `#123`, which Logseq turns into a tag. Titles need two fixes before they go in link text: drop issue-template prefixes like `[Feature]:` or `[Bug]:` (a `]` inside the link text stops `--gfw` from recognising the link, and a leading `[[` becomes a page link), and escape any `#` in the title as `\#`. `linktext()` in `scripts/logseq_links.py` implements these rules; run a title through it when unsure.
 
 4. **Convert** the Markdown into a block outline:
    ```

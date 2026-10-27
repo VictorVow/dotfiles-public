@@ -14,7 +14,8 @@ Options:
           last-commit age and open issue/PR counts, so don't repeat those in
           the text). For an issue, pull request or branch link (`/issues/N`,
           `/pull/N`, `/tree/<branch>`) it goes at the start of the first line,
-          after any heading `#`s, followed by one space.
+          after any heading `#`s, followed by one space. The logic lives in
+          logseq_links.py (shared with other Logseq skills).
 
 Mapping:
   - Headings become parent blocks; each heading nests under the nearest
@@ -34,16 +35,12 @@ Mapping:
 
 import re
 import sys
-from urllib.parse import quote
+
+from logseq_links import gfw_block
 
 LIST_RE = re.compile(r'^( *)(?:[-*+] |\d+[.)] )(.*)$')
 HEADING_RE = re.compile(r'^(#{1,6}) ')
 HR_RE = re.compile(r'^(?:-{3,}|\*{3,}|_{3,})\s*$')
-GH_LEAD_RE = re.compile(
-    r'^(#{1,6} )?(?:\[[^\]]*\]\(|<)?(https://github\.com/[\w.-]+/[\w.-]+[^\s)>]*)')
-# Links the plugin renders as an inline (non-repo) widget.
-GH_INLINE_RE = re.compile(
-    r'^https://github\.com/[^/]+/[^/]+/(?:issues/\d+|pull/\d+|tree/[^/?#]+)')
 
 
 def convert(text, gfw=False):
@@ -51,14 +48,8 @@ def convert(text, gfw=False):
     out = []
 
     def emit(depth, block):
-        m = GH_LEAD_RE.match(block) if gfw else None
-        if m:
-            macro = '{{renderer :gfw, ' + quote(m.group(2), safe='') + '}}'
-            if GH_INLINE_RE.match(m.group(2)):
-                prefix = m.group(1) or ''
-                block = prefix + macro + ' ' + block[len(prefix):]
-            else:
-                block += '\n' + macro
+        if gfw:
+            block = gfw_block(block)
         first, *rest = block.split('\n')
         out.append('  ' * depth + '- ' + first)
         out.extend('  ' * depth + '  ' + r for r in rest)

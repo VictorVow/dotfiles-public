@@ -9,8 +9,13 @@
 # Prints a per-device summary (name, guid, sync age, tab counts, cross-device
 # URL overlap) and writes a resumable queue JSON the skill then processes.
 # Reading is side-effect free; nothing here dismisses rows.
-import json, os, re, shutil, sqlite3, sys, tempfile
-from urllib.parse import urlparse, parse_qs, unquote_plus
+import json, os, shutil, sqlite3, sys, tempfile
+
+# linktext() is shared with the other Logseq skills
+# (sibling skill dir: works from the repo and from ~/.claude/skills; abspath, not realpath)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "../../logseq-add-md-to-blocks/scripts"))
+from logseq_links import linktext
 
 FF_BASE = os.environ.get("FF_BASE", os.path.expanduser("~/.mozilla/firefox"))
 
@@ -23,43 +28,6 @@ def copy_db(profile_dir, scratch):
         if os.path.exists(src + ext):
             shutil.copy(src + ext, dst + ext)
     return dst
-
-# suffixes that identify the site, not the page — strip " - X"/" | X" tails
-_SITE_TAILS = re.compile(
-    r"\s*(?:\||-|·|—|–)\s*(?:"
-    r"GitHub|GitLab|Brave Search|Google Search|Hacker News|YouTube|"
-    r"Reddit|Wikipedia|Stack Overflow|Stack Exchange|Amazon|Medium|"
-    r"PCGamingWiki PCGW|Nexus [Mm]ods|Royal Road|BBC|Reuters|"
-    r"AlternativeTo|Product Hunt|Wikibooks|DevDocs|MDN Web Docs"
-    r")[^-|·—–]*$")
-
-def linktext(title, url):
-    """Title for the markdown link, cleaned per logseq-add-md-to-blocks rules."""
-    t = (title or "").strip()
-    if " | " in t:
-        t = t.rsplit(" | ", 1)[0].strip()
-    if t.startswith("GitHub - "):
-        t = t[len("GitHub - "):]
-    prev = None
-    while prev != t:
-        prev = t
-        t = _SITE_TAILS.sub("", t).strip()
-    p = urlparse(url)
-    if not t:
-        for key in ("q", "query", "text", "search"):
-            qs = parse_qs(p.query)
-            if key in qs and qs[key][0]:
-                t = unquote_plus(qs[key][0]); break
-        if not t:
-            t = p.netloc + (p.path[:40] if p.path != "/" else "")
-    # amazon search links: use the k= param
-    if "amazon." in p.netloc and p.path in ("/s", "/gp/search"):
-        k = parse_qs(p.query).get("k")
-        if k: t = "Amazon: " + unquote_plus(k[0])
-    t = t.replace("#", "\\#")
-    if t.startswith("[["): t = t[2:]
-    t = t.replace("]", ")")
-    return t
 
 def main():
     import argparse
