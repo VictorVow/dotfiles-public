@@ -253,6 +253,8 @@ in
                  # Shell integration (auto-switch on cd) is set up in shell.nix
     typescript # TypeScript compiler
     deno         # Secure JavaScript/TypeScript runtime (replaces npm install -g deno)
+    web-ext      # Firefox WebExtension build/run/sign CLI — used by the
+                 # firefox-extension-development skill (AMO signing, `web-ext run`)
     # pnpm / yarn for the global supply-chain hardening rc files written in
     # programs.nix (~/.config/pnpm/rc, ~/.yarnrc.yml).
     pnpm         # Tracks newest packaged pnpm. The age-pinned flake.lock is
