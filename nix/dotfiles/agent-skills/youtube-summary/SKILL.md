@@ -10,11 +10,13 @@ The user will provide a YouTube URL and optionally either an output file path or
 
 ## Steps
 
-1. **Get the video title:**
+1. **Get the video title and upload date:**
 
    ```
-   yt-dlp --print title "<URL>"
+   yt-dlp --print title --print upload_date "<URL>"
    ```
+
+   The second line of output is the upload date as `YYYYMMDD` — render it in the summary as e.g. `15 Mar 2024`. If it's `NA` or empty, omit the date.
 
 2. **Download subtitles** — prefer manual subs over auto-generated:
 
@@ -36,7 +38,7 @@ The user will provide a YouTube URL and optionally either an output file path or
 
 4. **Summarise** the transcript into a Markdown document with:
    - H1: the video title
-   - **Source:** link to the video
+   - **Source:** link to the video, with the channel name and the publish date (e.g. `**Source:** [Title — Channel](url) (12 Jan 2024, ~7 min)`)
    - **Summary** section: a short (2–4 sentence) overview
    - Subsections (H3) for each major topic discussed, with a paragraph each
    - A "Misc" or "Other Topics" subsection for brief tangents
