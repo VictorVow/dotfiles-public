@@ -40,7 +40,7 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
    ```
    Note its block id (`group id`). Re-use it across videos and across runs — never create a second group block for the same playlist. Don't collapse it; the per-video blocks inside are collapsed instead.
 
-3. **Track state** in `/tmp/freetube-playlist/<Playlist>/` (one dir per playlist): after each video is written, `touch` a marker file `<playlistItemId>.done` so a re-run can skip it (`test -f`). On a fresh run, check markers against the `wsp list` output before processing each video.
+3. **Track state** in `/tmp/freetube-playlist/<Playlist>/` (one dir per playlist): after each video is written, `touch` a marker file `<playlistItemId>.done` so a re-run can skip it (`test -f`). Skipped videos get `<playlistItemId>.skipped` (see 4b) — re-runs should re-attempt them only if the user asks, since the underlying cause (no subs, unreachable) rarely fixes itself. On a fresh run, check markers against the `wsp list` output before processing each video.
 
 4. **Process the next video** (the first one in the list without a `.done` marker), then come back here for the next.
 
@@ -48,7 +48,7 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
    b. **Summarise** following `youtube-summary` steps 1–4 (yt-dlp title → subtitles → clean transcript → summary Markdown). Adapt it like this:
       - Work in `/tmp/freetube-playlist/<Playlist>/`: write the `.vtt` and `summary-<playlistItemId>.md` there, not `/tmp/youtube-summary*`.
-      - If the video has no English subtitles at all, or yt-dlp can't reach it (deleted/private video): mark it `failed` (step 4f) and move on — don't try Invidious or other fallbacks unless the user asks.
+      - If there's no summary to be had — no English subtitles or auto-captions, or yt-dlp can't reach it (deleted/private video): **skip it**. Write a `<playlistItemId>.skipped` marker file containing the one-line reason (e.g. `no English subtitles`, `video unreachable`), write **nothing** to the target (no stub or placeholder block — a summary-shaped block without a summary is worse than none), and **leave it in the playlist**. Move on to the next video. Don't try Invidious or other fallbacks unless the user asks.
       - Use `https://youtu.be/<videoId>` as the URL and keep the FreeTube `title` as the H1 when yt-dlp's title lookup fails or returns "NA".
 
    c. **Output**, depending on the target:
@@ -77,9 +77,9 @@ The helper is `scripts/watchsync-playlist.py` (run it directly; it's a `uv run -
 
       If the run ends at this gate without an answer, the marker file means the next run starts at this same gate with the same video, not by re-summarising it. Detect that case: a `.done` marker whose video is **still in** the playlist means "summarised, awaiting review" — go straight to the gate.
 
-   f. **Remove the video:** `wsp remove "<_id>" <playlistItemId>`. Check `ok: true` in the output — if `warning` is set, retry once; if it still fails, tell the user and continue (the summary is safe; the video just stays in the playlist). On any other failure in b–f: record it (a `<playlistItemId>.failed` marker file with the reason), tell the user in one line, and continue with the next video. `failed` markers are retried only if the user asks.
+   f. **Remove the video:** `wsp remove "<_id>" <playlistItemId>` — only for videos whose summary was actually written (never for `.skipped` ones). Check `ok: true` in the output — if `warning` is set, retry once; if it still fails, tell the user and continue (the summary is safe; the video just stays in the playlist). On any other failure in b–f: record it (a `<playlistItemId>.failed` marker file with the reason), tell the user in one line, and continue with the next video. `failed` markers are retried only if the user asks.
 
-5. **Report** (end of an auto run, or when the user stops a manual one): each video processed (title → file or Logseq target), how many videos remain in the playlist (`wsp list "<_id>"` count), anything marked `failed`, and any videos the user chose to keep.
+5. **Report** (end of an auto run, or when the user stops a manual one): each video processed (title → file or Logseq target), each **skipped** video (title + the reason from its `.skipped` marker — these stayed in the playlist and can be retried by deleting the marker), how many videos remain in the playlist (`wsp list "<_id>"` count), anything marked `failed`, and any videos the user chose to keep.
 
 6. **Commit (auto mode only):** if the run's mode was `auto`, finish by loading the `git-commit` skill and committing any repo changes this session made (skip if there are none). In `manual` mode don't commit unless the user asks.
 
