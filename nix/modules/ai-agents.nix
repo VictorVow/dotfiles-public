@@ -539,6 +539,7 @@ let
       thinking = "hide";   # reasoning blocks hidden unless toggled
       grouping = "auto";   # group related tool calls into summary rows
       # TUI persists this back when cycled via <leader>v; keep our default.
+      # The turn-verbosity plugin flips it to "high" during each turn.
       verbosity = "low";
     };
   };
@@ -871,6 +872,13 @@ in
   # has the v2 default export the upstream tarball lacks (#266).
   xdg.configFile."opencode/plugins/devin-auth.js".text =
     ''export { default } from "${devinAuth}/index.mjs"'';
+  # Expand the transcript while a turn runs, fold it back when idle (see file).
+  # index.js imports by store path: the symlinked file resolves "./" from its
+  # store realpath, not this directory.
+  xdg.configFile."opencode/plugins/turn-verbosity/tui.js".source =
+    ../dotfiles/opencode-plugins/turn-verbosity-tui.js;
+  xdg.configFile."opencode/plugins/turn-verbosity/index.js".text =
+    ''export { default } from "${../dotfiles/opencode-plugins/turn-verbosity-tui.js}"'';
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
     ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
