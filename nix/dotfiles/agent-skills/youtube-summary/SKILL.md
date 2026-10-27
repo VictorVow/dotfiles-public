@@ -1,12 +1,12 @@
 ---
 name: youtube-summary
-description: Summarise a YouTube video using yt-dlp subtitles.
+description: Summarise a YouTube video using yt-dlp subtitles, written to a Markdown file or into Logseq under a given block.
 allowed-tools: Bash Write Read Edit
-compatibility: "Requires yt-dlp"
+compatibility: "Requires yt-dlp; the Logseq output mode also requires the logseq CLI and a running Logseq DB graph"
 
 ---
 
-The user will provide a YouTube URL and optionally an output file path.
+The user will provide a YouTube URL and optionally either an output file path or a Logseq block target (`[[<uuid>]]` or a bare uuid), e.g. `/youtube-summary <url> [[6929822d-455e-4a81-8e9c-6dfdac0292c5]]`.
 
 ## Steps
 
@@ -41,11 +41,11 @@ The user will provide a YouTube URL and optionally an output file path.
    - Subsections (H3) for each major topic discussed, with a paragraph each
    - A "Misc" or "Other Topics" subsection for brief tangents
 
-5. **Write** the summary to the path the user specified. If no path was given, then save it into `/tmp/youtube-summary/` as a Markdown file.
+5. **Output** — two modes:
+   - **Logseq target given:** don't write a `.md` file. Load the `logseq-add-md-to-blocks` skill and import the summary as child blocks under the given block, following that skill's steps (the summary Markdown is the input you'd otherwise write to `/tmp/logseq-md-to-blocks/input.md`). Fit it to the target per that skill's rules: if the target block is itself titled with the video, drop the H1 since the title is already there.
+   - **Otherwise:** write the summary to the path the user specified. If no path was given, save it into `/tmp/youtube-summary/` as a Markdown file, then **open** it with `md path/to/file`.
 
-6. **Open** the Markdown file using `md path/to/file`
-
-7. **Clean up** the temp files:
+6. **Clean up** the temp files:
    ```
    rm -f /tmp/youtube-summary*.vtt
    ```
