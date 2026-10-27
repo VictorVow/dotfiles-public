@@ -105,6 +105,32 @@
     fi
   '';
 
+  # KWin window rule: Firefox's Picture-in-Picture window gets "Keep Above
+  # Windows" automatically. kwinrulesrc is managed by KDE (the rules KCM
+  # writes to it), so the rule is merged idempotently via kwriteconfig6
+  # rather than owned as a whole file. Same shape as the existing FreeTube
+  # PiP rule already in kwinrulesrc.
+  home.activation.firefoxPipKeepAbove = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rc="$HOME/.config/kwinrulesrc"
+    if ! { [ -f "$rc" ] && /usr/bin/grep -qxF 'title=Picture-in-Picture' "$rc"; }; then
+      uuid=$(/usr/bin/cat /proc/sys/kernel/random/uuid)
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key Description "Firefox Picture-in-Picture keep above"
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key above true
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key aboverule 2
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key title "Picture-in-Picture"
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key titlematch 2
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key wmclass firefox
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group "$uuid" --key wmclassmatch 1
+      rules=$(/usr/bin/kreadconfig6 --file kwinrulesrc --group General --key rules)
+      if [ -n "$rules" ]; then rules="$rules,$uuid"; else rules="$uuid"; fi
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group General --key rules "$rules"
+      run /usr/bin/kwriteconfig6 --file kwinrulesrc --group General --key count "$(/usr/bin/awk -F, '{print NF}' <<<"$rules")"
+      # Apply now instead of waiting for a re-login; ignore failure when no
+      # session bus is around (e.g. activation over SSH).
+      run /usr/bin/busctl --user call org.kde.KWin /KWin org.kde.KWin reconfigure || true
+    fi
+  '';
+
   # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
   # convention into `gio launch`.
   #
