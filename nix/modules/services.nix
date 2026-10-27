@@ -82,6 +82,34 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
+  # RustDesk's --server spawns a `rustdesk --tray` icon once per (re)start;
+  # Tray-Launcher owns GUI access instead. hide-tray is a builtin option only
+  # loadable via a cryptographically signed custom.txt, so we pkill the
+  # process on a timer. pkill exits 1 when nothing matches — that's fine.
+  systemd.user.services.rustdesk-tray-killer = {
+    Unit = {
+      Description = "Kill rustdesk --tray (Tray-Launcher takes over GUI access)";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "/usr/bin/pkill -f '^/usr/share/rustdesk/rustdesk --tray'";
+      SuccessExitStatus = "0 1";
+    };
+  };
+  systemd.user.timers.rustdesk-tray-killer = {
+    Unit = {
+      Description = "Kill rustdesk --tray periodically (it respawns from --server)";
+      After = [ "graphical-session.target" ];
+    };
+    Timer = {
+      OnBootSec = "30";
+      OnUnitActiveSec = "60";
+      Persistent = false;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
   # Daily unattended update-all. apt + the chromium-suid-sandbox restart are
   # NOPASSWD via /etc/sudoers.d/update-all (ansible.yml); update.sh uses
   # `sudo -n` without a TTY, so a missing rule fails the step instead of
