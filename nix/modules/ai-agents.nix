@@ -110,29 +110,22 @@ let
     inherit hash;
   };
   cursorAuth = magpiePkg "cursor" "0.2.19" "sha256-+JKtCYQ5D0de3+7b6x1tmDEI174F9eFA4oRV9Ce4ynQ=";
-  # Both OpenCodes' devin plugin is my fork's branch until its fixes land
-  # upstream: the OpenCode 2 port (issue magpie-community/plugins#266; the
-  # npm tarball has no v2 default export) and metadata.cli saved as the
-  # string "true" (devin-v1-cli-string, on top of the port) — OpenCode 1
-  # drops an auth.json entry with a non-string metadata value, and its
-  # requests then 404 at the plugin's placeholder baseURL.
+  # Both fixes my fork carried are now on magpie-community/plugins main, so the
+  # pin is the upstream commit that merged the second one (#397, OpenCode 2
+  # support — the npm tarball had no v2 default export). #396 (v1 metadata.cli
+  # as a string) shipped earlier in npm 0.1.24.
   #
-  # Unpin once BOTH of these are merged into magpie-community/plugins main:
-  #   - https://github.com/magpie-community/plugins/pull/396 (v1 metadata.cli fix)
-  #   - https://github.com/magpie-community/plugins/pull/397 (OpenCode 2 support)
-  # and a devin release after 0.1.23 that contains both is on npm (publish.yml
-  # only publishes when packages/devin/package.json's version is bumped on main;
-  # check `npm view @magpie-community/opencode-devin-auth versions`). Then
-  # replace devinAuthSrc + devinAuth below with the npm tarball:
+  # Switch to the npm tarball once a release containing #397 exists (0.1.25
+  # predates it; publish.yml only fires when packages/devin/package.json bumps
+  # on main — check `npm view @magpie-community/opencode-devin-auth versions`):
   #   devinAuth = magpiePkg "devin" "<that version>" "<hash>";
   # (hash: `nix store prefetch-file --unpack <tarball url>`, or build once with
   # lib.fakeHash), and make the same change in ai-agents-server.nix.
-  # If only one PR merges, keep the fork pin: the other fix is still fork-only.
   devinAuthSrc = pkgs.fetchFromGitHub {
-    owner  = "VictorVow";
-    repo   = "magpie-plugins";
-    rev    = "31a3f918e889fb381ac915d99553dbaf55be5696"; # devin-v1-cli-string
-    hash   = "sha256-FIEyZJkxsAW2TYofojRGOi9HLpHkwneViTBffeSYMxk=";
+    owner  = "magpie-community";
+    repo   = "plugins";
+    rev    = "9dbde4573cccbdf3d5e76e3dbb87894b6c3659d3"; # merge of #397
+    hash   = "sha256-Qu7S6IOnKWXMKI++7PrlC6FTf5fs5j0/KndLkLXlO7g=";
   };
   devinAuth = "${devinAuthSrc}/packages/devin";
 
