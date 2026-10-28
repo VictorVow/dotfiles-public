@@ -6,4 +6,4 @@ When you see a `> Decision`, `> Summary` or similar quote block near the top of 
 
 If asked to change config/packages/system use `rg` (Ripgrep) to search for it in this repository, as this will likely be the canonical place to make changes. 
 
-Self-hosted services (Headscale, Forgejo, Stremio, Calibre, RSS, etc.) and the servers they run on (lord-ubuntu, VPSes) are NOT managed here — they live in separate repos under `/home/boss/Projects/Git/1MY_REPOS/Self-Hosted` (on `boss` host) or `/home/lord/Projects/Self-Hosted/` on `lord-ubuntu` server). When troubleshooting or looking for a self-hosted service/tool, start with that directory's `README.md` (repo map).
+Self-hosted services (Headscale, Forgejo, Stremio, Calibre, RSS, etc.) and the servers they run on (lord-ubuntu, VPSes) are NOT managed here — they live in separate repos  on `lord-ubuntu` server within `/home/lord/Projects/Self-Hosted/`). When troubleshooting or looking for a self-hosted service/tool, start with that directory's `README.md` (repo map).
