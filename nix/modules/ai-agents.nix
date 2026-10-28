@@ -243,11 +243,7 @@ let
 
   # Global agent instructions, shared by Claude Code (~/.claude/CLAUDE.md) and
   # OpenCode (~/.config/opencode/AGENTS.md).
-  globalContext = ''
-    When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
-
-    To find something in the user's own data (documents, Logseq notes, Calibre highlights, Firefox tabs, past agent sessions), use the `search-personal-data` skill; its map of stores and commands is ~/Projects/installs/docs/system/data-stores.md.
-  '';
+  globalContext = builtins.readFile ../dotfiles/agent-context/global.md;
 
   # Written as a mutable file (not a Nix-store symlink) so Claude Code can
   # modify it at runtime — e.g. the /effort slash command rewrites this file.

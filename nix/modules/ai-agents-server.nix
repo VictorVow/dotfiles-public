@@ -280,9 +280,8 @@ let
     SECRET_GUARD_INTERPRETERS = builtins.toJSON secretGuardInterpreters;
   };
 
-  globalContext = ''
-    When creating MD files do not use hard wrapping, reflow the text. If you're editing an MD file and notice hard wrapping then ask the user if they want it removed also.
-  '';
+  # Same file as desktop — path relative to nix/modules/.
+  globalContext = builtins.readFile ../dotfiles/agent-context/global.md;
 
   # Same writable-settings trick as desktop (home-manager#8654): install -m 644
   # so Claude Code can rewrite at runtime, and carry over Orca's managed hooks
