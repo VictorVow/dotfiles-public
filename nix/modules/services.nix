@@ -19,18 +19,6 @@ let
       fi
     done
   '';
-  # OnFailure handler for update-all. update.sh exits 1 when any step failed
-  # (and also on a crash), so pull the "Some steps failed: …" summary line out
-  # of that run's journal; fall back to a generic message for a crash.
-  updateAllFailedNotify = pkgs.writeShellScript "update-all-failed-notify" ''
-    failed=$(/usr/bin/journalctl --user -u update-all.service --invocation=0 -o cat \
-      | ${pkgs.gnugrep}/bin/grep -o 'Some steps failed: .*' \
-      | ${pkgs.gnused}/bin/sed 's/\x1b\[[0-9;]*m//g' | ${pkgs.coreutils}/bin/tail -1)
-    ${pkgs.libnotify}/bin/notify-send -u critical -a update-all "update-all failed" \
-      "''${failed:-update.sh exited with an error}
-
-journalctl --user -u update-all"
-  '';
 in
 {
   systemd.user.services.ollama = {
@@ -133,15 +121,14 @@ in
   # Daily unattended update-all. apt + the chromium-suid-sandbox restart are
   # NOPASSWD via /etc/sudoers.d/update-all (ansible.yml); update.sh uses
   # `sudo -n` without a TTY, so a missing rule fails the step instead of
-  # hanging. update.sh exits 1 if any step failed, which triggers the
-  # update-all-failed notification. Output goes to the journal
-  # and ~/.local/state/update-all/update.log.
+  # hanging. The run posts its full output to the Notifications hub itself
+  # (source `update-all`, high priority on failure) — no OnFailure unit.
+  # Output goes to the journal and ~/.local/state/update-all/update.log.
   systemd.user.services.update-all = {
     Unit = {
       Description = "Update all package managers (update.sh)";
       Wants = [ "network-online.target" ];
       After = [ "network-online.target" ];
-      OnFailure = [ "update-all-failed.service" ];
       # The run itself does `home-manager switch`; never let that switch
       # restart/stop this unit mid-run.
       X-SwitchMethod = "keep-old";
@@ -151,13 +138,6 @@ in
       ExecStart = "${config.home.homeDirectory}/Projects/installs/update.sh";
       Nice = 10;
       IOSchedulingClass = "idle";
-    };
-  };
-  systemd.user.services.update-all-failed = {
-    Unit.Description = "Notify that update-all failed";
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${updateAllFailedNotify}";
     };
   };
   systemd.user.timers.update-all = {

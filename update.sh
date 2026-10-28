@@ -24,7 +24,9 @@
 #   systemctl --user start update-all.service   # trigger a background run now
 #
 # Every run is logged to ~/.local/state/update-all/update.log (5 MB cap, then
-# rotated to update.log.1).
+# rotated to update.log.1) and posted to the Notifications hub (source
+# `update-all`; full output, high priority on failure — routes live in
+# Self-Hosted/Notifications/notifications.yml).
 
 # shellcheck source-path=SCRIPTDIR
 set -euo pipefail
@@ -106,6 +108,19 @@ _rotate_log() {
 
 _log_hint() { echo -e "\n\033[0;34m[INFO]\033[0m  Full log: $UPDATE_LOG"; }
 
+# Post the run's output to the Notifications hub (source `update-all`).
+# $1 = title, $2 = ntfy priority. Silent no-op when `notify` isn't installed or
+# the hub is unreachable — the local run never depends on it.
+_notify_hub() {
+  local title="$1" priority="$2"
+  local raw_log="$3" body
+  $DRY_RUN && { info "[dry-run] Would post run output to the Notifications hub ($title)."; return 0; }
+  body=$(tail -c 60000 "$raw_log" | _clean_log)
+  command -v notify &>/dev/null || return 0
+  printf '%s' "$body" | notify -s update-all -t "$title" -p "$priority" -T incoming_envelope \
+    >/dev/null 2>&1 || warn "Could not post run output to the Notifications hub."
+}
+
 if [[ -z "${UPDATE_SH_LOGGING:-}" ]]; then
   export UPDATE_SH_LOGGING=1
   _rotate_log
@@ -117,12 +132,19 @@ if [[ -z "${UPDATE_SH_LOGGING:-}" ]]; then
     script -q -e -c "$(printf '%q ' "$0" "$@")" "$raw_log" || rc=$?
     # script(1) adds its own "Script started/done" header/footer lines.
     _clean_log < "$raw_log" | grep -v '^Script \(started\|done\) on ' >> "$UPDATE_LOG"
+    if (( rc == 0 )); then
+      _notify_hub "update-all OK" low "$raw_log"
+    else
+      _notify_hub "update-all FAILED" high "$raw_log"
+    fi
     rm -f "$raw_log"
     _log_hint
     exit "$rc"
   else
-    # Non-interactive (cron, piped): tee a cleaned copy into the log.
-    exec > >(tee >(_clean_log >> "$UPDATE_LOG")) 2>&1
+    # Non-interactive (cron, piped): tee a cleaned copy into the cumulative
+    # log AND a per-run file the hub post is built from at the end.
+    run_log=$(mktemp)
+    exec > >(tee >(_clean_log >> "$UPDATE_LOG") >(_clean_log > "$run_log")) 2>&1
     trap _log_hint EXIT
   fi
 fi
@@ -312,6 +334,17 @@ else
       success "docs/home-manager-news.md updated."
     fi
   fi
+fi
+
+# Post the run to the Notifications hub (non-interactive runs only — the
+# interactive script(1) wrapper already posted before exiting).
+if [[ -n "${run_log:-}" && -f "$run_log" ]]; then
+  if [[ ${#FAILED[@]} -gt 0 ]]; then
+    _notify_hub "update-all FAILED: ${FAILED[*]}" high "$run_log"
+  else
+    _notify_hub "update-all OK" low "$run_log"
+  fi
+  rm -f "$run_log"
 fi
 
 # Exit with failure if any step failed
