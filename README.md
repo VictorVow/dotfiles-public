@@ -36,7 +36,7 @@ installs/
 │   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
-│   │   ├── claude-hooks/     # Claude Code hook scripts (notify-waiting.sh, etc.)
+│   │   ├── claude-hooks/     # Claude Code hook scripts (bash-secret-guard.py)
 │   │   ├── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
 │   │   └── agent-skills/    # Own skills in the Agent Skills spec format (agentskills.io), one folder per skill (SKILL.md + helpers); auto-linked by agent-skills.nix
 │   └── modules/

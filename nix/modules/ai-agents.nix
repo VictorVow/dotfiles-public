@@ -445,11 +445,7 @@ let
         "Read(~/.gnupg/**)"
       ];
     };
-    # Devin CLI also reads these but rejects the whole block (no `Notification` event).
-    # Intentional — Devin/Zed notify natively; see docs/system/claude-code.md § Hooks.
     hooks = {
-      Notification     = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-waiting.sh";           }]; }];
-      UserPromptSubmit = [{ hooks = [{ type = "command"; command = "bash ~/.claude/hooks/notify-reset-dedupe.sh";      }]; }];
       # Read denies don't cover Bash payloads Claude doesn't parse (xxd, python3
       # -c, base64 -d, dd, …); the hook inspects argv for protected paths.
       PreToolUse       = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "python3 ~/.claude/hooks/bash-secret-guard.py"; }]; }];
@@ -885,16 +881,8 @@ in
   # Managed here so they're version-controlled alongside the rest of the nix config.
   # Using home.file with executable = true (NOT programs.claude-code.hooks, which
   # writes non-executable read-only Nix-store symlinks that cannot be chmod'd).
-
-  home.file.".claude/hooks/notify-waiting.sh" = {
-    source     = ../dotfiles/claude-hooks/notify-waiting.sh;
-    executable = true;
-  };
-
-  home.file.".claude/hooks/notify-reset-dedupe.sh" = {
-    source     = ../dotfiles/claude-hooks/notify-reset-dedupe.sh;
-    executable = true;
-  };
+  # Turn-end notifications come from Orca (OSC 7501 + its own agent hook), so no
+  # notify scripts live here anymore.
 
   # PreToolUse hook: blocks casual Bash reads of Read-denied paths (see
   # secretGuard* above). python3 is already in the Claude allowlist.
