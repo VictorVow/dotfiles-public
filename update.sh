@@ -129,6 +129,10 @@ _for_hub() {
     -e '/^remote: (Enumerating|Counting|Compressing|Total)/d' \
     -e '/^From https:\/\//d' \
     -e '/^Activating /d' \
+    -e '/^Starting Home Manager activation/d' \
+    -e '/^Starting units: /d' \
+    -e "/^(replacing old|installing) '.*'/d" \
+    -e '/^(Cleaning up orphan links|Creating home file links) /d' \
     -e '/^Updating (runtime|app)\//d' \
     -e '/^Info: .*end-of-life/d' \
     -e '/^F: Warning: Treating remote fetch error as non-fatal/d' \
@@ -140,7 +144,36 @@ _for_hub() {
     -e '/^warning: Git tree/d' \
     -e '/^warning: Using /d' \
     -e '/^warning: SQLite database/d' \
-    -e '/^ERROR: ld\.so: /d'
+    -e '/^ERROR: ld\.so: /d' \
+    -e '/^(Reading package lists|Building dependency tree|Reading state information|Solving dependencies)\.\.\./d' \
+    -e '/^warn: The user .* is already a member of /d' \
+    -e '/^npm warn deprecated /d' \
+    -e '/^[0-9]+ packages are looking for funding/,+1d' \
+    -e '/^distrobox: Installing basic packages\.\.\./d' \
+    -e '/^\/usr\/s?bin\/(dnf|pacman|apt(-get)?|zypper)$/d' \
+    -e '/^ Upgrading /d' \
+    -e '/^Updating and loading repositories:/d' \
+    -e '/^Repositories loaded\./d' \
+    -e '/^Nothing to do\./d' \
+    -e '/^ *there is nothing to do/d' \
+    -e '/^:: /d' \
+    -e '/^ [a-z]+ downloading\.\.\./d' \
+    -e '/^ [A-Z].*[0-9]+% \|/d' \
+  | sed -u -E \
+    -e '/^\[INFO\]  Applying Home Manager configuration\.\.\./d' \
+  | awk '
+      # Drop the age-pin block only when its end marker exists too — an
+      # unterminated sed range would otherwise eat the rest of the message.
+      /^\[INFO\]  Age-pinning flake inputs\.\.\./ { buf = $0 ORS; inpin = 1; next }
+      inpin {
+        buf = buf $0 ORS
+        if (/^\[INFO\]  Updating flake\.lock\.\.\./) { buf = ""; inpin = 0 }
+        next
+      }
+      { print }
+      END { if (buf != "") printf "%s", buf }
+    ' \
+  | uniq
 }
 
 # Post the run's output to the Notifications hub (source `update-all`).
