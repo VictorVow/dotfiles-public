@@ -131,6 +131,37 @@
     fi
   '';
 
+  # Vorta raw exclusions (Exclude dialog → Raw tab) for the cloud profiles,
+  # owned by dotfiles/backups/vorta-excludes.txt. Vorta re-reads the profile
+  # from settings.db on each use, so writing while it runs is fine; only an
+  # Exclude dialog left open would save its stale copy back over this.
+  # GUI edits are overwritten, so a drift diff is printed and the old value
+  # kept in settings.db's directory before replacing it. The diff also goes to
+  # the Notifications hub (source `vorta-excludes`, routes in
+  # Self-Hosted/Notifications/notifications.yml) so it isn't lost in hms output.
+  home.activation.vortaExcludes = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    db="$HOME/.var/app/com.borgbase.Vorta/data/Vorta/settings.db"
+    src=${../dotfiles/backups/vorta-excludes.txt}
+    if [ -f "$db" ]; then
+      for profile in BorgBase.com rsync.net; do
+        cur=$(${pkgs.sqlite}/bin/sqlite3 "$db" "select exclude_patterns from backupprofilemodel where name = '$profile'")
+        if [ "$cur" != "$(<"$src")" ]; then
+          echo "Vorta: replacing $profile raw exclusions (- DB, + repo):"
+          changes=$(${pkgs.diffutils}/bin/diff <(echo "$cur") "$src" || true)
+          echo "$changes"
+          run ${pkgs.curl}/bin/curl -sSf -m 20 -o /dev/null \
+            -H "Title: Vorta $profile exclusions replaced" \
+            --data-binary "$changes
+(- DB, + repo; old value in exclude_patterns.$profile.bak)" \
+            https://notifications.device.example.com/vorta-excludes \
+            || echo "notifications hub post failed" >&2
+          run ${pkgs.coreutils}/bin/cp /dev/stdin "$(dirname "$db")/exclude_patterns.$profile.bak" <<<"$cur"
+          run ${pkgs.sqlite}/bin/sqlite3 "$db" "update backupprofilemodel set exclude_patterns = rtrim(readfile('$src'), char(10)) where name = '$profile'"
+        fi
+      done
+    fi
+  '';
+
   # xdg-open wrapper: translate Firefox's non-standard 2-arg calling
   # convention into `gio launch`.
   #

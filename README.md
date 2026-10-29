@@ -36,6 +36,7 @@ installs/
 │   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
+│   │   ├── backups/          # vorta-excludes.txt: Vorta raw exclusions, written into settings.db by desktop.nix
 │   │   ├── claude-hooks/     # Claude Code hook scripts (bash-secret-guard.py)
 │   │   ├── claude-statusline/ # Claude Code statusline.py (deployed by ai-agents.nix)
 │   │   └── agent-skills/    # Own skills in the Agent Skills spec format (agentskills.io), one folder per skill (SKILL.md + helpers); auto-linked by agent-skills.nix
@@ -50,7 +51,7 @@ installs/
 │       ├── agent-skills.nix # Agent Skills spec skills: links dotfiles/agent-skills/* + Orca skills + logseq-cli (flake inputs) + ~/.agents/skills/ mirror
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
-│       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer
+│       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer, Vorta raw exclusions
 │       ├── services.nix      # systemd user services (Ollama, Jackett) + daily update-all timer
 │       ├── weekly-cleanup.nix # weekly Nix GC + Docker prune timer (shared by boss-laptop + lord-ubuntu)
 │       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
