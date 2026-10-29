@@ -107,3 +107,35 @@ if [[ -x "$CHROME_WRAPPER" ]]; then
 else
   echo "chromium-suid-sandbox: no google-chrome wrapper at $CHROME_WRAPPER — skipping."
 fi
+
+# ── brave-origin ──────────────────────────────────────────────────────────
+# brave-origin (de-Braved Brave fork) ships its own chrome-sandbox sibling
+# binary and, like google-chrome, only looks next to its own binary in the
+# read-only Nix store. Same AppArmor userns restriction applies.
+BRAVE_WRAPPER="$USER_HOME/.nix-profile/bin/brave-origin"
+if [[ -x "$BRAVE_WRAPPER" ]]; then
+  # The wrapper execs the real binary from its Nix store output; chrome-sandbox
+  # ships as a sibling file in the same directory. Find the store root from the
+  # resolved wrapper path, then locate the real binary under opt/brave.com/brave-origin/.
+  STORE_ROOT="$(readlink -f "$BRAVE_WRAPPER" | grep -oE '/nix/store/[^/]+-brave-origin-[0-9.]+' | head -1)"
+  BRAVE_BIN="$STORE_ROOT/opt/brave.com/brave-origin/brave"
+  BRAVE_SANDBOX_TARGET="$(dirname "${BRAVE_BIN:-}")/chrome-sandbox"
+  if [[ -n "$BRAVE_BIN" && -e "$BRAVE_SANDBOX_TARGET" ]]; then
+    install_setuid_helper "$BRAVE_SANDBOX_TARGET" "$DEST_DIR/__brave-origin-suid-sandbox" "brave-origin"
+
+    while read -r stale_target; do
+      [[ -n "$stale_target" && "$stale_target" != "$BRAVE_SANDBOX_TARGET" ]] || continue
+      umount "$stale_target" 2>/dev/null || true
+      echo "chromium-suid-sandbox: unmounted stale bind mount at $stale_target"
+    done < <(findmnt -rn -o TARGET | grep -F '/opt/brave.com/brave-origin/chrome-sandbox' || true)
+
+    if ! mountpoint -q "$BRAVE_SANDBOX_TARGET"; then
+      mount --bind "$DEST_DIR/__brave-origin-suid-sandbox" "$BRAVE_SANDBOX_TARGET"
+      echo "chromium-suid-sandbox: bind-mounted setuid helper onto $BRAVE_SANDBOX_TARGET"
+    fi
+  else
+    echo "chromium-suid-sandbox: could not resolve brave-origin sandbox helper — skipping." >&2
+  fi
+else
+  echo "chromium-suid-sandbox: no brave-origin wrapper at $BRAVE_WRAPPER — skipping."
+fi
