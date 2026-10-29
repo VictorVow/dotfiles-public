@@ -31,3 +31,4 @@ description: Make a git commit of the changes from this Claude session.
   - If the remote is pre-approved: always `git push` after committing. Do NOT ask for permission first — pushing to this remote is pre-approved. After pushing, tell the user that the commit was pushed.
   - If the remote is not pre-approved, then don't push unless it's necessary because a pull request, workflow action or something else in our intended next steps needs the commit pushed first.
 - When finished, report to the user for each commit made: the commit hash (short), the full commit message, and whether it was pushed.
+- If there are uncommitted changes still remaining in the repo, then suggest commit messages for them and ask the user which if any they want to commit also.
