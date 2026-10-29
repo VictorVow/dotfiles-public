@@ -19,13 +19,16 @@
 #   ./update.sh --no-stable-check  # Skip the nixpkgs stable-release upgrade check
 #   ./update.sh --dry-run          # Print what would run without executing
 #
-# Runs unattended daily via the update-all systemd user timer
-# (nix/modules/services.nix); root steps are NOPASSWD via ansible.yml.
+# Runs unattended via the update-all systemd user timer (nix/modules/update-all.nix):
+# daily on boss-laptop, every 2 days on lord-ubuntu. Root steps are NOPASSWD
+# via ansible.yml (boss) / lord's sudoers. The host is picked by $USER (= the
+# home-manager config name); on lord the Nix step pulls boss's committed
+# flake.lock (git pull --ff-only) instead of age-pinning its own.
 #   systemctl --user start update-all.service   # trigger a background run now
 #
 # Every run is logged to ~/.local/state/update-all/update.log (5 MB cap, then
 # rotated to update.log.1) and posted to the Notifications hub (source
-# `update-all`; full output, high priority on failure — routes live in
+# update-all-laptop / update-all-homeserver; full output, high priority on failure — routes live in
 # Self-Hosted/Notifications/notifications.yml).
 
 # shellcheck source-path=SCRIPTDIR
@@ -42,6 +45,11 @@ UPDATE_NIX=true
 UPDATE_DISTROBOX=true
 CHECK_STABLE=true
 DRY_RUN=false
+
+# home-manager config for this host (boss | lord) — matches the username.
+HM_CONFIG="${HM_CONFIG:-$USER}"
+HUB_SOURCE=update-all-laptop
+[[ "$HM_CONFIG" == lord ]] && HUB_SOURCE=update-all-homeserver
 
 # Minimum age (in days) of the upstream commit each pinned flake input is
 # advanced to. For nixpkgs this is the age of the channel *release* (when Hydra
@@ -176,7 +184,8 @@ _for_hub() {
   | uniq
 }
 
-# Post the run's output to the Notifications hub (source `update-all`).
+# Post the run's output to the Notifications hub (source update-all-laptop on
+# boss, update-all-homeserver on lord; declared in notifications.yml).
 # $1 = title, $2 = ntfy priority. Silent no-op when `notify` isn't installed or
 # the hub is unreachable — the local run never depends on it.
 _notify_hub() {
@@ -185,7 +194,7 @@ _notify_hub() {
   $DRY_RUN && { info "[dry-run] Would post run output to the Notifications hub ($title)."; return 0; }
   body=$(tail -c 60000 "$raw_log" | _clean_log | _for_hub)
   command -v notify &>/dev/null || return 0
-  printf '%s' "$body" | notify -s update-all -t "$title" -p "$priority" -T incoming_envelope \
+  printf '%s' "$body" | notify -s "$HUB_SOURCE" -t "$title" -p "$priority" -T incoming_envelope \
     >/dev/null 2>&1 || warn "Could not post run output to the Notifications hub."
 }
 
@@ -292,7 +301,7 @@ for key in "nixpkgs stable upgrade" \
            "age-pin nixpkgs" "age-pin nixpkgs-unstable" "age-pin home-manager" \
            "age-pin llm-agents" "age-pin sops-nix" "age-pin tuxManager" "age-pin ie-r" \
             "age-pin delta" "age-pin context7" "age-pin rea" "age-pin orca" \
-           "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
+           "git pull" "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
            "apt" "Homebrew" "brew bundle sync" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
@@ -336,7 +345,7 @@ echo ""
 echo -e "${CYAN}${BOLD}━━━ Home Manager News ━━━${NC}"
 info "Checking home-manager news (output suppressed)..."
 
-HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#boss" 2>&1 | grep -v 'has uncommitted changes') || true
+HM_NEWS_OUTPUT=$(home-manager news --flake "$NIX_FLAKE_DIR#$HM_CONFIG" 2>&1 | grep -v 'has uncommitted changes') || true
 
 if [[ -z "$HM_NEWS_OUTPUT" ]]; then
   info "No home-manager news output."

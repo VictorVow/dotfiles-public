@@ -52,8 +52,9 @@ installs/
 │       ├── firefox.nix       # programs.firefox: profiles, shared settings/search engines, cookie policy, profiles.ini fixup
 │       ├── firefox-search.nix # Shared Firefox search engines (plain attrset imported by firefox.nix)
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer, Vorta raw exclusions
-│       ├── services.nix      # systemd user services (Ollama, Jackett) + daily update-all timer
+│       ├── services.nix      # systemd user services (Ollama, Jackett)
 │       ├── weekly-cleanup.nix # weekly Nix GC + Docker prune timer (shared by boss-laptop + lord-ubuntu)
+│       ├── update-all.nix    # update.sh timer: daily on boss-laptop, every 2 days on lord-ubuntu
 │       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
 │       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation

@@ -17,7 +17,10 @@ else
       <(sed 's/#.*//' "$SCRIPT_DIR/uv-tools.txt" | tr -d '[:blank:]' | grep -v '^$' | sort -u) \
       <(uv tool list 2>/dev/null | awk '!/^-/ { print $1 }' | sort -u)
   )
-  if (( ${#UV_MISSING[@]} )); then
+  # uv-tools.txt is the desktop's list; other hosts only upgrade what they have.
+  if [[ "$HM_CONFIG" != boss ]]; then
+    RESULTS["uv install new"]="skipped (desktop list)"
+  elif (( ${#UV_MISSING[@]} )); then
     info "Installing uv tools declared but missing: ${UV_MISSING[*]}"
     run_step "uv install new" bash -c 'for t; do uv tool install "$t" || exit 1; done' _ "${UV_MISSING[@]}"
   else

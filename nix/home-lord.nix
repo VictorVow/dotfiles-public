@@ -1,4 +1,4 @@
-{ ... }:
+{ notifications, ... }:
 
 # Home Manager configuration for lord-ubuntu (headless server, user `lord`).
 # See docs/system/lord-ubuntu-home.md.
@@ -22,6 +22,8 @@
     ./modules/cass.nix # agent-session index timers (needs ~/.local/bin/cass, see module)
     ./modules/transcript-scrub.nix # daily gitleaks scrub of agent transcripts
     ./modules/weekly-cleanup.nix # weekly Nix GC + Docker prune (shared with boss-laptop)
+    ./modules/update-all.nix # update.sh every 2 days (daily on boss-laptop)
+    notifications.homeManagerModules.desktop # notify CLI only (subscribe = false below)
     ./modules/agent-skills.nix # ~/.claude/skills — desktop-only skills filtered out via hostProfile.isServer
   ];
 
@@ -46,6 +48,14 @@
   # Trade-off: this includes upstream fork checkouts (RSSHub-repo, headscale, …),
   # so an .envrc that arrives by `git pull` there runs without asking.
   programs.direnv.config.whitelist.prefix = [ "/home/lord/Projects/Self-Hosted" ];
+
+  # Send-only: puts `notify` on PATH for update.sh's hub post; no ntfy
+  # subscriber or desktop popups on a headless box.
+  services.notifications-desktop = {
+    enable = true;
+    subscribe = false;
+    topic = "none"; # required by the module, unused when subscribe = false
+  };
 
   programs.home-manager.enable = true;
 }

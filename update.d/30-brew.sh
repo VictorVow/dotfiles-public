@@ -15,9 +15,12 @@ else
 
   # Sync declared state: install new entries, remove unlisted ones.
   # (`install --cleanup` was removed upstream; cleanup is its own subcommand.)
+  # Per-host list when there is one (Brewfile.lord on lord-ubuntu).
+  BREWFILE="$SCRIPT_DIR/Brewfile"
+  [[ -f "$BREWFILE.$HM_CONFIG" ]] && BREWFILE="$BREWFILE.$HM_CONFIG"
   run_step "brew bundle sync" bash -c "
-    brew bundle install --file='$SCRIPT_DIR/Brewfile' && \
-    brew bundle cleanup --force --file='$SCRIPT_DIR/Brewfile'
+    brew bundle install --file='$BREWFILE' && \
+    brew bundle cleanup --force --file='$BREWFILE'
   "
 
   success "Homebrew done."

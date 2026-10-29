@@ -9,7 +9,12 @@ if ! command -v nix &>/dev/null; then
   warn "nix not found — skipping Nix updates. Run ./bootstrap.sh first."
   RESULTS["Nix"]="skipped (not installed)"
 else
-  if $UPDATE_NIX; then
+  if $UPDATE_NIX && [[ "$HM_CONFIG" != boss ]]; then
+    # Only boss age-pins and advances flake.lock; other hosts adopt its
+    # committed lock so they never fork flake.nix/flake.lock locally.
+    info "Pulling the committed flake.lock from boss..."
+    run_step "git pull" git -C "$SCRIPT_DIR" pull --ff-only
+  elif $UPDATE_NIX; then
     # ── gh preflight ──────────────────────────────────────────────────────────
     # The helpers below silence gh's stderr, so a broken auth state (stale
     # keyring token, GITHUB_TOKEN unset by `git su`) or rate limit otherwise
@@ -193,7 +198,7 @@ else
   # compile locally (cache misses) — reported once the switch finishes.
   NIX_BUILD_SINCE="$(date +%s)"
   run_step "home-manager switch" \
-    home-manager switch --flake "$NIX_FLAKE_DIR#boss" --no-write-lock-file
+    home-manager switch --flake "$NIX_FLAKE_DIR#$HM_CONFIG" --no-write-lock-file
 
   # If the switch bumped Chromium, the version-specific SUID sandbox helper
   # copied to /run/wrappers/bin is now stale and Chromium can refuse to launch

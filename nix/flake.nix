@@ -225,7 +225,7 @@
       modules = [ ./home-lord.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill notifications;
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;

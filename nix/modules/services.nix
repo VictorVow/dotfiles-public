@@ -118,38 +118,6 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  # Daily unattended update-all. apt + the chromium-suid-sandbox restart are
-  # NOPASSWD via /etc/sudoers.d/update-all (ansible.yml); update.sh uses
-  # `sudo -n` without a TTY, so a missing rule fails the step instead of
-  # hanging. The run posts its full output to the Notifications hub itself
-  # (source `update-all`, high priority on failure) — no OnFailure unit.
-  # Output goes to the journal and ~/.local/state/update-all/update.log.
-  systemd.user.services.update-all = {
-    Unit = {
-      Description = "Update all package managers (update.sh)";
-      Wants = [ "network-online.target" ];
-      After = [ "network-online.target" ];
-      # The run itself does `home-manager switch`; never let that switch
-      # restart/stop this unit mid-run.
-      X-SwitchMethod = "keep-old";
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${config.home.homeDirectory}/Projects/installs/update.sh";
-      Nice = 10;
-      IOSchedulingClass = "idle";
-    };
-  };
-  systemd.user.timers.update-all = {
-    Unit.Description = "Daily update-all";
-    Timer = {
-      OnCalendar = "*-*-* 10:00";
-      Persistent = true; # catch up after the laptop was off/asleep at 10:00
-      RandomizedDelaySec = "15min";
-    };
-    Install.WantedBy = [ "timers.target" ];
-  };
-
   home.packages = [ pkgs.ollama-vulkan ];
 
 }
