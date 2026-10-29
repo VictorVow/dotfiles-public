@@ -864,6 +864,11 @@ in
     ../dotfiles/opencode-plugins/turn-verbosity-tui.js;
   xdg.configFile."opencode/plugins/turn-verbosity/index.js".text =
     ''export { default } from "${../dotfiles/opencode-plugins/turn-verbosity-tui.js}"'';
+  # /recap slash command + palette entry — port of Claude Code's recap (see file).
+  xdg.configFile."opencode/plugins/recap/tui.js".source =
+    ../dotfiles/opencode-plugins/recap-tui.js;
+  xdg.configFile."opencode/plugins/recap/index.js".text =
+    ''export { default } from "${../dotfiles/opencode-plugins/recap-tui.js}"'';
   home.file.".opencode1/config/opencode/plugins/devin-auth.js".text =
     ''export { DevinAuthPlugin } from "${devinAuth}/index.mjs"'';
   home.file.".opencode1/config/opencode/plugins/cursor-auth.js".text =
