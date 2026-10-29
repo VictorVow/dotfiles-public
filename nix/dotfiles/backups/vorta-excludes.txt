@@ -14,7 +14,7 @@ node_modules
 /home/boss/.config/lbry/Cache/
 /home/boss/.config/Logseq/search/
 /home/boss/.config/Signal/
-/home/boss/.gradle/caches/
+/home/boss/.config/syncthing/index-v2/
 /home/boss/.local/share/baloo/
 /home/boss/.local/share/containers/storage/overlay/
 /home/boss/.local/share/flatpak/
@@ -30,24 +30,31 @@ node_modules
 /home/boss/.local/share/waydroid/data/
 /home/boss/.npm/_cacache/
 /home/boss/.ollama/
-/home/boss/.rustup/toolchains/
+/home/boss/.var/app/com.borgbase.Vorta/cache/
+/home/boss/.var/app/com.calibre_ebook.calibre/cache/
 /home/boss/.var/app/com.discordapp.Discord/config/discord/Code Cache/
 /home/boss/.var/app/com.discordapp.Discord/config/discord/Cache/
 /home/boss/.var/app/com.logseq.Logseq/config/Logseq/search/
 /home/boss/.var/app/com.logseq.Logseq/config/Logseq/Cache/
 /home/boss/.var/app/com.slack.Slack/config/Slack/Cache/Cache_Data/
 /home/boss/.var/app/com.slack.Slack/config/Slack/Service Worker/CacheStorage/
+/home/boss/.var/app/com.spotify.Client/cache/
 /home/boss/.var/app/com.stremio.Stremio/.stremio-server/stremio-cache/
+/home/boss/.var/app/com.stremio.Stremio/cache/
 /home/boss/.var/app/com.usebottles.bottles/data/bottles/
 /home/boss/.var/app/com.valvesoftware.Steam/.local/share/Steam/
 /home/boss/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/
+/home/boss/.var/app/eu.betterbird.Betterbird/cache/
+/home/boss/.var/app/io.anytype.anytype/cache/
 /home/boss/.var/app/io.freetubeapp.FreeTube/config/FreeTube/Cache/
+/home/boss/.var/app/io.lbry.lbry-app/data/lbry/lbrynet/blobfiles/
 /home/boss/.var/app/net.lutris.Lutris/cache/lutris/
 /home/boss/.var/app/net.lutris.Lutris/data/lutris/runners/wine/
 /home/boss/.var/app/org.polymc.PolyMC/data/polymc/
 /home/boss/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data/
 /home/boss/.var/app/org.telegram.desktop/data/TelegramDesktop/tdata/user_data#2/
-/home/boss/.var/app/io.lbry.lbry-app/data/lbry/lbrynet/blobfiles/
+/home/boss/.var/app/org.tribler.Tribler/
+/home/boss/.var/app/org.zotero.Zotero/cache/
 /home/boss/Documents/MUSEUM/Docker/NocoDB/
 /home/boss/Documents/MUSEUM/Docker/zlib-searcher/index/
 /home/boss/Documents/OPTIONAL/ISOs/
@@ -56,9 +63,12 @@ node_modules
 /home/boss/Downloads/MEGA/
 /home/boss/Games/1Git/
 /home/boss/Games/Adult/
+/home/boss/Games/byond/
 /home/boss/Games/gog-galaxy/drive_c/windows/
 /home/boss/Games/HydraLauncher/
 /home/boss/Games/itchio-games/
+/home/boss/Games/magic-the-gathering/
+/home/boss/Games/minecraft-meta/
 /home/boss/Games/Pirated/
 /home/boss/Games/SteamLibrary/steamapps/
 /home/boss/Games/SteamLibrary-actioncarbon/
@@ -78,6 +88,7 @@ node_modules
 /home/boss/Vaults/gocryptfs1/Thunderbird/profile/calendar-data/
 /home/boss/Vaults/gocryptfs1/Thunderbird/thunderbird/
 /home/boss/Vaults/gocryptfs2/
+/home/boss/Videos/0-Torrents/
 /home/boss/Videos/1-Downloading/
 /home/boss/Videos/2-Complete/
 /home/boss/Videos/NewPipe-Video/
