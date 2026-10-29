@@ -1,0 +1,38 @@
+# Excludes for nvme-4tb-omega-sync.sh (rsync --exclude-from).
+# Regenerable data only. Paths are anchored to /home/, the transfer root.
+
+/linuxbrew/
+
+# Generic caches
+/boss/.cache/
+/boss/.opencode1/cache/
+/boss/.var/app/*/cache/
+/boss/.local/share/Trash/
+/boss/.local/share/baloo/
+/boss/.stremio-server/stremio-cache/
+
+# Package / toolchain stores (re-downloadable)
+/boss/.npm/
+/boss/.bun/install/cache/
+/boss/.local/share/pnpm/
+/boss/.local/share/gradle/
+/boss/.local/share/go/
+/boss/.local/share/rustup/
+/boss/.rustup/
+/boss/.m2/repository/
+/boss/.pub-cache/
+/boss/.local/share/android/build-cache/
+/boss/.local/share/android/cache/
+
+# Re-downloadable apps, games and models (Proton saves in compatdata are kept)
+/boss/.local/share/flatpak/
+/boss/.local/share/Steam/steamapps/common/
+/boss/.local/share/Steam/steamapps/shadercache/
+/boss/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/
+/boss/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/shadercache/
+/boss/Games/SteamLibrary*/steamapps/common/
+/boss/Games/SteamLibrary*/steamapps/shadercache/
+/boss/.ollama/models/
+
+# Rebuildable index (cass)
+/boss/.local/share/coding-agent-search/
