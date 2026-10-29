@@ -108,6 +108,41 @@ _rotate_log() {
 
 _log_hint() { echo -e "\n\033[0;34m[INFO]\033[0m  Full log: $UPDATE_LOG"; }
 
+# Hub-bound copy of the run output: _clean_log plus drops for lines that are
+# pure noise in a notification (apt unpack chatter, nix path-copy spam, flatpak
+# EOL repeats) and /nix/store hashes stripped so lists stay readable.
+_for_hub() {
+  sed -u -E \
+    -e 's|/nix/store/[a-z0-9]+-||g' \
+    -e '/^Preconfiguring packages/d' \
+    -e '/^\(Reading database/d' \
+    -e '/^Preparing to unpack /d' \
+    -e '/^Unpacking /d' \
+    -e '/^Setting up /d' \
+    -e '/^Processing triggers for /d' \
+    -e '/^(Adding|Removing) .diversion of /d' \
+    -e '/^Ignoring request to rename /d' \
+    -e '/^Reading database/d' \
+    -e '/^copying path /d' \
+    -e "/^building '.*'/d" \
+    -e "/^unpacking '/d" \
+    -e '/^remote: (Enumerating|Counting|Compressing|Total)/d' \
+    -e '/^From https:\/\//d' \
+    -e '/^Activating /d' \
+    -e '/^Updating (runtime|app)\//d' \
+    -e '/^Info: .*end-of-life/d' \
+    -e '/^F: Warning: Treating remote fetch error as non-fatal/d' \
+    -e '/^• Updated input /d' \
+    -e "/^ +'(github|git\+https):/d" \
+    -e '/^   [0-9a-f]+\.\.[0-9a-f]+ .*-> /d' \
+    -e '/^  → /d' \
+    -e '/^warning: updating lock file/d' \
+    -e '/^warning: Git tree/d' \
+    -e '/^warning: Using /d' \
+    -e '/^warning: SQLite database/d' \
+    -e '/^ERROR: ld\.so: /d'
+}
+
 # Post the run's output to the Notifications hub (source `update-all`).
 # $1 = title, $2 = ntfy priority. Silent no-op when `notify` isn't installed or
 # the hub is unreachable — the local run never depends on it.
@@ -115,7 +150,7 @@ _notify_hub() {
   local title="$1" priority="$2"
   local raw_log="$3" body
   $DRY_RUN && { info "[dry-run] Would post run output to the Notifications hub ($title)."; return 0; }
-  body=$(tail -c 60000 "$raw_log" | _clean_log)
+  body=$(tail -c 60000 "$raw_log" | _clean_log | _for_hub)
   command -v notify &>/dev/null || return 0
   printf '%s' "$body" | notify -s update-all -t "$title" -p "$priority" -T incoming_envelope \
     >/dev/null 2>&1 || warn "Could not post run output to the Notifications hub."
