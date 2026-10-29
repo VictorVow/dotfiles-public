@@ -6,7 +6,7 @@ metadata:
 compatibility: "Requires nix-direnv and nix flakes"
 
 ---
-**Skill version: 4** — bump this whenever the setup steps below change significantly (anything that changes the files written or the exclude entries). The version is stamped into the deployed `.envrc` so a later run can tell an old setup from a current one.
+**Skill version: 5** — bump this whenever the setup steps below change significantly (anything that changes the files written or the exclude entries). The version is stamped into the deployed `.envrc` so a later run can tell an old setup from a current one.
 
 ## Repo families
 
@@ -50,7 +50,7 @@ For repos under `~/Projects/Git/1MY_REPOS/Self-Hosted`:
 
 1. Write `.envrc` in the repo's top level with exactly:
    ```
-   # direnv-deploy v4 (<mode>)
+   # direnv-deploy v5 (<mode>)
    # Shared deploy toolchain (Ansible, just, …) lives in 1-COMMON's flake.
    watch_file ../1-COMMON/flake.nix ../1-COMMON/flake.lock
    use flake ../1-COMMON
@@ -58,21 +58,23 @@ For repos under `~/Projects/Git/1MY_REPOS/Self-Hosted`:
    If the repo sits one level deeper (e.g. `News/News-deploy`), adjust the relative path (`../../1-COMMON`). When the repo also has its own `flake.nix` for extras, put `use flake` for it BETWEEN the marker line and the watch_file pair (see `logseq-sync/.envrc`).
 2. No `flake.nix` is created — the shared flake already exists. If the repo has a leftover `.nix/` dir or `flake.nix` that 1-COMMON now covers, ask before removing it.
 3. Git exclude entries exactly as in step 3 of *Standalone setup* below — `.direnv/` is excluded in both modes, and in exclude mode `flake.nix`/`flake.lock` are only added if they actually exist. Note most Self-Hosted `.envrc`s are committed (plain mode) — check `git ls-files --error-unmatch .envrc` before choosing.
-4. Run `direnv allow` to activate; report any evaluation errors.
+4. In exclude mode, run `git add -Nf` on any repo-local `flake.nix`/`flake.lock` that exists (step 4 of *Standalone setup*). Not needed when only `../1-COMMON` is loaded — that flake is already tracked by its own repo.
+5. Run `direnv allow` to activate; report any evaluation errors.
 
 ## Standalone setup
 
 1. Write `.envrc` in the top level of the repo with exactly:
    ```
-   # direnv-deploy v4 (<mode>)
+   # direnv-deploy v5 (<mode>)
    use flake
    ```
    (`<mode>` is `exclude` or `plain`; when merging into a user's existing `.envrc`, these two lines go first.)
-2. Create (or update, on upgrade) `flake.nix` in the top level with a `devShells.default` containing the packages this project needs (look at the repo's language/tooling files to decide). `flake.lock` is generated automatically on first evaluation — don't write it by hand. On an upgrade from v≤3, move `.nix/flake.nix` here and delete the `.nix/` dir.
+2. Create (or update, on upgrade) `flake.nix` in the top level with a `devShells.default` containing the packages this project needs (look at the repo's language/tooling files to decide). `flake.lock` is generated automatically on first evaluation — don't write it by hand (but do generate it before step 4's `git add -Nf`, e.g. via `nix flake metadata`, so it can be intent-to-added too). On an upgrade from v≤3, move `.nix/flake.nix` here and delete the `.nix/` dir.
 3. Git exclude entries (`.git/info/exclude`; in a worktree use `git rev-parse --git-common-dir` to find it):
    - **Both modes**: make sure `.direnv/` is present, one per line, without duplicates — that's where nix-direnv links the built packages, so it's never commit-worthy.
    - **exclude** mode: also make sure `.envrc`, `flake.nix` and `flake.lock` are present.
    - **plain** mode: remove `.envrc`, `flake.nix` and `flake.lock` lines if a previous exclude-mode deploy added them.
    - Either way, drop any obsolete `.nix/` line left over from a pre-v4 deploy.
    - If switching to exclude mode and any of those paths is already tracked by git, warn the user that the exclude has no effect on tracked files and ask before running `git rm --cached` on them.
-4. Run `direnv allow` to activate nix-direnv and build the environment; report any evaluation errors.
+4. In **exclude** mode only, run `git add -Nf flake.nix` (and `flake.lock` if it exists — generate it with `nix flake metadata` first if needed). Nix only sees files git knows about, and `.git/info/exclude` alone leaves the flake invisible to `nix develop`/`nix build` inside the repo; the intent-to-add entry fixes that without staging content, so `git commit -a` still won't include it. (`.envrc` does not need it — nix never reads it.) Note this makes `git status` show ` A` for the files.
+5. Run `direnv allow` to activate nix-direnv and build the environment; report any evaluation errors.
