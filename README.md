@@ -64,6 +64,7 @@ installs/
 ├── scripts/                  # Standalone helper/diagnostic scripts
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
+│   ├── nvme-4tb-omega-sync.sh     # rsync /home to the external 4TB-OMEGA drive, skipping caches/regenerable data
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
