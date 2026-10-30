@@ -110,6 +110,12 @@
         esac
       }
 
+      # md: read a markdown file in glow's pager (server counterpart to the
+      # desktop's md/mds MarkText helpers in shell.nix).
+      md() {
+        glow -p "$@"
+      }
+
       # Show fastfetch when an interactive SSH session starts (this is a server —
       # every login shell is via SSH).
       if [[ -n "$SSH_CONNECTION" ]] && command -v fastfetch >/dev/null; then
