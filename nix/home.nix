@@ -18,6 +18,16 @@
   # Needed for: VS Code, Steam, and other proprietary software.
   nixpkgs.config.allowUnfree = true;
 
+  # shortcut: solaar 1.1.19's desktop-notification tests need /etc/machine-id,
+  # which the Nix sandbox lacks. Drop once nixpkgs fixes it (try removing on bump).
+  nixpkgs.overlays = [
+    (_final: prev: {
+      solaar = prev.solaar.overridePythonAttrs (old: {
+        disabledTests = (old.disabledTests or [ ]) ++ [ "test_show" ];
+      });
+    })
+  ];
+
   # llm-agents.nix packages (claude-code, codex, cursor-agent, ...) are consumed
   # directly via `llm-agents.packages.${pkgs.stdenv.hostPlatform.system}` in packages.nix and
   # ai-agents.nix, NOT through nixpkgs.overlays. The overlay
