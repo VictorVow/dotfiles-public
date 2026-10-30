@@ -143,12 +143,12 @@ in
       icon = "${ffIcons}/flathub.ico";
       definedAliases = [ "@flat" ];
     };
-    # portable-linux-apps.github.io now supports a `?s=` query param
-    # (search is still client-side, but the URL triggers it on load).
+    # portable-linux-apps.github.io filters client-side; apps.html is the
+    # dedicated search page (optional &a=arch param exists).
     "Portable Linux Apps" = {
       urls = [
         {
-          template = "https://portable-linux-apps.github.io/en/index.html?s={searchTerms}";
+          template = "https://portable-linux-apps.github.io/en/apps.html?s={searchTerms}";
         }
       ];
       icon = "${ffIcons}/github.ico";
