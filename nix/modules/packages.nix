@@ -31,6 +31,37 @@ let
     sha256 = "sha256-/pJVNVTjLS3ZaeSkhS9ltCtEH237gVqCnb4S1f/yfD0=";
   };
 
+  # Herdr desktop app (github:herdrdev/herdr-app) — official prebuilt Linux
+  # tarball; not in nixpkgs. Single statically-linked-ish binary needing only
+  # xcb/xkbcommon. To update: bump version + hash from
+  # https://releases.herdr.dev/app/latest.json
+  herdrApp = pkgs.stdenv.mkDerivation rec {
+    pname = "herdr-app";
+    version = "0.1.9";
+    src = pkgs.fetchurl {
+      url = "https://releases.herdr.dev/app/${version}/herdr-app-linux-x86_64.tar.gz";
+      hash = "sha256-2m97QPbEFsW03vjbz4t2Z30Cvk9LRdBqTWWHZoUOC0U=";
+    };
+    sourceRoot = "herdr-app";
+    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.copyDesktopItems ];
+    buildInputs = [ pkgs.libxcb pkgs.libxkbcommon pkgs.stdenv.cc.cc.lib ];
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 herdr-app $out/bin/herdr-app
+      install -Dm644 herdr-app.svg $out/share/icons/hicolor/scalable/apps/herdr-app.svg
+      runHook postInstall
+    '';
+    desktopItems = [ (pkgs.makeDesktopItem {
+      name = "herdr-app";
+      exec = "herdr-app";
+      icon = "herdr-app";
+      desktopName = "Herdr";
+      comment = "Terminals and coding agents that keep running";
+      categories = [ "Development" ];
+      startupWMClass = "herdr-app";
+    }) ];
+  };
+
   # Looking Glass client, bleeding-edge build. nixpkgs only has B7, but the
   # signed Windows IDD is bleeding-only, and the client, IDD and kvmfr kernel
   # module must all come from the SAME upstream commit. To update, bump this
@@ -552,6 +583,9 @@ in
     })
     llmAgents.copilot-cli      # GitHub Copilot CLI — was npm @githubnext/github-copilot-cli
     llmAgents.cursor-agent     # Cursor Agent CLI (binary: `cursor-agent`) — binary fetch, cached by numtide
+    herdrApp    # Herdr desktop app — GPU terminal/agent multiplexer (herdr.dev), see let-block.
+                # NOTE: `pkgs.herdr` in nixpkgs is the herdr-core CLI, a different program —
+                # the app finds/updates its own core, or install one with `programs.herdr`.
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
 
