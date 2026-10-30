@@ -143,12 +143,12 @@ in
       icon = "${ffIcons}/flathub.ico";
       definedAliases = [ "@flat" ];
     };
-    # portable-linux-apps.github.io filters its catalogue client-side and
-    # has no `?q=` URL, so we route through Brave with a site: restriction.
+    # portable-linux-apps.github.io now supports a `?s=` query param
+    # (search is still client-side, but the URL triggers it on load).
     "Portable Linux Apps" = {
       urls = [
         {
-          template = "https://search.brave.com/search?q=site%3Aportable-linux-apps.github.io+{searchTerms}";
+          template = "https://portable-linux-apps.github.io/en/index.html?s={searchTerms}";
         }
       ];
       icon = "${ffIcons}/github.ico";
