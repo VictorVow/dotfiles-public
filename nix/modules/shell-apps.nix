@@ -495,10 +495,14 @@ in
       serverAliveInterval = 60;
       serverAliveCountMax = 10;
     };
-    # Forgejo SSH (container on lord-ubuntu, published on its Tailscale IP).
-    # Remote form: forgejo:ruler/dotfiles.git
-    settings."forgejo" = {
-      hostname       = "100.x.x.x";
+    # Forgejo SSH (container on lord-ubuntu, port 2222). HostName is the real
+    # domain, not the Tailscale IP: forgejo-cli resolves the remote's host
+    # through `ssh -G` and uses HostName as the HTTPS address, so an IP here
+    # makes `fj` call https://<ip>/api/v1/... which Caddy doesn't serve.
+    # Remote forms: forgejo:<owner>/<repo>.git (short) or
+    # git@git.device.example.com:<owner>/<repo>.git (fj-compatible).
+    settings."forgejo git.device.example.com" = {
+      hostname       = "git.device.example.com";
       port           = 2222;
       user           = "git";
       identityFile   = "~/.ssh/forgejo_ed25519";
