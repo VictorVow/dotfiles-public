@@ -1,4 +1,4 @@
-{ config, pkgs, lib, pkgs-unstable, llm-agents, tuxManager, ie-r, delta, ... }:
+{ config, pkgs, lib, pkgs-unstable, pkgs-latest, llm-agents, tuxManager, ie-r, delta, ... }:
 
 # All user-level packages managed by Home Manager.
 # These replace the apt, pipx, npm, and Homebrew package lists in ansible.yml.
@@ -208,7 +208,8 @@ in
     git-filter-repo # Rewrite git history (successor to git filter-branch / BFG)
     gh       # Official GitHub CLI
     glab     # Official GitLab CLI
-    forgejo-cli # `fj` — Forgejo client CLI (repos, issues, PRs) via the API
+    pkgs-latest.forgejo-cli # `fj` — Forgejo client CLI (repos, issues, PRs) via the API
+                # On pkgs-latest: 0.7.0 fixes `fj repo view` panicking on mirrors; back to pkgs once the age pin has it
                 # Logged in to git.device.example.com (token in ~/.local/share/forgejo-cli/keys.json)
     # `forgejo` — the Forgejo admin CLI can't talk to a remote instance (it reads
     # app.ini + the DB directly), so run it inside the self-hosted container over

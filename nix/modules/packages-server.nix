@@ -2,6 +2,7 @@
   config,
   pkgs,
   pkgs-unstable,
+  pkgs-latest,
   llm-agents,
   ...
 }:
@@ -33,7 +34,7 @@ in
     git-lfs
     git-filter-repo
     gh
-    forgejo-cli
+    pkgs-latest.forgejo-cli # 0.7.0 fixes `fj repo view` panicking on mirrors; back to pkgs once the age pin has it
 
     # ── Runtimes / dev tools ───────────────────────────────────────────────────
     uv
