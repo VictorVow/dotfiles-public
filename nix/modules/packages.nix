@@ -144,6 +144,11 @@ in
     mosh     # Mobile shell — SSH alternative with roaming and intermittent connectivity support
     sniffnet # Network traffic monitor — shows which apps are using the network
              # Similar to GlassWire on Windows
+    pkgs-unstable.netwatch # Terminal network diagnostics TUI (matthart1983/netwatch).
+                           # Not in the pinned nixos-26.05 channel yet; unstable has 0.30.0.
+                           # Drop back to plain `netwatch` once 26.05 picks it up.
+                           # Capture needs sudo, or grant once:
+                           # sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon+eip' "$(which netwatch)"
     ngrok    # Secure tunnels to localhost
 
     # ── Media Playback ────────────────────────────────────────────────────────
