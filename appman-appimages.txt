@@ -28,6 +28,9 @@ github-store
 hydra
 # Misc
 appimagetool
+# pdfcraft: Rust PDF reader/editor (github.com/storytold/pdfcraft). Not on the
+# age-pinned nixpkgs and uncached on unstable HEAD (would be a full local Rust build)
+pdfcraft
 opencode-desktop
 marktext
 veracrypt
