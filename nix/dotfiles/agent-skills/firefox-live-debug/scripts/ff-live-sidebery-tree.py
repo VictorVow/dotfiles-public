@@ -100,6 +100,7 @@ def tab_node(t: dict, containers: dict) -> dict:
         "folded": bool(sd.get("folded")),
         "panelId": sd.get("panelId"),
         "parentId": sd.get("parentId", -1),
+        "color": sd.get("customColor"),
         "ctx": ctx_name(containers, t.get("userContextId")),
         "hidden": bool(t.get("hidden")),
     }

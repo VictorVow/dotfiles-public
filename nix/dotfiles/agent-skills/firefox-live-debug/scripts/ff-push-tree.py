@@ -75,10 +75,21 @@ def flat_and_panels(windows):
                 "folded": bool(t.get("folded")),
                 "panelId": t.get("panelId"),
                 "parentId": t.get("parentId", -1),
+                "color": t.get("color"),          # Sidebery customColor (may be None)
                 "customTitle": None,
                 "ctx": t.get("ctx") or "",
                 "hidden": bool(t.get("hidden")),
             })
+    # Sidebery paints descendants in a group's color; inherit nearest
+    # ancestor's customColor when a tab has none of its own.
+    by_id = {t["id"]: t for t in tabs}
+    def inherited(t, depth=0):
+        if t["color"] or depth > 50:
+            return t["color"]
+        p = by_id.get(t["parentId"])
+        return inherited(p, depth + 1) if p else None
+    for t in tabs:
+        t["color"] = t["color"] or inherited(t)
     return tabs, panels
 
 
