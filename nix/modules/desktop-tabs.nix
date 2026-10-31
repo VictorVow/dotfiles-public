@@ -48,10 +48,23 @@ in
       Unit.Description = "Sidebery tree push timer (30 s)";
       Timer = {
         OnBootSec = "45s"; # let Firefox + the native host come up first
-        OnUnitActiveSec = "30s";
+        # Backstop only — the path unit below does the real work on each
+        # sessionstore rewrite; this just catches drift + drains commands.
+        OnUnitActiveSec = "60s";
         Persistent = false; # live tree — pointless to catch up after off
       };
       Install.WantedBy = [ "timers.target" ];
+    };
+
+    # Also fire the instant Firefox rewrites the session backup, so a new /
+    # closed tab syncs within its ~15 s flush cadence instead of up to 30 s.
+    systemd.user.paths.firefox-desktop-tabs = {
+      Unit.Description = "Push on sessionstore rewrite";
+      Path = {
+        PathChanged = "%h/.mozilla/firefox/VERTEX/sessionstore-backups/recovery.jsonlz4";
+        Unit = "firefox-desktop-tabs.service";
+      };
+      Install.WantedBy = [ "paths.target" ];
     };
   };
 }
