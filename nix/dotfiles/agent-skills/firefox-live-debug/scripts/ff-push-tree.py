@@ -30,7 +30,8 @@ TOKEN = os.environ.get("TABS_TOKEN", "")
 PROFILE = os.environ.get("TABS_PROFILE", str(Path.home() / ".mozilla/firefox/VERTEX"))
 CLOSE = os.environ.get("TABS_CLOSE", str(HERE / "ff-close-tabs.py"))
 TREE = HERE / "ff-live-sidebery-tree.py"
-DEVICE = "desktop-vertex"
+DEVICE = "sidebery-vertex"   # distinct from the extension's "desktop-vertex" —
+                            # don't let its flat shape overwrite the real tree
 HASH_FILE = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "ff-push-tree.hash"
 
 
@@ -53,7 +54,12 @@ def flat_and_panels(windows):
     for w in windows:
         for pid, p in (w.get("panels") or {}).items():
             if isinstance(p, dict) and p.get("name"):
-                panels[pid] = p["name"]
+                panels[pid] = {
+                    "name": p["name"],
+                    "color": p.get("color") or "toolbar",
+                    "icon": p.get("iconSVG") or "icon_tabs",
+                    "iconIMG": p.get("iconIMGSrc") or p.get("iconIMG") or "",
+                }
         for t in w.get("tabs", []):
             title = t.get("title") or ""
             discarded = title.startswith("\U0001f4a4")
