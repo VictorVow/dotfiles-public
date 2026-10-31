@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """List or close live Firefox tabs by exact URL — including unloaded (discarded) tabs.
 
-Talks to the FF Tab Closer add-on (../tab-closer/) through its native-messaging
+Talks to the 0-Custom - Tab Closer add-on (../tab-closer/) through its native-messaging
 host, which listens on $XDG_RUNTIME_DIR/ff-tab-closer.sock while Firefox runs.
 No restart or remote-debug mode needed.
 
@@ -23,7 +23,7 @@ try:
     s.connect(sock)
 except OSError as e:
     sys.exit(f"error: can't reach {sock} ({e}) — is Firefox running with the "
-             "FF Tab Closer add-on installed?")
+             "0-Custom - Tab Closer add-on installed?")
 s.sendall(json.dumps({"cmd": cmd, "urls": urls}).encode() + b"\n")
 reply = json.loads(s.makefile().readline())
 print(json.dumps(reply, indent=1))

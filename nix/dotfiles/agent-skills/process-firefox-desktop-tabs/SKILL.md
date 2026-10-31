@@ -4,7 +4,7 @@ name: process-firefox-desktop-tabs
 description: >-
   Work through one branch of the user's desktop Firefox tabs (VERTEX profile, organised as a Sidebery tab tree): read the live tree, summarise every webpage in the chosen branch (any depth) into a Markdown file, suggest Logseq parent blocks for each summary (as logseq:// URIs), write the approved summaries into Logseq, then optionally close those tabs in the live browser. Use when the user wants to triage, archive, summarise or "process" open tabs / a Sidebery group / panel on this laptop. For tabs synced from other devices (phone) use `process-firefox-synced-tabs` instead.
 allowed-tools: Bash Read Write Skill AskUserQuestion WebFetch
-compatibility: "Requires the VERTEX Firefox profile with Sidebery, the logseq CLI with a running Logseq DB graph, and MarkText (marktext-wrap). Closing tabs needs the FF Tab Closer add-on (see firefox-live-debug §2)."
+compatibility: "Requires the VERTEX Firefox profile with Sidebery, the logseq CLI with a running Logseq DB graph, and MarkText (marktext-wrap). Closing tabs needs the 0-Custom - Tab Closer add-on (see firefox-live-debug §2)."
 
 ---
 
@@ -80,7 +80,7 @@ Re-read the `.md` first (the user may have edited it in MarkText). Then for each
 
 Ask (AskUserQuestion) whether to close the `done` tabs from the live browser: "Close all saved tabs", "Let me pick", "Keep them open". Also offer the branch's group tab if every child of it is now closed. Only `done` tabs are eligible.
 
-If yes, close them with the FF Tab Closer add-on — no restart, no remote-debug mode, and it closes unloaded (`💤`) tabs too:
+If yes, close them with the 0-Custom - Tab Closer add-on — no restart, no remote-debug mode, and it closes unloaded (`💤`) tabs too:
 
 ```
 C=~/Projects/installs/nix/dotfiles/agent-skills/firefox-live-debug/scripts/ff-close-tabs.py

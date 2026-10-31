@@ -59,6 +59,7 @@
     ./modules/update-all.nix # update.sh timer: daily here, every 2 days on lord-ubuntu
     notifications.homeManagerModules.desktop # KDE notifications + notify CLI from the Notifications hub
     ./modules/recoll.nix     # Recoll full-text document index (~/Documents, ~/Downloads, ~/Media) + hourly timer
+    ./modules/desktop-tabs.nix # Push Sidebery tree to Desktop Tabs server + drain remote closes (30s timer)
     ./modules/desktop.nix    # Desktop autostarts (Solaar, VeraCrypt, Tailscale tray) + xdg-open/ft-mpv wrappers
   ];
 

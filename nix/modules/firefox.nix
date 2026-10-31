@@ -197,6 +197,7 @@ in
       "https://aiometadata.device.example.com"
       "https://calibre.device.example.com"
       "https://calibre-content.device.example.com"
+      "https://firefox-desktop-tabs.device.example.com"
       "https://freellmapi.device.example.com"
       "https://git.device.example.com"
       "https://headscale.device.example.com"
