@@ -3,7 +3,7 @@ name: git-commit
 description: Make a git commit of the changes from this Claude session.
 
 ---
-- `git add` only the files touched by this session. If there are no files touched by this session then give a summary of what files have been changed outside of this session and give a commit message suggestion.
+- `git add` only the files touched by this session. If there are no files touched by this session, the changes are external — do NOT commit them. Instead, summarize the external changes and propose a commit plan: which files go into each commit and the message for each. Ask the user which commits, if any, they want created, and only commit the ones they confirm.
 - Make a single commit by default, but split the work into multiple commits when that's more appropriate (e.g. unrelated changes, or changes that logically belong in separate commits per Conventional Commits type/scope).
 - If executed not in a git repo, then check the child directories for which contain git repos.
 - git commit messages should follow the Conventional Commit structure i.e.
