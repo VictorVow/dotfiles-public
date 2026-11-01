@@ -172,12 +172,22 @@ def drain(tabs):
         HASH_FILE.unlink(missing_ok=True)   # force re-PUT next cycle
         ICONS_FILE.unlink(missing_ok=True)  # server state wiped: resend icons
     urls = {t["url"] for t in tabs}
+    acked = []
     for cmd in res.get("commands", []):
         if cmd.get("action") == "close":
             targets = [u for u in cmd.get("urls", []) if u in urls]
             if targets:
                 subprocess.run([sys.executable, CLOSE, "close", *targets],
                                capture_output=True)
+            # Whether there were live targets or the urls were already gone,
+            # the command is done — ack so the server stops re-serving it.
+            if "issuedAt" in cmd:
+                acked.append(cmd["issuedAt"])
+    if acked:
+        try:
+            api("/api/commands/ack", "POST", {"issuedAt": acked})
+        except Exception:
+            pass   # server re-serves them next tick; a re-close is a no-op
 
 
 def main():
