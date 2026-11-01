@@ -14,7 +14,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/26f4107e47e3ad0ffd0db220469ba83b6f6d96e8";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/55bfb4d7437bd4e09ab7cba58a43bd68eb310044";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/fe13242281a67641c0102cdb1087f0ebe586c7df";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -31,7 +31,7 @@
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/32904dfe1cf86039f3c8c9f41f94e1cfd76dbb34";
+      url = "github:nix-community/home-manager/ab3823b4b24c0c3ca984c1f3ee577fd6d667424c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/467c27cb367fa1059583bcadf28390611f66550b";
+    llm-agents.url = "github:numtide/llm-agents.nix/b14f9d18b6d127221bd9f63817a40e1cca2b344b";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/568cd1ba7278c267cab2364a59b2738f0c08f4e4";
+      url = "github:stablyai/orca/8d4e61912c0a2c7578dfe92e47ef9f2cae7b074c";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/dd02d8ff696385949b05459f2ab9b6ffda18a52c";
+      url = "github:morluto/rea/bc143125edd223b7e0d315d5ea7efdc270c29f9e";
       flake = false;
     };
 
