@@ -232,13 +232,12 @@ in
       # since the last update-all; re-run update-all rather than dropping the
       # flag.
       #
-      # Two cache-cooldown guards so `hms` doesn't burn CPU on source builds:
+      # Two cache-cooldown warnings so `hms` doesn't silently burn CPU on
+      # source builds (both warn only — the switch proceeds regardless):
       #   1. Warn if flake.lock's nixpkgs pin is younger than PIN_AGE_DAYS —
       #      Hydra's cache may not have caught up yet (run update-all first).
       #   2. `nix build --dry-run` the activationPackage and list what would
-      #      compile locally vs download; prompt before switching. That's the
-      #      same guarantee update.sh gives via its post-switch build report,
-      #      moved before the commit point. HMS_FORCE=1 skips the prompt.
+      #      compile locally vs download.
       hms() {
         local flake="${hostProfile.hms.flakePath}"
         local config="${hostProfile.hms.configName}"
@@ -263,7 +262,7 @@ in
         fi
 
         # 2. Dry-run: what would build from source vs substitute from caches.
-        local plan fetched=0 built=() line
+        local plan built=() line
         plan=$(nix build --dry-run --no-link \
                  "$flake#homeConfigurations.$config.activationPackage" 2>&1) || {
           printf '\033[0;31m[ERROR]\033[0m dry-run failed:\n%s\n' "$plan" >&2
@@ -271,7 +270,6 @@ in
         }
         while IFS= read -r line; do
           case "$line" in
-            *"will be fetched"*) fetched=1 ;;
             *"/nix/store/"*.drv)
               line="''${line##*/nix/store/}"   # strip leading space + /nix/store/<hash>-
               line="''${line#*-}"
@@ -283,15 +281,6 @@ in
           printf '\033[1;33m[WARN]\033[0m %d derivation(s) would build locally (no cache):\n' \
                  "''${#built[@]}" >&2
           printf '  %s\n' "''${built[@]}" >&2
-          if [[ -z "''${HMS_FORCE:-}" && -t 0 ]]; then
-            local ans
-            printf 'Switch anyway? [y/N] '
-            read -r ans || ans=N
-            [[ "$ans" =~ ^[Yy]$ ]] || return 1
-          elif [[ -z "''${HMS_FORCE:-}" ]]; then
-            printf 'Non-interactive — aborting. Re-run with HMS_FORCE=1 to override.\n' >&2
-            return 1
-          fi
         fi
 
         home-manager switch --flake "$flake#$config" --no-write-lock-file
