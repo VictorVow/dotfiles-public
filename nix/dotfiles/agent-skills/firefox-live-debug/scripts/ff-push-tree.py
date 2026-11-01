@@ -166,28 +166,46 @@ def push(tabs, panels):
     })
 
 
-def drain(tabs):
+def close(mode, args):
+    out = subprocess.run([sys.executable, CLOSE, mode, *args],
+                         capture_output=True, text=True)
+    try:
+        return json.loads(out.stdout)
+    except ValueError:
+        return {"ok": False}
+
+
+def drain(windows, tabs):
+    """Run queued closes, then ack the ones that fully ran. Unacked commands
+    stay queued server-side and are retried next tick (until TABS_COMMAND_TTL)."""
     res = api(f"/api/commands?device={DEVICE}")
     if res.get("hasDevice") is False:
         HASH_FILE.unlink(missing_ok=True)   # force re-PUT next cycle
         ICONS_FILE.unlink(missing_ok=True)  # server state wiped: resend icons
     urls = {t["url"] for t in tabs}
-    acked = []
+    # Sidebery id -> (tab-strip index, url) from THIS run's sessionstore read:
+    # the reader keeps each window's tabs in strip order.
+    pos = {t.get("id"): (i, t.get("url") or "")
+           for w in windows for i, t in enumerate(w.get("tabs", []))}
+    done = []
     for cmd in res.get("commands", []):
-        if cmd.get("action") == "close":
-            targets = [u for u in cmd.get("urls", []) if u in urls]
-            if targets:
-                subprocess.run([sys.executable, CLOSE, "close", *targets],
-                               capture_output=True)
-            # Whether there were live targets or the urls were already gone,
-            # the command is done — ack so the server stops re-serving it.
-            if "issuedAt" in cmd:
-                acked.append(cmd["issuedAt"])
-    if acked:
-        try:
-            api("/api/commands/ack", "POST", {"issuedAt": acked})
-        except Exception:
-            pass   # server re-serves them next tick; a re-close is a no-op
+        if cmd.get("action") != "close":
+            continue
+        # A tab gone, or now showing another URL, is dropped: nothing to close.
+        at = [f"{pos[t['id']][0]}:{t['url']}" for t in cmd.get("tabs", [])
+              if t.get("id") in pos and pos[t["id"]][1] == t.get("url")]
+        by_url = [u for u in cmd.get("urls", []) if u in urls]
+        ok = True
+        if at:
+            r = close("close-at", at)
+            # fewer closed = stale index (sessionstore lags ~15 s): retry next tick
+            ok = r.get("ok") and len(r.get("tabs", [])) == len(at)
+        if by_url:
+            ok = close("close", by_url).get("ok") and ok
+        if ok:
+            done.append(cmd["issuedAt"])
+    if done:
+        api("/api/commands/ack", "POST", {"issuedAt": done})
 
 
 def main():
@@ -200,7 +218,7 @@ def main():
     if h != prev:
         push(tabs, panels)
         HASH_FILE.write_text(h)
-    drain(tabs)
+    drain(windows, tabs)
     push_icons(host_icons(windows))
 
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "0-Custom - Tab Closer",
-  "version": "0.0.2",
-  "description": "Lets a local CLI list/close tabs by URL via native messaging.",
+  "version": "0.0.3",
+  "description": "Lets a local CLI list/close tabs by URL (or URL + tab index) via native messaging.",
   "permissions": [
     "tabs",
     "nativeMessaging"
