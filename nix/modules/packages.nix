@@ -32,8 +32,9 @@ let
   };
 
   # Herdr desktop app (github:herdrdev/herdr-app) — official prebuilt Linux
-  # tarball; not in nixpkgs. Single statically-linked-ish binary needing only
-  # xcb/xkbcommon. To update: bump version + hash from
+  # tarball; not in nixpkgs. Single statically-linked-ish binary; dlopen()s
+  # libwayland-client + libxcb/libxkbcommon at runtime, so they're exposed
+  # via LD_LIBRARY_PATH in postFixup. To update: bump version + hash from
   # https://releases.herdr.dev/app/latest.json
   herdrApp = pkgs.stdenv.mkDerivation rec {
     pname = "herdr-app";
@@ -43,13 +44,21 @@ let
       hash = "sha256-2m97QPbEFsW03vjbz4t2Z30Cvk9LRdBqTWWHZoUOC0U=";
     };
     sourceRoot = "herdr-app";
-    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.copyDesktopItems ];
-    buildInputs = [ pkgs.libxcb pkgs.libxkbcommon pkgs.stdenv.cc.cc.lib ];
+    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.copyDesktopItems pkgs.makeWrapper ];
+    buildInputs = [ pkgs.libxcb pkgs.libxkbcommon pkgs.wayland pkgs.stdenv.cc.cc.lib ];
     installPhase = ''
       runHook preInstall
       install -Dm755 herdr-app $out/bin/herdr-app
       install -Dm644 herdr-app.svg $out/share/icons/hicolor/scalable/apps/herdr-app.svg
       runHook postInstall
+    '';
+    # GPU/display libs are dlopen()ed, so they're not in RUNPATH — expose them via LD_LIBRARY_PATH
+    postFixup = ''
+      wrapProgram $out/bin/herdr-app \
+        --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath [
+          pkgs.wayland pkgs.libxcb pkgs.libxkbcommon
+          pkgs.vulkan-loader pkgs.libGL pkgs.libglvnd
+        ]}
     '';
     desktopItems = [ (pkgs.makeDesktopItem {
       name = "herdr-app";
