@@ -33,7 +33,7 @@ let
   desktopOnlySkills = [
     "chromium-live-debug" "firefox-live-debug" "firefox-extension-development" "process-firefox-synced-tabs" "process-firefox-desktop-tabs" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-enrich-blocks" "logseq-research"
-    "process-hacker-news-favourites" "process-freetube-playlist" "search-personal-data"
+    "process-hacker-news-favourites" "process-freetube-playlist" "search-personal-data" "ai-screen-recording"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
