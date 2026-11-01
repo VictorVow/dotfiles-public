@@ -62,6 +62,7 @@ io.github.dvlv.boxbuddyrs
 io.github.flattool.Warehouse
 io.github.forkgram.tdesktop
 io.github.giantpinkrobots.flatsweep
+io.github.gnoooo.typst-ide
 io.github.hmlendea.geforcenow-electron
 io.github.ihhub.Fheroes2
 io.github.ilya_zlobintsev.LACT
