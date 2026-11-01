@@ -15,7 +15,9 @@ group (a group.html parent tab); a "💤 " already inside a stored title means
 the tab is discarded/unloaded; a non-default container is appended in
 brackets.
 
-Usage: ff-live-sidebery-tree.py [-p PROFILE_DIR] [FILTER] [--json]
+Usage: ff-live-sidebery-tree.py [-p PROFILE_DIR] [FILTER] [--json [--icons]]
+--icons adds each tab's sessionstore favicon (`image`, usually a data: URI;
+~10 MB across 2000 tabs) to the JSON nodes.
 FILTER is a substring matched against title+URL (case-insensitive); matching
 tabs keep their parent chain so the tree context survives.
 """
@@ -166,6 +168,8 @@ def main():
                     default=Path.home() / ".mozilla/firefox/VERTEX")
     ap.add_argument("--json", action="store_true",
                     help="emit raw JSON instead of Markdown")
+    ap.add_argument("--icons", action="store_true",
+                    help="with --json: include each tab's favicon (image)")
     ap.add_argument("filter", nargs="?", default="")
     args = ap.parse_args()
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -184,7 +188,8 @@ def main():
         for i, w in enumerate(ss.get("windows", [])):
             out.append({"window": i, "title": w.get("title") or "",
                         "panels": panels,
-                        "tabs": [tab_node(t, containers)
+                        "tabs": [dict(tab_node(t, containers),
+                                      **({"image": t.get("image")} if args.icons else {}))
                                  for t in w.get("tabs", [])]})
         print(json.dumps(out, indent=1, ensure_ascii=False))
         return

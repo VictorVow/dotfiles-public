@@ -10,6 +10,10 @@ ff-close-tabs.py (native host -> live tab close by URL).
 Skips the PUT entirely when the tree hash is unchanged — the 30 s tick then
 only drains close commands.
 
+Favicons: one icon per hostname, taken from sessionstore's own data: URIs,
+PUT to /api/favicons only when new/changed (or every ICON_REFRESH, so the
+server's 365d TTL never lapses). The server never fetches icons itself.
+
 Env:
   TABS_SERVER   base URL (e.g. https://firefox-desktop-tabs.device.example.com)
   TABS_TOKEN    bearer token
@@ -17,12 +21,15 @@ Env:
   TABS_CLOSE    path to ff-close-tabs.py (default sibling scripts/ dir)
 """
 import hashlib
+import time
 import json
 import os
 import subprocess
 import sys
 import urllib.request
+from collections import Counter, defaultdict
 from pathlib import Path
+from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
 SERVER = os.environ.get("TABS_SERVER", "").rstrip("/")
@@ -33,6 +40,9 @@ TREE = HERE / "ff-live-sidebery-tree.py"
 DEVICE = "sidebery-vertex"   # distinct from the extension's "desktop-vertex" —
                             # don't let its flat shape overwrite the real tree
 HASH_FILE = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "ff-push-tree.hash"
+ICONS_FILE = HASH_FILE.with_suffix(".icons.json")   # {host: [sha1, sentAt]}
+ICON_REFRESH = 180 * 86400        # re-push well inside the server's 365d TTL
+ICON_BATCH_BYTES = 2 * 1024 * 1024
 
 
 def die(msg):
@@ -41,7 +51,7 @@ def die(msg):
 
 def read_tree():
     out = subprocess.run(
-        [sys.executable, str(TREE), "-p", PROFILE, "--json"],
+        [sys.executable, str(TREE), "-p", PROFILE, "--json", "--icons"],
         capture_output=True, text=True)
     if out.returncode != 0:
         die(f"tree read failed: {out.stderr.strip()}")
@@ -93,6 +103,41 @@ def flat_and_panels(windows):
     return tabs, panels
 
 
+def host_icons(windows):
+    """-> {hostname: data URI}. A host with several icons keeps its most
+    common one (ties by value) so the pick is stable across runs."""
+    seen = defaultdict(Counter)
+    for w in windows:
+        for t in w.get("tabs", []):
+            img, u = t.get("image") or "", urlparse(t.get("url") or "")
+            # UI only shows icons for http(s) tabs (not moz-extension:// etc.)
+            if u.scheme in ("http", "https") and u.hostname and img.startswith("data:image/"):
+                seen[u.hostname][img] += 1
+    return {h: max(c, key=lambda i: (c[i], i)) for h, c in seen.items()}
+
+
+def push_icons(icons):
+    try:
+        sent = json.loads(ICONS_FILE.read_text())
+    except (OSError, ValueError):
+        sent = {}
+    now = time.time()
+    due = {h: u for h, u in icons.items()
+           if h not in sent or sent[h][0] != hashlib.sha1(u.encode()).hexdigest()
+           or now - sent[h][1] > ICON_REFRESH}
+    batch, size = {}, 0
+    for i, (h, u) in enumerate(sorted(due.items())):
+        batch[h], size = u, size + len(u)
+        if size >= ICON_BATCH_BYTES or i == len(due) - 1:
+            api("/api/favicons", "PUT", batch)
+            # rejected ones (bad type / too big) are marked sent too, so they
+            # are not retried every tick; a changed icon has a new sha anyway
+            for k in batch:
+                sent[k] = [hashlib.sha1(batch[k].encode()).hexdigest(), now]
+            ICONS_FILE.write_text(json.dumps(sent))
+            batch, size = {}, 0
+
+
 def tree_hash(tabs):
     h = hashlib.sha1()
     for t in sorted(tabs, key=lambda x: (x["id"] or 0)):
@@ -125,6 +170,7 @@ def drain(tabs):
     res = api(f"/api/commands?device={DEVICE}")
     if res.get("hasDevice") is False:
         HASH_FILE.unlink(missing_ok=True)   # force re-PUT next cycle
+        ICONS_FILE.unlink(missing_ok=True)  # server state wiped: resend icons
     urls = {t["url"] for t in tabs}
     for cmd in res.get("commands", []):
         if cmd.get("action") == "close":
@@ -137,13 +183,15 @@ def drain(tabs):
 def main():
     if not SERVER or not TOKEN:
         die("TABS_SERVER and TABS_TOKEN are required")
-    tabs, panels = flat_and_panels(read_tree())
+    windows = read_tree()
+    tabs, panels = flat_and_panels(windows)
     h = tree_hash(tabs)
     prev = HASH_FILE.read_text().strip() if HASH_FILE.exists() else ""
     if h != prev:
         push(tabs, panels)
         HASH_FILE.write_text(h)
     drain(tabs)
+    push_icons(host_icons(windows))
 
 
 if __name__ == "__main__":
