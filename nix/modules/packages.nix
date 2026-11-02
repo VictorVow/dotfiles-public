@@ -204,7 +204,6 @@ in
                  # in Reader Mode https://support.mozilla.org/en-US/kb/speechd-setup
 
     # ── Screen Recording / Streaming ─────────────────────────────────────────
-    simplescreenrecorder  # Screen recorder with hardware encoding support
     gpu-screen-recorder     # GPU-accelerated screen recorder (replaces flathub-gpu-screen-recorder.sh)
     gpu-screen-recorder-gtk # GUI frontend for gpu-screen-recorder (replaces Flatpak com.dec05eba.gpu_screen_recorder)
 
