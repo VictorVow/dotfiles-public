@@ -27,10 +27,10 @@ Desktop: **Kubuntu, KDE Plasma 6.6.6, Wayland**. Wayland blocks the X11 free-for
 | Browser DevTools MCPs (firefox/chromium/×2) | **Installed**, wired in `nix/modules/ai-agents.nix` |
 | Anthropic synced `computer-use` skill | **Disabled here.** It drives `mcp__computer-use__*` tools that only exist inside Claude Desktop on macOS/Windows — the Linux desktop beta ships no screen control, so the skill is inert on this machine. |
 | OpenAI Codex app computer use | **Not available.** Its own-cursor computer use is a macOS-only beta (added Apr 2026); the Linux Codex CLI has no desktop control, only browser-level Playwright. `~/.config/codex/computer-use/` is just its UI prefs. |
-| `kwin-mcp` (KDE virtual sessions + live attach) | Not installed. KDE-only, `uv`/`pip` install, would register in `ai-agents.nix` |
-| `computer-use-linux` (agent-sh, Rust MCP) | Not installed. Cross-desktop backend picker (portal/ydotool/KWin scripting/AT-SPI); only manually validated on GNOME |
+| [`kwin-mcp`](https://github.com/isac322/kwin-mcp) (KDE virtual sessions + live attach) | [Not installed](https://github.com/isac322/kwin-mcp). KDE-only, `uv`/`pip` install, would register in `ai-agents.nix` |
+| [`computer-use-linux`](https://github.com/agent-sh/computer-use-linux) (agent-sh, Rust MCP) | [Not installed](https://github.com/agent-sh/computer-use-linux). Cross-desktop backend picker (portal/ydotool/KWin scripting/AT-SPI); only manually validated on GNOME |
 | Anthropic computer-use **API** tool / OpenAI GPT-5.4 CUA | Available at API level, but both are "bring your own executor" — you'd build the screenshot/input loop yourself |
-| Open-source agents (Agent S3, UI-TARS, Bytebot, Cua) | Not installed. All assume X11 or their own VM/container |
+| Open-source agents ([Agent S3](https://github.com/simular-ai/agent-s), [UI-TARS](https://github.com/bytedance/UI-TARS-desktop), [Bytebot](https://github.com/bytebot-ai/bytebot), [Cua](https://github.com/trycua/cua)) | Not installed. All assume X11 or their own VM/container |
 
 ## Vendor beta note
 
