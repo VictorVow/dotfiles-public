@@ -595,7 +595,36 @@ in
     herdrApp    # Herdr desktop app — GPU terminal/agent multiplexer (herdr.dev), see let-block.
                 # NOTE: `pkgs.herdr` in nixpkgs is the herdr-core CLI, a different program —
                 # the app finds/updates its own core, or install one with `programs.herdr`.
-    llmAgents.hermes-desktop # Hermes One desktop app (fathah/hermes-desktop) — Hermes Agent companion.
+    # Hermes One desktop app (fathah/hermes-desktop) — Hermes Agent companion.
+    # On this AMDGPU/KWayland host its GPU process intermittently fails to spawn
+    # (error_code=1002) and Chromium FATALs "GPU process isn't usable" — flaky per
+    # launch (upstream NousResearch/hermes-agent #97616/#100549/#132793). The app
+    # self-heals after 2 boot aborts by latching software-GPU mode via
+    # ~/.config/Hermes/linux-gpu-fallback.json, so all we add is
+    # --ozone-platform=x11 to keep its transparent HUD/pet overlay windows off the
+    # Wayland compositor path. Real argv flag (not the env hint) so it applies from
+    # a shell or KRunner/.desktop; .desktop Exec= pinned to the wrapped binary so
+    # the store path's `Exec=hermes-desktop` can't resolve the unwrapped binary via
+    # another PATH. Deliberately NOT --in-process-gpu: that removes the child-
+    # process isolation that lets the app's own GPU-fallback work, and turns a
+    # recoverable GPU fault into a whole-app SIGTRAP.
+    # SIGTRAP on KRunner launch with "SUID sandbox helper ... not configured
+    # correctly" = missing userns: see ansible/installers/nix-electron-apparmor.yml.
+    (pkgs.symlinkJoin {
+      name = "hermes-desktop-wrapped";
+      paths = [ llmAgents.hermes-desktop ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        rm $out/bin/hermes-desktop
+        makeWrapper ${llmAgents.hermes-desktop}/bin/hermes-desktop $out/bin/hermes-desktop \
+          --add-flags '--ozone-platform=x11'
+        # .desktop is a store symlink → replace with an editable copy, then pin Exec=
+        rm $out/share/applications/hermes-desktop.desktop
+        substitute ${llmAgents.hermes-desktop}/share/applications/hermes-desktop.desktop \
+          $out/share/applications/hermes-desktop.desktop \
+          --replace-fail 'Exec=hermes-desktop %U' "Exec=$out/bin/hermes-desktop %U"
+      '';
+    })
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
 

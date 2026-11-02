@@ -1,0 +1,52 @@
+---
+# Imported by custom-installers.yml (shares its play vars).
+
+# ════════════════════════════════════════════════════════════════════════
+# NIX ELECTRON — AppArmor userns profile for Nix-built Electron apps
+# ════════════════════════════════════════════════════════════════════════
+# Ubuntu ships kernel.apparmor_restrict_unprivileged_userns=1, so the
+# nixpkgs `electron` binary (used by e.g. hermes-desktop) cannot create
+# user namespaces when launched unconfined (KRunner/.desktop). Chromium
+# then falls back to the SUID sandbox, finds the non-setuid store
+# chrome-sandbox, and aborts with SIGTRAP:
+#   FATAL:setuid_sandbox_host.cc The SUID sandbox helper binary was found,
+#   but is not configured correctly.
+# Launches from an already-confined parent (e.g. a shell inside an AppMan
+# AppImage, which inherits appman-appimages' userns) work, which hides it.
+# Same "narrow exemption, keep global hardening" approach as the AppMan
+# and Tor Browser profiles. The glob tracks every electron version
+# without re-running this after updates.
+#
+# Run by tag:
+#   ansible-playbook custom-installers.yml --ask-become-pass --tags nix_electron
+# To undo: `sudo apparmor_parser -R /etc/apparmor.d/nix-electron`
+# and delete the file.
+
+- name: Nix Electron | install AppArmor userns profile
+  ansible.builtin.copy:
+    dest: /etc/apparmor.d/nix-electron
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Managed by installs/custom-installers.yml — do not edit by hand.
+      # Grants `userns` to Nix-built Electron so its sandbox works under
+      # kernel.apparmor_restrict_unprivileged_userns=1.
+      abi <abi/4.0>,
+      include <tunables/global>
+
+      profile nix-electron /nix/store/*-electron-unwrapped-*/libexec/electron/electron flags=(unconfined) {
+        userns,
+
+        include if exists <local/nix-electron>
+      }
+  become: yes
+  register: nix_electron_apparmor_profile
+  tags: nix_electron
+
+- name: Nix Electron | reload AppArmor profile
+  ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/nix-electron
+  become: yes
+  when: nix_electron_apparmor_profile.changed  # noqa: no-handler — load before next launch
+  changed_when: true
+  tags: nix_electron
