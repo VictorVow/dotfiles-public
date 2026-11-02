@@ -1,4 +1,4 @@
-{ pkgs, lib, llm-agents, ... }:
+{ pkgs, lib, config, llm-agents, ... }:
 
 let
   jsonFormat = pkgs.formats.json { };
@@ -908,4 +908,21 @@ in
   '';
 
   home.sessionVariables.CLAUDE_ENV_FILE = "$HOME/.claude/direnv-env.sh";
+
+  # ── Hermes: repo-tracked content symlinked into ~/.hermes ────────────────────
+  # ~/.hermes itself must stay a plain real dir — hermes-desktop's gateway
+  # ticket check requires realpath($HERMES_HOME) == $HERMES_HOME and rejects a
+  # symlinked home ("Noncanonical gateway profile", app hangs on CONNECTING).
+  # Only the agent-authored pieces live in the repo (memories + agent-created
+  # skills); mkOutOfStoreSymlink keeps the link pointing at the mutable repo
+  # path so the agent's memory/skill_manage writes land in git.
+  # Layout + rationale: nix/dotfiles/hermes/docs/ai-hermes.md
+  home.file.".hermes/memories".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/memories";
+  home.file.".hermes/profiles/installs/memories".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/memories";
+  home.file.".hermes/profiles/installs/skills/config-repo-review".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/skills/config-repo-review";
+  home.file.".hermes/profiles/installs/skills/nix-home-manager-ops".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/skills/nix-home-manager-ops";
 }

@@ -1,0 +1,1 @@
+installs repo (~/Projects/installs): CHANGELOG.md and CVLOG.md are only ever written by the /system-update-changelog and /system-update-cvlog skills (daily timer) — agents must not edit them directly, even to record work they just did. The agent-skills scan-dir + Hermes external_dirs setup lives in the agent-skills.nix header comment.

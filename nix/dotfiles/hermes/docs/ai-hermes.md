@@ -7,18 +7,25 @@ Hermes runs two profile homes on boss-laptop:
 | Default | `/home/boss/.hermes` | The `hermes`/`@hermes` agent (CLI sessions, teammate roster's default) |
 | `installs` | `/home/boss/.hermes/profiles/installs` | The Installs agent (`hermes desktop` profile switch — the agent that works on this repo) |
 
-Both homes live in this repo since 2026-11-02: the tree is
-[`nix/dotfiles/hermes/home/`](../../dotfiles/hermes/home/) and `~/.hermes` is a
-**bind mount** of it (fstab entry, re-asserted by an `ansible.yml` task). A
-symlink does NOT work: hermes-desktop's gateway ticket check requires
-`realpath(profile_id) == profile_id` and refuses a symlinked home with
-"Noncanonical gateway profile" (app hangs on CONNECTING). All `$HERMES_HOME`
-paths below resolve through the mount identically either way.
-The whole `home/` tree is gitignored — it holds runtime state and secrets
-(`auth.json`, `.env`, `state.db`, session transcripts) — so nothing inside it is
-committed; only this `docs/` sibling is tracked. It is a live dotfiles
-relocation, NOT a `home.file`-managed verbatim dir: nothing in
-`agent-skills.nix`/`home.nix` writes into it.
+`~/.hermes` is a plain directory on disk (NOT relocated, NOT a symlink —
+hermes-desktop requires `realpath($HERMES_HOME) == $HERMES_HOME` and refuses a
+symlinked home with "Noncanonical gateway profile", hanging on CONNECTING).
+
+What this repo tracks is only the **agent-authored** content, symlinked into
+the live home:
+
+| Live path | Symlinks to |
+|-----------|-------------|
+| `~/.hermes/memories/` | [`../memories/`](../memories/) — default profile memory |
+| `~/.hermes/profiles/installs/memories/` | [`../profiles/installs/memories/`](../profiles/installs/memories/) |
+| `~/.hermes/profiles/installs/skills/config-repo-review` | [`../profiles/installs/skills/config-repo-review`](../profiles/installs/skills/config-repo-review) |
+| `~/.hermes/profiles/installs/skills/nix-home-manager-ops` | [`../profiles/installs/skills/nix-home-manager-ops`](../profiles/installs/skills/nix-home-manager-ops) |
+
+Everything else under `~/.hermes` (state.db, sessions, auth.json, `.env`,
+config.yaml, bundled skills catalog, logs, cache, kanban, …) is runtime state
+or secrets and stays local — nothing in `agent-skills.nix`/`home.nix` writes
+into it. New agent-created skills the user wants tracked get moved into the
+matching `profiles/<name>/skills/` dir here and symlinked back the same way.
 
 Each profile keeps its own sessions, memory, skills, config, cron and logs; nothing is shared
 between them unless configured below.
@@ -45,8 +52,10 @@ session's context (subject to a character budget):
   (Brewfile) via the `search-agent-history` skill.
 
 So for the Installs agent specifically: **memory lives at
-`/home/boss/.hermes/profiles/installs/memories/`** and the default agent's at
-`/home/boss/.hermes/memories/`.
+`/home/boss/.hermes/profiles/installs/memories/`** (a symlink into
+`nix/dotfiles/hermes/profiles/installs/memories/` in this repo) and the
+default agent's at `/home/boss/.hermes/memories/` (symlinked into
+`nix/dotfiles/hermes/memories/`).
 
 ## Skills — on-disk locations
 
@@ -60,8 +69,10 @@ Each profile loads skills from, in precedence order (highest first):
      (`autonomous-ai-agents/`, `productivity/`, `software-development/`, …) each with
      one SKILL.md per skill.
    - **Agent-created skills** as top-level `<name>/SKILL.md` — e.g. the `installs`
-     profile has `config-repo-review/` and `nix-home-manager-ops/`. The agent creates
-     and maintains these with its `skill_manage` tool; the curator tidies them.
+     profile has `config-repo-review/` and `nix-home-manager-ops/`, which live in
+     this repo under `nix/dotfiles/hermes/profiles/installs/skills/` and are
+     symlinked into the live home. The agent maintains them with `skill_manage`
+     (writes through the symlink land in the repo); the curator tidies them.
 3. **`skills.create_dir`** — optional redirect for new skill creation (unset here)
 4. **`skills.external_dirs`** in `$HERMES_HOME/config.yaml — extra scan roots. Set on
    **both** profiles (2026-11-02) to `~/.claude/skills`, which exposes the repo's
