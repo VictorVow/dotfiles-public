@@ -17,5 +17,10 @@ __pycache__/
 # nix build output symlink
 /result
 
+# Live Hermes profile homes (nix/dotfiles/hermes/home → ~/.hermes symlink).
+# Runtime state, secrets (auth.json, .env), session DBs — never commitable.
+# Only the docs/ sibling is tracked.
+/nix/dotfiles/hermes/home/
+
 # web-ext signing upload-tracking file
 .amo-upload-uuid

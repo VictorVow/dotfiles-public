@@ -715,6 +715,29 @@
       become: yes
       when: _nfs_fstab.changed  # noqa: no-handler
 
+    # ── Hermes home bind mount ─────────────────────────────────────────────
+    # $HERMES_HOME (~/.hermes) lives in this repo at nix/dotfiles/hermes/home.
+    # The Hermes desktop app rejects a symlinked profile home ("Noncanonical
+    # gateway profile": it requires realpath(profile_id) == profile_id), so a
+    # symlink cannot work — a bind mount keeps /home/boss/.hermes canonical
+    # while the data stays in the repo. See nix/dotfiles/hermes/docs/ai-hermes.md.
+    - name: "Hermes | ensure ~/.hermes bind-mount point exists"
+      ansible.builtin.file:
+        path: /home/boss/.hermes
+        state: directory
+        owner: boss
+        group: boss
+        mode: "0700"
+
+    - name: "Hermes | persistent bind mount of the repo hermes home"
+      ansible.posix.mount:
+        path: /home/boss/.hermes
+        src: /home/boss/Projects/installs/nix/dotfiles/hermes/home
+        fstype: none
+        opts: bind
+        state: mounted
+      become: yes
+
   handlers:
     - name: Restart systemd-logind
       ansible.builtin.systemd:
