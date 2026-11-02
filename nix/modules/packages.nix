@@ -595,6 +595,7 @@ in
     herdrApp    # Herdr desktop app — GPU terminal/agent multiplexer (herdr.dev), see let-block.
                 # NOTE: `pkgs.herdr` in nixpkgs is the herdr-core CLI, a different program —
                 # the app finds/updates its own core, or install one with `programs.herdr`.
+    llmAgents.hermes-desktop # Hermes One desktop app (fathah/hermes-desktop) — Hermes Agent companion.
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
 
