@@ -166,6 +166,10 @@ app.fork.Grayjay
 
 gg.hydralauncher.hydra
 
+## kwi-nightly
+
+org.kde.kwi
+
 ## launcher.moe
 
 moe.celica.BabyloniaTerminal
