@@ -11,21 +11,24 @@ Hermes runs two profile homes on boss-laptop:
 hermes-desktop requires `realpath($HERMES_HOME) == $HERMES_HOME` and refuses a
 symlinked home with "Noncanonical gateway profile", hanging on CONNECTING).
 
-What this repo tracks is only the **agent-authored** content, symlinked into
-the live home:
+What this repo tracks is only the **agent-authored** content:
 
-| Live path | Symlinks to |
-|-----------|-------------|
-| `~/.hermes/memories/` | [`../memories/`](../memories/) — default profile memory |
-| `~/.hermes/profiles/installs/memories/` | [`../profiles/installs/memories/`](../profiles/installs/memories/) |
-| `~/.hermes/profiles/installs/skills/config-repo-review` | [`../profiles/installs/skills/config-repo-review`](../profiles/installs/skills/config-repo-review) |
-| `~/.hermes/profiles/installs/skills/nix-home-manager-ops` | [`../profiles/installs/skills/nix-home-manager-ops`](../profiles/installs/skills/nix-home-manager-ops) |
+| Live path | Backed by |
+|-----------|-----------|
+| `~/.hermes/memories/` | symlink → [`../memories/`](../memories/) — default profile memory |
+| `~/.hermes/profiles/installs/memories/` | symlink → [`../profiles/installs/memories/`](../profiles/installs/memories/) |
+| `~/.hermes` agent-created skills | `skills.create_dir` → [`../skills/`](../skills/) — scanned in place, no symlinks |
+| `~/.hermes/profiles/installs` agent-created skills | `skills.create_dir` → [`../profiles/installs/skills/`](../profiles/installs/skills/) — scanned in place |
 
 Everything else under `~/.hermes` (state.db, sessions, auth.json, `.env`,
 config.yaml, bundled skills catalog, logs, cache, kanban, …) is runtime state
 or secrets and stays local — nothing in `agent-skills.nix`/`home.nix` writes
-into it. New agent-created skills the user wants tracked get moved into the
-matching `profiles/<name>/skills/` dir here and symlinked back the same way.
+into it. New agent-created skills land directly in the matching repo skills
+dir because both profiles' `config.yaml` set `skills.create_dir` there
+(Hermes scans `create_dir` alongside `$HERMES_HOME/skills/`); no symlink or
+home-manager change is needed for each new skill. Skills created *before*
+this was set, or hub-installed ones still under `$HERMES_HOME/skills/`, can
+be moved into the matching repo dir manually.
 
 Each profile keeps its own sessions, memory, skills, config, cron and logs; nothing is shared
 between them unless configured below.
@@ -63,17 +66,17 @@ Each profile loads skills from, in precedence order (highest first):
 
 1. **Project-local** trusted repo dirs (`.hermes/skills`, `.agents/skills` — only after
    `hermes skills trust <repo>`; not used in this repo)
-2. **`$HERMES_HOME/skills/`** — the profile's own dir, the source of truth. On this
-   machine each holds:
-   - Bundled catalog (~90 skills) seeded from the Hermes repo, as category dirs
-     (`autonomous-ai-agents/`, `productivity/`, `software-development/`, …) each with
-     one SKILL.md per skill.
-   - **Agent-created skills** as top-level `<name>/SKILL.md` — e.g. the `installs`
-     profile has `config-repo-review/` and `nix-home-manager-ops/`, which live in
-     this repo under `nix/dotfiles/hermes/profiles/installs/skills/` and are
-     symlinked into the live home. The agent maintains them with `skill_manage`
-     (writes through the symlink land in the repo); the curator tidies them.
-3. **`skills.create_dir`** — optional redirect for new skill creation (unset here)
+2. **`$HERMES_HOME/skills/`** — the profile's own dir. On this machine each holds
+   the bundled catalog (~90 skills) seeded from the Hermes repo, as category dirs
+   (`autonomous-ai-agents/`, `productivity/`, `software-development/`, …) each with
+   one SKILL.md per skill.
+3. **`skills.create_dir`** — redirect for new skill creation. **Set on both
+   profiles** (2026-11-02) to the repo dir: `~/Projects/installs/nix/dotfiles/hermes/skills`
+   (default) and `.../profiles/installs/skills` (installs profile). It is scanned
+   alongside the local dir, so agent-created skills live in git directly — e.g.
+   `config-repo-review/`, `nix-home-manager-ops/`,
+   `hermes-desktop-outside-in-debugging/` under the installs profile. The agent
+   maintains them with `skill_manage`; the curator tidies them.
 4. **`skills.external_dirs`** in `$HERMES_HOME/config.yaml — extra scan roots. Set on
    **both** profiles (2026-11-02) to `~/.claude/skills`, which exposes the repo's
    `agent-skills` (26 own + third-party symlinked skills) to Hermes — including as

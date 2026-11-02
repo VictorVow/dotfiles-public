@@ -913,16 +913,13 @@ in
   # ~/.hermes itself must stay a plain real dir — hermes-desktop's gateway
   # ticket check requires realpath($HERMES_HOME) == $HERMES_HOME and rejects a
   # symlinked home ("Noncanonical gateway profile", app hangs on CONNECTING).
-  # Only the agent-authored pieces live in the repo (memories + agent-created
-  # skills); mkOutOfStoreSymlink keeps the link pointing at the mutable repo
-  # path so the agent's memory/skill_manage writes land in git.
+  # Only memories are symlinked (agent's `memory` tool writes land in git).
+  # Agent-created skills need NO symlinks: both profiles' config.yaml set
+  # skills.create_dir to the repo dir, which Hermes scans alongside the local
+  # skills dir — new skill_manage creates land directly in the repo.
   # Layout + rationale: nix/dotfiles/hermes/docs/ai-hermes.md
   home.file.".hermes/memories".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/memories";
   home.file.".hermes/profiles/installs/memories".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/memories";
-  home.file.".hermes/profiles/installs/skills/config-repo-review".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/skills/config-repo-review";
-  home.file.".hermes/profiles/installs/skills/nix-home-manager-ops".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/installs/nix/dotfiles/hermes/profiles/installs/skills/nix-home-manager-ops";
 }
