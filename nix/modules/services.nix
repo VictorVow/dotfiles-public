@@ -39,6 +39,27 @@ in
     };
   };
 
+  # magpie gateway — serves every signed-in subscription account (Devin, …) as
+  # OpenAI/Anthropic/Responses APIs on 127.0.0.1:3425 so non-OpenCode agents
+  # (Hermes, whose config.yaml magpie rewrites to provider magpie) can use them.
+  # Without a running magpie process nothing answers :3425, so the agents it
+  # wired break — keep it up like ollama. `magpie serve` is the headless mode
+  # (tui/web also serve while open). Providers/sign-ins live in ~/.config/magpie.
+  systemd.user.services.magpie = {
+    Unit = {
+      Description = "magpie gateway (shared AI subscription accounts on :3425)";
+      After = [ "network.target" ];
+    };
+    Service = {
+      ExecStart = "${config.home.profileDirectory}/bin/magpie serve";
+      Restart = "always";
+      RestartSec = "5";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
   systemd.user.services.jackett = {
     Unit = {
       Description = "Jackett torrent indexer proxy";

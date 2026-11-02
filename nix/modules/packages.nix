@@ -71,6 +71,28 @@ let
     }) ];
   };
 
+  # magpie (yetone/magpie) — terminal build (`magpie-cli-linux-amd64`): local
+  # gateway at 127.0.0.1:3425/v1 (OpenAI chat completions + Responses +
+  # Anthropic Messages) that shares signed-in coding subscriptions (Devin,
+  # Cursor, ChatGPT Codex, Copilot…) with every wired agent — incl. Hermes
+  # Agent (~/.hermes/config.yaml). Not in nixpkgs or llm-agents.nix; static Go
+  # binary, needs no libs. The desktop build (magpie-linux-amd64) wants GTK 3 +
+  # WebKitGTK 4.1; TUI/web/CLI and the gateway are all in this build.
+  # Updates itself in place? No — the store is read-only, so bump version+hash
+  # from https://usemagpie.ai/api/latest (assets."magpie-cli-linux-amd64").
+  magpieCli = pkgs.stdenv.mkDerivation rec {
+    pname = "magpie-cli";
+    version = "0.1.2752";
+    src = pkgs.fetchurl {
+      url = "https://github.com/yetone/magpie-releases/releases/download/v${version}/magpie-cli-linux-amd64";
+      hash = "sha256-QMKC+QChX1dOakIHj0X1qIqnvgk3cxA+63zbYJa1BHk=";
+    };
+    dontUnpack = true;
+    installPhase = ''
+      install -Dm755 $src $out/bin/magpie
+    '';
+  };
+
   # Looking Glass client, bleeding-edge build. nixpkgs only has B7, but the
   # signed Windows IDD is bleeding-only, and the client, IDD and kvmfr kernel
   # module must all come from the SAME upstream commit. To update, bump this
@@ -628,6 +650,9 @@ in
     })
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
+    magpieCli   # magpie terminal build (binary: `magpie`) — shares the Devin/Cursor/etc.
+                # subscription sign-ins with agents via a local gateway (127.0.0.1:3425/v1);
+                # wired to Hermes + OpenCode etc. See let-block + services.nix magpie service.
 
     # ── Documents / PDF ───────────────────────────────────────────────────────
     pkgs-latest.pdfcraft # PDF reader/editor in Rust (binaries: pdfcraft GUI + pdfcraft-cli,
