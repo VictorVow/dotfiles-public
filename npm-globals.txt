@@ -8,11 +8,10 @@
 #   name and is how the activation script checks whether it's already installed.
 # - Adding a line + running `hms` installs anything missing (activation script
 #   in nix/modules/shell.nix). update.sh upgrades everything in the prefix.
+#
 #   Removal stays manual (`npm uninstall -g --prefix ~/.npm-global <pkg>`).
 
 # AI / LLM CLIs not in llm-agents.nix
-cline                       cline     # Cline LLM CLI
-@continuedev/cli            continue  # Continue Dev LLM CLI
 
 # Other
 @helgesverre/namecheap-cli  namecheap # Namecheap domains/DNS CLI
