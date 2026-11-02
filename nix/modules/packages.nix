@@ -627,6 +627,11 @@ in
     pkgs-unstable.devin-cli    # Cognition Devin CLI (binary: `devin`) — not in llm-agents.nix; stable's
                                # build lags far behind. Upstream alternative is `npm i -g devin`.
 
+    # ── Documents / PDF ───────────────────────────────────────────────────────
+    pkgs-latest.pdfcraft # PDF reader/editor in Rust (binaries: pdfcraft GUI + pdfcraft-cli,
+                         # whose `mcp` subcommand is the opt-in agent MCP server).
+                         # latest-only attr — not yet in either age-pinned nixpkgs.
+
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
     # rustdesk — removed from Nix; the build pulls libsciter (Rust crate +
