@@ -283,7 +283,28 @@ in
           printf '  %s\n' "''${built[@]}" >&2
         fi
 
+        # 3. Post-switch diff (nvd): resolve the profile symlink BEFORE the
+        #    switch (it's a generation-N-link that persists), then diff it
+        #    against the new one so every hms ends with an added/removed/
+        #    up/downgraded package list. First run installs nvd itself, so
+        #    guard on its presence.
+        # ~/.nix-profile is NOT the HM generation on this setup — it resolves
+        # to ~/.local/state/nix/profiles/profile (the `nix profile`
+        # user-environment). HM's generations are the home-manager-*-link
+        # entries in the same dir; the `home-manager` symlink tracks the
+        # current one. readlink -f gives the persistent generation-N store
+        # path (survives the switch), so diff old vs new.
+        local hm_profile="$HOME/.local/state/nix/profiles/home-manager"
+        local old_profile=""
+        [[ -e "$hm_profile" ]] && old_profile=$(readlink -f "$hm_profile")
+
         home-manager switch --flake "$flake#$config" --no-write-lock-file
+        local rc=$?
+
+        if (( rc == 0 )) && [[ -n "$old_profile" ]] && command -v nvd >/dev/null; then
+          nvd diff "$old_profile" "$hm_profile"
+        fi
+        return $rc
       }
 
       # ── Nix shortcuts: nsh / nr ────────────────────────────────────────────

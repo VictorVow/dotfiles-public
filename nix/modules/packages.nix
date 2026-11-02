@@ -118,6 +118,9 @@ in
              # internal game bwrap sandbox (both are needed)
     btop     # Better top - rich terminal system monitor
     htop     # Interactive process viewer
+    nvd      # Nix/NixOS/HM version diff tool — used by hms (shell.nix) to show
+             # added/removed/up/downgraded packages after each switch
+             # (readlink'd pre-switch profile vs the new one).
     # nvtop — removed from Nix: nvtopPackages.full pulls the entire CUDA 12.8
     # archive (libcublas/cusparse/cusolver/nvjitlink/nvrtc + cuda-merged,
     # ~600 MiB DL / 2.7 GiB unpacked) on every lock bump. Install via apt
