@@ -11,7 +11,7 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/26f4107e47e3ad0ffd0db220469ba83b6f6d96e8";
+    nixpkgs.url = "github:NixOS/nixpkgs/8ce73368d1efd4d657e9064d29b144a52046b4e8";
 
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/fe13242281a67641c0102cdb1087f0ebe586c7df";
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/b14f9d18b6d127221bd9f63817a40e1cca2b344b";
+    llm-agents.url = "github:numtide/llm-agents.nix/8efcba308a6b12a92441cb4df624e484bad9e18a";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/8d4e61912c0a2c7578dfe92e47ef9f2cae7b074c";
+      url = "github:stablyai/orca/fbc48858f6c43e0d3c51713931e76864276ad363";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/b5e81de845092694ba1bfc5af15400f319c89b6d";
+      url = "github:upstash/context7/c66d7815b597d147114be1ceacc5a7098aa491ce";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/bc143125edd223b7e0d315d5ea7efdc270c29f9e";
+      url = "github:morluto/rea/e7f986c99485f48cb34d9e1d5cbf2f291a2d45ca";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/936867543ac2576920d663cc9803597f6044f3ac";
+      url = "github:pbakaus/impeccable/5c2d1be3fac95bd1de722cc9db027a0b0efeefe7";
       flake = false;
     };
 
