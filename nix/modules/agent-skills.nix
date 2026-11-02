@@ -34,6 +34,9 @@ let
     "chromium-live-debug" "firefox-live-debug" "firefox-extension-development" "process-firefox-synced-tabs" "process-firefox-desktop-tabs" "dbox-status" "md-open" "wl-copy"
     "logseq-add-md-to-blocks" "logseq-comparisons-update" "logseq-enrich-blocks" "logseq-research"
     "process-hacker-news-favourites" "process-freetube-playlist" "search-personal-data" "ai-screen-recording"
+    # computer-use = overview of GUI-control options (desktop-only tooling), orca-computer-use
+    # = Orca app's `orca computer` driver (only exists where the Orca desktop app runs)
+    "computer-use" "orca-computer-use"
   ];
   # Every subdirectory of skillsDir is a skill — adding a folder is all it takes.
   allSkillNames = lib.attrNames (lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir));
