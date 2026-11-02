@@ -16,3 +16,4 @@ cline                       cline     # Cline LLM CLI
 
 # Other
 @helgesverre/namecheap-cli  namecheap # Namecheap domains/DNS CLI
+agent-desktop               agent-desktop # Vercel Labs desktop GUI driver (AT-SPI computer use; computer-use skill)
