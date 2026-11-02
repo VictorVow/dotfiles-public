@@ -324,11 +324,11 @@
     },
     "notifications": {
       "locked": {
-        "lastModified": 1793324732,
-        "narHash": "sha256-4vKpOR3GuUR3JTF2/cw5jIeRr2CZLMvYnMZb29v7pbc=",
+        "lastModified": 1793648032,
+        "narHash": "sha256-cNLm1Ej4w+6d5vxJEr/HK/vjTUp/H3k1MS8XDHB/PfM=",
         "ref": "refs/heads/main",
-        "rev": "5eeae26898964587b1884a9d7396a136e288894c",
-        "revCount": 14,
+        "rev": "7463b174ea34e0d5bdc5a9e829984ca4fb4122d0",
+        "revCount": 15,
         "type": "git",
         "url": "https://git.device.example.com/self-hosted/Notifications.git"
       },
