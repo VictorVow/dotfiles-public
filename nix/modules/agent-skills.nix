@@ -15,8 +15,15 @@
 #                 CLI also ~/.gemini/antigravity-cli/skills, ~/.gemini/skills)
 #                 (project: .agents/skills). Does NOT read .claude/.
 #   Devin CLI   — ~/.config/devin/skills, ~/.agents/skills, plus ~/.claude/skills via its
-#                 Claude Code import (read_config_from.claude, default on). In Zed (ACP) the
-#                 slash menu is empty; type " /name" (leading space) — see docs/system/claude-code.md.
+#                Claude Code import (read_config_from.claude, default on). In Zed (ACP) the
+#                slash menu is empty; type " /name" (leading space) — see docs/system/claude-code.md.
+#   Hermes      — $HERMES_HOME/skills/ (per profile) + any skills.external_dirs entries in
+#                the profile's config.yaml; bundled-catalog format, same agentskills.io spec.
+#                Every profile that should see these needs its own external_dirs entry —
+#                set on this machine via `hermes config set skills.external_dirs
+#                '["~/.claude/skills"]'` for ~/.hermes (default) and
+#                ~/.hermes/profiles/installs (2026-11-02). External dirs are writable by
+#                agent skill_manage edits, which here land in this repo via the symlinks.
 # Deliberately only deployed to ~/.claude/skills → Claude Code + OpenCode (the primary
 # agents). To reach Codex/Antigravity too, also deploy to ~/.agents/skills and
 # ~/.gemini/config/skills — but OpenCode reads both ~/.claude and ~/.agents, so it would
