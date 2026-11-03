@@ -30,7 +30,7 @@ listening() { ss -ltn "sport = :$1" | grep -q LISTEN; }
 
 # Same args as the "Firefox-Nix VERTEX" .desktop launcher, plus any extras.
 launch() {
-  setsid firefox -P "$PROFILE" --class="$PROFILE" "$@" >/dev/null 2>&1 &
+  setsid firefox -P "$PROFILE" --name "$PROFILE" --class="$PROFILE" "$@" >/dev/null 2>&1 &
 }
 
 in_debug_mode() {

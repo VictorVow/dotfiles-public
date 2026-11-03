@@ -46,7 +46,7 @@ ff_running() {
 ff_launch_cmd() {
   local profile="$1" pid a skip=0; local -n _out="$2"; _out=()
   pid=$(ff_main_pid "$profile")
-  if [[ -z $pid ]]; then _out=(firefox -P "$profile" --class="$profile"); return; fi
+  if [[ -z $pid ]]; then _out=(firefox -P "$profile" --name "$profile" --class="$profile"); return; fi
   local argv; mapfile -d '' -t argv < "/proc/$pid/cmdline"
   for a in "${argv[@]}"; do
     (( skip )) && { skip=0; continue; }
