@@ -26,7 +26,6 @@ com.gitlab.tipp10.tipp10
 com.heroicgameslauncher.hgl
 com.jetpackduba.Gitnuro
 com.jgraph.drawio.desktop
-com.logseq.Logseq
 com.moonlight_stream.Moonlight
 com.nuclearplayer.Nuclear
 com.openwebui.open-webui
@@ -86,7 +85,6 @@ io.gitlab.hinnerkm.Kairos
 io.gpt4all.gpt4all
 io.itch.itch
 io.missioncenter.MissionCenter
-io.neovim.nvim
 it.mijorus.gearlever
 me.iepure.devtoolbox
 net.ankiweb.Anki
@@ -161,10 +159,6 @@ com.nvidia.geforcenow
 ## grayjay1-origin
 
 app.fork.Grayjay
-
-## hydra1-origin
-
-gg.hydralauncher.hydra
 
 ## kwi-nightly
 
