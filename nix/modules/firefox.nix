@@ -458,12 +458,8 @@ in
 
     # ── Other profiles ──
 
-    profiles.PRIME = {
-      id = 1;
-    };
-
     profiles.minimal-amnesic = {
-      id = 2;
+      id = 1;
 
       settings = ffBase // ffHardened // {
         # ── Privacy / Security (amnesic extras) ───────────────────────────────
@@ -491,7 +487,7 @@ in
     };
 
     profiles.minimal-persistent = {
-      id = 3;
+      id = 2;
       settings = ffBase // ffHardened;
       search = ffSearch;
       userChrome = ''
@@ -510,7 +506,7 @@ in
     };
 
     profiles.dev-edition-default = {
-      id = 4;
+      id = 3;
 
       settings = ffBase // {
         # ── Privacy / Security ────────────────────────────────────────────────
@@ -560,6 +556,12 @@ in
       src=$(readlink -f "$dest")
       $DRY_RUN_CMD rm "$dest"
       $DRY_RUN_CMD install -m 644 "$src" "$dest"
+      # HM's profiles.ini has no StoreID=, which hides profiles from the new
+      # Manage Profiles UI. Restore each one from the profile's own prefs.js.
+      for path in $(sed -n 's/^Path=//p' "$dest"); do
+        id=$(sed -n 's/.*"toolkit.profiles.storeID", "\([^"]*\)".*/\1/p' "$HOME/.mozilla/firefox/$path/prefs.js" 2>/dev/null || true)
+        if [ -n "$id" ]; then $DRY_RUN_CMD sed -i "/^Path=$path\$/a StoreID=$id" "$dest"; fi
+      done
     fi
     # Append Install sections only if not already present
     if ! grep -q 'Install9255EBAFD2F5B3DD' "$dest" 2>/dev/null; then
