@@ -26,6 +26,7 @@ while getopts "p:d:o:h" o; do case $o in
 esac; done
 mkdir -p "$OUTDIR"
 
+CMD=(); ff_launch_cmd "$PROFILE" CMD   # relaunch the same build it's running on
 if [[ -n $(ff_main_pid "$PROFILE") ]]; then
   echo "quitting running instance of $PROFILE first..."
   ff_quit "$PROFILE"
@@ -36,7 +37,7 @@ MOZ_PROFILER_STARTUP=1 \
 MOZ_PROFILER_STARTUP_FEATURES=js,stackwalk,cpu \
 MOZ_PROFILER_STARTUP_FILTERS=GeckoMain \
 MOZ_UPLOAD_DIR="$OUTDIR" \
-setsid firefox -P "$PROFILE" >/dev/null 2>&1 &
+setsid "${CMD[@]}" >/dev/null 2>&1 &
 
 sleep 15
 MAIN=$(ff_main_pid "$PROFILE")

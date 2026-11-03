@@ -9,28 +9,34 @@
 #   off     quit, relaunch normally (do this when done: Marionette sets
 #           navigator.webdriver=true in every tab, which trips bot detection)
 #   status  is it running, and is it in remote-debug mode?
+#   list    every running Firefox: pid, profile, build type, binary
+#
+# A relaunch reuses the instance's own command line (so Dev Edition comes back
+# as Dev Edition); if the profile isn't running it uses the Nix `firefox -P`.
 #
 # Marionette listens on 127.0.0.1:2828, BiDi on 127.0.0.1:9222 (loopback only).
 #
-# Usage: ff-remote-debug.sh [-p PROFILE] on|off|status
+# Usage: ff-remote-debug.sh [-p PROFILE] on|off|status|list   (PROFILE: name or path)
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"; source ./ff-lib.sh
 
 PROFILE=VERTEX MARIONETTE_PORT=2828 BIDI_PORT=9222
 while getopts "p:h" o; do case $o in
   p) PROFILE=$OPTARG;;
-  h) grep '^#' "$0" | head -16; exit 0;;
+  h) grep '^#' "$0" | head -20; exit 0;;
   *) exit 2;;  # getopts already printed "illegal option"
 esac; done
 shift $((OPTIND - 1))
 ACTION="${1:-status}"
+[[ $ACTION == list ]] && { ff_running; exit 0; }
 ff_profile_dir "$PROFILE" >/dev/null
 
 listening() { ss -ltn "sport = :$1" | grep -q LISTEN; }
 
-# Same args as the "Firefox-Nix VERTEX" .desktop launcher, plus any extras.
+# Captured before quitting, while the instance (and its argv) still exists.
+CMD=(); ff_launch_cmd "$PROFILE" CMD
 launch() {
-  setsid firefox -P "$PROFILE" --class="$PROFILE" "$@" >/dev/null 2>&1 &
+  setsid "${CMD[@]}" "$@" >/dev/null 2>&1 &
 }
 
 in_debug_mode() {
@@ -81,5 +87,5 @@ case $ACTION in
     sleep 5
     status
     ;;
-  *) echo "usage: $0 [-p PROFILE] on|off|status" >&2; exit 2 ;;
+  *) echo "usage: $0 [-p PROFILE] on|off|status|list" >&2; exit 2 ;;
 esac

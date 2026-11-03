@@ -2,7 +2,7 @@
 
 Scripts for diagnosing a misbehaving Firefox profile — freezes, runaway memory, blank extension icons / empty Sidebery panel, repeated extension-process crashes. Built during the 2026-07-03 VERTEX incident, where GeoSpoof 1.22.14 called `tabs.query` ~25×/sec against a ~1,900-tab session, pegging the parent main thread and OOM-crashing the shared extension process.
 
-All scripts default to the `VERTEX` profile; pass `-p NAME` for another profile under `~/.mozilla/firefox/`. They only need bash, ps, and python3 (stdlib only).
+All scripts default to the `VERTEX` profile; pass `-p NAME` for another profile under `~/.mozilla/firefox/` (or a full path). `ff-remote-debug.sh list` shows which profiles are running and on which build (Nix Firefox, Developer Edition). They only need bash, ps, and python3 (stdlib only).
 
 ## The playbook
 
@@ -25,7 +25,7 @@ Auxiliary: **`./ff-ext-storage.py EXTENSION [KEY]`** reads an extension's `stora
 
 ## Hard-won gotchas
 
-- **Nix wrapper vs pgrep**: `firefox` here is a Nix wrapper, and `pgrep -f "firefox -P VERTEX"` happily matches the launching bash, your own monitoring command, or content processes. Worse, a shell loop whose *own command line* contains the pattern deadlocks waiting for itself. `ff-lib.sh::ff_main_pid` picks the real parent (matches `bin/firefox`, excludes `-contentproc`, takes the largest RSS).
+- **Nix wrapper vs pgrep**: `firefox` here is a Nix wrapper, and `pgrep -f "firefox -P VERTEX"` happily matches the launching bash, your own monitoring command, or content processes. Worse, a shell loop whose *own command line* contains the pattern deadlocks waiting for itself. `ff-lib.sh::ff_main_pid` sidesteps all of it by finding the process that holds the profile's `.parentlock` open, which also covers Dev Edition and Manage Profiles launches that have no `-P` in argv.
 - **`kill -34` (about:memory dump) can kill Firefox** if sent before the signal handler is installed during early startup. The profiler SIGUSR2 path in `ff-profiler-capture.sh` is safer and more useful anyway.
 - **SIGUSR2 needs `MOZ_UPLOAD_DIR`** or the dump silently goes nowhere. `MOZ_PROFILER_SHUTDOWN` (write on clean exit) proved unreliable when the browser was mid-meltdown.
 - **Steady-state capture without a second restart**: an instance started by `ff-profiler-capture.sh` keeps `MOZ_UPLOAD_DIR` in its environment, so `kill -USR1 <pid>` starts the profiler on the running browser and `kill -USR2 <pid>` dumps it, which lets you profile long after the startup noise has settled. Check `SigCgt` in `/proc/<pid>/status` first (bit 10 = USR1): an uncaught SIGUSR1 terminates the process. The capture keeps only the most recent part of the buffer (a 120 s run kept the last ~50 s).
