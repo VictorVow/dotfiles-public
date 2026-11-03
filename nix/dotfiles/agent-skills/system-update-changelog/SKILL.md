@@ -81,4 +81,4 @@ The test is about **using the system**, not maintaining the repos. If unsure, as
 - Prefix Self-Hosted items with the service name, e.g. `**FreeLLMAPI** (Self-Hosted): …`.
 - No commit hashes, no file paths unless the path is what the user types or opens.
 
-Show the user the new sections once they're written, then end the run by loading the `git-commit` skill and committing the session's changes.
+Show the user the new sections once they're written, then end the run by loading the `git-commit` skill and committing the session's changes to `main` branch.
