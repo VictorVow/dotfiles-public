@@ -11,10 +11,10 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/8ce73368d1efd4d657e9064d29b144a52046b4e8";
+    nixpkgs.url = "github:NixOS/nixpkgs/f3a73bcf5d1c5b75a66cf35a48957e30d41d647a";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/fe13242281a67641c0102cdb1087f0ebe586c7df";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/09063bd1f2b36fd9fd793c36dfade7bd40a93dfc";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -31,7 +31,7 @@
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/ab3823b4b24c0c3ca984c1f3ee577fd6d667424c";
+      url = "github:nix-community/home-manager/24f8f8e786f87d6a818e1746cb2389bf922afdab";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -39,7 +39,7 @@
     # at activation. Used by modules/rclone.nix for rclone remote credentials.
     sops-nix = {
       # channel: master
-      url = "github:Mic92/sops-nix/442449fa7b1fe6c692d0103ac9fc8f9e82931cf3";
+      url = "github:Mic92/sops-nix/60182817ee048ac94b4c68ea76d5ef2e8aac730d";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/8efcba308a6b12a92441cb4df624e484bad9e18a";
+    llm-agents.url = "github:numtide/llm-agents.nix/10f2be38f8a46fdf7689697270dd14b27f723aae";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/fbc48858f6c43e0d3c51713931e76864276ad363";
+      url = "github:stablyai/orca/f29cc1aa82043ef8056ce641251eb4bf4bae5dcd";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/c66d7815b597d147114be1ceacc5a7098aa491ce";
+      url = "github:upstash/context7/60e59f935f1ee1f25dcaeaddade53f628fb6d4e6";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/e7f986c99485f48cb34d9e1d5cbf2f291a2d45ca";
+      url = "github:morluto/rea/d6f88becd531cabafca1d968b89cf7fc77a80041";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/5c2d1be3fac95bd1de722cc9db027a0b0efeefe7";
+      url = "github:pbakaus/impeccable/d34c87e1a00989ae8dbdd7f6b30b70f23319e860";
       flake = false;
     };
 
