@@ -3,6 +3,18 @@
 let
   jsonFormat = pkgs.formats.json { };
 
+  # npx with its own Node first on PATH for every npx-launched MCP server.
+  # Why: agents inherit the PATH of the shell they start in, and a repo's
+  # direnv/devenv shell can put an old Node first (2026-11-03: Sidebery's
+  # devenv gave Node 18.14, so firefox-devtools, both chromium-devtools and rea
+  # all died at startup with "Node >=20 required" / CONNECTION_CLOSED).
+  # Pinning only the npx binary isn't enough: npx runs package bins via
+  # `#!/usr/bin/env node`, which resolves from PATH.
+  npx = "${pkgs.writeShellScript "npx-pinned-node" ''
+    export PATH=${pkgs.nodejs_22}/bin:$PATH
+    exec npx "$@"
+  ''}";
+
   # MCP servers given to Claude Code are defined here (not read back from
   # config.programs.mcp.servers) because that copy carries option defaults
   # (url = null, enabled = null, …) into Claude Code's .mcp.json.
@@ -23,7 +35,7 @@ let
   # bundled in the firefox-live-debug skill's scripts/). Procedure lives there.
   # Public package: chrome-context/prefs tools are only in @mozilla/firefox-devtools-mcp-moz.
   firefoxDevtoolsMcp = {
-    command = "npx";
+    command = npx;
     args    = [ "-y" "@mozilla/firefox-devtools-mcp@latest"
                 "--connect-existing" "--tool-preset" "developer" ];
   };
@@ -41,7 +53,7 @@ let
   # --workspace lets its file-writing tools (screenshots, snapshots, trace
   # dumps) write outside the OS temp dir.
   chromiumDevtoolsMcp = {
-    command = "npx";
+    command = npx;
     args    = [ "-y" "chrome-devtools-mcp@latest"
                 "--browserUrl" "http://127.0.0.1:9223"
                 "--usageStatistics" "false" "--performanceCrux" "false"
@@ -55,7 +67,7 @@ let
   # Clean profile (no cookies/logins) — for automation and testing, not for
   # driving the user's real session. Drop --headless for a visible window.
   chromiumDevtoolsMcpIsolated = {
-    command = "npx";
+    command = npx;
     args    = [ "-y" "chrome-devtools-mcp@latest"
                 "--isolated" "--headless"
                 "--executablePath" "${pkgs.ungoogled-chromium}/bin/chromium"
@@ -77,7 +89,7 @@ let
   #   1. Find what the installer writes (run it with --dry-run/--json if it has
   #      one, or read its docs/source): usually an MCP server entry, a skill
   #      folder, and maybe a slash command.
-  #   2. MCP server → add a <name>Mcp attrset here ({ command = "npx";
+  #   2. MCP server → add a <name>Mcp attrset here ({ command = npx;
   #      args = [ "-y" "<pkg>@latest" <server-flag> ]; }) and reference it from
   #      programs.mcp.servers, programs.claude-code.mcpServers, and both
   #      opencode.json blocks below — one entry, four consumers. Prefer
@@ -94,7 +106,7 @@ let
   #      covers it. If the project also has a CLI worth keeping, npm-globals.txt
   #      is the non-Nix escape hatch for tools missing from nixpkgs/llm-agents.
   reaMcp = {
-    command = "npx";
+    command = npx;
     args    = [ "-y" "rea-agents@latest" "--mcp" ];
   };
 
