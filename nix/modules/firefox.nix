@@ -484,6 +484,15 @@ in
       '';
       containers = ffContainers;
       containersForce = true;
+
+      extensions = {
+        force = true;
+        packages = with pkgs.nur.repos.rycee.firefox-addons; [
+          ublock-origin
+          consent-o-matic
+          darkreader
+        ];
+      };
     };
 
     profiles.minimal-persistent = {
@@ -503,6 +512,18 @@ in
       '';
       containers = ffContainers;
       containersForce = true;
+
+      extensions = {
+        force = true;
+        packages = with pkgs.nur.repos.rycee.firefox-addons; [
+          ublock-origin
+          consent-o-matic
+          darkreader
+          keepassxc-browser
+          libredirect
+          plasma-integration
+        ];
+      };
     };
 
     profiles.dev-edition-default = {

@@ -1,4 +1,4 @@
-{ notifications, ... }:
+{ notifications, nur, ... }:
 
 {
   # Home Manager needs to know the user and home directory.
@@ -21,6 +21,7 @@
   # shortcut: solaar 1.1.19's desktop-notification tests need /etc/machine-id,
   # which the Nix sandbox lacks. Drop once nixpkgs fixes it (try removing on bump).
   nixpkgs.overlays = [
+    nur.overlays.default
     (_final: prev: {
       solaar = prev.solaar.overridePythonAttrs (old: {
         disabledTests = (old.disabledTests or [ ]) ++ [ "test_show" ];

@@ -144,6 +144,14 @@
       flake = false;
     };
 
+    # Nix User Repository — provides rycee's firefox-addons set (617 pre-packaged
+    # Firefox extensions with addonId passthru) for declarative profile
+    # extensions. Only the firefox-addons subset is used.
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Notifications desktop receiver — Home Manager module + the notify CLI from
     # the self-hosted Notifications repo on Forgejo (tailnet-only, public so a
     # git+https fetch needs no token). Imported in home.nix as
@@ -153,7 +161,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, notifications, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-latest, home-manager, llm-agents, tuxManager, ie-r, delta, sops-nix, orca, context7, logseq-fork, rea, impeccable, cli-anything, security-audit-skill, nur, notifications, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     # Independently-pinned nixos-unstable HEAD (see the input comment), passed
@@ -199,7 +207,7 @@
       modules = [ ./home.nix sops-nix.homeManagerModules.sops ];
 
       extraSpecialArgs = {
-        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill notifications pkgs-latest;
+        inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill nur notifications pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
         # nixpkgs.config only reaches the main pkgs set.
         pkgs-unstable = import nixpkgs-unstable {
