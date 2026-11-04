@@ -35,6 +35,11 @@ flatpak override --user --nofilesystem=host \
     --filesystem="~/Vaults/gocryptfs1/Android-sync/Android-MP" \
     --filesystem="~/Vaults/gocryptfs1/1Vault/v Red Pill/" \
     org.signal.Signal
+
+# Gitnuro: the sandboxed GPU render path spins the JVM at 100% CPU on startup
+# (skiko FontMgr init) and the window never opens on this AMD/Wayland box.
+# Software rendering avoids it. Upstream: JetpackDuba/Gitnuro#374.
+flatpak override --user --env=SKIKO_RENDER_API=SOFTWARE com.jetpackduba.Gitnuro
 echo "Flatpak permission overrides applied."
 
 # ── Reinstall previously installed apps from ~/.var/app ───────────────────────
