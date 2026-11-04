@@ -1,6 +1,6 @@
 ---
 name: direnv-deploy
-description: Set up (or upgrade) nix-direnv in this repo with a top-level flake.nix, optionally kept out of git via .git/info/exclude. Repos under ~/Projects/Git/1MY_REPOS/Self-Hosted share the central 1-COMMON flake instead of getting their own flake. This should probably be the go-to skill whenever the environment lacks a particular package — put it in the repo's flake instead of installing it ad hoc.
+description: Set up (or upgrade) nix-direnv in this repo with a top-level flake.nix, optionally kept out of git via .git/info/exclude. Repos under ~/Projects/Git/1MY_REPOS/Self-Hosted share the central 1-COMMON flake instead of getting their own flake. This should probably be the go-to skill whenever the environment lacks a particular package — put it in the repo's flake instead of installing it ad hoc. Also covers the local-only agent-instructions pattern (CLAUDE.md stub + AGENTS.local.md + opencode.json, all git-excluded).
 metadata:
   argument-hint: "[ignore|exclude|plain]"
 compatibility: "Requires nix-direnv and nix flakes"
@@ -78,3 +78,27 @@ For repos under `~/Projects/Git/1MY_REPOS/Self-Hosted`:
    - If switching to exclude mode and any of those paths is already tracked by git, warn the user that the exclude has no effect on tracked files and ask before running `git rm --cached` on them.
 4. In **exclude** mode only, run `git add -Nf flake.nix` (and `flake.lock` if it exists — generate it with `nix flake metadata` first if needed). Nix only sees files git knows about, and `.git/info/exclude` alone leaves the flake invisible to `nix develop`/`nix build` inside the repo; the intent-to-add entry fixes that without staging content, so `git commit -a` still won't include it. (`.envrc` does not need it — nix never reads it.) Note this makes `git status` show ` A` for the files.
 5. Run `direnv allow` to activate nix-direnv and build the environment; report any evaluation errors.
+
+## Local agent instructions
+
+The same git-visibility trick applies to repo-specific agent instructions that shouldn't go upstream. When a repo needs local-only agent notes (or the user asks for them), use this pattern:
+
+- **`AGENTS.local.md`** — the actual content. Personal notes, local paths, workflow quirks.
+- **`CLAUDE.md`** — a stub that force-loads both files via import syntax:
+  ```
+  # CLAUDE.md
+
+  @AGENTS.md
+  @AGENTS.local.md
+  ```
+  (Claude Code reads `AGENTS.md` on its own, but the `@` import makes it deterministic rather than relying on a "read this" instruction.)
+- **`opencode.json`** — tells OpenCode to load the same files:
+  ```json
+  {
+    "$schema": "https://opencode.ai/config.json",
+    "instructions": ["AGENTS.local.md", "CLAUDE.md"]
+  }
+  ```
+- **`.git/info/exclude`** — add `/AGENTS.local.md`, `/CLAUDE.md`, `/opencode.json`. All three stay local; upstream's `AGENTS.md` is untouched.
+
+When deploying this in exclude mode alongside direnv, these entries go in the same `.git/info/exclude` block. If the repo already has a tracked `CLAUDE.md`, warn before excluding it (exclude has no effect on tracked files).
