@@ -54,6 +54,7 @@ installs/
 │       ├── desktop.nix       # Desktop integration: autostart entries (Solaar), Dolphin HTML thumbnailer, Vorta raw exclusions
 │       ├── services.nix      # systemd user services (Ollama, Jackett)
 │       ├── weekly-cleanup.nix # weekly Nix GC + Docker prune timer (shared by boss-laptop + lord-ubuntu)
+│       ├── logseq-mirror-git.nix # hourly git commit of the logseq-apex Markdown mirror (readable graph history)
 │       ├── update-all.nix    # update.sh timer: daily on boss-laptop, every 2 days on lord-ubuntu
 │       ├── gpg-expiry.nix    # Desktop notification when a GPG key nears expiry
 │       ├── gui-apps.nix      # programs.* for GUI apps: rofi, obs (Zed is AppMan-installed, config unmanaged)

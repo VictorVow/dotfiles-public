@@ -57,6 +57,7 @@
     ./modules/cass.nix       # cass agent-session search: background index timers (cass itself via Brewfile)
     ./modules/transcript-scrub.nix # Daily gitleaks scrub of secrets in agent transcripts (scripts/security/)
     ./modules/weekly-cleanup.nix # Weekly Nix GC + Docker prune (shared with lord-ubuntu)
+    ./modules/logseq-mirror-git.nix # Hourly git snapshot of the logseq-apex Markdown mirror
     ./modules/update-all.nix # update.sh timer: daily here, every 2 days on lord-ubuntu
     notifications.homeManagerModules.desktop # KDE notifications + notify CLI from the Notifications hub
     ./modules/recoll.nix     # Recoll full-text document index (~/Documents, ~/Downloads, ~/Media) + hourly timer
