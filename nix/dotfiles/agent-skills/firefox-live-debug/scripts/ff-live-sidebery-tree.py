@@ -44,8 +44,23 @@ def _load(name, file):
 _stats = _load("ff_session_stats", "ff-session-stats.py")   # pure-Python mozLz4
 ffes = _load("ff_ext_storage", "ff-ext-storage.py")          # storage.local decoder
 
-SIDEBERY_EXTDATA = "extension:{3c078156-979c-498b-8990-85f7987dd929}:data"
-SIDEBERY_QUERY = "sidebery"
+# Sessionstore extData key — set in main() from the active Sidebery's addon id
+# (a custom Sidebery build has a different id than the upstream addon).
+SIDEBERY_EXTDATA = ""
+
+
+def resolve_sidebery(profile_dir: Path):
+    """-> (addon id, internal uuid) of the ACTIVE Sidebery extension.
+
+    Matches by name, then by `active`: a custom build can be installed
+    alongside upstream Sidebery, but only one is enabled at a time."""
+    addons = json.loads((profile_dir / "extensions.json").read_text()).get("addons", [])
+    hits = [a["id"] for a in addons if a.get("active") and "sidebery" in
+            ((a.get("defaultLocale") or {}).get("name") or "").lower()]
+    if len(hits) != 1:
+        sys.exit(f"error: expected exactly one active Sidebery (matched: {len(hits)})")
+    _, addon_id, uuid = ffes.resolve_extension(profile_dir, hits[0])
+    return addon_id, uuid
 
 
 def load_session(profile_dir: Path) -> dict:
@@ -57,9 +72,8 @@ def load_session(profile_dir: Path) -> dict:
     sys.exit(f"error: no sessionstore jsonlz4 found under {profile_dir}")
 
 
-def sidebery_storage(profile_dir: Path) -> dict:
+def sidebery_storage(profile_dir: Path, uuid: str) -> dict:
     """-> {'sidebar': {...}, 'containers': {...}} from Sidebery storage.local"""
-    _, _, uuid = ffes.resolve_extension(profile_dir, SIDEBERY_QUERY)
     out = {}
     with tempfile.TemporaryDirectory() as tmp:
         for label, db in ffes.copy_dbs(profile_dir, uuid, Path(tmp)):
@@ -178,8 +192,12 @@ def main():
     if not profile_dir.is_dir():
         sys.exit(f"error: profile dir not found: {profile_dir}")
 
+    global SIDEBERY_EXTDATA
+    addon_id, uuid = resolve_sidebery(profile_dir)
+    SIDEBERY_EXTDATA = f"extension:{addon_id}:data"
+
     ss = load_session(profile_dir)
-    st = sidebery_storage(profile_dir)
+    st = sidebery_storage(profile_dir, uuid)
     panels = (st.get("sidebar") or {}).get("panels") or {}
     containers = st.get("containers") or {}
 
