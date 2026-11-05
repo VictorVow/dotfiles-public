@@ -104,7 +104,8 @@ _clean_log() {
     -e 's/\x1b\[[0-9;?]*[A-Za-z]//g' \
     -e 's/\x1b\][^\x07]*\x07//g' \
     -e 's/\r+$//' \
-    -e 's/.*\r//'
+    -e 's/.*\r//' \
+    -e 's/lseek error in child setup//g'   # flatpak apply_extra_data lseeks pipe fds in child_setup — newline-less spam
 }
 
 _rotate_log() {
@@ -141,7 +142,7 @@ _for_hub() {
     -e '/^Starting units: /d' \
     -e "/^(replacing old|installing) '.*'/d" \
     -e '/^(Cleaning up orphan links|Creating home file links) /d' \
-    -e '/^Updating (runtime|app)\//d' \
+    -e '/^Updating runtime\//d' \
     -e '/^Info: .*end-of-life/d' \
     -e '/^F: Warning: Treating remote fetch error as non-fatal/d' \
     -e '/^• Updated input /d' \
