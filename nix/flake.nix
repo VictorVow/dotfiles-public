@@ -11,7 +11,7 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/cd4ea8d57de16f4810bc5f14207bac45fbf19f67";
+    nixpkgs.url = "github:NixOS/nixpkgs/da6dc0e7b26060f2f71ce3ef7088fb56ee44fa36";
 
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/02c087f3fe673c9e317f206a627cb6b910336dbe";
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/5ba207f9d264f531e473a4ea8b3187c9ced912f9";
+    llm-agents.url = "github:numtide/llm-agents.nix/38235de70aec5e5ca95070e8e020be0f31cd8c03";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -71,7 +71,7 @@
 
     # Zed's Delta (official prebuilt Linux binaries, wrapped for Nix).
     # channel: main
-    delta.url = "github:zed-industries/delta-nix/5850dc1246f80d41a34fbfe28f9cbca4341596cb";
+    delta.url = "github:zed-industries/delta-nix/6b18003d156e93c65dbd44d9087254dc616ac780";
     delta.inputs.nixpkgs.follows = "nixpkgs";
 
     # Orca agent skills (skills/orca-cli, skills/orchestration) — source only,
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/a8ccf3bc68352571eaa33c8878342270cf35e4e5";
+      url = "github:stablyai/orca/ee532e571c074392c5ecddeb22b60a63e71f85c4";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/a6774bcecf97651e35a84a6efb06eeef50f87847";
+      url = "github:upstash/context7/eabe36965ec69b2f3487c4eb329c448dd60b817c";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/60bad9ed06474f5e4f2c09dce19f00f78591950e";
+      url = "github:morluto/rea/d3ecf6800015f2183a298d78ffb30a266a9efd2a";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/8409a564d1baee90b2dde4f7a8f06288838e3921";
+      url = "github:pbakaus/impeccable/5e745ace7e151feb2a93d360d0281fe39448b857";
       flake = false;
     };
 
