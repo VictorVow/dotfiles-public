@@ -24,6 +24,12 @@
       sopsFile = ../secrets/ai.yaml;
       path = "${config.home.homeDirectory}/.config/shell-secrets/freellmapi_api_key";
     };
+    # Refuseless key for OpenCode's `refuseless` provider (ai-agents.nix).
+    # Same explicit-path pattern as freellmapi: the opencode wrappers cat it.
+    secrets."refuseless_api_key" = {
+      sopsFile = ../secrets/ai.yaml;
+      path = "${config.home.homeDirectory}/.config/shell-secrets/refuseless_api_key";
+    };
   };
 
   # Deliberately not OPENAI_API_KEY/ANTHROPIC_AUTH_TOKEN: those would shadow

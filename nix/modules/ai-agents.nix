@@ -722,6 +722,75 @@ in
         "auto:smart" = { name = "FreeLLMAPI auto (smart)"; };
       };
     };
+    # Refuseless (api.refuseless.com) — abliterated GLM/DeepSeek/Minimax models.
+    # Key from REFUSELESS_API_KEY (sops ai.yaml → shell-secrets, exported by the
+    # opencode2 wrapper in packages.nix). v2 schema: variants is an array of
+    # {id, settings}; "medium" is simply absent (no disable form).
+    providers.refuseless = {
+      name     = "Refuseless";
+      env      = [ "REFUSELESS_API_KEY" ];
+      package  = "@opencode/ai/providers/openai-compatible";
+      settings.baseURL = "https://api.refuseless.com/v1";
+      models = {
+        "glm-5.3-abliterated" = {
+          name = "GLM 5.3 Abliterated";
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = [
+            { id = "low";  settings.reasoningEffort = "low"; }
+            { id = "high"; settings.reasoningEffort = "high"; }
+            { id = "max";  settings.reasoningEffort = "max"; }
+          ];
+        };
+        "glm-5.3-flash-abliterated" = {
+          name = "GLM 5.3 Flash Abliterated";
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = [
+            { id = "low";  settings.reasoningEffort = "low"; }
+            { id = "high"; settings.reasoningEffort = "high"; }
+            { id = "max";  settings.reasoningEffort = "max"; }
+          ];
+        };
+        "deepseek-v4.1-flash-abliterated" = {
+          name = "DeepSeek V4.1 Flash 1017 Abliterated";
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = [
+            { id = "off";  settings.reasoningEffort = "off"; }
+            { id = "low";  settings.reasoningEffort = "low"; }
+            { id = "high"; settings.reasoningEffort = "high"; }
+            { id = "max";  settings.reasoningEffort = "max"; }
+          ];
+        };
+        "deepseek-v4.1-flash-fast" = {
+          name = "DeepSeek V4.1 Flash 1017";
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+          limit = { context = 1048576; output = 262144; };
+          variants = [
+            { id = "off";  settings.reasoningEffort = "off"; }
+            { id = "low";  settings.reasoningEffort = "low"; }
+            { id = "high"; settings.reasoningEffort = "high"; }
+            { id = "max";  settings.reasoningEffort = "max"; }
+          ];
+        };
+        "minimax-m3.1-flash" = {
+          name = "Minimax M3.1 Flash";
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+          limit = { context = 1048576; output = 512000; };
+          variants = [
+            { id = "low";  settings.reasoningEffort = "low"; }
+            { id = "high"; settings.reasoningEffort = "high"; }
+            { id = "max";  settings.reasoningEffort = "max"; }
+          ];
+        };
+      };
+    };
     # Web search via FreeLLMAPI's /mcp `web_search` tool (its pooled search
     # providers) instead of OpenCode's built-in websearch, whose provider list
     # is fixed (exa/tavily/…) and can't point at a custom endpoint. Needs the
@@ -811,6 +880,56 @@ in
         "auto"       = { name = "FreeLLMAPI auto"; };
         "auto:fast"  = { name = "FreeLLMAPI auto (fast)"; };
         "auto:smart" = { name = "FreeLLMAPI auto (smart)"; };
+      };
+    };
+    # Refuseless, same models as the v2 config above but in v1's schema
+    # (npm/options, object-shaped variants incl. `disabled`).
+    provider.refuseless = {
+      name = "Refuseless";
+      npm  = "@ai-sdk/openai-compatible";
+      options = {
+        baseURL = "https://api.refuseless.com/v1";
+        apiKey  = "{env:REFUSELESS_API_KEY}";
+      };
+      models = let
+        stdVariants = {
+          low.reasoningEffort  = "low";
+          high.reasoningEffort = "high";
+          max.reasoningEffort  = "max";
+          medium.disabled = true;
+        };
+        offVariants = stdVariants // { off.reasoningEffort = "off"; };
+      in {
+        "glm-5.3-abliterated" = {
+          name = "GLM 5.3 Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "glm-5.3-flash-abliterated" = {
+          name = "GLM 5.3 Flash Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "deepseek-v4.1-flash-abliterated" = {
+          name = "DeepSeek V4.1 Flash 1017 Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = offVariants;
+        };
+        "deepseek-v4.1-flash-fast" = {
+          name = "DeepSeek V4.1 Flash 1017";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 262144; };
+          variants = offVariants;
+        };
+        "minimax-m3.1-flash" = {
+          name = "Minimax M3.1 Flash";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 512000; };
+          variants = stdVariants;
+        };
       };
     };
     mcp.freellmapi = {
