@@ -193,6 +193,22 @@
         - "{{ ansible_facts['env']['HOME'] }}/snap"
       become: yes
 
+    # ── Coreutils: GNU provider, not rust/uutils ────────────────────────
+    # Ubuntu 26.04 defaults to rust-coreutils via coreutils-from-uutils
+    # (provides /usr/bin/ls etc.). Switching the provider package to
+    # coreutils-from-gnu restores the GNU versions. Removing
+    # coreutils-from-uutils also removes the build-essential metapackage
+    # (it Depends: coreutils-from-uutils specifically); gcc/g++/make/
+    # libc6-dev stay installed, only the metapackage is lost.
+    - name: Switch coreutils provider from uutils to GNU
+      ansible.builtin.apt:
+        name:
+          - coreutils-from-gnu
+          - coreutils-from-uutils-
+          - rust-coreutils-
+        state: present
+      become: yes
+
     - name: Install system-level apt packages
       ansible.builtin.apt:
         name:
