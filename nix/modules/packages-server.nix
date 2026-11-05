@@ -80,7 +80,8 @@ in
       postBuild = ''
         rm $out/bin/opencode2
         makeWrapper ${llmAgents.opencode2}/bin/opencode2 $out/bin/opencode2 \
-          --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"'
+          --run 'export FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"' \
+          --run 'export REFUSELESS_API_KEY="$(cat ${config.sops.secrets.refuseless_api_key.path} 2>/dev/null)"'
       '';
     })
     # OpenCode 1 (`opencode`/`opencode1`) for the magpie Devin/Cursor plugins —
@@ -92,6 +93,8 @@ in
           root="$HOME/.opencode1"
           FREELLMAPI_API_KEY="$(cat ${config.sops.secrets.freellmapi_api_key.path} 2>/dev/null)"
           export FREELLMAPI_API_KEY
+          REFUSELESS_API_KEY="$(cat ${config.sops.secrets.refuseless_api_key.path} 2>/dev/null)"
+          export REFUSELESS_API_KEY
           export XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
                  XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache"
           # Mirror ~/.config into the isolated root, except v2's `opencode`.

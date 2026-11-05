@@ -546,6 +546,53 @@ in
         };
       };
     };
+    # Refuseless (api.refuseless.com) — abliterated GLM/DeepSeek/Minimax models.
+    # Same as desktop ai-agents.nix; key via REFUSELESS_API_KEY (sops ai.yaml,
+    # exported by the opencode2 wrapper in packages-server.nix).
+    providers.refuseless = {
+      name = "Refuseless";
+      env = [ "REFUSELESS_API_KEY" ];
+      package = "@opencode/ai/providers/openai-compatible";
+      settings.baseURL = "https://api.refuseless.com/v1";
+      models = let
+        reasoning = {
+          capabilities.tools = true;
+          capabilities.reasoning.supported = true;
+        };
+        stdVariants = [
+          { id = "low";  settings.reasoningEffort = "low"; }
+          { id = "high"; settings.reasoningEffort = "high"; }
+          { id = "max";  settings.reasoningEffort = "max"; }
+        ];
+        offVariants = [ { id = "off"; settings.reasoningEffort = "off"; } ] ++ stdVariants;
+      in {
+        "glm-5.3-abliterated" = reasoning // {
+          name = "GLM 5.3 Abliterated";
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "glm-5.3-flash-abliterated" = reasoning // {
+          name = "GLM 5.3 Flash Abliterated";
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "deepseek-v4.1-flash-abliterated" = reasoning // {
+          name = "DeepSeek V4.1 Flash 1017 Abliterated";
+          limit = { context = 1048576; output = 131072; };
+          variants = offVariants;
+        };
+        "deepseek-v4.1-flash-fast" = reasoning // {
+          name = "DeepSeek V4.1 Flash 1017";
+          limit = { context = 1048576; output = 262144; };
+          variants = offVariants;
+        };
+        "minimax-m3.1-flash" = reasoning // {
+          name = "Minimax M3.1 Flash";
+          limit = { context = 1048576; output = 512000; };
+          variants = stdVariants;
+        };
+      };
+    };
     websearch = false;
     mcp.servers.freellmapi = {
       type = "remote";
@@ -598,6 +645,56 @@ in
         };
         "auto:smart" = {
           name = "FreeLLMAPI auto (smart)";
+        };
+      };
+    };
+    # Refuseless, same models as the v2 config above but in v1's schema
+    # (npm/options, object-shaped variants incl. `disabled`).
+    provider.refuseless = {
+      name = "Refuseless";
+      npm = "@ai-sdk/openai-compatible";
+      options = {
+        baseURL = "https://api.refuseless.com/v1";
+        apiKey = "{env:REFUSELESS_API_KEY}";
+      };
+      models = let
+        stdVariants = {
+          low.reasoningEffort = "low";
+          high.reasoningEffort = "high";
+          max.reasoningEffort = "max";
+          medium.disabled = true;
+        };
+        offVariants = stdVariants // { off.reasoningEffort = "off"; };
+      in {
+        "glm-5.3-abliterated" = {
+          name = "GLM 5.3 Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "glm-5.3-flash-abliterated" = {
+          name = "GLM 5.3 Flash Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = stdVariants;
+        };
+        "deepseek-v4.1-flash-abliterated" = {
+          name = "DeepSeek V4.1 Flash 1017 Abliterated";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 131072; };
+          variants = offVariants;
+        };
+        "deepseek-v4.1-flash-fast" = {
+          name = "DeepSeek V4.1 Flash 1017";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 262144; };
+          variants = offVariants;
+        };
+        "minimax-m3.1-flash" = {
+          name = "Minimax M3.1 Flash";
+          tools = true; reasoning = true;
+          limit = { context = 1048576; output = 512000; };
+          variants = stdVariants;
         };
       };
     };
