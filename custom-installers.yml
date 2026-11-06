@@ -16,7 +16,7 @@
     dnvm_arch: "{{ 'x64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' }}"
     # Looking Glass: must match the client rev pinned in nix/modules/packages.nix
     # (lookingGlassClient) and the IDD installed in the Windows guest.
-    looking_glass_rev: 236efcb155f952f5d7d9fcd5891a3060ad254e68
+    looking_glass_rev: 1b485305d9267207701d01adbe7907e90bfd6990 # tag B8-rc1
     kvmfr_version: "0.0.12"      # PACKAGE_VERSION in module/dkms.conf at that rev
     kvmfr_static_size_mb: 64     # 2256x1504 needs ~46 MiB → next power of two
     # Brewfile path for ansible/installers/homebrew.yml — this playbook is at

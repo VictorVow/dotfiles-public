@@ -93,20 +93,20 @@ let
     '';
   };
 
-  # Looking Glass client, bleeding-edge build. nixpkgs only has B7, but the
-  # signed Windows IDD is bleeding-only, and the client, IDD and kvmfr kernel
-  # module must all come from the SAME upstream commit. To update, bump this
-  # rev + hash AND `looking_glass_rev` in custom-installers.yml, then install
-  # the matching looking-glass-idd-setup.exe in the guest.
+  # Looking Glass client, B8-rc1 (first B8 release candidate). nixpkgs only has
+  # B7, and the client, Windows IDD and kvmfr kernel module must all come from
+  # the SAME upstream build. To update, bump this rev + hash AND
+  # `looking_glass_rev` in custom-installers.yml, then install the matching
+  # looking-glass-idd-setup.exe in the guest.
   # See scripts/looking-glass/README.md.
   lookingGlassClient = pkgs.looking-glass-client.overrideAttrs (old: {
-    version = "B7-826-236efcb1";
+    version = "B8-rc1";
     src = pkgs.fetchFromGitHub {
       owner = "gnif";
       repo = "LookingGlass";
-      rev = "236efcb155f952f5d7d9fcd5891a3060ad254e68";
+      rev = "1b485305d9267207701d01adbe7907e90bfd6990"; # tag B8-rc1
       fetchSubmodules = true;
-      hash = "sha256-NAfV4Z0RZp2IGBzVAFysm53aGMEReT03RIN+45TveUU=";
+      hash = "sha256-ropEJC9+Gg85DS9XRuTb2IRGNNmUcA09Sy/cN6DTvZE=";
     };
     patches = [ ]; # nixpkgs' nanosvg-unvendor.diff targets B7
     # New since B7: fuse3 (required), libunwind + libdw (crash backtraces),
@@ -115,7 +115,7 @@ let
       fuse3 libunwind elfutils usbredir libdrm zstd libxcb
     ]);
     postUnpack = ''
-      echo B7-826-236efcb1 > source/VERSION
+      echo B8-rc1 > source/VERSION
       export sourceRoot="source/client"
     '';
   });
