@@ -206,7 +206,7 @@ in
       "https://reddit.device.example.com/"
       "https://syncyomi.device.example.com"
       "https://ttrss.device.example.com"
-      "https://yamtrack.device.example.com/"
+      "https://floppy.device.example.com/"
       "https://watchsync.device.example.com/"
       "https://wud-lord-ubuntu.device.example.com"
       # Tailscale
