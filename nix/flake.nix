@@ -56,14 +56,14 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/38235de70aec5e5ca95070e8e020be0f31cd8c03";
+    llm-agents.url = "github:numtide/llm-agents.nix/499fb79f92064e92cdb968d12ffeb92d36243b50";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
     # A compromised or broken upstream commit gets PIN_AGE_DAYS_SOURCE days
     # (orca: PIN_AGE_DAYS_ORCA) to be noticed before update.sh adopts it.
     # channel: master
-    tuxManager.url = "github:benapetr/TuxManager/305bcadbc2d1ec00689e4827041700ed0ca8341f";
+    tuxManager.url = "github:benapetr/TuxManager/4bc67f81684b9a135bf533668fa7d326acb6cf2e";
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
     # channel: master
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/ee532e571c074392c5ecddeb22b60a63e71f85c4";
+      url = "github:stablyai/orca/2536c1d569f761915052cfcf3a1f22717d913a96";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/eabe36965ec69b2f3487c4eb329c448dd60b817c";
+      url = "github:upstash/context7/8a0289e4c5e28684b7c4ced5353af2893d1329f9";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/d3ecf6800015f2183a298d78ffb30a266a9efd2a";
+      url = "github:morluto/rea/8f920bb65b8d8ae669411501b0a3a59a62883ac3";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/5e745ace7e151feb2a93d360d0281fe39448b857";
+      url = "github:pbakaus/impeccable/df3a4abe7d0840d5f60324812c432e00b66a4e75";
       flake = false;
     };
 
