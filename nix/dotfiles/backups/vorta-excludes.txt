@@ -31,7 +31,6 @@ node_modules
 /home/boss/.npm/_cacache/
 /home/boss/.ollama/
 /home/boss/.var/app/com.borgbase.Vorta/cache/
-/home/boss/.var/app/com.calibre_ebook.calibre/cache/
 /home/boss/.var/app/com.discordapp.Discord/config/discord/Code Cache/
 /home/boss/.var/app/com.discordapp.Discord/config/discord/Cache/
 /home/boss/.var/app/com.logseq.Logseq/config/Logseq/search/
