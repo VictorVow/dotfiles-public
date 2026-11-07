@@ -96,4 +96,35 @@ in
     };
     Install.WantedBy = [ "timers.target" ];
   };
+
+  # Weekly raw-mirror prune: the mirror snapshots whole source files every run, and
+  # SQLite session DBs (opencode.db) churn ~500 MB of unique blobs per capture —
+  # unbounded this grew to 26 GB within weeks. Keep the newest 2 captures per
+  # source file plus anything <1h old; reclaim the rest.
+  systemd.user.services.cass-mirror-prune = {
+    Unit = {
+      Description = "cass raw-mirror retention prune";
+      Documentation = "https://github.com/Dicklesworthstone/coding_agent_session_search";
+      X-SwitchMethod = "keep-old";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${cass} --color=never mirror prune --keep-latest 2 --safety-hold-down 1h --apply --data-dir ${dataDir} --json";
+      Environment = [ "CASS_INDEX_NO_PROGRESS_EVENTS=1" ];
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      CPUSchedulingPolicy = "idle";
+      CPUQuota = "25%";
+      TimeoutStartSec = "30min";
+    };
+  };
+  systemd.user.timers.cass-mirror-prune = {
+    Unit.Description = "cass raw-mirror prune timer";
+    Timer = {
+      OnCalendar = "Sun *-*-* 04:00:00";
+      Persistent = true;
+      RandomizedDelaySec = 60;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
 }
