@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 5. Flatpak ────────────────────────────────────────────────────────────────
-step "5/8  Flatpak"
+step "5/9  Flatpak"
 
 if ! command -v flatpak &>/dev/null; then
   skipped "flatpak not found — skipping."

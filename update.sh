@@ -11,6 +11,7 @@
 #   5. Flatpak             — user Flatpak apps
 #   6. uv tools            — Python CLI tools declared in uv-tools.txt
 #   7. Distrobox           — OS packages inside containers
+#   8. Git commit          — commit + push the files this run generated (boss only)
 #
 # Usage:
 #   ./update.sh                    # Full update (all managers)
@@ -285,6 +286,8 @@ source "$UPDATE_D/60-uv.sh"
 source "$UPDATE_D/70-appman.sh"
 # shellcheck source=update.d/80-distrobox.sh
 source "$UPDATE_D/80-distrobox.sh"
+# shellcheck source=update.d/90-git-commit.sh
+source "$UPDATE_D/90-git-commit.sh"
 
 # Nix GC + Docker prune run on their own weekly timer (weekly-cleanup.timer
 # in nix/modules/weekly-cleanup.nix).
@@ -303,7 +306,7 @@ for key in "nixpkgs stable upgrade" \
            "age-pin llm-agents" "age-pin sops-nix" "age-pin tuxManager" "age-pin ie-r" \
             "age-pin delta" "age-pin context7" "age-pin rea" "age-pin orca" \
            "git pull" "Nix flake update" "home-manager switch" "chromium-suid-sandbox restart" \
-           "apt" "Homebrew" "brew bundle sync" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox"; do
+           "apt" "Homebrew" "brew bundle sync" "npm globals" "Flatpak" "uv install new" "uv tools" "AppMan" "appman install new" "appman update" "Distrobox" "git commit"; do
   result="${RESULTS[$key]:-—}"
   if [[ "$result" == ✓* ]]; then
     echo -e "  $(printf '%-30s' "$key") ${GREEN}${result}${NC}"

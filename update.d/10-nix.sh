@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 1. Nix + Home Manager ────────────────────────────────────────────────────
-step "1/8  Nix + Home Manager"
+step "1/9  Nix + Home Manager"
 
 if ! command -v nix &>/dev/null; then
   warn "nix not found — skipping Nix updates. Run ./bootstrap.sh first."

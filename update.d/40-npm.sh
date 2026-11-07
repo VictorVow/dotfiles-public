@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 4. npm global AI CLIs ─────────────────────────────────────────────────────
-step "4/8  npm global packages (AI CLIs)"
+step "4/9  npm global packages (AI CLIs)"
 
 if ! command -v npm &>/dev/null; then
   skipped "npm not found — skipping."

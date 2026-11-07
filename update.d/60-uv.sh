@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 6. uv tools ───────────────────────────────────────────────────────────────
-step "6/8  uv tools"
+step "6/9  uv tools"
 
 if ! command -v uv &>/dev/null; then
   skipped "uv not found — skipping."

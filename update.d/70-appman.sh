@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 7. AppMan (AM) — AppImages ────────────────────────────────────────────────
-step "7/8  AppMan (AM) — AppImages"
+step "7/9  AppMan (AM) — AppImages"
 
 if ! command -v appman &>/dev/null; then
   skipped "appman not found — skipping."

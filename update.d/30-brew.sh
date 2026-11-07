@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 3. Homebrew ───────────────────────────────────────────────────────────────
-step "3/8  Homebrew"
+step "3/9  Homebrew"
 
 if ! command -v brew &>/dev/null; then
   skipped "brew not found — skipping."

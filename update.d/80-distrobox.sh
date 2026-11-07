@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 8. Distrobox containers ───────────────────────────────────────────────────
-step "8/8  Distrobox containers"
+step "8/9  Distrobox containers"
 
 if ! command -v distrobox &>/dev/null; then
   skipped "distrobox not found — skipping."

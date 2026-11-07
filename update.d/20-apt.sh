@@ -3,7 +3,7 @@
 # variables (RESULTS, flags, colours) and helpers from update.d/lib.sh.
 
 # ── 2. apt (system packages) ─────────────────────────────────────────────────
-step "2/8  apt (system packages)"
+step "2/9  apt (system packages)"
 
 if ! command -v apt-get &>/dev/null; then
   warn "apt-get not found — not an apt-based system?"
