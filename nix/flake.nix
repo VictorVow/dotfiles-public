@@ -31,7 +31,7 @@
 
     home-manager = {
       # channel: release-26.05
-      url = "github:nix-community/home-manager/24f8f8e786f87d6a818e1746cb2389bf922afdab";
+      url = "github:nix-community/home-manager/24f2190587513b9c2f73db112a17844ae912d965";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/499fb79f92064e92cdb968d12ffeb92d36243b50";
+    llm-agents.url = "github:numtide/llm-agents.nix/baf924369e8d5ec02af1eab444db411d6fed1e5e";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/2536c1d569f761915052cfcf3a1f22717d913a96";
+      url = "github:stablyai/orca/d4144ce5ed254843c261f5e1d323d607f65bb7db";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/8a0289e4c5e28684b7c4ced5353af2893d1329f9";
+      url = "github:upstash/context7/7836c583918374fbecffacf866afb7594b919466";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/8f920bb65b8d8ae669411501b0a3a59a62883ac3";
+      url = "github:morluto/rea/23de10bb2849cdce8ddbe70504aa7cc57de75a98";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/df3a4abe7d0840d5f60324812c432e00b66a4e75";
+      url = "github:pbakaus/impeccable/b7a89176e4e87422b40f98adabceb051dbb5448b";
       flake = false;
     };
 

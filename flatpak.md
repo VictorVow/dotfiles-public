@@ -12,6 +12,7 @@ com.authormore.penpotdesktop
 com.bilingify.readest
 com.bktus.gpgfrontend
 com.borgbase.Vorta
+com.calibre_ebook.calibre
 com.discordapp.Discord
 com.github.ahrm.sioyek
 com.github.jeromerobert.pdfarranger
