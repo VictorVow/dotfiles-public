@@ -22,6 +22,23 @@ let
 
   # Background priority as cass sets it: only runs when the CPU/disk is otherwise idle.
   # cass also skips a run itself under severe load (/proc/loadavg + PSI).
+  #
+  # CASS_RAW_MIRROR=0 disables the raw mirror (added in cass 0.10.0, upstream
+  # #506). The mirror is a content-addressed evidence store at
+  # ~/.local/share/coding-agent-search/raw-mirror: on every index run it keeps a
+  # byte copy of each source file version it scanned (chunked, blake3-addressed,
+  # deduplicated) as the "last copy" fallback, so a conversation can be
+  # re-indexed or recovered even after its source file is deleted. It is never
+  # read for search — everything searchable comes from agent_search.db and the
+  # lexical index, and cass always re-reads the live source file.
+  #
+  # Why off: two of the largest sources here are live SQLite DBs
+  # (opencode.db ~450 MB, devin sessions.db) that change pages all over the file
+  # on every write, so chunk dedup gains nothing — each 15-min incremental run
+  # stored a near-full fresh copy. The mirror hit 26 GB while all real sources
+  # were ~1 GB, and still exists on disk. Providers don't delete their files
+  # here, so the sole-copy protection buys nothing. With capture off, a
+  # `cass mirror prune` actually sticks (nothing re-captures).
   mkService = description: job: timeout: {
     Unit = {
       Description = description;
@@ -33,7 +50,7 @@ let
     Service = {
       Type = "oneshot";
       ExecStart = "${cass} --color=never schedule run --job ${job} --data-dir ${dataDir} --json";
-      Environment = [ "CASS_INDEX_NO_PROGRESS_EVENTS=1" ];
+      Environment = [ "CASS_INDEX_NO_PROGRESS_EVENTS=1" "CASS_RAW_MIRROR=0" ];
       Nice = 19;
       IOSchedulingClass = "idle";
       CPUSchedulingPolicy = "idle";
@@ -97,34 +114,5 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  # Weekly raw-mirror prune: the mirror snapshots whole source files every run, and
-  # SQLite session DBs (opencode.db) churn ~500 MB of unique blobs per capture —
-  # unbounded this grew to 26 GB within weeks. Keep the newest 2 captures per
-  # source file plus anything <1h old; reclaim the rest.
-  systemd.user.services.cass-mirror-prune = {
-    Unit = {
-      Description = "cass raw-mirror retention prune";
-      Documentation = "https://github.com/Dicklesworthstone/coding_agent_session_search";
-      X-SwitchMethod = "keep-old";
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${cass} --color=never mirror prune --keep-latest 2 --safety-hold-down 1h --apply --data-dir ${dataDir} --json";
-      Environment = [ "CASS_INDEX_NO_PROGRESS_EVENTS=1" ];
-      Nice = 19;
-      IOSchedulingClass = "idle";
-      CPUSchedulingPolicy = "idle";
-      CPUQuota = "25%";
-      TimeoutStartSec = "30min";
-    };
-  };
-  systemd.user.timers.cass-mirror-prune = {
-    Unit.Description = "cass raw-mirror prune timer";
-    Timer = {
-      OnCalendar = "Sun *-*-* 04:00:00";
-      Persistent = true;
-      RandomizedDelaySec = 60;
-    };
-    Install.WantedBy = [ "timers.target" ];
-  };
+  # No mirror-prune timer: CASS_RAW_MIRROR=0 stops capture, so nothing regrows.
 }

@@ -61,7 +61,7 @@ installs/
 │       ├── shell.nix         # Bash, PATH, env vars, aliases, npm AI CLI activation
 │       ├── shell-server.nix  # Server variant of shell.nix (no GUI/Yakuake/Android bits)
 │       ├── rclone.nix        # Declarative rclone remotes (programs.rclone + sops creds)
-│       ├── cass.nix          # systemd user timers: cass index refresh + weekly raw-mirror prune (search-agent-history skill)
+│       ├── cass.nix          # systemd user timers keeping the cass agent-session search index fresh (raw mirror disabled; search-agent-history skill)
 │       ├── recoll.nix        # services.recoll: full-text index of ~/Documents, ~/Downloads, ~/Media (searchable file types listed inside)
 │       └── distrobox.nix     # Declarative distrobox containers (dev + media)
 ├── scripts/                  # Standalone helper/diagnostic scripts
