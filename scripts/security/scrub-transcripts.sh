@@ -58,12 +58,13 @@ ts_defaults
 REPORT="$REPORT_DIR/report.json"
 CASS_BIN="${CASS_BIN:-/home/linuxbrew/.linuxbrew/bin/cass}"
 
-DRY=0 FULL=0 CASS=1
+DRY=0 FULL=0 CASS=1 FORGET_BUDGET=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY=1; shift ;;
     --full)    FULL=1; shift ;;
     --defer-cass) CASS=0; shift ;;
+    --forget-budget) FORGET_BUDGET="$2"; shift 2 ;;
     --) shift; break ;;
     *) break ;;
   esac
@@ -75,7 +76,7 @@ ts_resolve "$@"
 
 ts_lock || exit 1
 ts_targets_json
-export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DB DIR
+export STATE_FILE FULL REPORT CONF DRY CASS CASS_BIN CASS_DB DIR FORGET_BUDGET
 python3 - "$REPORT_DIR" <<'PYEOF'
 import json, os, sys, subprocess, sqlite3
 sys.path.insert(0, os.environ["DIR"])
@@ -279,7 +280,14 @@ def glob_escape(s):
 # cass accepts ONE --source-glob per call and does not expand {a,b} braces, so
 # batching means capping attempts per run -- each forget rewrites the index --
 # and carrying the rest in cass://pending for the next run.
+# A single forget takes ~90s (post-delete index rebuild) and can hit the 300s
+# per-call timeout while cass's own jobs hold the db, so bound the whole phase
+# by wall-clock, not attempts: stop well inside the service's 30min
+# TimeoutStartSec so state is saved and the run exits cleanly.
 MAX_FORGET_ATTEMPTS = 100
+# --forget-budget N overrides for long unattended drains (default fits the
+# service's 30min TimeoutStartSec with headroom).
+FORGET_BUDGET_S = int(os.environ.get("FORGET_BUDGET") or 600)
 
 # ---------------- cass archive (agent_search.db) ----------------------------
 # Dump messages.content per conversation, gitleaks-scan once, and forget every
@@ -362,8 +370,9 @@ if cass and pending:
         print(f"cass: {len(pending)} forgets pending; agent_search.db not a target",
               file=sys.stderr)
     elif not dry:
+        forget_deadline = time.time() + FORGET_BUDGET_S
         for g in sorted(pending):
-            if attempts >= MAX_FORGET_ATTEMPTS:
+            if attempts >= MAX_FORGET_ATTEMPTS or time.time() >= forget_deadline:
                 break
             attempts += 1
             pat = glob_escape(g) if pending[g] == "exact" else g
@@ -371,7 +380,8 @@ if cass and pending:
                 r = subprocess.run(
                     [cass_bin, "forget", "--source-glob", pat,
                      "--apply", "--db", cass_db, "--json"],
-                    capture_output=True, text=True, timeout=300)
+                    capture_output=True, text=True,
+                    timeout=max(60, forget_deadline - time.time()))
             except subprocess.TimeoutExpired:
                 print(f"cass forget timed out for {pat} (300s)", file=sys.stderr)
                 continue
