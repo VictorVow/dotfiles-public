@@ -14,7 +14,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/da6dc0e7b26060f2f71ce3ef7088fb56ee44fa36";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/02c087f3fe673c9e317f206a627cb6b910336dbe";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/3ec636362e1816bc2f0888fa0fa2c69f1bc9e504";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/baf924369e8d5ec02af1eab444db411d6fed1e5e";
+    llm-agents.url = "github:numtide/llm-agents.nix/70f935080caa586fd7d0ae6703b155d487b93af4";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/d4144ce5ed254843c261f5e1d323d607f65bb7db";
+      url = "github:stablyai/orca/566b52ec68c54d44a5d5b8473a73acd991a3447c";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/23de10bb2849cdce8ddbe70504aa7cc57de75a98";
+      url = "github:morluto/rea/e5e0dc5542f6a63b790881ac906dc9fcd6d46659";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/b7a89176e4e87422b40f98adabceb051dbb5448b";
+      url = "github:pbakaus/impeccable/f5c80432f883a0ee437735305eafc2a9e1bdb7a0";
       flake = false;
     };
 
