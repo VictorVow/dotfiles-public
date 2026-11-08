@@ -32,12 +32,17 @@
 #     orphaned and still rendering. A render that was killed is simply
 #     retried next time the file is shown.
 #
+# Fresh renders also drop a 500px JPEG at .ts/<name>.jpg so TagSpaces shows
+# the same thumb (it only knows sidecars, and its own HTML thumb path only
+# reads an embedded data-screenshot). Skipped for inputs inside a .ts dir or
+# when .ts can't be created.
+#
 # All DNS is mapped to NOTFOUND so previewing a file never fetches remote
 # resources (tracking pixels, CDNs) — only local/relative assets render.
 # Don't add --blink-settings=scriptEnabled=false: with it headless Chromium
 # silently writes no screenshot at all.
 
-input=$2 out=$3
+input=$2 out=$3 orig=$2
 cache=${XDG_CACHE_HOME:-$HOME/.cache}/html-thumbnailer
 key=$(stat -c '%n|%Y|%s' -- "$input" | md5sum | cut -d' ' -f1)
 cached=$cache/$key.png
@@ -69,5 +74,18 @@ setpriv --pdeathsig KILL -- timeout 30 \
 [ -s "$work/shot.png" ] || exit 1
 mv "$work/shot.png" "$cached.tmp" && mv "$cached.tmp" "$cached"
 cp "$cached" "$out"
+# Also feed TagSpaces: it looks for .ts/<name>.jpg sidecars next to the file
+# and can't render HTML itself. Skip silently if .ts isn't creatable
+# (read-only dir, or input already lives inside a .ts folder). Runs only on
+# the cold-render path; cached hits leave the .ts jpg to the first render.
+tsdir="$(dirname "$orig")/.ts"
+case "$orig" in */.ts/*|file://*) ;; *)
+  if mkdir -p "$tsdir" 2>/dev/null; then
+    tsjpg="$tsdir/$(basename "$orig").jpg"
+    ffmpeg -nostdin -loglevel error -y -i "$cached" \
+      -vf "scale=500:500:force_original_aspect_ratio=decrease" \
+      -q:v 3 "$tsjpg" 2>/dev/null || rm -f "$tsjpg"
+  fi ;;
+esac
 # Prune renders of files not previewed (or since changed) in 90 days.
 find "$cache" -name '*.png' -atime +90 -delete

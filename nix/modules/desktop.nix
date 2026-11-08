@@ -86,7 +86,7 @@
   # enabled preview plugins (Settings → Interface → Previews).
   xdg.dataFile."thumbnailers/html-thumbnailer.thumbnailer".text = let
     htmlThumbnailer = "${pkgs.writeShellScriptBin "html-thumbnailer" ''
-      export PATH=${lib.makeBinPath (with pkgs; [ coreutils findutils gnugrep util-linux unzip ungoogled-chromium ])}
+      export PATH=${lib.makeBinPath (with pkgs; [ coreutils findutils gnugrep util-linux unzip ungoogled-chromium ffmpeg ])}
       ${builtins.readFile ../../scripts/html-thumbnailer.sh}
     ''}/bin/html-thumbnailer";
   in ''
