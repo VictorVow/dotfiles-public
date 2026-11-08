@@ -63,6 +63,13 @@ in
     secrets = lib.genAttrs secretNames (_: { });
   };
 
+  # Requires sops-nix, so starting at boot (linger) would drag it in before
+  # login; follow it to graphical-session.target (see sops-age-key.nix).
+  systemd.user.services.rclone-config = {
+    Unit.After = [ "graphical-session.target" ];
+    Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
+  };
+
   programs.rclone = {
     enable = true;
 

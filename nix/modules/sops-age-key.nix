@@ -44,10 +44,19 @@ lib.mkMerge [
     # the service below has written it.
     sops.age.keyFile = keyPath;
 
+    # Linger is on, so default.target is reached at boot before login: secret-tool
+    # then D-Bus-activates ksecretd with no display, it aborts, and DrKonqi
+    # segfaults reporting it. Wait for the Plasma session instead.
+    systemd.user.services.sops-nix = {
+      Unit.After = [ "graphical-session.target" ];
+      Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
+    };
+
     systemd.user.services.sops-age-key = {
       Unit = {
         Description = "Materialise sops age identity from Secret Service";
         Before = [ "sops-nix.service" ];
+        After = [ "graphical-session.target" ];
       };
       Service = {
         Type = "oneshot";
@@ -64,7 +73,7 @@ lib.mkMerge [
           mv -f "$tmp" "$d/key"
         '';
       };
-      Install.WantedBy = [ "default.target" ];
+      Install.WantedBy = [ "graphical-session.target" ];
     };
   })
 
