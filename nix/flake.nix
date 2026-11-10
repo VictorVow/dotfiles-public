@@ -11,7 +11,7 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/1f607aa79b6356ed45d3cd3c8079c196e79efa2c";
+    nixpkgs.url = "github:NixOS/nixpkgs/718f670e845328e9c2cecdd832835712b2cbd065";
 
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/3ec636362e1816bc2f0888fa0fa2c69f1bc9e504";
@@ -39,7 +39,7 @@
     # at activation. Used by modules/rclone.nix for rclone remote credentials.
     sops-nix = {
       # channel: master
-      url = "github:Mic92/sops-nix/60182817ee048ac94b4c68ea76d5ef2e8aac730d";
+      url = "github:Mic92/sops-nix/b18e01ce148eb3efff5de2f2d3181ca53b2b2a54";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/b351c893c53850908a89bc30ea2cbf6437ada413";
+    llm-agents.url = "github:numtide/llm-agents.nix/4c6c37495fc45a46cb6f86cc6b0865e363fb77f2";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/9ea9ea9a1948f7694c5253480e9c22c50d459f38";
+      url = "github:stablyai/orca/a964c9e0b549cc955db372ced79d1a8838d801e3";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/93b8b82db70279e40f484114cff9dc1958dc14ee";
+      url = "github:morluto/rea/6be6596aaca5a9f584fd726b9ca7733d5b54f55a";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/e89e3ada3e875a89ac2c5d33d11e65ebef6fe285";
+      url = "github:pbakaus/impeccable/9fadc41729c38fd47d7ae622b501558653f9d2e9";
       flake = false;
     };
 
