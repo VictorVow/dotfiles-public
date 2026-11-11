@@ -658,9 +658,10 @@ in
                 # wired to Hermes + OpenCode etc. See let-block + services.nix magpie service.
 
     # ── Documents / PDF ───────────────────────────────────────────────────────
-    pkgs-latest.pdfcraft # PDF reader/editor in Rust (binaries: pdfcraft GUI + pdfcraft-cli,
-                         # whose `mcp` subcommand is the opt-in agent MCP server).
-                         # latest-only attr — not yet in either age-pinned nixpkgs.
+    pkgs-unstable.pdfcraft # PDF reader/editor in Rust (binaries: pdfcraft GUI + pdfcraft-cli,
+                           # whose `mcp` subcommand is the opt-in agent MCP server). pkgs-unstable,
+                           # not pkgs-latest: the unstable pin is Hydra-cached, while nixos-unstable
+                           # HEAD was not — building pdfcraft locally dies on aws-lc-sys.
 
     # ── Assorted ───────────────────────────────────────────────────────────────
     glow # Markdown viewer
