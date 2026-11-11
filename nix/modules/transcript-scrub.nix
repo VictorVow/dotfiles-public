@@ -41,7 +41,8 @@ in
   # Daily incremental scrub: only files/rows newer than the state high-water
   # mark hit gitleaks, so the run is cheap. Runs before cass-nightly (03:00)
   # so forget+re-index lands inside the same nightly window.
-  # Success + failure both go to the Notifications hub (→ "Transcript scrub" room).
+  # Only failure notifies the hub (→ "Transcript scrub" room); check
+  # `journalctl --user -u transcript-scrub` for redacted/pending/review lines.
   systemd.user.services.transcript-scrub = {
     Unit = {
       Description = "Scrub leaked secrets from agent transcripts";
@@ -54,7 +55,6 @@ in
     Service = {
       Type = "oneshot";
       ExecStart = "${scrubScript}/scrub-transcripts.sh";
-      ExecStartPost = "${notifyScript} 'transcript-scrub ok'";
       Environment = [
         "PATH=${
           lib.makeBinPath (
