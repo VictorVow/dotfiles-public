@@ -17,7 +17,9 @@ fi
 # Ensure the Flathub user remote is configured.
 # --user: installs for this user only (no sudo required).
 flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-echo "Flathub user remote is configured."
+# FlatPark: 3rd-party repo hosting XerahS (com.xerahs.XerahS).
+flatpak remote-add --if-not-exists --user flatpark https://dl.flatpark.org/flatpark.flatpakrepo
+echo "Flathub + FlatPark user remotes are configured."
 
 # ── Per-app permission overrides ─────────────────────────────────────────────
 # Overrides apply even before the app is installed, so set them up front.

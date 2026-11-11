@@ -152,6 +152,10 @@ us.zoom.Zoom
 
 com.stremio.Stremio
 
+## flatpark
+
+com.xerahs.XerahS
+
 ## GeForce NOW
 
 com.nvidia.geforcenow
