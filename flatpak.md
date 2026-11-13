@@ -7,7 +7,6 @@ au.stevetech.yafi
 chat.delta.desktop
 codes.merritt.Nyrna
 codes.nora.gDiceRoller
-com.adamcake.Bolt
 com.authormore.penpotdesktop
 com.bilingify.readest
 com.bktus.gpgfrontend

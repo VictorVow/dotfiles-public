@@ -11,7 +11,7 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/08d3a97586f6b6343b3b5e799980773629432610";
+    nixpkgs.url = "github:NixOS/nixpkgs/6f06d204d8f2d8761d9da78778745974a3216381";
 
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/31ecbaca1bdefa45dffc409f0250bd8039ea0010";
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/b1794bce59df71b7f479fd477acbeedbdda5f85a";
+    llm-agents.url = "github:numtide/llm-agents.nix/a4ef5bdd670dc14d115a2f4cd38a2955303254f3";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -67,7 +67,7 @@
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
     # channel: master
-    ie-r.url = "github:miaupaw/ie-r/1af07655b132122d0ff8ee4265017dd5e8ed1791";
+    ie-r.url = "github:miaupaw/ie-r/d02a286414d90a79f7079a0676d70fa3b11f43c3";
 
     # Zed's Delta (official prebuilt Linux binaries, wrapped for Nix).
     # channel: main
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/7c018474477fb65b4ccd1fe4cd7d34620c549158";
+      url = "github:stablyai/orca/9ee8feaf9d9bf4f172e97d84dedbdbe6aab1e2cf";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/902632c1c179bb6771fd926dfec650635a5fe42c";
+      url = "github:upstash/context7/2a150c108eed74e45e20a03fa0092c4c166780c5";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/08a923f722a23fd1773f5a4cbe03d1c5edba1fbd";
+      url = "github:morluto/rea/abdbaa544ad3e63444a58bebd1708cc51b136a8b";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/98d9f7d2159d698ced1690a3cf1015019009b718";
+      url = "github:pbakaus/impeccable/c3bb418ee38ee49a6b999b7752c1368f3123a2bd";
       flake = false;
     };
 
