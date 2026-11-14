@@ -14,7 +14,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/6f06d204d8f2d8761d9da78778745974a3216381";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/31ecbaca1bdefa45dffc409f0250bd8039ea0010";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/1c89083e451e891152365b799595cf7790a43325";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -39,7 +39,7 @@
     # at activation. Used by modules/rclone.nix for rclone remote credentials.
     sops-nix = {
       # channel: master
-      url = "github:Mic92/sops-nix/b18e01ce148eb3efff5de2f2d3181ca53b2b2a54";
+      url = "github:Mic92/sops-nix/89a234ce2daf6e568a7d4b4fe250afdd23d84e20";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/a4ef5bdd670dc14d115a2f4cd38a2955303254f3";
+    llm-agents.url = "github:numtide/llm-agents.nix/860075d959fc68c31fd405989daf85c1b1f0db38";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/9ee8feaf9d9bf4f172e97d84dedbdbe6aab1e2cf";
+      url = "github:stablyai/orca/c0d4b77a6ffe6647fa279b63b974dad4457f0a99";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/2a150c108eed74e45e20a03fa0092c4c166780c5";
+      url = "github:upstash/context7/078c0c731d19eb88d2391b236ab82a127dbabac3";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/abdbaa544ad3e63444a58bebd1708cc51b136a8b";
+      url = "github:morluto/rea/c5301e6145a9c8e06719f27e83da55af8e5480fc";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/c3bb418ee38ee49a6b999b7752c1368f3123a2bd";
+      url = "github:pbakaus/impeccable/e2b7486f266e6667d182f4d1d7ca2be88bfc4004";
       flake = false;
     };
 
