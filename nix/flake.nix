@@ -11,7 +11,7 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/6f06d204d8f2d8761d9da78778745974a3216381";
+    nixpkgs.url = "github:NixOS/nixpkgs/fa1373130d5a21c040a47c5dbe1913d59ed91808";
 
     # channel: nixos-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/1c89083e451e891152365b799595cf7790a43325";
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/860075d959fc68c31fd405989daf85c1b1f0db38";
+    llm-agents.url = "github:numtide/llm-agents.nix/ee05b5abb7c7f4af84a5ad5420f8a6e662774f2b";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -67,7 +67,7 @@
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
     # channel: master
-    ie-r.url = "github:miaupaw/ie-r/d02a286414d90a79f7079a0676d70fa3b11f43c3";
+    ie-r.url = "github:miaupaw/ie-r/d8f61e36087f6ade97f5cd88b43bb5554739c1c3";
 
     # Zed's Delta (official prebuilt Linux binaries, wrapped for Nix).
     # channel: main
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/c0d4b77a6ffe6647fa279b63b974dad4457f0a99";
+      url = "github:stablyai/orca/e81a89c5ffe3e8bf8abcc962630ee1fdbc2139ad";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/c5301e6145a9c8e06719f27e83da55af8e5480fc";
+      url = "github:morluto/rea/72d5e72e6d7b7997c4ecb11972fc405be8ec67d2";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/e2b7486f266e6667d182f4d1d7ca2be88bfc4004";
+      url = "github:pbakaus/impeccable/e6daaba727fc444f1534e7d7cd7ea88942565b7d";
       flake = false;
     };
 
