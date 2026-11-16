@@ -11,10 +11,10 @@
     # flake.lock. Don't hand-edit the SHAs — let update.sh do it.
 
     # channel: nixos-26.05
-    nixpkgs.url = "github:NixOS/nixpkgs/fa1373130d5a21c040a47c5dbe1913d59ed91808";
+    nixpkgs.url = "github:NixOS/nixpkgs/9bb52223f4f6a0cc606fd0852d8784f896c137d5";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/1c89083e451e891152365b799595cf7790a43325";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/0bb2eedc20e4739f29e8045034f2828ad7054f8f";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -56,14 +56,14 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/ee05b5abb7c7f4af84a5ad5420f8a6e662774f2b";
+    llm-agents.url = "github:numtide/llm-agents.nix/aeb1afe1529c5dc7dcdc54d644a8aed212d99dd0";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
     # A compromised or broken upstream commit gets PIN_AGE_DAYS_SOURCE days
     # (orca: PIN_AGE_DAYS_ORCA) to be noticed before update.sh adopts it.
     # channel: master
-    tuxManager.url = "github:benapetr/TuxManager/4bc67f81684b9a135bf533668fa7d326acb6cf2e";
+    tuxManager.url = "github:benapetr/TuxManager/573f0bd54312676ed5435476c67329cd4a1c04d5";
     tuxManager.inputs.nixpkgs.follows = "nixpkgs";
 
     # channel: master
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/e81a89c5ffe3e8bf8abcc962630ee1fdbc2139ad";
+      url = "github:stablyai/orca/574cea7ee54debf4e6e696f24f122d75124f672c";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/078c0c731d19eb88d2391b236ab82a127dbabac3";
+      url = "github:upstash/context7/7765f353c694907297ae36bbae61b141ce712f44";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/72d5e72e6d7b7997c4ecb11972fc405be8ec67d2";
+      url = "github:morluto/rea/94728785ea4f4c1b96c1a117057a3c882b26768f";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/e6daaba727fc444f1534e7d7cd7ea88942565b7d";
+      url = "github:pbakaus/impeccable/27c8e878a4afaf5a13bffc99af2d7ac966e54c46";
       flake = false;
     };
 
