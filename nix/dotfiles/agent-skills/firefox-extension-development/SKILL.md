@@ -91,7 +91,7 @@ web-ext run -s <source-dir> --target=firefox-android \
 Which `--firefox-apk` to use:
 
 - `org.mozilla.firefox_beta` — Beta. Accepts debug installs, matches release behavior most closely. Good default.
-- `org.mozilla.fenix` — Nightly. Same debug support, and the only channel with the custom add-on collection menu (persistent install of any AMO-listed extension). More churn, updates ~daily.
+- `org.mozilla.fenix` — Nightly. Same debug support, and (with Beta) the only channel with the custom add-on collection menu (persistent install of any AMO-listed extension). More churn, updates ~daily.
 - `org.mozilla.fennec_fdroid` — Fennec F-Droid, also debuggable.
 - `org.mozilla.firefox` — release. Locked to the curated extension list; debug installs effectively don't work.
 
@@ -101,6 +101,24 @@ Notes:
 - web-ext logs `You can connect to this Android device on TCP port XXXXX` — the device then shows up in desktop `about:debugging` for inspecting the extension's pages/console while it runs.
 - `Old artifacts directories have been found` warning → rerun with `--adb-remove-old-artifacts`.
 - Touch/pointer-event bugs usually also reproduce on desktop without a device: F12 → Responsive Design Mode (Ctrl+Shift+M) → enable touch simulation. Much faster loop; reach for the phone only for confirmation.
+
+### Persistent install on Android (signed XPI required)
+
+Fenix has an **"Install add-on from file"** preference (`pref_key_install_local_addon` in `SettingsFragment.kt`) that does a real persistent install via `AddonManager.installAddon(uri, InstallationMethod.FROM_FILE)`. Its only gate is `showSecretDebugMenuThisSession` — **not** the release channel — so it works on Fennec F-Droid and Beta, not just Nightly (verified against firefox-main source; the fennecbuild patches don't touch this path). Unlisted/self-signed XPIs work since signature checking is all that applies.
+
+Steps:
+
+1. Push the signed XPI: `adb push web-ext-artifacts/<hash>-<version>.xpi /sdcard/Download/` (or copy it over any way — the picker accepts `application/x-xpinstall` and `application/zip`).
+2. In the app: **Settings → About** → tap the logo ~5× to enable the debug menu for this session.
+3. **Settings → Extensions → "Install add-on from file"** → pick the XPI → confirm.
+
+Caveats:
+
+- The debug menu unlock is per-session; if the menu item vanishes after a restart, tap the logo again. The **installed add-on persists regardless**.
+- No auto-updates: bump `version`, re-sign, re-install from file (same `gecko.id` updates in place).
+- A different `gecko.id` than the AMO-listed original installs as a separate extension with default settings.
+- **Custom Add-on Collection** (the other persistent path, installs straight from AMO) IS channel-gated: `FeatureFlags.customExtensionCollectionFeature = isNightlyOrDebug || isBeta`, so Nightly/Beta only — not Fennec release.
+- Rooted alternative: drop the XPI into `/data/data/<pkg>/files/mozilla/<profile>.default/extensions/<gecko.id>.xpi`.
 
 ## 6. Resetting extension data
 
