@@ -506,6 +506,11 @@ in
     # Disable GitHub CLI telemetry (enabled by default since gh ≥ 2.91.0)
     GH_TELEMETRY = "false";
 
+    # git's bash completion suggests remote branch names for `git switch`/`git
+    # checkout` (tracking DWIM), cluttering local-branch completion. Actual DWIM
+    # behavior is unaffected.
+    GIT_COMPLETION_CHECKOUT_NO_GUESS = "1";
+
     # corepack provides yarn/pnpm (see packages.nix). Disable its interactive
     # "download package manager X?" prompt so non-interactive contexts (git
     # hooks, CI, scripts) fetch the pinned version silently instead of hanging.
