@@ -245,42 +245,49 @@ in
 
         # 1. Lock-age check: nixpkgs' lastModified is the channel-release
         #    commit's date, close enough to Hydra publish time to matter.
-        local lock="$flake/flake.lock"
+        #    age_days defaults to 0 (treat as young) when unreadable so the
+        #    dry-run below still fires in odd states.
+        local lock="$flake/flake.lock" age_days=0
         if [[ -f "$lock" ]]; then
-          local pin_ts now_ts age_days
+          local pin_ts now_ts
           pin_ts=$(jq -r '.nodes.nixpkgs.locked.lastModified // empty' "$lock" 2>/dev/null)
           if [[ -n "$pin_ts" ]]; then
             now_ts=$(date +%s)
             age_days=$(( (now_ts - pin_ts) / 86400 ))
-            if (( age_days < pin_age_days )); then
-              printf '\033[1;33m[WARN]\033[0m nixpkgs pin is %sd old (< %sd cooldown).\n' \
-                     "$age_days" "$pin_age_days" >&2
-              printf '       Hydra may not have built all of it yet — expect local\n' >&2
-              printf '       compiles. Run `update-all` first, or continue anyway.\n' >&2
-            fi
           fi
+        fi
+        if (( age_days < pin_age_days )); then
+          printf '\033[1;33m[WARN]\033[0m nixpkgs pin is %sd old (< %sd cooldown).\n' \
+                 "$age_days" "$pin_age_days" >&2
+          printf '       Hydra may not have built all of it yet — expect local\n' >&2
+          printf '       compiles. Run `update-all` first, or continue anyway.\n' >&2
         fi
 
         # 2. Dry-run: what would build from source vs substitute from caches.
-        local plan built=() line
-        plan=$(nix build --dry-run --no-link \
-                 "$flake#homeConfigurations.$config.activationPackage" 2>&1) || {
-          printf '\033[0;31m[ERROR]\033[0m dry-run failed:\n%s\n' "$plan" >&2
-          return 1
-        }
-        while IFS= read -r line; do
-          case "$line" in
-            *"/nix/store/"*.drv)
-              line="''${line##*/nix/store/}"   # strip leading space + /nix/store/<hash>-
-              line="''${line#*-}"
-              built+=("''${line%.drv}") ;;
-          esac
-        done <<< "$plan"
+        #    Only worth its full extra ~13s flake eval when the pin is young —
+        #    that's exactly when cache misses are plausible. With an old pin
+        #    (the common case) skip it: halves hms' eval cost.
+        if (( age_days < pin_age_days )); then
+          local plan built=() line
+          plan=$(nix build --dry-run --no-link \
+                   "$flake#homeConfigurations.$config.activationPackage" 2>&1) || {
+            printf '\033[0;31m[ERROR]\033[0m dry-run failed:\n%s\n' "$plan" >&2
+            return 1
+          }
+          while IFS= read -r line; do
+            case "$line" in
+              *"/nix/store/"*.drv)
+                line="''${line##*/nix/store/}"   # strip leading space + /nix/store/<hash>-
+                line="''${line#*-}"
+                built+=("''${line%.drv}") ;;
+            esac
+          done <<< "$plan"
 
-        if (( ''${#built[@]} > 0 )); then
-          printf '\033[1;33m[WARN]\033[0m %d derivation(s) would build locally (no cache):\n' \
-                 "''${#built[@]}" >&2
-          printf '  %s\n' "''${built[@]}" >&2
+          if (( ''${#built[@]} > 0 )); then
+            printf '\033[1;33m[WARN]\033[0m %d derivation(s) would build locally (no cache):\n' \
+                   "''${#built[@]}" >&2
+            printf '  %s\n' "''${built[@]}" >&2
+          fi
         fi
 
         # 3. Post-switch diff (nvd): resolve the profile symlink BEFORE the
