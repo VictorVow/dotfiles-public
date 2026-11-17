@@ -32,6 +32,7 @@ installs/
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
 │   ├── home.nix              # Top-level Home Manager config (desktop, user `boss`), imports modules
 │   ├── home-lord.nix         # Headless-server Home Manager config (lord-ubuntu, user `lord`), imports *-server.nix + shared modules
+│   ├── home-droid.nix        # Minimal headless config for the Pixel AVF "Linux Terminal" Debian VM (aarch64, user `droid`)
 │   ├── secrets/              # sops-encrypted (age) secrets, safe to commit
 │   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
@@ -43,6 +44,7 @@ installs/
 │   └── modules/
 │       ├── packages.nix      # All home.packages (replaces apt/brew/pipx/npm lists) — desktop
 │       ├── packages-server.nix # Headless subset of packages.nix for lord-ubuntu
+│       ├── packages-droid.nix  # Minimal headless package set for the Pixel VM (adb, tailscale CLI, LLM CLIs)
 │       ├── shell-apps.nix    # programs.* for shell/CLI apps: git, tmux, starship, htop, gh, direnv, ssh
 │       ├── ai-agents.nix     # Claude Code (settings, statusline, hooks), Codex, OpenCode (+ `opencode1` w/ magpie Devin/Cursor plugins), shared MCP server registry
 │       ├── ai-agents-server.nix # Server variant of ai-agents.nix (no browser MCPs)
@@ -68,7 +70,6 @@ installs/
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
-│   ├── pixel-vm.sh                # Drive the Pixel's AVF Linux Terminal (scrcpy display) over adb: status/join/send/screenshot/ocr; joins it to the Headscale tailnet
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times

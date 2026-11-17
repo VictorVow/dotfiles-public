@@ -13,7 +13,7 @@ The working channel is:
 - **Input**: `adb shell input -d <logical-display> text ...` — types into the terminal's surface on the scrcpy virtual display.
 - **Output**: `adb exec-out screencap -p -d <surfaceflinger-id>` → `tesseract` OCR. The terminal canvas is not accessibility-readable (only the tab title appears in `uiautomator dump`).
 
-All of this is wrapped by **`~/Projects/installs/scripts/pixel-vm.sh`** — prefer it over hand-rolling adb calls.
+All of this is wrapped by **`scripts/pixel-vm.sh`** (in this skill's directory) — prefer it over hand-rolling adb calls.
 
 ## Wrapper script (preferred)
 

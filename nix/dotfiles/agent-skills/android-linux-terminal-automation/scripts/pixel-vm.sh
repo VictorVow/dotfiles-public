@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/pixel-vm.sh
+# nix/dotfiles/agent-skills/android-linux-terminal-automation/scripts/pixel-vm.sh
 #
 # Drive the Android "Linux Terminal" app (AVF/crosvm Debian VM) on a Pixel
 # phone from this machine over adb. The VM's shell is only reachable through
