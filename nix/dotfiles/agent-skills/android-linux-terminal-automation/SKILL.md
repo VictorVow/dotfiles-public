@@ -78,10 +78,32 @@ The tailnet is self-hosted Headscale at `https://15-hs.example.com` (nodes get `
 
 First successful join gave **pixel-vm = 100.x.x.x**. If key minting fails, `join` falls back to interactive `tailscale up` and OCRs the screen — open the login URL yourself and approve the node. `join` is idempotent (re-running on an enrolled VM is a no-op for tailscaled state; it just re-auths the key).
 
+## Sending files to the VM — use taildrop, not the terminal
+
+Once the VM is on the tailnet, files go over taildrop. This is the only reliable file channel — `input`/OCR cannot carry file contents, and there is no shared `/sdcard` with Android.
+
+```bash
+# 1) push file(s) into the VM's taildrop inbox (no confirmation output on success)
+tailscale file cp file1.apk file2.apk pixel-vm:
+#    pixel-vm resolves by name or by 100.x.x.x
+
+# 2) inside the VM (via pixel-vm.sh send, then verify with ocr):
+#    the inbox dir /var/lib/tailscale/files is root-only — `ls` as droid
+#    gives Permission denied. `tailscale file get` moves them out:
+./scripts/pixel-vm.sh send 'sudo tailscale file get ~/iplayer'
+./scripts/pixel-vm.sh send 'ls -l ~/iplayer'
+./scripts/pixel-vm.sh ocr      # confirm the files landed
+```
+
+Notes:
+- `tailscale file cp <files> <node>:` — trailing `:` targets the node's inbox. Silent on success.
+- `tailscale file get <dir>` requires sudo (inbox is root-owned) and moves inbox files into `<dir>`.
+- Pulling files *from* the VM has no taildrop equivalent; use `scp`/http once sshd or a web server runs in the guest, or just OCR the result of `cat`.
+
 ## Gotchas
 
 - **`input text` quirks**: escape spaces as `\ `; avoid `|`, `>`, `$()` in commands — on this build a piped command leaked into a different app (`droiddeck`) instead of the terminal. Prefer short single commands; chain on the host side instead.
-- **`/sdcard` does not exist in the VM** — no shared storage with Android; file-based I/O is impossible, OCR is the read channel.
+- **`/sdcard` does not exist in the VM** — no shared storage with Android; file-based I/O is impossible over the terminal channel. To *send files to the VM* use taildrop, not the terminal (see below).
 - **OCR is lossy** on punctuation (`£`, `1`/`l`, `0`/`O`). Verify state with commands whose output OCRs reliably (`tailscale ip -4`, `hostname`), not by eyeballing echoed commands.
 - **Focus can wander**: tap inside the display before typing; if text lands in the wrong app, retap and retry. Phone display 0 (`input` without `-d`) is a different screen — never send there.
 - **Remote grep is toybox** — no `-P`/`grep -oP` inside `adb shell`; use `grep -o`/`awk`. Parse locally where possible.
