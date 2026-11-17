@@ -18,29 +18,22 @@ in
     # ── Shell / CLI ────────────────────────────────────────────────────────────
     procps # pgrep, ps, kill
     btop
-    htop
     fastfetch
     ripgrep
     fd
     jq
     tmux # configured by programs.tmux in shell-apps.nix
     eza
-    glow
     micro # EDITOR/VISUAL in shell-server.nix
-    tesseract # OCR for the VM terminal (pixel-vm.sh companion workflows)
 
     # ── Version control ────────────────────────────────────────────────────────
     git
-    gh
 
     # ── Runtimes / dev tools ───────────────────────────────────────────────────
     uv
-    nodejs_24 # npm >= 11.10 for `min-release-age` (see programs.npm)
+    nodejs_24 # ponytail plugin hooks run `node` (ai-agents-server.nix)
     python3 # bash-secret-guard.py + statusline.py hooks
     just
-    deno
-    ffmpeg
-    yt-dlp
 
     # ── Secrets ────────────────────────────────────────────────────────────────
     sops
