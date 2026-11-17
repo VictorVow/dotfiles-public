@@ -13,7 +13,10 @@ let
   weeklyCleanup = pkgs.writeShellScript "weekly-cleanup" ''
     set -eu
     ${pkgs.nix}/bin/nix-collect-garbage --delete-older-than 30d
-    /usr/bin/docker system prune -af --filter "until=720h" || true
+    # No docker on droid (AVF VM) — skip the prune when it's absent.
+    if [ -x /usr/bin/docker ]; then
+      /usr/bin/docker system prune -af --filter "until=720h" || true
+    fi
   '';
 in
 {

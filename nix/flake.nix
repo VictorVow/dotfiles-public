@@ -201,6 +201,11 @@
       '';
     };
 
+    # Only checkable on the VM itself (or an aarch64 remote builder):
+    # `nix flake check` on x86_64 ignores other systems. Eval sanity from the
+    # desktop: nix eval .#homeConfigurations.droid.activationPackage
+    checks.aarch64-linux.hm-build-droid = self.homeConfigurations."droid".activationPackage;
+
     homeConfigurations."boss" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
@@ -243,6 +248,30 @@
           hms = {
             flakePath  = "$HOME/installs/nix";
             configName = "lord";
+          };
+        };
+      };
+    };
+
+    # droid — Pixel 8 AVF "Linux Terminal" Debian VM (aarch64-linux). Minimal
+    # headless set: reuses the server modules, minus the ones that assume a
+    # real server (cass, systemd-creds sops key, update-all/cass timers).
+    homeConfigurations."droid" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.aarch64-linux;
+
+      modules = [ ./home-droid.nix sops-nix.homeManagerModules.sops ];
+
+      extraSpecialArgs = {
+        inherit llm-agents orca context7 logseq-fork rea impeccable cli-anything security-audit-skill;
+        pkgs-unstable = import nixpkgs-unstable {
+          system = "aarch64-linux";
+          config.allowUnfree = true;
+        };
+        hostProfile = {
+          isServer = true;
+          hms = {
+            flakePath  = "$HOME/installs/nix";
+            configName = "droid";
           };
         };
       };

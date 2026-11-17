@@ -18,6 +18,9 @@
 keys:
   - &boss age10qg4dmewk0t3khmjmqlske6vn57rxezqn8xs0s8eu0fgz8ndkgmsy5u5qa
   - &lord age14pvl48v82x4atpc8cfqn2sk4ejkhpxp6nrpahz5xdhhue00a3q8sc32fvd
+  # droid — Pixel AVF VM (nix/home-droid.nix). Plaintext keys.txt at the
+  # sops-nix default path (no systemd-creds on the disposable VM).
+  - &droid age1cjqpqyl4uzycxszj0yge08a83eygf2xvadupncr6pe6mp2ha5p4skgs89f
 creation_rules:
   # Only ai.yaml may be decrypted on lord-ubuntu (freellmapi_api_key for
   # OpenCode). All other secrets stay boss-only.
@@ -26,6 +29,13 @@ creation_rules:
       - age:
           - *boss
           - *lord
+  # ai-droid.yaml is the droid-only subset (freellmapi + refuseless keys for
+  # OpenCode on the VM).
+  - path_regex: nix/secrets/ai-droid\.yaml$
+    key_groups:
+      - age:
+          - *boss
+          - *droid
   - path_regex: nix/secrets/.*\.yaml$
     key_groups:
       - age:

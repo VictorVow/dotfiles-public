@@ -482,6 +482,7 @@ in
   # Writable settings.json + preserve Orca's managed hooks across hms.
   home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     dest="$HOME/.claude/settings.json"
+    $DRY_RUN_CMD mkdir -p "$(dirname "$dest")"
     if [ -L "$dest" ]; then
       $DRY_RUN_CMD rm "$dest"
     fi

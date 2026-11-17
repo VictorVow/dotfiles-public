@@ -124,7 +124,7 @@
     '';
 
     shellAliases = {
-      hmn = "home-manager news --flake ~/installs/nix#lord";
+      hmn = "home-manager news --flake \"${hostProfile.hms.flakePath}#${hostProfile.hms.configName}\"";
       nsp = "echo 'Ignore the legacyPackages.x86_64-linux. prefix' && echo '' && nix search nixpkgs";
 
       ls = "eza";

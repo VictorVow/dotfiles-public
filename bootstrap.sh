@@ -44,8 +44,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_CONFIG_DIR="$SCRIPT_DIR/nix"
 
-# Flake config to activate. Default "boss" (desktop); on lord-ubuntu pass the
-# config name explicitly: ./bootstrap.sh lord
+# Flake config to activate. Default "boss" (desktop); on other hosts pass the
+# config name explicitly: ./bootstrap.sh lord / ./bootstrap.sh droid
 CONFIG_NAME="${1:-boss}"
 
 if [[ ! -f "$NIX_CONFIG_DIR/flake.nix" ]]; then
@@ -100,6 +100,7 @@ if [[ ! -f "$REPO_CUSTOM_CONF" ]]; then
   warn "$REPO_CUSTOM_CONF missing — skipping daemon substituter setup."
 elif [[ ! -f "$NIX_CUSTOM_CONF" ]]; then
   info "Creating $NIX_CUSTOM_CONF from repo copy (needs sudo)..."
+  sudo install -d /etc/nix
   sudo install -m 644 "$REPO_CUSTOM_CONF" "$NIX_CUSTOM_CONF"
   sudo systemctl restart nix-daemon.service \
     || warn "Could not restart nix-daemon — restart it manually before building."
@@ -206,10 +207,12 @@ fi
 # pane, so "open a new terminal" isn't enough inside tmux. Push this script's
 # PATH (now including the Nix profile dirs) into the server's global env.
 # Panes that are already open still need `exec bash`.
-if [[ "$NIX_FRESH_INSTALL" -eq 1 ]] && command -v tmux &>/dev/null \
-   && tmux info &>/dev/null; then
-  tmux set-environment -g PATH "$PATH"
-  success "Updated the running tmux server's PATH (new panes will find nix)."
+if [[ "$NIX_FRESH_INSTALL" -eq 1 ]] && command -v tmux &>/dev/null; then
+  # shellcheck disable=SC2033  # tmux is a real binary; `info` is our function name, not an arg to a function
+  if tmux info &>/dev/null; then
+    tmux set-environment -g PATH "$PATH"
+    success "Updated the running tmux server's PATH (new panes will find nix)."
+  fi
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
@@ -224,6 +227,12 @@ if [[ "$CONFIG_NAME" == "lord" ]]; then
   echo "  2. Provision the sops age key (see docs/system/lord-ubuntu-home.md):"
   echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"
   echo "       then add its pubkey to .sops.yaml on the desktop + sops updatekeys"
+elif [[ "$CONFIG_NAME" == "droid" ]]; then
+  echo "  2. Provision the sops age key (plaintext is fine on the VM):"
+  echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"
+  echo "     then on the desktop: add the pubkey to .sops.yaml's &droid entry,"
+  echo "     create nix/secrets/ai-droid.yaml (freellmapi/refuseless keys), and"
+  echo "     sops updatekeys. Re-run hms afterwards."
 else
   echo "  2. Run the Ansible playbook for system-level packages."
   echo "     ansible-playbook is now available from your Nix profile:"
