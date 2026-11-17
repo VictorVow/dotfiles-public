@@ -68,6 +68,7 @@ installs/
 │   ├── chromium-suid-sandbox.sh   # Fix SUID sandbox for Nix ungoogled-chromium + google-chrome
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
+│   ├── pixel-vm.sh                # Drive the Pixel's AVF Linux Terminal (scrcpy display) over adb: status/join/send/screenshot/ocr; joins it to the Headscale tailnet
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
 │   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
