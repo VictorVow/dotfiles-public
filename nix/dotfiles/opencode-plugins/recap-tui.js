@@ -1,32 +1,34 @@
 // Recap TUI plugin for OpenCode v2 (`opencode2`) — a port of Claude Code's
-// /recap: "generate a one-line summary of the current session on demand".
+// /recap: a short transient summary of the current session on demand.
 //
 // Deployed as a directory plugin (~/.config/opencode/plugins/recap/): v2 only
 // loads a TUI entry from a directory's `tui.js`, and the directory also needs
 // a server entry (`index.js`, re-exporting this; setup no-ops there since the
 // server ctx has no `ui`/`keymap`). Same deployment shape as turn-verbosity.
 //
-// There is no recap endpoint: the command asks the session's own model for a
-// one-liner via `session.prompt`, then shows it as a toast — same end state
-// as Claude Code's "one line, ready when you return". The prompt carries
-// `system` so the model knows this is a side query, and `noReply` is NOT set
-// because we need the text back.
+// The prompt is verbatim from Claude Code 2.1.325 (its /recap and the away
+// summary share it). Claude Code runs it in-context with tools denied and
+// skipTranscript — OpenCode's `session.generate` endpoint (added ~v2.3) is the
+// exact match: "generate transient text from the current session context
+// without mutating session history". No transcript pollution, no tools.
 //
-// The exchange is visible in the transcript (the recap request + its reply
-// appear as a normal turn) — unlike Claude Code's out-of-band recap, v2 gives
-// a plugin no way to inject hidden context. The prompt asks for a single
-// line, so the pollution is bounded.
-// shortcut: recap runs on the session's primary model (whatever the prompt
-// box has selected) rather than a cheap small_model — upgrade if upstream
-// exposes the title/summary model to the prompt call or adds a native recap
-// endpoint.
+// The reply is shown as a toast. Claude Code's manual /recap leaves the text
+// in the transcript instead; the generate endpoint deliberately returns text
+// without persisting it (like its auto away summary), so a toast is the
+// closest equivalent.
+// shortcut: recap runs on the session's model — generate takes no model
+// override — rather than a cheap small model. Upgrade if the endpoint grows a
+// model parameter or upstream adds a native recap command.
+// Claude Code also hard-caps the result at 400 chars; enforced below.
 // CLI TUI only: Orca's native chat doesn't load cli.json plugins.
 
 const TITLE = "Recap";
 const PROMPT =
-  "Summarize this session so far in one short line for a recap. " +
-  "Cover what was done and where things stand right now. " +
-  "Answer with the summary line only: no preamble, no quotes, no markdown.";
+  "The user stepped away and is coming back. Recap in under 40 words, " +
+  "1-2 plain sentences, no markdown. Lead with the overall goal and current " +
+  "task, then the one next action. Skip root-cause narrative, fix internals, " +
+  "secondary to-dos, and em-dash tangents.";
+const MAX_CHARS = 400; // Claude Code caps the generated recap at 400 chars.
 
 function isTui(ctx) {
   return typeof ctx?.keymap?.layer === "function" && typeof ctx?.ui?.toast?.show === "function";
@@ -37,8 +39,8 @@ export default {
   setup(ctx) {
     if (!isTui(ctx)) return async () => {};
 
-    const toast = (message, variant = "info") =>
-      ctx.ui.toast.show({ title: TITLE, message, variant, duration: 8000 });
+    const toast = (message, variant = "info", duration = 8000) =>
+      ctx.ui.toast.show({ title: TITLE, message, variant, duration });
 
     const sessionID = () => {
       const route = ctx.ui?.router?.current?.();
@@ -53,39 +55,30 @@ export default {
       }
       const session = ctx.data?.session;
       if (typeof session?.status === "function" && session.status(id) === "running") {
+        // Claude Code drops a recap if a new turn is already running.
         toast("Session is busy — wait for the current turn to finish", "warning");
         return;
       }
       // Recapping a fresh session wastes a model call on nothing.
       const messages = typeof session?.message?.list === "function" ? session.message.list(id) : [];
       if (!messages?.length) {
-        toast("Nothing to recap yet", "warning");
+        toast("Nothing to recap yet — send a message first", "warning");
         return;
       }
-      const model = ctx.ui?.model?.current?.();
-      toast("Summarizing…");
+      toast("Summarizing…", "info", 4000);
       try {
-        const res = await ctx.client.session.prompt({
+        const res = await ctx.client.session.generate({
           path: { sessionID: id },
-          body: {
-            ...(model?.providerID && model?.modelID
-              ? { model: { providerID: model.providerID, modelID: model.modelID } }
-              : {}),
-            system:
-              "The user asked for a session recap (/recap). This is a side query, " +
-              "not a new task: do not start work, do not call tools, just answer.",
-            parts: [{ type: "text", text: PROMPT }],
-          },
+          body: { prompt: PROMPT },
         });
         if (res?.error) throw new Error(res.error.message ?? JSON.stringify(res.error));
-        const text = (res?.data?.parts ?? [])
-          .filter((p) => p?.type === "text" && typeof p.text === "string")
-          .map((p) => p.text)
-          .join("\n")
-          .trim();
-        toast(text || "The model returned no summary", text ? "success" : "warning");
+        // Response shape is { data: { text, tokens, cost } } per the OpenAPI
+        // schema; tolerate an unwrapped { text } too.
+        let text = (res?.data?.data?.text ?? res?.data?.text ?? "").trim();
+        if (text.length > MAX_CHARS) text = text.slice(0, MAX_CHARS).trimEnd();
+        toast(text || "The model returned no summary", text ? "success" : "warning", 20000);
       } catch (err) {
-        toast(`Failed: ${err?.message ?? err}`, "error");
+        toast(`Couldn't generate a recap: ${err?.message ?? err}`, "error");
       }
     }
 
