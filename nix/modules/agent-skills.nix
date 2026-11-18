@@ -205,7 +205,8 @@ in
     # nix/dotfiles/opencode-plugins/recap-tui.js (transient session.generate, no
     # history mutation) never registers there. This markdown command is the fallback:
     # same verbatim prompt from Claude Code 2.1.325, sent as a normal visible user
-    # turn. Tools can't be denied without an agent binding (which would leave the
+    # turn (recap-tui.js's header comment points back here for the same reason).
+    # Tools can't be denied without an agent binding (which would leave the
     # session stuck on a tool-less agent), so the prompt just forbids them.
     (lib.listToAttrs (map (dir: {
       name  = "${dir}/commands/recap.md";
