@@ -1,0 +1,90 @@
+# pr-shots.toml — copy to your repo root and adapt. Every section is optional
+# except `serve`. Commands run with bash inside the throwaway worktree of the
+# commit being captured, with these env vars set (plus everything in [env]):
+#   WORKTREE  — the worktree dir (per-commit data files should live here)
+#   ROOT      — the main checkout (reuse its venv/cache instead of reinstalling)
+#   PORT      — the port the app must listen on
+#   PR        — the PR number being captured
+#   LABEL     — "before" or "after"
+#
+# All top-level keys must sit above the first [table] header — everything after
+# [env]/[paths] belongs to that table.
+
+# owner/name that owns the PRs. Default: `upstream` remote, else `origin`.
+repo = "owner/project"
+
+# Remote to upload images through (must be a repo you can push to — your fork).
+# Default: "origin".
+# upload_remote = "origin"
+
+# port = 8299              # local port for the temporary server
+# out_dir = ".pr-shots"    # output root, relative to repo root (gitignore it!)
+
+# ── Prepare ──────────────────────────────────────────────────────────────────
+# Run in order, inside each worktree, before serving. Install deps (cheap:
+# caches/venvs are shared), migrate, seed, build frontend — whatever gets the
+# app running. Any failure aborts the run.
+prepare = [
+  # Django-style example (seed script prints SHOTS_PATHS=<json>, see below):
+  # "uv run --project $ROOT --no-sync python manage.py migrate --noinput",
+  # "uv run --project $ROOT --no-sync python manage.py shell < $ROOT/scripts/seed.py",
+  # "uv run --project $ROOT --no-sync python manage.py collectstatic --noinput",
+  # Node example:
+  # "npm ci",
+  # "npm run build",
+]
+
+# ── Serve ────────────────────────────────────────────────────────────────────
+# Foreground command that serves the app on $PORT from this worktree. The whole
+# process group is SIGTERMed afterwards.
+serve = "uv run --project $ROOT --no-sync gunicorn --bind localhost:$PORT config.wsgi:application"
+# serve = "npm run preview -- --port $PORT"
+# serve = "python -m http.server $PORT --directory dist"
+
+# URL to poll until the server is up. {port} is substituted. Default: "/".
+health_url = "http://localhost:{port}/health/"
+
+# Command run inside the worktree that prints a JSON object {"name": "/path"},
+# either raw or as a `SHOTS_PATHS=<json>` line (the latter lets your script log
+# freely; only that line is read). Runs after `prepare`, so the DB/seed data
+# exists. Merges with [paths]; resolver wins on name clashes. Names missing on
+# a commit are skipped.
+# paths_command = "uv run --project $ROOT --no-sync python $ROOT/scripts/resolve_routes.py"
+
+# Which page names to shoot (default: all resolved paths). Override per run
+# with --pages.
+default_pages = ["home"]
+
+# ── Extra env ────────────────────────────────────────────────────────────────
+# Env for every command above and below (app settings, test flags…). Values
+# become strings. NOTE: values are literal, NOT shell-expanded — build paths
+# from $WORKTREE/$ROOT inside your `prepare`/`serve` commands instead.
+[env]
+SECRET = "pr-shots"
+
+# ── Per-PR page lists ────────────────────────────────────────────────────────
+# [per_pr]
+# "1370" = ["home", "library"]
+
+# ── Static page paths ────────────────────────────────────────────────────────
+# name = "/path" for routes that exist on every commit.
+[paths]
+home = "/"
+# about = "/about/"
+
+# ── Login (optional) ─────────────────────────────────────────────────────────
+# Omit the whole table for apps that need no auth. One login happens per
+# browser context, before the page list is visited.
+[auth]
+url = "/accounts/login/"          # GET the login page first
+username_field = "#id_login"
+password_field = "#id_password"
+submit = "button[type='submit']"
+username = "shots"                # create this user in your seed/prepare
+password = "shots-pass-12345"
+
+# ── Capture matrix (optional) ────────────────────────────────────────────────
+# [viewports]
+# desktop = { width = 1280, height = 900 }
+# phone   = { width = 390,  height = 844 }
+# schemes = ["light", "dark"]

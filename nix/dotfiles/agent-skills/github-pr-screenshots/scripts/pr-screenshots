@@ -1,0 +1,355 @@
+#!/usr/bin/env python3
+"""Generic before/after PR screenshots for any web app.
+
+Run from anywhere inside a git checkout:
+
+    scripts/pr-screenshots 1370 1373          # capture only
+    scripts/pr-screenshots 1370 --post        # capture, then update the PR description
+    scripts/pr-screenshots 1370 --pages home,library --no-before
+
+For each PR it checks out the head and the merge-base in throwaway worktrees,
+runs your prepare commands, serves the app, and screenshots a set of pages.
+Nothing touches your working tree. Output lands in .pr-shots/<pr>/<before|after>/.
+
+Everything app-specific lives in `pr-shots.toml` at the repo root (or --config):
+how to prepare each worktree (install deps, migrate, seed), the serve command,
+a health URL, an optional login flow, and the pages to shoot. See
+pr-shots.example.toml next to this script.
+
+--post uploads the images to a repo you can push to (origin by default) and
+rewrites a marked section of the PR description on the PR's own repo.
+
+Requires: python 3.11+, playwright (`uv run --with playwright` works), gh.
+"""
+
+# ruff: noqa: INP001, T201, S603, S607
+import argparse
+import json
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import time
+import tomllib
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+MARK_START, MARK_END = "<!-- pr-screenshots:start -->", "<!-- pr-screenshots:end -->"
+DEFAULT_VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 390, "height": 844}}
+DEFAULT_SCHEMES = ["light", "dark"]
+DEFAULT_LOGIN = {
+    "username_field": "#id_login",
+    "password_field": "#id_password",
+    "submit": 'button[type="submit"]',
+    "username": "shots",
+    "password": "shots-pass-12345",
+}
+
+
+def sh(cmd, cwd, env=None, input=None, check=True):
+    """Run a command and return its stripped stdout."""
+    result = subprocess.run(
+        cmd, cwd=cwd, env=env, input=input, capture_output=True, text=True, check=check
+    )
+    return result.stdout.strip()
+
+
+def shell(command, cwd, env, input=None, check=True):
+    """Run a bash command string and return its stripped stdout."""
+    result = subprocess.run(
+        ["bash", "-c", command],
+        cwd=cwd, env=env, input=input, capture_output=True, text=True, check=False,
+    )
+    if check and result.returncode:
+        sys.exit(f"command failed in {cwd}:\n  {command}\n{result.stderr[-1500:]}")
+    return result.stdout.strip()
+
+
+def gh_json(*args):
+    return json.loads(sh(["gh", *args], cwd="."))
+
+
+def remote_slug(name, cwd):
+    """Return 'owner/name' for a git remote, or None if the remote is missing."""
+    url = sh(["git", "remote", "get-url", name], cwd=cwd, check=False)
+    if not url or "fatal:" in url:
+        return None
+    url = url.removesuffix(".git")
+    parts = url.replace(":", "/").split("/")
+    return "/".join(parts[-2:])
+
+
+def pr_refs(root, repo, number):
+    """Return (head_sha, merge_base_sha) for a PR, fetching what is missing."""
+    info = gh_json(
+        "pr", "view", str(number), "--repo", repo,
+        "--json", "headRefName,headRefOid,baseRefName",
+    )
+    head = info["headRefOid"]
+    base = gh_json(
+        "api", f"repos/{repo}/compare/{info['baseRefName']}...{head}"
+    )["merge_base_commit"]["sha"]
+    for sha in (head, base):
+        if subprocess.run(
+            ["git", "cat-file", "-e", sha], cwd=root, check=False,
+            capture_output=True,
+        ).returncode != 0:
+            sh(["git", "fetch", f"https://github.com/{repo}.git", sha], cwd=root)
+    return head, base
+
+
+class Server:
+    """One app instance serving one commit from a throwaway worktree."""
+
+    def __init__(self, root, cfg, sha, workdir, port, pr, label):
+        self.root, self.cfg, self.workdir, self.port = root, cfg, workdir, port
+        sh(["git", "worktree", "add", "--detach", str(workdir), sha], cwd=root)
+        self.env = {
+            **os.environ,
+            "WORKTREE": str(workdir),
+            "ROOT": str(root),
+            "PORT": str(port),
+            "PR": str(pr),
+            "LABEL": label,
+            **{k: str(v) for k, v in cfg.get("env", {}).items()},
+        }
+        self.process = None
+        self.log = None
+
+    def start(self):
+        """Prepare, resolve routes, serve, wait for health; return page paths."""
+        for command in self.cfg.get("prepare", []):
+            shell(command, cwd=self.workdir, env=self.env)
+        paths = self.resolve_paths()
+        command = self.cfg["serve"]
+        self.log = open(self.workdir / "server.log", "w")
+        self.process = subprocess.Popen(
+            ["bash", "-c", command],
+            cwd=self.workdir, env=self.env,
+            start_new_session=True,
+            stdout=self.log, stderr=subprocess.STDOUT,
+        )
+        health = self.cfg.get("health_url", "/").format(port=self.port)
+        for _ in range(120):
+            try:
+                urllib.request.urlopen(health, timeout=2)
+                break
+            except OSError:
+                time.sleep(1)
+        else:
+            log_name = self.log.name
+            self.stop()
+            sys.exit(f"server never became healthy at {health} (log: {log_name})")
+        return paths
+
+    def resolve_paths(self):
+        """Static [paths] table merged with the resolver command's JSON output."""
+        paths = dict(self.cfg.get("paths", {}))
+        command = self.cfg.get("paths_command")
+        if command:
+            out = shell(command, cwd=self.workdir, env=self.env)
+            line = next(
+                (x for x in out.splitlines() if x.startswith("SHOTS_PATHS=")), None
+            )
+            blob = line.removeprefix("SHOTS_PATHS=") if line else out
+            try:
+                resolved = json.loads(blob)
+            except json.JSONDecodeError:
+                sys.exit(f"paths_command output is not JSON:\n{blob[:500]}")
+            paths.update({k: v for k, v in resolved.items() if v})
+        return paths
+
+    def stop(self):
+        """Stop the serve process group, then drop the worktree."""
+        if self.process:
+            os.killpg(self.process.pid, signal.SIGTERM)
+            self.process.wait()
+        if self.log:
+            self.log.close()
+        sh(["git", "worktree", "remove", "--force", str(self.workdir)],
+           cwd=self.root, check=False)
+
+
+def capture(browser, base_url, paths, pages, out_dir, cfg):
+    """Screenshot each page at every viewport and scheme; return files written."""
+    written = []
+    viewports = cfg.get("viewports", DEFAULT_VIEWPORTS)
+    schemes = cfg.get("schemes", DEFAULT_SCHEMES)
+    auth = cfg.get("auth")
+    for viewport, size in viewports.items():
+        for scheme in schemes:
+            context = browser.new_context(
+                viewport={"width": size["width"], "height": size["height"]},
+                color_scheme=scheme,
+            )
+            page = context.new_page()
+            if auth:
+                login = {**DEFAULT_LOGIN, **auth}
+                page.goto(f'{base_url}{login["url"]}')
+                page.fill(login["username_field"], login["username"])
+                page.fill(login["password_field"], login["password"])
+                page.click(login["submit"])
+                page.wait_for_load_state("networkidle")
+            for name in pages:
+                if name not in paths:
+                    continue
+                page.goto(f"{base_url}{paths[name]}")
+                page.wait_for_load_state("networkidle")
+                target = out_dir / f"{name}-{viewport}-{scheme}.png"
+                page.screenshot(path=str(target), full_page=True)
+                written.append(target)
+            context.close()
+    return written
+
+
+def upload(path, repository_id, token):
+    """Upload one image to GitHub and return its user-attachments URL."""
+    query = urllib.parse.urlencode(
+        {"name": path.name, "content_type": "image/png",
+         "repository_id": repository_id}
+    )
+    request = urllib.request.Request(
+        f"https://uploads.github.com/user-attachments/assets?{query}",
+        data=path.read_bytes(),
+        headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+    )
+    with urllib.request.urlopen(request) as response:  # noqa: S310 - fixed https endpoint
+        return json.load(response)["url"]
+
+
+def post(cfg, root, number, out_dir, pages):
+    """Upload the shots and rewrite the marked section of the PR description."""
+    repo = cfg["repo"]
+    upload_slug = remote_slug(cfg.get("upload_remote", "origin"), root)
+    if not upload_slug:
+        sys.exit("no upload remote found; set upload_remote in pr-shots.toml")
+    repository_id = gh_json("api", f"repos/{upload_slug}")["id"]
+    token = sh(["gh", "auth", "token"], cwd=root)
+    viewports = cfg.get("viewports", DEFAULT_VIEWPORTS)
+    schemes = cfg.get("schemes", DEFAULT_SCHEMES)
+    sections = []
+    for name in pages:
+        rows = []
+        for viewport in viewports:
+            for scheme in schemes:
+                cells = []
+                for label in ("before", "after"):
+                    shot = out_dir / label / f"{name}-{viewport}-{scheme}.png"
+                    cells.append(
+                        f'<img src="{upload(shot, repository_id, token)}" width="360">'
+                        if shot.exists() else "n/a"
+                    )
+                if any(c != "n/a" for c in cells):
+                    rows.append(f"| {viewport}, {scheme} | " + " | ".join(cells) + " |")
+        if rows:
+            header = "| | Before | After |\n|---|---|---|\n"
+            sections.append(
+                f"<details><summary>{name}</summary>\n\n{header}"
+                + "\n".join(rows)
+                + "\n\n</details>"
+            )
+    block = (
+        f"{MARK_START}\n## Screenshots\n\n" + "\n\n".join(sections) + f"\n{MARK_END}"
+    )
+    body = (
+        gh_json("pr", "view", str(number), "--repo", repo, "--json", "body")["body"]
+        or ""
+    )
+    if MARK_START in body:
+        head, _, rest = body.partition(MARK_START)
+        body = head + block + rest.partition(MARK_END)[2]
+    else:
+        body = f"{body.rstrip()}\n\n{block}\n"
+    subprocess.run(
+        ["gh", "pr", "edit", str(number), "--repo", repo, "--body-file", "-"],
+        input=body, text=True, check=True,
+    )
+
+
+def main():
+    """Capture each requested PR, before and after, then optionally post."""
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("prs", nargs="+", type=int)
+    parser.add_argument("--config", help="path to pr-shots.toml (default: repo root)")
+    parser.add_argument("--repo", help="owner/name that owns the PRs")
+    parser.add_argument("--pages", help="comma list overriding the page set")
+    parser.add_argument("--no-before", action="store_true")
+    parser.add_argument("--before-ref", help="git ref for the 'before' capture")
+    parser.add_argument("--no-auth", action="store_true", help="skip the login step")
+    parser.add_argument("--post", action="store_true")
+    parser.add_argument("--port", type=int)
+    parser.add_argument("--out-dir", help="output root (default: <root>/.pr-shots)")
+    args = parser.parse_args()
+
+    root = Path(sh(["git", "rev-parse", "--show-toplevel"], cwd="."))
+    config_path = Path(args.config) if args.config else root / "pr-shots.toml"
+    cfg = tomllib.loads(config_path.read_text()) if config_path.exists() else {}
+
+    cfg["repo"] = (
+        args.repo
+        or cfg.get("repo")
+        or remote_slug("upstream", root)
+        or remote_slug("origin", root)
+    )
+    if not cfg["repo"]:
+        sys.exit("could not determine --repo (no repo config, no git remotes)")
+    port = args.port or cfg.get("port", 8299)
+    if args.no_auth:
+        cfg.pop("auth", None)
+    if "serve" not in cfg:
+        sys.exit(f"{config_path} does not define a serve command")
+    root_out = Path(args.out_dir) if args.out_dir else root / cfg.get("out_dir", ".pr-shots")
+    if not root_out.is_absolute():
+        root_out = root / root_out
+
+    # Import here so --help works without playwright installed.
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as playwright:
+        executable = cfg.get("chromium") or os.environ.get(
+            "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"
+        )
+        browser = playwright.chromium.launch(
+            executable_path=executable or None,
+        )
+        for number in args.prs:
+            head, base = pr_refs(root, cfg["repo"], number)
+            base = args.before_ref or base
+            targets = [("after", head)]
+            if not args.no_before:
+                targets.append(("before", base))
+            captured_pages = []
+            for label, sha in targets:
+                out_dir = root_out / str(number) / label
+                shutil.rmtree(out_dir, ignore_errors=True)
+                out_dir.mkdir(parents=True)
+                server = Server(
+                    root, cfg, sha, root_out / "work" / f"{number}-{label}",
+                    port, number, label,
+                )
+                try:
+                    paths = server.start()
+                    pages = (
+                        tuple(args.pages.split(",")) if args.pages
+                        else tuple(cfg.get("per_pr", {}).get(str(number), ()))
+                        or tuple(cfg.get("default_pages", ()))
+                        or tuple(paths)
+                    )
+                    captured_pages = list(pages)
+                    files = capture(
+                        browser, f"http://localhost:{port}", paths, pages,
+                        out_dir, cfg,
+                    )
+                    print(f"#{number} {label}: {len(files)} shots in {out_dir}")
+                finally:
+                    server.stop()
+            if args.post:
+                post(cfg, root, number, root_out / str(number), captured_pages)
+                print(f"#{number}: description updated")
+        browser.close()
+
+
+if __name__ == "__main__":
+    main()
