@@ -170,6 +170,30 @@
       system = "x86_64-linux";
       config.allowUnfree = true;
     };
+    # devin-cli pin override. Cognition unpublishes a version's tarball from
+    # static.devin.ai (HTTP 403 on the whole path) shortly after promoting the
+    # next one to cli/current/manifest.json, so nixpkgs-unstable's pinned
+    # version (3000.11.234) can't be fetched at all — even the older tarballs
+    # we built from are gone. Track the live manifest instead. Hashes below
+    # come from that manifest's platforms.<target>.sha256 (hex → SRI base64).
+    devinVersion = "3000.14.30821";
+    devinTargets = {
+      x86_64-linux  = { target = "x86_64-unknown-linux";  hash = "sha256-TcQ+PkOIus5g/iqoAQy7OZQC5ySJLXF1hFsc3vAOfds="; };
+      aarch64-linux = { target = "aarch64-unknown-linux"; hash = "sha256-PeuK9rAmBg6XXtNxk24TmBgCDl3Fq7y6B83gOfRzpaU="; };
+    };
+    mkUnstable = system: (import nixpkgs-unstable {
+      inherit system;
+      config.allowUnfree = true;
+    }).extend (_final: prev: {
+      devin-cli = prev.devin-cli.overrideAttrs (_: {
+        version = devinVersion;
+        src = prev.fetchurl {
+          url = "https://static.devin.ai/cli/${devinVersion}/devin-${devinVersion}-${devinTargets.${system}.target}.tar.gz";
+          inherit (devinTargets.${system}) hash;
+        };
+      });
+    });
+
     # The flake lives in nix/, but sourceInfo is the whole repo — needed so
     # the checks can see the shell scripts and playbooks at the repo root.
     repo = self.sourceInfo.outPath;
@@ -214,11 +238,9 @@
       extraSpecialArgs = {
         inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill nur notifications pkgs-latest;
         # import (not legacyPackages) so allowUnfree applies — home.nix's
-        # nixpkgs.config only reaches the main pkgs set.
-        pkgs-unstable = import nixpkgs-unstable {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
-        };
+        # nixpkgs.config only reaches the main pkgs set. mkUnstable adds the
+        # devin-cli live-version override (see the let block).
+        pkgs-unstable = mkUnstable "x86_64-linux";
         hostProfile = {
           isServer = false;
           hms = {
@@ -239,10 +261,7 @@
 
       extraSpecialArgs = {
         inherit llm-agents tuxManager ie-r delta orca context7 logseq-fork rea impeccable cli-anything security-audit-skill notifications pkgs-latest;
-        pkgs-unstable = import nixpkgs-unstable {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
-        };
+        pkgs-unstable = mkUnstable "x86_64-linux";
         hostProfile = {
           isServer = true;
           hms = {
@@ -263,10 +282,7 @@
 
       extraSpecialArgs = {
         inherit llm-agents orca context7 logseq-fork rea impeccable cli-anything security-audit-skill;
-        pkgs-unstable = import nixpkgs-unstable {
-          system = "aarch64-linux";
-          config.allowUnfree = true;
-        };
+        pkgs-unstable = mkUnstable "aarch64-linux";
         hostProfile = {
           isServer = true;
           hms = {
