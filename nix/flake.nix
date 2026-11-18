@@ -14,7 +14,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/7dcdd87373d72e7a2173e4db02e20d3d7f495cfd";
 
     # channel: nixos-unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/0bb2eedc20e4739f29e8045034f2828ad7054f8f";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/1d060086d60cb76a40cf37109f979d88a5bd6396";
 
     # Bleeding-edge nixpkgs for individual packages that need a newer version
     # than the age-pinned `nixpkgs-unstable` above can offer — used when a
@@ -56,7 +56,7 @@
     # Also intentionally NOT following nixpkgs so the pre-built packages in
     # numtide's cache (built against unstable) remain valid store paths.
     # channel: main
-    llm-agents.url = "github:numtide/llm-agents.nix/733d5b0fa81d5aad7c623dca8d8170ce411fba1d";
+    llm-agents.url = "github:numtide/llm-agents.nix/97b2c73782356e4934a5d350fa4b6b7dbea1b646";
 
     # Third-party inputs below (and sops-nix above) are age-pinned too, but for
     # a different reason: a supply-chain cooldown rather than cache coverage.
@@ -80,7 +80,7 @@
     # skills shouldn't lag its CLI by long.
     orca = {
       # channel: main
-      url = "github:stablyai/orca/d20ec84d6815ab97689b8f43a69ba70e522c7756";
+      url = "github:stablyai/orca/cbd75eb0084aaa16feb04a079140f77631be6892";
       flake = false;
     };
 
@@ -88,7 +88,7 @@
     # linked by modules/agent-skills.nix. Replaces the Context7 MCP server.
     context7 = {
       # channel: master
-      url = "github:upstash/context7/fe81a13e20adcc818f64ffc1946acb3d927d4a77";
+      url = "github:upstash/context7/d4514936dc81e2005700499045b5036b152105ae";
       flake = false;
     };
 
@@ -97,7 +97,7 @@
     # The repo's other .agents/skills/rea-* skills are for developing REA itself.
     rea = {
       # channel: main
-      url = "github:morluto/rea/55b6d2ca200649d433480f0aa45d8ac202436cae";
+      url = "github:morluto/rea/3c0e9d8a0235965f34fd52eebe58a1223f06a462";
       flake = false;
     };
 
@@ -108,7 +108,7 @@
     # ~/.impeccable/bin/, outside the read-only store path. Desktop-only.
     impeccable = {
       # channel: main
-      url = "github:pbakaus/impeccable/2f091721089e4b60205604527b9d7a8803117b0f";
+      url = "github:pbakaus/impeccable/a8decf6b9802bc2f2525df3d7642209f59db4b5e";
       flake = false;
     };
 
