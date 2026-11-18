@@ -200,6 +200,25 @@ in
       [ { dir = ".config/opencode";           extra = [ "reverse-engineer-anything" ]; }
         { dir = ".opencode1/config/opencode"; extra = [ ]; } ]))
 
+    # ── /recap for non-TUI surfaces ─────────────────────────────────────────────────
+    # Orca's native chat doesn't load cli.json TUI plugins, so the faithful port in
+    # nix/dotfiles/opencode-plugins/recap-tui.js (transient session.generate, no
+    # history mutation) never registers there. This markdown command is the fallback:
+    # same verbatim prompt from Claude Code 2.1.325, sent as a normal visible user
+    # turn. Tools can't be denied without an agent binding (which would leave the
+    # session stuck on a tool-less agent), so the prompt just forbids them.
+    (lib.listToAttrs (map (dir: {
+      name  = "${dir}/commands/recap.md";
+      value.text = ''
+        ---
+        description: "Recap the session like Claude Code's /recap (under 40 words, next action first)"
+        ---
+        The user stepped away and is coming back. Recap in under 40 words, 1-2 plain sentences, no markdown. Lead with the overall goal and current task, then the one next action. Skip root-cause narrative, fix internals, secondary to-dos, and em-dash tangents.
+
+        Answer from this conversation only — do not call any tools.
+      '';
+    }) [ ".config/opencode" ".opencode1/config/opencode" ]))
+
     # ── CLI-Anything OpenCode commands (github:HKUDS/CLI-Anything, flake = false input) ──
     # Upstream's OpenCode install copies opencode-commands/*.md + the shared HARNESS.md
     # methodology spec into the commands dir — same files for v2 and opencode1 (their
