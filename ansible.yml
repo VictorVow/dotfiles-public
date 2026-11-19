@@ -678,6 +678,31 @@
       become: yes
       notify: Reload systemd daemon
 
+    - name: Ensure systemd-suspend drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/systemd-suspend.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      become: yes
+
+    - name: Stop systemd-sleep freezing user.slice before suspend
+      # Freezing user.slice freezes AppImage squashfuse daemons (tagspaces,
+      # marktext, ...) while their own Electron processes page-fault on them →
+      # D state → kernel freeze fails (EBUSY) → laptop half-asleep (fans/screen
+      # off, power LED solid), then wakes. Seen 2026-10-22, 11-04, 11-05, 11-19.
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/systemd-suspend.service.d/no-freeze-user.conf
+        content: |
+          [Service]
+          Environment=SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false
+        owner: root
+        group: root
+        mode: "0644"
+      become: yes
+      notify: Reload systemd daemon
+
     # ── NFS client mount (lord-ubuntu:/home/lord) ──────────────────────────
     # Persistent, reboot-surviving mount of the server's home dir over the
     # headscale tailnet (WireGuard-encrypted transport, so plaintext NFS is
