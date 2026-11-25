@@ -223,16 +223,17 @@ echo "Next steps:"
 echo "  1. Run 'exec bash' in every shell that was open before this script"
 echo "     (including tmux panes and terminals inside agents like Claude Code)."
 echo "     Otherwise hms fails there with 'nix: command not found'."
+# Note: nix/secrets/ and the system docs are not included in this public mirror;
+# the sops/provisioning steps below describe the private repo's workflow.
 if [[ "$CONFIG_NAME" == "lord" ]]; then
-  echo "  2. Provision the sops age key (see docs/system/lord-ubuntu-home.md):"
+  echo "  2. Provision the sops age key:"
   echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"
   echo "       then add its pubkey to .sops.yaml on the desktop + sops updatekeys"
 elif [[ "$CONFIG_NAME" == "droid" ]]; then
   echo "  2. Provision the sops age key (plaintext is fine on the VM):"
   echo "       mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt"
   echo "     then on the desktop: add the pubkey to .sops.yaml's &droid entry,"
-  echo "     create nix/secrets/ai-droid.yaml (freellmapi/refuseless keys), and"
-  echo "     sops updatekeys. Re-run hms afterwards."
+  echo "     create nix/secrets/ai-droid.yaml, and sops updatekeys. Re-run hms afterwards."
 else
   echo "  2. Run the Ansible playbook for system-level packages."
   echo "     ansible-playbook is now available from your Nix profile:"

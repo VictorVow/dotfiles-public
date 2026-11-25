@@ -2,6 +2,8 @@
 
 System configuration for Kubuntu (KDE Plasma on Ubuntu). Manages packages, dotfiles, shell environment, and development containers through a layered approach: **Nix + Home Manager** handles user-space, **Ansible** handles system-level packages.
 
+> This is a public mirror of a private repo, sanitized with `git filter-repo`. Personal docs (`docs/system`, `docs/research`, `docs/archive`), encrypted secrets (`nix/secrets/`), private changelog/CV files, launcher shortcuts, and a few personal-context agent skills are excluded; personal domains, IPs, and account handles are rewritten to placeholders. Some references to excluded files may survive in configs.
+
 ## Repo Structure
 
 Note: High-level view with not every file/directory is listed, only the most important ones.
@@ -23,18 +25,14 @@ installs/
 ├── Brewfile.lord             # Server-scoped brew list (cass) for lord-ubuntu
 ├── appman-appimages.txt      # AppImages managed by AppMan
 ├── arkenfox.sh               # Apply/update arkenfox user.js on a Firefox profile
-├── CHANGELOG.md              # Dated log of workflow-affecting changes (here + Self-Hosted repos) — written by the system-update-changelog skill
-├── CVLOG.md                  # Skills/experience list grouped by skill, each item dated + backlinked (commit, Logseq block, agent session) — CV/resume reference, written by the system-update-cvlog skill
 ├── uv-tools.txt              # Python CLI tools managed by `uv tool` (not in / lagging in nixpkgs) — installed by update.sh
 ├── npm-globals.txt           # Global npm CLIs (not in nixpkgs/llm-agents) — installed by the shell.nix activation, upgraded by update.sh
-├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/*)
+├── .sops.yaml                # sops creation rules (age recipient for nix/secrets/* — secrets not included in this mirror)
 ├── nix/                      # Home Manager flake — all user-space config
 │   ├── flake.nix             # Flake inputs (nixpkgs-unstable + home-manager + sops-nix)
 │   ├── home.nix              # Top-level Home Manager config (desktop, user `boss`), imports modules
 │   ├── home-lord.nix         # Headless-server Home Manager config (lord-ubuntu, user `lord`), imports *-server.nix + shared modules
 │   ├── home-droid.nix        # Minimal headless config for the Pixel AVF "Linux Terminal" Debian VM (aarch64, user `droid`)
-│   ├── secrets/              # sops-encrypted (age) secrets, safe to commit
-│   │   └── rclone.yaml       # rclone remote credentials (decrypted at activation)
 │   ├── dotfiles/             # Verbatim config files managed via home.file
 │   │   ├── starship.toml     # Gruvbox dark powerline prompt theme
 │   │   ├── backups/          # vorta-excludes.txt: Vorta raw exclusions, written into settings.db by desktop.nix; nvme-4tb-omega-sync.sh: rsync /home to the external 4TB-OMEGA drive, skipping external-drive-excludes.txt
@@ -71,25 +69,11 @@ installs/
 │   ├── html-thumbnailer.sh        # Dolphin/KIO HTML preview renderer (headless Chromium); deployed as a .thumbnailer by nix/modules/desktop.nix
 │   ├── waydroid-init.sh           # One-shot Waydroid setup
 │   ├── looking-glass/             # Win11 VM viewed via Looking Glass IDD: VM creation script + setup playbook (README)
-│   ├── mailbox.org/mailbox-dns.sh # Apply mailbox.org MX/SPF/DKIM/DMARC records to the Namecheap-hosted domains
 │   ├── nix-build-report.py        # Used by update.sh: which top-level packages were built locally (cache misses) + build times
 │   ├── migration/                 # Disk migration runbook (README) + scripts: swap lord-ubuntu's root disk, optionally converting ext4 → btrfs
 │   ├── network-debugging/         # Toolkit for LAN/mesh streaming diagnosis: per-segment latency, loss, iperf3 throughput matrix (README = playbook)
 │   └── security/                  # gitleaks-based audit + in-place scrubbing of secrets leaked into agent transcripts (README = playbook)
-├── 0SHORTCUTS/               # App shortcuts (.desktop/executables) scanned by vault-launch (rofi), outside XDG
-│   ├── 0STARTUP/             # Login/startup scripts: yakuake1.sh orchestrator, sections/*.sh tmux panes, shutdown.sh
-│   ├── 1COMMON/              # Everyday apps; subdirs become [Category] prefixes in vault-launch
-│   └── 2OTHER/               # Miscellaneous apps (top level only scanned)
-└── docs/                     # All documentation
-    ├── archive/              # Previously relevant, only kept for historical purposes
-    ├── system/               # Reference docs for this system's config (implemented, in use)
-    │   ├── architecture.md   # How the layers fit together and why
-    │   └── ...
-    ├── research/             # Deep-dive research and comparison docs
-    │   ├── git-worktrees.md
-    │   ├── app-launchers.md
-    │   ├── mesh-networks.md
-    │   └── ...
+└── docs/                     # Documentation
     └── comparison-tables/    # Sortable/weightable comparison tables + their renderer
         ├── data/             # The table Markdown + per-table .weights.json sidecars
         └── browser-render/   # Render the tables as styled webpages (live-reload server + standalone HTML)
@@ -100,7 +84,7 @@ installs/
 
 ## Related Repos
 
-- **Self-hosted services** — `~/Projects/Git/1MY_REPOS/Self-Hosted`: one repo per service (Headscale, Forgejo, Stremio, Calibre, DAV, RSS, Rclone, Dashboard, …), mostly deployed with Ansible to the home server `lord-ubuntu` and reachable tailnet-only at `*.device.example.com`. Its `README.md` is the repo map — a symlink to [docs/system/self-hosted-readme.md](docs/system/self-hosted-readme.md), kept here so it's tracked in git (relative links in it resolve from the Self-Hosted directory). This repo only holds the client side (e.g. `nix/modules/rclone.nix`, `docs/system/headscale.md`, `docs/system/nfs-mounts.md`).
+- **Self-hosted services** — `~/Projects/Git/1MY_REPOS/Self-Hosted`: one repo per service (Headscale, Forgejo, Stremio, Calibre, DAV, RSS, Rclone, Dashboard, …), mostly deployed with Ansible to a home server (`lord-ubuntu`) and reachable tailnet-only. This repo only holds the client side (e.g. `nix/modules/rclone.nix`).
 
 ## Quick Start
 
@@ -137,12 +121,7 @@ ansible-playbook ansible.yml --ask-become-pass
 
 ## Further Reading
 
-- [Architecture](docs/system/architecture.md) — why multiple package managers coexist
-- [Package inventory](docs/system/packages.md) — full list of what's managed where
-- [Daily workflow](docs/system/daily-workflow.md) — adding packages, updating, rollbacks
-- [Limitations](docs/system/limitations.md) — what can't go in Nix and alternatives
-- [Migration to Nix](docs/archive/migration-to-nix.md) — archived: the completed apt/brew/pipx/npm → Nix migration
-- [Nix secrets](docs/system/nix-secrets.md) — how sops-nix encrypts/decrypts secrets (rclone credentials, etc.)
-- [lord-ubuntu Home Manager](docs/system/lord-ubuntu-home.md) — headless-server config (`./nix#lord`) sharing modules with the desktop
-- [lord-ubuntu disk migration](scripts/migration/README.md) — runbook + scripts for swapping the root NVMe: live `pvmove` (ext4) or the scripted btrfs conversion (Path B, used 2026-10-27)
-- [Adding a new host](docs/system/bootstrap-new-host.md) — repeatable checklist for bringing another machine into the flake
+- [Disk migration runbook](scripts/migration/README.md) — swapping a server's root NVMe: live `pvmove` (ext4) or a scripted btrfs conversion
+- [Transcript secret scrubbing](scripts/security/README.md) — gitleaks audit + in-place scrubbing of secrets leaked into agent transcripts
+- [Network debugging toolkit](scripts/network-debugging/README.md) — per-segment latency, loss, and iperf3 throughput matrix for LAN/mesh streaming
+- [Comparison tables](docs/comparison-tables/) — sortable/weightable tables + browser renderer
